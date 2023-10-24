@@ -94,28 +94,37 @@ public class SharpTournament : BasePlugin
     [GameEventHandler]
     public HookResult OnPlayerConnect(EventPlayerConnect @event, GameEventInfo info)
     {
-        // Userid will give you a reference to a CCSPlayerController class
+        // // Userid will give you a reference to a CCSPlayerController class
         Console.WriteLine($"Player {@event.Userid.PlayerName} has connected!");
 
         if (_Config == null)
         {
+            Console.WriteLine($"Player {@event.Userid.PlayerName} kicked because no match has been loaded!");
             Server.ExecuteCommand($"kickid {@event.Userid.UserId} \"No match loaded!\"");
             return HookResult.Continue;
         }
-
-        if (_Config.Team1.Players.ContainsKey(@event.Userid.SteamID))
-        {
-            _SwitchTeamFunc?.Invoke(@event.Userid.Handle, 1);
-        }
-        if (_Config.Team2.Players.ContainsKey(@event.Userid.SteamID))
-        {
-            _SwitchTeamFunc?.Invoke(@event.Userid.Handle, 2);
-        }
         else
         {
-            Server.ExecuteCommand($"kickid {@event.Userid.UserId} \"You are not part of the current match!\"");
-        }
+            Console.WriteLine("configdebug");
+            Console.WriteLine(JsonSerializer.Serialize(_Config));
+            if (_Config.Team1.Players.ContainsKey(@event.Userid.SteamID))
+            {
+                Console.WriteLine("Player belongs to team1");
+                _SwitchTeamFunc?.Invoke(@event.Userid.Handle, 2);
+                return HookResult.Continue;
 
+            }
+            if (_Config.Team2.Players.ContainsKey(@event.Userid.SteamID))
+            {
+                Console.WriteLine("Player belongs to team2");
+                _SwitchTeamFunc?.Invoke(@event.Userid.Handle, 3);
+                return HookResult.Continue;
+            }
+            else
+            {
+                Server.ExecuteCommand($"kickid {@event.Userid.UserId} \"You are not part of the current match!\"");
+            }
+        }
         return HookResult.Continue;
     }
 
