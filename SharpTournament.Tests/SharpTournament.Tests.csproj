@@ -22,4 +22,14 @@
     </PackageReference>
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\SharpTournament\SharpTournament.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Reference Include="CounterStrikeSharp.API">
+      <HintPath>..\SharpTournament\counterstrikesharp\api\CounterStrikeSharp.API.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+
 </Project>
