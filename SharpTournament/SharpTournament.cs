@@ -17,6 +17,29 @@ public class SharpTournament : BasePlugin
         Console.WriteLine("Hello World!");
     }
 
+    [ConsoleCommand("st_loadconfig", "Load a match config")]
+    public void OnCommandLoadConfig(CCSPlayerController? player, CommandInfo command)
+    {
+        Console.WriteLine("Start loading match config!");
+        if (command.ArgCount != 1)
+        {
+            Console.WriteLine("Url is required as Argument!");
+            if (player != null)
+            {
+                player.PrintToCenter("Url is required as Argument!");
+            }
+
+            return;
+        }
+
+        var url = command.ArgByIndex(0);
+        Console.WriteLine($"Loading match from \"{url}\"");
+
+
+
+        Console.WriteLine("Start Command called.");
+    }
+
     [ConsoleCommand("st_start", "Starts a match")]
     public void OnCommandStart(CCSPlayerController? player, CommandInfo command)
     {
@@ -49,7 +72,7 @@ public class SharpTournament : BasePlugin
 
         _Counter++;
 
-        if(_Counter %2 == 0)
+        if (_Counter % 2 == 0)
         {
             Server.ExecuteCommand($"kickid {@event.Userid.UserId} \"You are not part of the current match!\"");
         }
