@@ -21,7 +21,7 @@ public class SharpTournament : BasePlugin
     public void OnCommandLoadConfig(CCSPlayerController? player, CommandInfo command)
     {
         Console.WriteLine("Start loading match config!");
-        if (command.ArgCount != 1)
+        if (command.ArgCount != 2)
         {
             Console.WriteLine("Url is required as Argument!");
             if (player != null)
@@ -32,7 +32,7 @@ public class SharpTournament : BasePlugin
             return;
         }
 
-        var url = command.ArgByIndex(0);
+        var url = command.ArgByIndex(1);
         Console.WriteLine($"Loading match from \"{url}\"");
 
 
