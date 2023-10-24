@@ -13,7 +13,7 @@ public class SharpTournament : BasePlugin
 
     public override string ModuleVersion => "0.0.1";
 
-    private HttpClient _HttpClient = new();
+    private readonly HttpClient _HttpClient = new();
     private Config? _Config;
     private Action<nint, int>? _SwitchTeamFunc;
 
@@ -117,5 +117,15 @@ public class SharpTournament : BasePlugin
         }
 
         return HookResult.Continue;
+    }
+
+    protected override void Dispose(bool disposing)
+    {
+        base.Dispose(disposing);
+
+        if (disposing)
+        {
+            _HttpClient.Dispose();
+        }
     }
 }
