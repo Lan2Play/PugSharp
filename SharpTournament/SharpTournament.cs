@@ -2,6 +2,7 @@
 using CounterStrikeSharp.API.Core;
 using CounterStrikeSharp.API.Core.Attributes.Registration;
 using CounterStrikeSharp.API.Modules.Commands;
+using CounterStrikeSharp.API.Modules.Entities;
 using CounterStrikeSharp.API.Modules.Memory;
 using SharpTournament.Config;
 using Stateless;
@@ -29,8 +30,33 @@ public enum MatchCommand
 {
     LoadMatch,
     ConnectPlayer,
-    ConnectPlayerReady,
+    DisconnectPlayer,
+    PlayerReady,
     VoteMap,
+    VoteTeam,
+}
+
+public class MatchPlayer
+{
+    public MatchPlayer(IPlayer player)
+    {
+        Player = player;
+    }
+
+    public IPlayer Player { get; }
+
+    public bool IsReady { get; set; }
+}
+
+public class MatchTeam
+{
+    public MatchTeam(Team team)
+    {
+        Team = team;
+    }
+
+    public List<MatchPlayer> Players { get; } = new List<MatchPlayer>();
+    public Team Team { get; }
 }
 
 public class Match
@@ -38,6 +64,7 @@ public class Match
     private readonly IMatchCallback _MatchCallback;
     private readonly MatchConfig _Config;
     private readonly StateMachine<MatchState, MatchCommand> _MatchStateMachine;
+    private readonly List<MatchTeam> _MatchTeams = new List<MatchTeam>();
 
     public Match(IMatchCallback matchCallback, MatchConfig matchConfig)
     {
@@ -53,13 +80,31 @@ public class Match
             .PermitIf(MatchCommand.ConnectPlayer, MatchState.WaitingForPlayersConnectedReady, AllPlayersAreConnected);
 
         _MatchStateMachine.Configure(MatchState.WaitingForPlayersConnectedReady)
-            .PermitIf(MatchCommand.ConnectPlayerReady, MatchState.MapVote, () => { /*TODO Check if all Players are ready*/ return true; });
+            .PermitIf(MatchCommand.PlayerReady, MatchState.MapVote, AllPlayersAreReady)
+            .OnExit(SetAllPlayersNotReady);
 
         _MatchStateMachine.Configure(MatchState.MapVote)
             .PermitReentryIf(MatchCommand.VoteMap, () => { /*TODO Check if not all maps are vetoed*/ return true; })
             .PermitIf(MatchCommand.VoteMap, MatchState.TeamVote, () => { /*TODO Check if one map is selected*/ return true; })
             .OnEntry(() => /* TODO Send remaining map list to team X*/ { });
 
+        _MatchStateMachine.Configure(MatchState.TeamVote)
+            .PermitIf(MatchCommand.VoteTeam, MatchState.SwitchMap, () => { /*TODO Check if not all maps are vetoed*/ return true; });
+
+        _MatchStateMachine.Configure(MatchState.SwitchMap);
+
+        _MatchStateMachine.Configure(MatchState.WaitingForPlayersReady)
+            .PermitIf(MatchCommand.PlayerReady, MatchState.MatchStarting, AllPlayersAreReady);
+
+        _MatchStateMachine.Configure(MatchState.MatchStarting);
+
+        _MatchStateMachine.Configure(MatchState.MatchRunning)
+            .Permit(MatchCommand.DisconnectPlayer, MatchState.MatchPaused);
+
+        _MatchStateMachine.Configure(MatchState.MatchPaused)
+            .PermitIf(MatchCommand.ConnectPlayer, MatchState.MatchRunning, AllPlayersAreConnected);
+
+        _MatchStateMachine.Configure(MatchState.MatchCompleted);
 
         _MatchStateMachine.Fire(MatchCommand.LoadMatch);
 
@@ -81,38 +126,101 @@ public class Match
         return false;
     }
 
+    private bool AllPlayersAreReady()
+    {
+        return _MatchTeams.SelectMany(m => m.Players).All(p => p.IsReady);
+    }
+
+    private void SetAllPlayersNotReady()
+    {
+        foreach (var player in _MatchTeams.SelectMany(m => m.Players))
+        {
+            player.IsReady = false;
+        }
+    }
+
+
+
     public bool TryAddPlayer(IPlayer player)
     {
-        if (_Config.Team1.Players.ContainsKey(player.SteamID))
-        {
-            Console.WriteLine("Player belongs to team1");
-            _MatchCallback.SwitchTeam(player, Team.Team1);
-
-        }
-        else if (_Config.Team2.Players.ContainsKey(player.SteamID))
-        {
-            Console.WriteLine("Player belongs to team2");
-            _MatchCallback.SwitchTeam(player, Team.Team2);
-        }
-        else
+        var playerTeam = GetPlayerTeam(player.SteamID);
+        if (playerTeam == Team.None)
         {
             return false;
-
         }
+
+        Console.WriteLine($"Player belongs to {playerTeam}");
+        _MatchCallback.SwitchTeam(player, playerTeam);
+
+        var team = _MatchTeams.Find(m => m.Team == playerTeam);
+        if (team == null)
+        {
+            team = new MatchTeam(playerTeam);
+            _MatchTeams.Add(team);
+        }
+
+        var existingPlayer = team.Players.Find(x => x.Player.SteamID.Equals(player.SteamID));
+        if (existingPlayer != null)
+        {
+            team.Players.Remove(existingPlayer);
+        }
+
+        team.Players.Add(new MatchPlayer(player));
 
         TryFireState(MatchCommand.ConnectPlayer);
         return true;
     }
 
-    private bool TryFireState(MatchCommand command)
+    public void TogglePlayerIsReady(Player player)
+    {
+        var matchPlayer = GetMatchPlayer(player.SteamID);
+        matchPlayer.IsReady = !matchPlayer.IsReady;
+
+        var readyPlayers = _MatchTeams.SelectMany(x => x.Players).Count(x => x.IsReady);
+        var requiredPlayers = _Config.MinPlayersToReady;
+
+        if (matchPlayer.IsReady)
+        {
+            _MatchCallback.SendMessage($"\\x04{player.PlayerName} \\x06is ready! {readyPlayers} of {requiredPlayers} are ready.");
+            TryFireState(MatchCommand.VoteMap);
+        }
+        else
+        {
+            _MatchCallback.SendMessage($"\\x04{player.PlayerName} \\x02is not ready! {readyPlayers} of {requiredPlayers} are ready.");
+        }
+    }
+
+    private void TryFireState(MatchCommand command)
     {
         if (_MatchStateMachine.CanFire(command))
         {
             _MatchStateMachine.Fire(command);
-            return true;
+        }
+    }
+
+    private Team GetPlayerTeam(ulong steamID)
+    {
+        if (_Config.Team1.Players.ContainsKey(steamID))
+        {
+            return Team.Team1;
+        }
+        else if (_Config.Team2.Players.ContainsKey(steamID))
+        {
+            return Team.Team2;
         }
 
-        return false;
+        return Team.None;
+    }
+
+    private MatchTeam? GetMatchTeam(ulong steamID)
+    {
+        var team = GetPlayerTeam(steamID);
+        return _MatchTeams.Find(x => x.Team == team);
+    }
+
+    private MatchPlayer GetMatchPlayer(ulong steamID)
+    {
+        return _MatchTeams.SelectMany(x => x.Players).First(x => x.Player.SteamID == steamID);
     }
 }
 
@@ -139,10 +247,13 @@ public class Player : IPlayer
     public ulong SteamID => _PlayerController.SteamID;
 
     public int? UserId => _PlayerController.UserId;
+
+    public string PlayerName => _PlayerController.PlayerName;
 }
 
 public enum Team
 {
+    None,
     Team1 = 2,
     Team2 = 3,
 }
@@ -150,7 +261,7 @@ public enum Team
 public interface IMatchCallback
 {
     IReadOnlyList<IPlayer> GetAllPlayers();
-
+    void SendMessage(string message);
     void SwitchTeam(IPlayer player, Team team);
 }
 
@@ -229,6 +340,21 @@ public class SharpTournament : BasePlugin, IMatchCallback
         return false;
     }
 
+    [ConsoleCommand("ready", "Mark player as ready")]
+    public void OnCommandReady(CCSPlayerController? player, CommandInfo command)
+    {
+        if (player == null)
+        {
+            Console.WriteLine("Command Start has been called by the server. Player is required to be marked as ready");
+            return;
+        }
+
+        _Match?.TogglePlayerIsReady(new Player(player));
+
+
+        Console.WriteLine("Command ready called.");
+    }
+
     [ConsoleCommand("st_start", "Starts a match")]
     public void OnCommandStart(CCSPlayerController? player, CommandInfo command)
     {
@@ -295,6 +421,12 @@ public class SharpTournament : BasePlugin, IMatchCallback
         var playerEntities = Utilities.FindAllEntitiesByDesignerName<CCSPlayerController>("cs_player_controller");
         return playerEntities.Select(p => new Player(p)).ToArray();
     }
+
+    public void SendMessage(string message)
+    {
+        Server.PrintToChatAll(message);
+    }
+
     #endregion
 
 
@@ -307,4 +439,5 @@ public class SharpTournament : BasePlugin, IMatchCallback
             _HttpClient.Dispose();
         }
     }
+
 }
