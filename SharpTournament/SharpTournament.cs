@@ -5,6 +5,7 @@ using CounterStrikeSharp.API.Modules.Commands;
 using CounterStrikeSharp.API.Modules.Memory;
 using SharpTournament.Config;
 using Stateless;
+using Stateless.Graph;
 using System.Text.Json;
 
 namespace SharpTournament;
@@ -49,17 +50,20 @@ public class Match
             .Permit(MatchCommand.LoadMatch, MatchState.WaitingForPlayersConnected);
 
         _MatchStateMachine.Configure(MatchState.WaitingForPlayersConnected)
-            .PermitIf(MatchCommand.ConnectPlayer, MatchState.WaitingForPlayersReady, AllPlayersAreConnected);
+            .PermitIf(MatchCommand.ConnectPlayer, MatchState.WaitingForPlayersConnectedReady, AllPlayersAreConnected);
 
         _MatchStateMachine.Configure(MatchState.WaitingForPlayersConnectedReady)
             .PermitIf(MatchCommand.ConnectPlayerReady, MatchState.MapVote, () => { /*TODO Check if all Players are ready*/ return true; });
 
         _MatchStateMachine.Configure(MatchState.MapVote)
             .PermitReentryIf(MatchCommand.VoteMap, () => { /*TODO Check if not all maps are vetoed*/ return true; })
-            .PermitIf(MatchCommand.VoteMap, MatchState.TeamVote, () => { /*TODO Check if one map is selected*/ return true; });
+            .PermitIf(MatchCommand.VoteMap, MatchState.TeamVote, () => { /*TODO Check if one map is selected*/ return true; })
+            .OnEntry(() => /* TODO Send remaining map list to team X*/ { });
 
 
         _MatchStateMachine.Fire(MatchCommand.LoadMatch);
+
+        //string graph = UmlDotGraph.Format(_MatchStateMachine.GetInfo());
     }
 
     public MatchState CurrentState => _MatchStateMachine.State;
@@ -115,7 +119,10 @@ public class Match
 public interface IPlayer
 {
     nint Handle { get; }
+
     ulong SteamID { get; }
+
+    int? UserId { get; }
 }
 
 public class Player : IPlayer
@@ -130,6 +137,8 @@ public class Player : IPlayer
     public nint Handle => _PlayerController.Handle;
 
     public ulong SteamID => _PlayerController.SteamID;
+
+    public int? UserId => _PlayerController.UserId;
 }
 
 public enum Team
@@ -166,6 +175,14 @@ public class SharpTournament : BasePlugin, IMatchCallback
     public void InitializeMatch(MatchConfig matchConfig)
     {
         _Match = new Match(this, matchConfig);
+        var players = GetAllPlayers();
+        foreach (var player in players)
+        {
+            if (!_Match.TryAddPlayer(player) && player.UserId != null)
+            {
+                KickPlayer(player.UserId.Value);
+            }
+        }
     }
 
     [ConsoleCommand("st_loadconfig", "Load a match config")]
@@ -252,30 +269,17 @@ public class SharpTournament : BasePlugin, IMatchCallback
         {
             //Console.WriteLine("configdebug");
             //Console.WriteLine(JsonSerializer.Serialize(_Config));
-            if (!_Match.TryAddPlayer(new Player(@event.Userid)))
+            if (!_Match.TryAddPlayer(new Player(@event.Userid)) && @event.Userid.UserId != null)
             {
-                Server.ExecuteCommand($"kickid {@event.Userid.UserId} \"You are not part of the current match!\"");
-
+                KickPlayer(@event.Userid.UserId.Value);
             }
-            //if (_Config.Team1.Players.ContainsKey(@event.Userid.SteamID))
-            //{
-            //    Console.WriteLine("Player belongs to team1");
-            //    _SwitchTeamFunc?.Invoke(@event.Userid.Handle, 2);
-            //    return HookResult.Continue;
-
-            //}
-            //if (_Config.Team2.Players.ContainsKey(@event.Userid.SteamID))
-            //{
-            //    Console.WriteLine("Player belongs to team2");
-            //    _SwitchTeamFunc?.Invoke(@event.Userid.Handle, 3);
-            //    return HookResult.Continue;
-            //}
-            //else
-            //{
-            //    Server.ExecuteCommand($"kickid {@event.Userid.UserId} \"You are not part of the current match!\"");
-            //}
         }
         return HookResult.Continue;
+    }
+
+    private static void KickPlayer(int userId)
+    {
+        Server.ExecuteCommand($"kickid {userId} \"You are not part of the current match!\"");
     }
 
     #region Implementation of IMatchCallback
