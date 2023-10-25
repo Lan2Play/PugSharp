@@ -290,6 +290,7 @@ public class SharpTournament : BasePlugin, IMatchCallback
     public void InitializeMatch(MatchConfig matchConfig)
     {
         _Match = new Match(this, matchConfig);
+
         var players = GetAllPlayers();
         foreach (var player in players)
         {
@@ -394,6 +395,12 @@ public class SharpTournament : BasePlugin, IMatchCallback
         return HookResult.Continue;
     }
 
+    [GameEventHandler]
+    public HookResult OnPlayerTeam(EventPlayerTeam @event, GameEventInfo info)
+    {
+        Console.WriteLine($"Player {@event.Userid.PlayerName} has switched Team to {@event.Team}!");
+        return HookResult.Continue;
+    }
 
     public bool LoadConfig(string url, string authToken)
     {
