@@ -3,11 +3,11 @@ build-and-copy: build copy
 
 
 build:
-	dotnet build
+	dotnet publish
 
 copy:
-	rm SharpTournament/bin/Debug/net7.0/CounterStrikeSharp.API.dll
-	cp -rf SharpTournament/bin/Debug/net7.0/* /home/volza/temp/cs2/cs2-data/game/csgo/addons/counterstrikesharp/plugins/SharpTournament
+	rm SharpTournament/bin/Debug/net7.0/publish/CounterStrikeSharp.API.dll
+	cp -rf SharpTournament/bin/Debug/net7.0/publish/* /home/volza/temp/cs2/cs2-data/game/csgo/addons/counterstrikesharp/plugins/SharpTournament
 
 start-ds:
 	cd /home/volza/temp/cs2
