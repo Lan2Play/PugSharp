@@ -177,7 +177,9 @@ public class Match
         matchPlayer.IsReady = !matchPlayer.IsReady;
 
         var readyPlayers = _MatchTeams.SelectMany(x => x.Players).Count(x => x.IsReady);
-        var requiredPlayers = _Config.MinPlayersToReady;
+
+        // Min Players per Team
+        var requiredPlayers = _Config.MinPlayersToReady * 2;
 
         if (matchPlayer.IsReady)
         {
