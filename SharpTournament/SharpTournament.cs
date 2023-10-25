@@ -292,7 +292,7 @@ public class SharpTournament : BasePlugin, IMatchCallback
         _Match = new Match(this, matchConfig);
 
         var players = GetAllPlayers();
-        foreach (var player in players)
+        foreach (var player in players.Where(x => x.UserId.HasValue && x.UserId >= 0))
         {
             if (!_Match.TryAddPlayer(player) && player.UserId != null)
             {
