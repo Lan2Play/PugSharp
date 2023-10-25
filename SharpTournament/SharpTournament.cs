@@ -318,6 +318,14 @@ public class SharpTournament : BasePlugin, IMatchCallback
         Console.WriteLine("Start Command called.");
     }
 
+    [ConsoleCommand("st_dumpmatch", "Load a match config")]
+    public void OnCommandDumpMatch(CCSPlayerController? player, CommandInfo command)
+    {
+        Console.WriteLine("################ dump match ################");
+        Console.WriteLine(JsonSerializer.Serialize(_Match));
+        Console.WriteLine("################ dump match ################");
+    }
+
     public bool LoadConfig(string url, string authToken)
     {
         Console.WriteLine($"Loading match from \"{url}\"");
