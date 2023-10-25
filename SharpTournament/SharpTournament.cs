@@ -404,7 +404,11 @@ public class SharpTournament : BasePlugin, IMatchCallback
 
             if ((int)configTeam != @event.Team)
             {
-                SwitchTeam(new Player(@event.Userid), configTeam);
+                Task.Run(async () =>
+                {
+                    await Task.Delay(100).ConfigureAwait(false);
+                    SwitchTeam(new Player(@event.Userid), configTeam);
+                });
             }
         }
 
