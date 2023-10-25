@@ -62,14 +62,13 @@ public class MatchTeam
 public class Match
 {
     private readonly IMatchCallback _MatchCallback;
-    private readonly MatchConfig _Config;
     private readonly StateMachine<MatchState, MatchCommand> _MatchStateMachine;
     private readonly List<MatchTeam> _MatchTeams = new List<MatchTeam>();
 
     public Match(IMatchCallback matchCallback, MatchConfig matchConfig)
     {
         _MatchCallback = matchCallback;
-        _Config = matchConfig;
+        Config = matchConfig;
 
         _MatchStateMachine = new StateMachine<MatchState, MatchCommand>(MatchState.None);
 
@@ -112,12 +111,15 @@ public class Match
     }
 
     public MatchState CurrentState => _MatchStateMachine.State;
+    public MatchConfig Config { get; }
+
+
 
     private bool AllPlayersAreConnected()
     {
         var players = _MatchCallback.GetAllPlayers();
         var connectedPlayerSteamIds = players.Select(p => p.SteamID).ToList();
-        var allPlayerIds = _Config.Team1.Players.Keys.Concat(_Config.Team2.Players.Keys);
+        var allPlayerIds = Config.Team1.Players.Keys.Concat(Config.Team2.Players.Keys);
         if (allPlayerIds.All(p => connectedPlayerSteamIds.Contains(p)))
         {
             return true;
@@ -179,7 +181,7 @@ public class Match
         var readyPlayers = _MatchTeams.SelectMany(x => x.Players).Count(x => x.IsReady);
 
         // Min Players per Team
-        var requiredPlayers = _Config.MinPlayersToReady * 2;
+        var requiredPlayers = Config.MinPlayersToReady * 2;
 
         if (matchPlayer.IsReady)
         {
@@ -202,11 +204,11 @@ public class Match
 
     private Team GetPlayerTeam(ulong steamID)
     {
-        if (_Config.Team1.Players.ContainsKey(steamID))
+        if (Config.Team1.Players.ContainsKey(steamID))
         {
             return Team.Team1;
         }
-        else if (_Config.Team2.Players.ContainsKey(steamID))
+        else if (Config.Team2.Players.ContainsKey(steamID))
         {
             return Team.Team2;
         }
@@ -298,6 +300,8 @@ public class SharpTournament : BasePlugin, IMatchCallback
         }
     }
 
+    #region Commands
+
     [ConsoleCommand("st_loadconfig", "Load a match config")]
     public void OnCommandLoadConfig(CCSPlayerController? player, CommandInfo command)
     {
@@ -324,30 +328,6 @@ public class SharpTournament : BasePlugin, IMatchCallback
         Console.WriteLine("################ dump match ################");
         Console.WriteLine(JsonSerializer.Serialize(_Match));
         Console.WriteLine("################ dump match ################");
-    }
-
-    public bool LoadConfig(string url, string authToken)
-    {
-        Console.WriteLine($"Loading match from \"{url}\"");
-
-        try
-        {
-            _HttpClient.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", authToken);
-            var configJson = _HttpClient.GetStringAsync(url).Result;
-            var config = JsonSerializer.Deserialize<MatchConfig>(configJson);
-            if (config != null)
-            {
-                Console.WriteLine($"Successfully loaded config for match {config.MatchId}");
-                InitializeMatch(config);
-                return true;
-            }
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine($"Failed loading config from \"{url}\". Error: {ex.Message};");
-        }
-
-        return false;
     }
 
     [ConsoleCommand("ready", "Mark player as ready")]
@@ -389,6 +369,8 @@ public class SharpTournament : BasePlugin, IMatchCallback
         Console.WriteLine("Pause Command called.");
     }
 
+    #endregion
+
     [GameEventHandler]
     public HookResult OnPlayerConnect(EventPlayerConnect @event, GameEventInfo info)
     {
@@ -403,8 +385,7 @@ public class SharpTournament : BasePlugin, IMatchCallback
         }
         else
         {
-            //Console.WriteLine("configdebug");
-            //Console.WriteLine(JsonSerializer.Serialize(_Config));
+            @event.Userid.PrintToChat($"Hello {@event.Userid.PlayerName}, welcome to match {_Match.Config.MatchId}");
             if (!_Match.TryAddPlayer(new Player(@event.Userid)) && @event.Userid.UserId != null)
             {
                 KickPlayer(@event.Userid.UserId.Value);
@@ -412,6 +393,32 @@ public class SharpTournament : BasePlugin, IMatchCallback
         }
         return HookResult.Continue;
     }
+
+
+    public bool LoadConfig(string url, string authToken)
+    {
+        Console.WriteLine($"Loading match from \"{url}\"");
+
+        try
+        {
+            _HttpClient.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", authToken);
+            var configJson = _HttpClient.GetStringAsync(url).Result;
+            var config = JsonSerializer.Deserialize<MatchConfig>(configJson);
+            if (config != null)
+            {
+                Console.WriteLine($"Successfully loaded config for match {config.MatchId}");
+                InitializeMatch(config);
+                return true;
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Failed loading config from \"{url}\". Error: {ex.Message};");
+        }
+
+        return false;
+    }
+
 
     private static void KickPlayer(int userId)
     {
