@@ -395,25 +395,25 @@ public class SharpTournament : BasePlugin, IMatchCallback
         return HookResult.Continue;
     }
 
-    [GameEventHandler]
-    public HookResult OnPlayerTeam(EventPlayerTeam @event, GameEventInfo info)
-    {
-        if (_Match != null)
-        {
-            var configTeam = _Match.GetPlayerTeam(@event.Userid.SteamID);
+    //[GameEventHandler]
+    //public HookResult OnPlayerTeam(EventPlayerTeam @event, GameEventInfo info)
+    //{
+    //    if (_Match != null)
+    //    {
+    //        var configTeam = _Match.GetPlayerTeam(@event.Userid.SteamID);
 
-            if ((int)configTeam != @event.Team)
-            {
-                Task.Run(async () =>
-                {
-                    await Task.Delay(100).ConfigureAwait(false);
-                    SwitchTeam(new Player(@event.Userid), configTeam);
-                });
-            }
-        }
+    //        if ((int)configTeam != @event.Team)
+    //        {
+    //            Task.Run(async () =>
+    //            {
+    //                await Task.Delay(100).ConfigureAwait(false);
+    //                SwitchTeam(new Player(@event.Userid), configTeam);
+    //            });
+    //        }
+    //    }
 
-        return HookResult.Continue;
-    }
+    //    return HookResult.Continue;
+    //}
 
     public bool LoadConfig(string url, string authToken)
     {
