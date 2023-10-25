@@ -5,7 +5,13 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
   </PropertyGroup>
+
 	<ItemGroup>
+		<PackageReference Include="Stateless" Version="5.13.0" />
+	</ItemGroup>
+	
+	<ItemGroup>
+		
 		<Reference Include="CounterStrikeSharp.API">
 			<HintPath>../counterstrikesharp/api/CounterStrikeSharp.API.dll</HintPath>
 		</Reference>
