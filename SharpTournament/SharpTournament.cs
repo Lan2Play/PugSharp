@@ -202,7 +202,7 @@ public class Match
         }
     }
 
-    private Team GetPlayerTeam(ulong steamID)
+    public Team GetPlayerTeam(ulong steamID)
     {
         if (Config.Team1.Players.ContainsKey(steamID))
         {
@@ -398,7 +398,16 @@ public class SharpTournament : BasePlugin, IMatchCallback
     [GameEventHandler]
     public HookResult OnPlayerTeam(EventPlayerTeam @event, GameEventInfo info)
     {
-        Console.WriteLine($"Player {@event.Userid.PlayerName} has switched Team to {@event.Team}!");
+        if (_Match != null)
+        {
+            var configTeam = _Match.GetPlayerTeam(@event.Userid.SteamID);
+
+            if ((int)configTeam != @event.Team)
+            {
+                SwitchTeam(new Player(@event.Userid), configTeam);
+            }
+        }
+
         return HookResult.Continue;
     }
 
