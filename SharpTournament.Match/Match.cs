@@ -259,7 +259,13 @@ public class Match
             return;
         }
 
-        if (_MapsToSelect.Count <= mapNumber || mapNumber < 0)
+        if (!int.TryParse(mapNumber, out int mapNumberInt))
+        {
+            player.PrintToChat($"Mapnumber {mapNumber} is invalid!");
+            return;
+        }
+
+        if (_MapsToSelect.Count <= mapNumberInt || mapNumberInt < 0)
         {
             player.PrintToChat($"Mapnumber {mapNumber} is not available!");
             return;
@@ -272,7 +278,7 @@ public class Match
             return;
         }
 
-        var mapToSelect = _MapsToSelect[mapNumber];
+        var mapToSelect = _MapsToSelect[mapNumberInt];
         mapToSelect.Votes.Add(player);
 
         if (_MapsToSelect.Sum(x => x.Votes.Count) >= Config.PlayersPerTeam)
