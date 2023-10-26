@@ -9,5 +9,8 @@ public interface IPlayer
     int? UserId { get; }
 
     IPlayerPawn PlayerPawn { get; }
+
     string PlayerName { get; }
+
+    void PrintToChat(string message);
 }

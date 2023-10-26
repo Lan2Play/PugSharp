@@ -1,7 +1,20 @@
 ﻿using SharpTournament.Match.Contract;
 using Stateless;
+using System.Text;
 
 namespace SharpTournament.Match;
+
+public class MapVote
+{
+    public MapVote(string mapName)
+    {
+        MapName = mapName;
+    }
+
+    public string MapName { get; }
+
+    public List<IPlayer> Votes { get; } = new List<IPlayer>();
+}
 
 public class Match
 {
@@ -9,10 +22,21 @@ public class Match
     private readonly StateMachine<MatchState, MatchCommand> _MatchStateMachine;
     private readonly List<MatchTeam> _MatchTeams = new();
 
+    private List<MapVote> _MapsToSelect = new();
+    private MatchTeam? _CurrentMatchTeamToVote;
+
+    private System.Timers.Timer _VoteTimer = new();
+
     public Match(IMatchCallback matchCallback, Config.MatchConfig matchConfig)
     {
         _MatchCallback = matchCallback;
         Config = matchConfig;
+        _VoteTimer.Interval = Config.VoteTimeout;
+        _VoteTimer.Elapsed += _VoteTimer_Elapsed;
+
+        var availbaleMaps = _MatchCallback.GetAvailableMaps();
+        _MapsToSelect = availbaleMaps.Intersect(matchConfig.Maplist).Select(x => new MapVote(x)).ToList();
+
 
         _MatchStateMachine = new StateMachine<MatchState, MatchCommand>(MatchState.None);
 
@@ -27,9 +51,9 @@ public class Match
             .OnExit(SetAllPlayersNotReady);
 
         _MatchStateMachine.Configure(MatchState.MapVote)
-            .PermitReentryIf(MatchCommand.VoteMap, () => { /*TODO Check if not all maps are vetoed*/ return true; })
-            .PermitIf(MatchCommand.VoteMap, MatchState.TeamVote, () => { /*TODO Check if one map is selected*/ return true; })
-            .OnEntry(() => /* TODO Send remaining map list to team X*/ { });
+            .PermitReentryIf(MatchCommand.VoteMap, MapIsNotSelected)
+            .PermitIf(MatchCommand.VoteMap, MatchState.TeamVote, MapIsSelected)
+            .OnEntry(SendRemainingMapsToVotingTeam);
 
         _MatchStateMachine.Configure(MatchState.TeamVote)
             .PermitIf(MatchCommand.VoteTeam, MatchState.SwitchMap, () => { /*TODO Check if not all maps are vetoed*/ return true; });
@@ -54,10 +78,50 @@ public class Match
         //string graph = UmlDotGraph.Format(_MatchStateMachine.GetInfo());
     }
 
+    private void _VoteTimer_Elapsed(object? sender, System.Timers.ElapsedEventArgs e)
+    {
+        _VoteTimer.Stop();
+        switch (CurrentState)
+        {
+            case MatchState.MapVote:
+                TryFireState(MatchCommand.VoteMap);
+                break;
+        }
+    }
+
     public MatchState CurrentState => _MatchStateMachine.State;
+
     public Config.MatchConfig Config { get; }
 
 
+
+    private void SendRemainingMapsToVotingTeam()
+    {
+        _MapsToSelect.ForEach(m => m.Votes.Clear());
+
+        var mapMessageBuilder = new StringBuilder();
+
+        mapMessageBuilder.AppendLine("Remaining maps to Veto: ");
+        mapMessageBuilder.AppendLine();
+        for (int i = 0; i < _MapsToSelect.Count; i++)
+        {
+            string? map = _MapsToSelect[i].MapName;
+            mapMessageBuilder.Append(i).Append(": ").AppendLine(map);
+        }
+
+        mapMessageBuilder.AppendLine();
+        mapMessageBuilder.AppendLine("To Veto: !veto [mapnumber] ");
+
+        _CurrentMatchTeamToVote ??= _MatchTeams.First();
+
+        var mapMessage = mapMessageBuilder.ToString();
+        _CurrentMatchTeamToVote.Players.ForEach(p =>
+        {
+            p.Player.PrintToChat(mapMessage);
+        });
+
+        _CurrentMatchTeamToVote = GetMatchTeam(_CurrentMatchTeamToVote.Team == Team.Team1 ? Team.Team2 : Team.Team1);
+    }
 
     private bool AllPlayersAreConnected()
     {
@@ -84,6 +148,42 @@ public class Match
             player.IsReady = false;
         }
     }
+
+    private bool MapIsSelected()
+    {
+        return _MapsToSelect.Count == 1;
+    }
+
+    private bool MapIsNotSelected()
+    {
+        return !MapIsSelected();
+    }
+
+    private void TryFireState(MatchCommand command)
+    {
+        if (_MatchStateMachine.CanFire(command))
+        {
+            _MatchStateMachine.Fire(command);
+        }
+    }
+
+    private MatchTeam? GetMatchTeam(ulong steamID)
+    {
+        var team = GetPlayerTeam(steamID);
+        return GetMatchTeam(team);
+    }
+
+    private MatchTeam? GetMatchTeam(Team team)
+    {
+        return _MatchTeams.Find(x => x.Team == team);
+    }
+
+    private MatchPlayer GetMatchPlayer(ulong steamID)
+    {
+        return _MatchTeams.SelectMany(x => x.Players).First(x => x.Player.SteamID == steamID);
+    }
+
+    #region Match Functions
 
     public bool TryAddPlayer(IPlayer player)
     {
@@ -136,13 +236,6 @@ public class Match
         }
     }
 
-    private void TryFireState(MatchCommand command)
-    {
-        if (_MatchStateMachine.CanFire(command))
-        {
-            _MatchStateMachine.Fire(command);
-        }
-    }
 
     public Team GetPlayerTeam(ulong steamID)
     {
@@ -158,14 +251,36 @@ public class Match
         return Team.None;
     }
 
-    private MatchTeam? GetMatchTeam(ulong steamID)
+    public void SetVeto(IPlayer player, string mapNumber)
     {
-        var team = GetPlayerTeam(steamID);
-        return _MatchTeams.Find(x => x.Team == team);
+        if (!_CurrentMatchTeamToVote.Players.Select(x => x.Player.UserId).Contains(player.UserId))
+        {
+            player.PrintToChat("You are currently not permitted to veto!");
+            return;
+        }
+
+        if (_MapsToSelect.Count <= mapNumber || mapNumber < 0)
+        {
+            player.PrintToChat($"Mapnumber {mapNumber} is not available!");
+            return;
+        }
+
+        var vetoedMap = _MapsToSelect.FirstOrDefault(x => x.Votes.Any(x => x.UserId == player.UserId));
+        if (vetoedMap != null)
+        {
+            player.PrintToChat($"You already vetoed Mapnumber {_MapsToSelect.IndexOf(vetoedMap)}: {vetoedMap.MapName} !");
+            return;
+        }
+
+        var mapToSelect = _MapsToSelect[mapNumber];
+        mapToSelect.Votes.Add(player);
+
+        if (_MapsToSelect.Sum(x => x.Votes.Count) >= Config.PlayersPerTeam)
+        {
+            TryFireState(MatchCommand.VoteMap);
+        }
     }
 
-    private MatchPlayer GetMatchPlayer(ulong steamID)
-    {
-        return _MatchTeams.SelectMany(x => x.Players).First(x => x.Player.SteamID == steamID);
-    }
+    #endregion
+
 }

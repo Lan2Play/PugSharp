@@ -88,6 +88,31 @@ public class SharpTournament : BasePlugin, IMatchCallback
         Console.WriteLine("Command ready called.");
     }
 
+
+    [ConsoleCommand("veto", "Set veto for selection")]
+    public void OnCommandVeto(CCSPlayerController? player, CommandInfo command)
+    {
+        if (player == null)
+        {
+            Console.WriteLine("Command Veto has been called by the server. Player is required to set a veto");
+            return;
+        }
+
+        if(command.ArgCount != 2)
+        {
+            player.PrintToChat("Veto requires exact one argument!");
+        }
+
+        var mapNumber = command.ArgByIndex(1);
+
+
+
+        _Match?.SetVeto(new Player(player), mapNumber);
+
+
+        Console.WriteLine("Command ready called.");
+    }
+
     [ConsoleCommand("st_start", "Starts a match")]
     public void OnCommandStart(CCSPlayerController? player, CommandInfo command)
     {
@@ -190,6 +215,11 @@ public class SharpTournament : BasePlugin, IMatchCallback
     {
         var playerEntities = Utilities.FindAllEntitiesByDesignerName<CCSPlayerController>("cs_player_controller");
         return playerEntities.Select(p => new Player(p)).ToArray();
+    }
+
+    public IReadOnlyCollection<string> GetAvailableMaps()
+    {
+        return Server.GetMapList().ToList();
     }
 
     public void SendMessage(string message)

@@ -21,4 +21,9 @@ public class Player : IPlayer
     public string PlayerName => _PlayerController.PlayerName;
 
     public IPlayerPawn PlayerPawn => new PlayerPawn(_PlayerController.PlayerPawn.Value);
+
+    public void PrintToChat(string message)
+    {
+        _PlayerController.PrintToChat(message);
+    }
 }
