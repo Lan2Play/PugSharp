@@ -158,12 +158,13 @@ public class SharpTournament : BasePlugin, IMatchCallback
         }
         else
         {
+            var userId = @event.Userid;
             Server.NextFrame(() =>
             {
-                @event.Userid.PrintToChat($"Hello {@event.Userid.PlayerName}, welcome to match {_Match.Config.MatchId}");
-                if (!_Match.TryAddPlayer(new Player(@event.Userid)) && @event.Userid.UserId != null)
+                userId.PrintToChat($"Hello {userId.PlayerName}, welcome to match {_Match.Config.MatchId}");
+                if (!_Match.TryAddPlayer(new Player(userId)) && userId.UserId != null)
                 {
-                    KickPlayer(@event.Userid.UserId.Value);
+                    KickPlayer(userId.UserId.Value);
                 }
             });
         }
