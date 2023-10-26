@@ -4,6 +4,7 @@ using CounterStrikeSharp.API.Core.Attributes.Registration;
 using CounterStrikeSharp.API.Modules.Commands;
 using CounterStrikeSharp.API.Modules.Entities;
 using CounterStrikeSharp.API.Modules.Memory;
+using CounterStrikeSharp.API.Modules.Utils;
 using SharpTournament.Config;
 using Stateless;
 using Stateless.Graph;
@@ -235,6 +236,8 @@ public interface IPlayer
     ulong SteamID { get; }
 
     int? UserId { get; }
+
+    CHandle<CCSPlayerPawn> PlayerPawn { get; }
 }
 
 public class Player : IPlayer
@@ -253,6 +256,8 @@ public class Player : IPlayer
     public int? UserId => _PlayerController.UserId;
 
     public string PlayerName => _PlayerController.PlayerName;
+
+    public CHandle<CCSPlayerPawn> PlayerPawn => _PlayerController.PlayerPawn;
 }
 
 public enum Team
@@ -294,9 +299,16 @@ public class SharpTournament : BasePlugin, IMatchCallback
         var players = GetAllPlayers();
         foreach (var player in players.Where(x => x.UserId.HasValue && x.UserId >= 0))
         {
-            if (!_Match.TryAddPlayer(player) && player.UserId != null)
+            if (player.UserId != null)
             {
-                KickPlayer(player.UserId.Value);
+                if (!_Match.TryAddPlayer(player))
+                {
+                    KickPlayer(player.UserId.Value);
+                }
+                else
+                {
+                    player.PlayerPawn.Value.CommitSuicide(true, true);
+                }
             }
         }
     }
@@ -395,25 +407,31 @@ public class SharpTournament : BasePlugin, IMatchCallback
         return HookResult.Continue;
     }
 
-    //[GameEventHandler]
-    //public HookResult OnPlayerTeam(EventPlayerTeam @event, GameEventInfo info)
-    //{
-    //    if (_Match != null)
-    //    {
-    //        var configTeam = _Match.GetPlayerTeam(@event.Userid.SteamID);
+    [GameEventHandler]
+    public HookResult OnPlayerTeam(EventPlayerTeam @event, GameEventInfo info)
+    {
+        if (_Match != null)
+        {
+            var configTeam = _Match.GetPlayerTeam(@event.Userid.SteamID);
 
-    //        if ((int)configTeam != @event.Team)
-    //        {
-    //            Task.Run(async () =>
-    //            {
-    //                await Task.Delay(100).ConfigureAwait(false);
-    //                SwitchTeam(new Player(@event.Userid), configTeam);
-    //            });
-    //        }
-    //    }
+            if ((int)configTeam != @event.Team)
+            {
+                Console.WriteLine($"Player {@event.Userid.PlayerName} tried to join {@event.Team} but is not allowed!");
 
-    //    return HookResult.Continue;
-    //}
+                //    Task.Run(async () =>
+                //    {
+                //        await Task.Delay(100).ConfigureAwait(false);
+                //        SwitchTeam(new Player(@event.Userid), configTeam);
+                //    });
+                return HookResult.Stop;
+            }
+        }
+
+        return HookResult.Continue;
+    }
+
+  
+
 
     public bool LoadConfig(string url, string authToken)
     {
