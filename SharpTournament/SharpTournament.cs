@@ -39,6 +39,13 @@ public class SharpTournament : BasePlugin, IMatchCallback
 
     public void InitializeMatch(MatchConfig matchConfig)
     {
+        Server.ExecuteCommand("sv_disable_teamselect_menu true");
+        Server.ExecuteCommand("sv_human_autojoin_team 2");
+        //Server.ExecuteCommand("mp_team_intro_time 6");
+        Server.ExecuteCommand("mp_warmuptime 6000");
+
+        ExecuteServerCommand($"mp_endmatch_votenextmap", "false");
+
         ExecuteServerCommand($"mp_teamname_1", matchConfig.Team1.Name);
         ExecuteServerCommand($"mp_teamflag_1", matchConfig.Team1.Flag);
         ExecuteServerCommand($"mp_teamname_2", matchConfig.Team2.Name);
@@ -202,12 +209,7 @@ public class SharpTournament : BasePlugin, IMatchCallback
     {
         Console.WriteLine("################################ Event ServerSpawn! ################################");
 
-        Server.ExecuteCommand("sv_disable_teamselect_menu true");
-        Server.ExecuteCommand("sv_human_autojoin_team 2");
-        //Server.ExecuteCommand("mp_team_intro_time 6");
-        Server.ExecuteCommand("mp_warmuptime 6000");
 
-        ExecuteServerCommand($"mp_endmatch_votenextmap", "false");
 
         return HookResult.Continue;
     }
