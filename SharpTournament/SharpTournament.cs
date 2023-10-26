@@ -289,6 +289,11 @@ public class SharpTournament : BasePlugin, IMatchCallback
 
     private PlayerConnectedState PlayerState(CCSPlayerController player)
     {
+        if (player == null)
+        {
+            return PlayerConnectedState.PlayerNeverConnected;
+        }
+
         return (PlayerConnectedState)Schema.GetRef<UInt32>(player.Handle, "CBasePlayerController", "m_iConnected");
     }
 
