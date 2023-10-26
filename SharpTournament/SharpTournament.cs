@@ -198,9 +198,9 @@ public class SharpTournament : BasePlugin, IMatchCallback
     //}
 
     [GameEventHandler]
-    public HookResult OnGameInit(EventGameInit @event, GameEventInfo info)
+    public HookResult OnGameInit(EventServerSpawn @event, GameEventInfo info)
     {
-        Console.WriteLine($"Event ServerSpawn!");
+        Console.WriteLine("################################ Event ServerSpawn! ################################");
 
         Server.ExecuteCommand("sv_disable_teamselect_menu true");
         Server.ExecuteCommand("sv_human_autojoin_team 2");
