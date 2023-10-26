@@ -2,9 +2,11 @@
 using CounterStrikeSharp.API.Core;
 using CounterStrikeSharp.API.Core.Attributes.Registration;
 using CounterStrikeSharp.API.Modules.Commands;
+using CounterStrikeSharp.API.Modules.Entities;
 using CounterStrikeSharp.API.Modules.Memory;
 using SharpTournament.Config;
 using SharpTournament.Match.Contract;
+using System.Numerics;
 using System.Text.Json;
 
 namespace SharpTournament;
@@ -98,7 +100,7 @@ public class SharpTournament : BasePlugin, IMatchCallback
             return;
         }
 
-        if(command.ArgCount != 2)
+        if (command.ArgCount != 2)
         {
             player.PrintToChat("Veto requires exact one argument!");
         }
@@ -163,6 +165,30 @@ public class SharpTournament : BasePlugin, IMatchCallback
     }
 
     [GameEventHandler]
+    public HookResult OnPlayerConnect2(EventPlayerConnectFull @event, GameEventInfo info)
+    {
+        // // Userid will give you a reference to a CCSPlayerController class
+        Console.WriteLine($"Player {@event.Userid.PlayerName} has connected full!");
+
+        if (_Match == null)
+        {
+            Console.WriteLine($"Player {@event.Userid.PlayerName} kicked because no match has been loaded!");
+            Server.ExecuteCommand($"kickid {@event.Userid.UserId} \"No match loaded!\"");
+            return HookResult.Continue;
+        }
+        else
+        {
+            @event.Userid.PrintToChat($"Hello {@event.Userid.PlayerName}, welcome to match {_Match.Config.MatchId}");
+            if (!_Match.TryAddPlayer(new Player(@event.Userid)) && @event.Userid.UserId != null)
+            {
+                KickPlayer(@event.Userid.UserId.Value);
+            }
+        }
+
+        return HookResult.Continue;
+    }
+
+    [GameEventHandler]
     public HookResult OnPlayerTeam(EventPlayerTeam @event, GameEventInfo info)
     {
         if (_Match != null)
@@ -214,7 +240,24 @@ public class SharpTournament : BasePlugin, IMatchCallback
     public IReadOnlyList<IPlayer> GetAllPlayers()
     {
         var playerEntities = Utilities.FindAllEntitiesByDesignerName<CCSPlayerController>("cs_player_controller");
-        return playerEntities.Select(p => new Player(p)).ToArray();
+
+        return playerEntities.Where(x => PlayerState(x) == PlayerConnectedState.PlayerConnected).Select(p => new Player(p)).ToArray();
+    }
+
+    private PlayerConnectedState PlayerState(CCSPlayerController player)
+    {
+        return (PlayerConnectedState)Schema.GetRef<UInt32>(player.Handle, "CBasePlayerController", "m_iConnected");
+    }
+
+    public enum PlayerConnectionState
+    {
+        PlayerNeverConnected = 0xfffffff,
+        PlayerConnected = 0x0,
+        PlayerConnecting = 0x1,
+        PlayerReconnecting = 0x2,
+        PlayerDisconnecting = 0x3,
+        PlayerDisconnected = 0x4,
+        PlayerReserved = 0x5,
     }
 
     public IReadOnlyCollection<string> GetAvailableMaps()
