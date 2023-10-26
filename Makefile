@@ -3,7 +3,7 @@ build-and-copy: build copy
 
 
 build:
-	dotnet publish
+	dotnet publish -c debug
 
 copy:
 	rm SharpTournament/bin/Debug/net7.0/publish/CounterStrikeSharp.API.dll
