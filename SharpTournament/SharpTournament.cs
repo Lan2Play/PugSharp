@@ -26,13 +26,6 @@ public class SharpTournament : BasePlugin, IMatchCallback
         Console.WriteLine("Loading SharpTournament!");
 
         _SwitchTeamFunc = VirtualFunction.CreateVoid<IntPtr, int>(GameData.GetSignature("CCSPlayerController_SwitchTeam"));
-
-        Server.ExecuteCommand("sv_disable_teamselect_menu true");
-        Server.ExecuteCommand("sv_human_autojoin_team 2");
-        //Server.ExecuteCommand("mp_team_intro_time 6");
-        Server.ExecuteCommand("mp_warmuptime 6000");
-
-        ExecuteServerCommand($"mp_endmatch_votenextmap", "false");
     }
 
     private void ExecuteServerCommand(string command, string value)
@@ -203,6 +196,22 @@ public class SharpTournament : BasePlugin, IMatchCallback
 
     //    return HookResult.Continue;
     //}
+
+    [GameEventHandler]
+    public HookResult OnGameInit(EventGameInit @event, GameEventInfo info)
+    {
+        Console.WriteLine($"Event ServerSpawn!");
+
+        Server.ExecuteCommand("sv_disable_teamselect_menu true");
+        Server.ExecuteCommand("sv_human_autojoin_team 2");
+        //Server.ExecuteCommand("mp_team_intro_time 6");
+        Server.ExecuteCommand("mp_warmuptime 6000");
+
+        ExecuteServerCommand($"mp_endmatch_votenextmap", "false");
+
+        return HookResult.Continue;
+    }
+
 
     [GameEventHandler]
     public HookResult OnPlayerConnect(EventPlayerConnect @event, GameEventInfo info)
