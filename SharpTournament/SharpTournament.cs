@@ -26,7 +26,7 @@ public class SharpTournament : BasePlugin, IMatchCallback
         Console.WriteLine("Loading SharpTournament!");
 
         _SwitchTeamFunc = VirtualFunction.CreateVoid<IntPtr, int>(GameData.GetSignature("CCSPlayerController_SwitchTeam"));
-
+        
     }
 
     public void InitializeMatch(MatchConfig matchConfig)
@@ -150,7 +150,7 @@ public class SharpTournament : BasePlugin, IMatchCallback
         if (_Match == null)
         {
             Console.WriteLine($"Player {@event.Userid.PlayerName} kicked because no match has been loaded!");
-            Server.ExecuteCommand($"kickid {@event.Userid.UserId} \"No match loaded!\"");
+            Server.ExecuteCommand($"kickid {@event.Userid.UserId} 'No match loaded!'\n");
             return HookResult.Continue;
         }
         else
@@ -173,7 +173,7 @@ public class SharpTournament : BasePlugin, IMatchCallback
         if (_Match == null)
         {
             Console.WriteLine($"Player {@event.Userid.PlayerName} kicked because no match has been loaded!");
-            Server.ExecuteCommand($"kickid {@event.Userid.UserId} \"No match loaded!\"");
+            Server.ExecuteCommand($"kickid {@event.Userid.UserId} 'No match loaded!'\n");
             return HookResult.Continue;
         }
         else
