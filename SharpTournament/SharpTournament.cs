@@ -204,8 +204,13 @@ public class SharpTournament : BasePlugin, IMatchCallback
     //}
 
     [GameEventHandler]
-    public HookResult OnPlayerConnectFull(EventPlayerConnect @event, GameEventInfo info)
+    public HookResult OnPlayerConnect(EventPlayerConnect @event, GameEventInfo info)
     {
+        if (PlayerState(@event.Userid) != PlayerConnectedState.PlayerConnected)
+        {
+            return HookResult.Continue;
+        }
+
         // // Userid will give you a reference to a CCSPlayerController class
         Console.WriteLine($"Player {@event.Userid.PlayerName} has connected full!");
 
