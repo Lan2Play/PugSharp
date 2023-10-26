@@ -177,32 +177,8 @@ public class SharpTournament : BasePlugin, IMatchCallback
     //    return HookResult.Continue;
     //}
 
-    [GameEventHandler]
-    public HookResult OnPlayerConnect(EventPlayerConnect @event, GameEventInfo info)
-    {
-        // // Userid will give you a reference to a CCSPlayerController class
-        Console.WriteLine($"Player {@event.Userid.PlayerName} has connected full!");
-
-        if (_Match == null)
-        {
-            Console.WriteLine($"Player {@event.Userid.PlayerName} kicked because no match has been loaded!");
-            KickPlayer(@event.Userid.UserId.Value);
-        }
-        else /*if (_RoundStarted)*/
-        {
-            var userId = @event.Userid;
-            userId.PrintToChat($"Hello {userId.PlayerName}, welcome to match {_Match.Config.MatchId}");
-            if (!_Match.TryAddPlayer(new Player(userId)) && userId.UserId != null)
-            {
-                KickPlayer(userId.UserId.Value);
-            }
-        }
-
-        return HookResult.Continue;
-    }
-
     //[GameEventHandler]
-    //public HookResult OnPlayerConnect(EventPlayerConnectFull @event, GameEventInfo info)
+    //public HookResult OnPlayerConnect(EventPlayerConnect @event, GameEventInfo info)
     //{
     //    // // Userid will give you a reference to a CCSPlayerController class
     //    Console.WriteLine($"Player {@event.Userid.PlayerName} has connected full!");
@@ -224,6 +200,30 @@ public class SharpTournament : BasePlugin, IMatchCallback
 
     //    return HookResult.Continue;
     //}
+
+    [GameEventHandler]
+    public HookResult OnPlayerConnectFul(EventPlayerConnectFull @event, GameEventInfo info)
+    {
+        // // Userid will give you a reference to a CCSPlayerController class
+        Console.WriteLine($"Player {@event.Userid.PlayerName} has connected full!");
+
+        if (_Match == null)
+        {
+            Console.WriteLine($"Player {@event.Userid.PlayerName} kicked because no match has been loaded!");
+            KickPlayer(@event.Userid.UserId.Value);
+        }
+        //else /*if (_RoundStarted)*/
+        //{
+        //    var userId = @event.Userid;
+        //    userId.PrintToChat($"Hello {userId.PlayerName}, welcome to match {_Match.Config.MatchId}");
+        //    if (!_Match.TryAddPlayer(new Player(userId)) && userId.UserId != null)
+        //    {
+        //        KickPlayer(userId.UserId.Value);
+        //    }
+        //}
+
+        return HookResult.Continue;
+    }
 
     [GameEventHandler]
     public HookResult OnPlayerTeam(EventPlayerTeam @event, GameEventInfo info)
