@@ -198,7 +198,7 @@ public class SharpTournament : BasePlugin, IMatchCallback
     //}
 
     [GameEventHandler]
-    public HookResult OnGameInit(EventServerSpawn @event, GameEventInfo info)
+    public HookResult OnGameInit(EventGameNewmap @event, GameEventInfo info)
     {
         Console.WriteLine("################################ Event ServerSpawn! ################################");
 
