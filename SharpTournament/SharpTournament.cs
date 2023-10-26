@@ -40,6 +40,7 @@ public class SharpTournament : BasePlugin, IMatchCallback
 
     public void InitializeMatch(MatchConfig matchConfig)
     {
+        Server.ExecuteCommand("sv_disable_teamselect_menu false");
         Server.ExecuteCommand("mp_warmuptime 6000");
         ExecuteServerCommand($"mp_teamname_1", matchConfig.Team1.Name);
         ExecuteServerCommand($"mp_teamflag_1", matchConfig.Team1.Flag);
