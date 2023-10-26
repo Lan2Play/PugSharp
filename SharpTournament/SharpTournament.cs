@@ -29,9 +29,23 @@ public class SharpTournament : BasePlugin, IMatchCallback
 
     }
 
+    private void ExecuteServerCommand(string command, string value)
+    {
+        if (!string.IsNullOrEmpty(value))
+        {
+            Server.ExecuteCommand($"{command} {value}");
+
+        }
+    }
+
     public void InitializeMatch(MatchConfig matchConfig)
     {
         Server.ExecuteCommand("mp_warmup_pausetimer 1");
+        ExecuteServerCommand($"mp_teamname_1", matchConfig.Team1.Name);
+        ExecuteServerCommand($"mp_teamflag_1", matchConfig.Team1.Flag);
+        ExecuteServerCommand($"mp_teamname_2", matchConfig.Team2.Name);
+        ExecuteServerCommand($"mp_teamflag_2", matchConfig.Team2.Flag);
+        ExecuteServerCommand($"mp_endmatch_votenextmap", "false");
 
         _Match = new Match.Match(this, matchConfig);
 
@@ -159,14 +173,14 @@ public class SharpTournament : BasePlugin, IMatchCallback
         else
         {
             var userId = @event.Userid;
-            Server.NextFrame(() =>
-            {
+            //Server.NextFrame(() =>
+            //{
                 userId.PrintToChat($"Hello {userId.PlayerName}, welcome to match {_Match.Config.MatchId}");
                 if (!_Match.TryAddPlayer(new Player(userId)) && userId.UserId != null)
                 {
                     KickPlayer(userId.UserId.Value);
                 }
-            });
+            //});
         }
 
         return HookResult.Continue;
