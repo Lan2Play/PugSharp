@@ -1,5 +1,6 @@
 using NSubstitute;
 using SharpTournament.Config;
+using SharpTournament.Match.Contract;
 
 namespace SharpTournament.Tests
 {
@@ -20,7 +21,7 @@ namespace SharpTournament.Tests
             var matchCallback = Substitute.For<IMatchCallback>();
             MatchConfig config = CreateExampleConfig();
 
-            var match = new Match(matchCallback, config);
+            var match = new Match.Match(matchCallback, config);
 
             Assert.Equal(MatchState.WaitingForPlayersConnected, match.CurrentState);
 
@@ -35,7 +36,7 @@ namespace SharpTournament.Tests
             var matchCallback = Substitute.For<IMatchCallback>();
             MatchConfig config = CreateExampleConfig();
 
-            var match = new Match(matchCallback, config);
+            var match = new Match.Match(matchCallback, config);
 
             Assert.Equal(MatchState.WaitingForPlayersConnected, match.CurrentState);
 
@@ -53,7 +54,7 @@ namespace SharpTournament.Tests
 
             MatchConfig config = CreateExampleConfig();
 
-            var match = new Match(matchCallback, config);
+            var match = new Match.Match(matchCallback, config);
 
             Assert.Equal(MatchState.WaitingForPlayersConnected, match.CurrentState);
 

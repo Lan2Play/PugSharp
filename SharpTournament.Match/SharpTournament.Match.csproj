@@ -1,0 +1,18 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+		<TargetFramework>net7.0</TargetFramework>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<Nullable>enable</Nullable>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<PackageReference Include="Stateless" Version="5.13.0" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<ProjectReference Include="..\SharpTournament.Config\SharpTournament.Config.csproj" />
+		<ProjectReference Include="..\SharpTournament.Match.Contract\SharpTournament.Match.Contract.csproj" />
+	</ItemGroup>
+
+</Project>

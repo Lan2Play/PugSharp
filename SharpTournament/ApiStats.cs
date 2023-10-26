@@ -276,7 +276,7 @@ namespace SharpTournament
 
         public string SeriesType => $"bo{Maps.Count}";
 
-        public Team Winner { get; set; }
+        public Config.Team Winner { get; set; }
 
         public bool Forfeit { get; set; }
 
@@ -301,7 +301,7 @@ namespace SharpTournament
 
         public string DemoFileName { get; set; }
 
-        public Team Winner { get; set; }
+        public Config.Team Winner { get; set; }
 
         public MapTeamInfo Team1 { get; set; }
 
