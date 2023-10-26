@@ -289,12 +289,14 @@ public class SharpTournament : BasePlugin, IMatchCallback
 
     private PlayerConnectedState PlayerState(CCSPlayerController player)
     {
-        if (player == null)
+        if (player == null || !player.IsValid)
         {
             return PlayerConnectedState.PlayerNeverConnected;
         }
 
-        return (PlayerConnectedState)Schema.GetRef<UInt32>(player.Handle, "CBasePlayerController", "m_iConnected");
+        var statusRef = Schema.GetRef<UInt32>(player.Handle, "CBasePlayerController", "m_iConnected");
+
+        return (PlayerConnectedState)statusRef;
     }
 
     public enum PlayerConnectionState
