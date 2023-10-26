@@ -305,10 +305,6 @@ public class SharpTournament : BasePlugin, IMatchCallback
                 {
                     KickPlayer(player.UserId.Value);
                 }
-                else
-                {
-                    player.PlayerPawn.Value.CommitSuicide(true, true);
-                }
             }
         }
     }
@@ -417,13 +413,23 @@ public class SharpTournament : BasePlugin, IMatchCallback
             if ((int)configTeam != @event.Team)
             {
                 Console.WriteLine($"Player {@event.Userid.PlayerName} tried to join {@event.Team} but is not allowed!");
+                var player = @event.Userid;
+                var team = @event.Team;
 
-                //    Task.Run(async () =>
-                //    {
-                //        await Task.Delay(100).ConfigureAwait(false);
-                //        SwitchTeam(new Player(@event.Userid), configTeam);
-                //    });
-                return HookResult.Stop;
+                Server.NextFrame(() =>
+                {
+                    
+                    SwitchTeam(new Player(player), configTeam);
+                    if(team == 1)
+                    {
+                        //TODO: player can cheat kills if switched to spectator
+                        player.Score = 0;
+                        //.m_pActionTrackingServices.Value.m_matchStats
+                        // .Player.m_iKills = 0;
+                    }
+                });
+                return HookResult.Continue;
+
             }
         }
 
@@ -469,6 +475,7 @@ public class SharpTournament : BasePlugin, IMatchCallback
     {
         Console.WriteLine($"Switch player to team {team}");
         _SwitchTeamFunc?.Invoke(player.Handle, (int)team);
+        player.PlayerPawn.Value.CommitSuicide(true, true);
     }
 
     public IReadOnlyList<IPlayer> GetAllPlayers()
