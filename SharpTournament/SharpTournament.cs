@@ -2,12 +2,10 @@
 using CounterStrikeSharp.API.Core;
 using CounterStrikeSharp.API.Core.Attributes.Registration;
 using CounterStrikeSharp.API.Modules.Commands;
-using CounterStrikeSharp.API.Modules.Entities;
 using CounterStrikeSharp.API.Modules.Memory;
 using CounterStrikeSharp.API.Modules.Utils;
 using SharpTournament.Config;
 using Stateless;
-using Stateless.Graph;
 using System.Text.Json;
 
 namespace SharpTournament;
@@ -141,8 +139,6 @@ public class Match
             player.IsReady = false;
         }
     }
-
-
 
     public bool TryAddPlayer(IPlayer player)
     {
