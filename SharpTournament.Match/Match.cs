@@ -34,8 +34,9 @@ public class Match
         _VoteTimer.Interval = Config.VoteTimeout;
         _VoteTimer.Elapsed += _VoteTimer_Elapsed;
 
-        var availbaleMaps = _MatchCallback.GetAvailableMaps();
-        _MapsToSelect = availbaleMaps.Intersect(matchConfig.Maplist).Select(x => new MapVote(x)).ToList();
+        //var availbaleMaps = _MatchCallback.GetAvailableMaps();
+        //_MapsToSelect = availbaleMaps.Intersect(matchConfig.Maplist).Select(x => new MapVote(x)).ToList();
+        _MapsToSelect = matchConfig.Maplist.Select(x => new MapVote(x)).ToList();
 
 
         _MatchStateMachine = new StateMachine<MatchState, MatchCommand>(MatchState.None);
