@@ -26,7 +26,7 @@ public class SharpTournament : BasePlugin, IMatchCallback
         Console.WriteLine("Loading SharpTournament!");
 
         _SwitchTeamFunc = VirtualFunction.CreateVoid<IntPtr, int>(GameData.GetSignature("CCSPlayerController_SwitchTeam"));
-        
+
     }
 
     public void InitializeMatch(MatchConfig matchConfig)
@@ -152,15 +152,17 @@ public class SharpTournament : BasePlugin, IMatchCallback
         {
             Console.WriteLine($"Player {@event.Userid.PlayerName} kicked because no match has been loaded!");
             Server.ExecuteCommand($"kickid {@event.Userid.UserId} 'No match loaded!'\n");
-            return HookResult.Continue;
         }
         else
         {
-            @event.Userid.PrintToChat($"Hello {@event.Userid.PlayerName}, welcome to match {_Match.Config.MatchId}");
-            if (!_Match.TryAddPlayer(new Player(@event.Userid)) && @event.Userid.UserId != null)
+            Server.NextFrame(() =>
             {
-                KickPlayer(@event.Userid.UserId.Value);
-            }
+                @event.Userid.PrintToChat($"Hello {@event.Userid.PlayerName}, welcome to match {_Match.Config.MatchId}");
+                if (!_Match.TryAddPlayer(new Player(@event.Userid)) && @event.Userid.UserId != null)
+                {
+                    KickPlayer(@event.Userid.UserId.Value);
+                }
+            });
         }
 
         return HookResult.Continue;
@@ -181,15 +183,14 @@ public class SharpTournament : BasePlugin, IMatchCallback
 
                 Server.NextFrame(() =>
                 {
-
                     SwitchTeam(new Player(player), configTeam);
-                    if (team == 1)
-                    {
-                        //TODO: player can cheat kills if switched to spectator
-                        player.Score = 0;
-                        //.m_pActionTrackingServices.Value.m_matchStats
-                        // .Player.m_iKills = 0;
-                    }
+                    //if (team == 1)
+                    //{
+                    //    //TODO: player can cheat kills if switched to spectator
+                    //    player.Score = 0;
+                    //    //.m_pActionTrackingServices.Value.m_matchStats
+                    //    // .Player.m_iKills = 0;
+                    //}
                 });
                 return HookResult.Continue;
 
