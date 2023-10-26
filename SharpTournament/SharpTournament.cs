@@ -158,6 +158,23 @@ public class SharpTournament : BasePlugin, IMatchCallback
 
     #endregion
 
+    private bool _RoundStarted = false;
+
+    [GameEventHandler]
+    public HookResult OnRoundStart(EventRoundStart @event, GameEventInfo info)
+    {
+        _RoundStarted = true;
+        var players = GetAllPlayers();
+        foreach (var player in players.Where(x => x.UserId.HasValue && x.UserId >= 0))
+        {
+            if (player.UserId != null && !_Match.TryAddPlayer(player))
+            {
+                KickPlayer(player.UserId.Value);
+            }
+        }
+
+        return HookResult.Continue;
+    }
 
     [GameEventHandler]
     public HookResult OnPlayerConnect(EventPlayerConnectFull @event, GameEventInfo info)
@@ -170,7 +187,7 @@ public class SharpTournament : BasePlugin, IMatchCallback
             Console.WriteLine($"Player {@event.Userid.PlayerName} kicked because no match has been loaded!");
             KickPlayer(@event.Userid.UserId.Value);
         }
-        else
+        else if(_RoundStarted)
         {
             var userId = @event.Userid;
             //Server.NextFrame(() =>
