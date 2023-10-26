@@ -237,7 +237,12 @@ public interface IPlayer
 
     int? UserId { get; }
 
-    CHandle<CCSPlayerPawn> PlayerPawn { get; }
+    IPlayerPawn PlayerPawn { get; }
+}
+
+public interface IPlayerPawn
+{
+    void CommitSuicide();
 }
 
 public class Player : IPlayer
@@ -257,7 +262,22 @@ public class Player : IPlayer
 
     public string PlayerName => _PlayerController.PlayerName;
 
-    public CHandle<CCSPlayerPawn> PlayerPawn => _PlayerController.PlayerPawn;
+    public IPlayerPawn PlayerPawn => new PlayerPawn(_PlayerController.PlayerPawn.Value);
+}
+
+public class PlayerPawn : IPlayerPawn
+{
+    private readonly CCSPlayerPawn _PlayerPawnHandle;
+
+    public PlayerPawn(CCSPlayerPawn playerPawnHandle)
+    {
+        _PlayerPawnHandle = playerPawnHandle;
+    }
+
+    public void CommitSuicide()
+    {
+        _PlayerPawnHandle.CommitSuicide(true, true);
+    }
 }
 
 public enum Team
@@ -299,12 +319,9 @@ public class SharpTournament : BasePlugin, IMatchCallback
         var players = GetAllPlayers();
         foreach (var player in players.Where(x => x.UserId.HasValue && x.UserId >= 0))
         {
-            if (player.UserId != null)
+            if (player.UserId != null && !_Match.TryAddPlayer(player))
             {
-                if (!_Match.TryAddPlayer(player))
-                {
-                    KickPlayer(player.UserId.Value);
-                }
+                KickPlayer(player.UserId.Value);
             }
         }
     }
@@ -418,9 +435,9 @@ public class SharpTournament : BasePlugin, IMatchCallback
 
                 Server.NextFrame(() =>
                 {
-                    
+
                     SwitchTeam(new Player(player), configTeam);
-                    if(team == 1)
+                    if (team == 1)
                     {
                         //TODO: player can cheat kills if switched to spectator
                         player.Score = 0;
@@ -436,7 +453,7 @@ public class SharpTournament : BasePlugin, IMatchCallback
         return HookResult.Continue;
     }
 
-  
+
 
 
     public bool LoadConfig(string url, string authToken)
@@ -475,7 +492,7 @@ public class SharpTournament : BasePlugin, IMatchCallback
     {
         Console.WriteLine($"Switch player to team {team}");
         _SwitchTeamFunc?.Invoke(player.Handle, (int)team);
-        player.PlayerPawn.Value.CommitSuicide(true, true);
+        player.PlayerPawn.CommitSuicide();
     }
 
     public IReadOnlyList<IPlayer> GetAllPlayers()
