@@ -27,6 +27,12 @@ public class SharpTournament : BasePlugin, IMatchCallback
 
         _SwitchTeamFunc = VirtualFunction.CreateVoid<IntPtr, int>(GameData.GetSignature("CCSPlayerController_SwitchTeam"));
 
+        Server.ExecuteCommand("sv_disable_teamselect_menu true");
+        Server.ExecuteCommand("sv_human_autojoin_team 2");
+        //Server.ExecuteCommand("mp_team_intro_time 6");
+        Server.ExecuteCommand("mp_warmuptime 6000");
+
+        ExecuteServerCommand($"mp_endmatch_votenextmap", "false");
     }
 
     private void ExecuteServerCommand(string command, string value)
@@ -40,15 +46,10 @@ public class SharpTournament : BasePlugin, IMatchCallback
 
     public void InitializeMatch(MatchConfig matchConfig)
     {
-        Server.ExecuteCommand("sv_disable_teamselect_menu true");
-        Server.ExecuteCommand("sv_human_autojoin_team 2");
-        //Server.ExecuteCommand("mp_team_intro_time 6");
-        Server.ExecuteCommand("mp_warmuptime 6000");
         ExecuteServerCommand($"mp_teamname_1", matchConfig.Team1.Name);
         ExecuteServerCommand($"mp_teamflag_1", matchConfig.Team1.Flag);
         ExecuteServerCommand($"mp_teamname_2", matchConfig.Team2.Name);
         ExecuteServerCommand($"mp_teamflag_2", matchConfig.Team2.Flag);
-        ExecuteServerCommand($"mp_endmatch_votenextmap", "false");
 
         _Match = new Match.Match(this, matchConfig);
 
@@ -258,6 +259,14 @@ public class SharpTournament : BasePlugin, IMatchCallback
                 });
                 return HookResult.Continue;
 
+            }
+        }
+        else
+        {
+            var players = GetAllPlayers();
+            foreach (var player in players.Where(x => x.UserId != null))
+            {
+                KickPlayer(player.UserId!.Value);
             }
         }
 
