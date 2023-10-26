@@ -160,21 +160,21 @@ public class SharpTournament : BasePlugin, IMatchCallback
 
     private bool _RoundStarted = false;
 
-    [GameEventHandler]
-    public HookResult OnRoundStart(EventRoundStart @event, GameEventInfo info)
-    {
-        _RoundStarted = true;
-        var players = GetAllPlayers();
-        foreach (var player in players.Where(x => x.UserId.HasValue && x.UserId >= 0))
-        {
-            if (player.UserId != null && !_Match.TryAddPlayer(player))
-            {
-                KickPlayer(player.UserId.Value);
-            }
-        }
+    //[GameEventHandler]
+    //public HookResult OnRoundStart(EventRoundStart @event, GameEventInfo info)
+    //{
+    //    _RoundStarted = true;
+    //    var players = GetAllPlayers();
+    //    foreach (var player in players.Where(x => x.UserId.HasValue && x.UserId >= 0))
+    //    {
+    //        if (player.UserId != null && !_Match.TryAddPlayer(player))
+    //        {
+    //            KickPlayer(player.UserId.Value);
+    //        }
+    //    }
 
-        return HookResult.Continue;
-    }
+    //    return HookResult.Continue;
+    //}
 
     [GameEventHandler]
     public HookResult OnPlayerConnect(EventPlayerConnectFull @event, GameEventInfo info)
@@ -187,17 +187,19 @@ public class SharpTournament : BasePlugin, IMatchCallback
             Console.WriteLine($"Player {@event.Userid.PlayerName} kicked because no match has been loaded!");
             KickPlayer(@event.Userid.UserId.Value);
         }
-        else if(_RoundStarted)
+        else /*if (_RoundStarted)*/
         {
             var userId = @event.Userid;
             //Server.NextFrame(() =>
-            //{
-            userId.PrintToChat($"Hello {userId.PlayerName}, welcome to match {_Match.Config.MatchId}");
-            if (!_Match.TryAddPlayer(new Player(userId)) && userId.UserId != null)
+            Task.Run(async () =>
             {
-                KickPlayer(userId.UserId.Value);
-            }
-            //});
+                await Task.Delay(5000).ConfigureAwait(false);
+                userId.PrintToChat($"Hello {userId.PlayerName}, welcome to match {_Match.Config.MatchId}");
+                if (!_Match.TryAddPlayer(new Player(userId)) && userId.UserId != null)
+                {
+                    KickPlayer(userId.UserId.Value);
+                }
+            });
         }
 
         return HookResult.Continue;
