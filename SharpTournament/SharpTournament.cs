@@ -31,7 +31,7 @@ public class SharpTournament : BasePlugin, IMatchCallback
 
     public void InitializeMatch(MatchConfig matchConfig)
     {
-        Server.ExecuteCommand("mp_warmuptime 600.000000");
+        Server.ExecuteCommand("mp_warmup_pausetimer 1");
 
         _Match = new Match.Match(this, matchConfig);
 
