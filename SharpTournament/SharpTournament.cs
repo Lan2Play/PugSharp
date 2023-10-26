@@ -31,7 +31,10 @@ public class SharpTournament : BasePlugin, IMatchCallback
 
     public void InitializeMatch(MatchConfig matchConfig)
     {
+        Server.ExecuteCommand("mp_warmuptime 600.000000");
+
         _Match = new Match.Match(this, matchConfig);
+
 
         var players = GetAllPlayers();
         foreach (var player in players.Where(x => x.UserId.HasValue && x.UserId >= 0))
