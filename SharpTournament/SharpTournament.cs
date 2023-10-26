@@ -168,55 +168,55 @@ public class SharpTournament : BasePlugin, IMatchCallback
         if (_Match == null)
         {
             Console.WriteLine($"Player {@event.Userid.PlayerName} kicked because no match has been loaded!");
-            Server.ExecuteCommand($"kickid {@event.Userid.UserId} 'No match loaded!'\n");
+            KickPlayer(@event.Userid.UserId.Value);
         }
         else
         {
             var userId = @event.Userid;
             //Server.NextFrame(() =>
             //{
-                userId.PrintToChat($"Hello {userId.PlayerName}, welcome to match {_Match.Config.MatchId}");
-                if (!_Match.TryAddPlayer(new Player(userId)) && userId.UserId != null)
-                {
-                    KickPlayer(userId.UserId.Value);
-                }
+            userId.PrintToChat($"Hello {userId.PlayerName}, welcome to match {_Match.Config.MatchId}");
+            if (!_Match.TryAddPlayer(new Player(userId)) && userId.UserId != null)
+            {
+                KickPlayer(userId.UserId.Value);
+            }
             //});
         }
 
         return HookResult.Continue;
     }
 
-    [GameEventHandler]
-    public HookResult OnPlayerTeam(EventPlayerTeam @event, GameEventInfo info)
-    {
-        if (_Match != null)
-        {
-            var configTeam = _Match.GetPlayerTeam(@event.Userid.SteamID);
+    //[GameEventHandler]
+    //public HookResult OnPlayerTeam(EventPlayerTeam @event, GameEventInfo info)
+    //{
+    //    if (_Match != null)
+    //    {
+    //        var configTeam = _Match.GetPlayerTeam(@event.Userid.SteamID);
 
-            if ((int)configTeam != @event.Team)
-            {
-                Console.WriteLine($"Player {@event.Userid.PlayerName} tried to join {@event.Team} but is not allowed!");
-                var player = @event.Userid;
-                var team = @event.Team;
+    //        if ((int)configTeam != @event.Team)
+    //        {
+    //            Console.WriteLine($"Player {@event.Userid.PlayerName} tried to join {@event.Team} but is not allowed!");
+    //            var player = @event.Userid;
+    //            var team = @event.Team;
 
-                Server.NextFrame(() =>
-                {
-                    SwitchTeam(new Player(player), configTeam);
-                    //if (team == 1)
-                    //{
-                    //    //TODO: player can cheat kills if switched to spectator
-                    //    player.Score = 0;
-                    //    //.m_pActionTrackingServices.Value.m_matchStats
-                    //    // .Player.m_iKills = 0;
-                    //}
-                });
-                return HookResult.Continue;
+    //            Server.NextFrame(() =>
+    //            {
+    //                SwitchTeam(new Player(player), configTeam);
+    //                //if (team == 1)
+    //                //{
+    //                //    //TODO: player can cheat kills if switched to spectator
+    //                //    player.Score = 0;
+    //                //    //.m_pActionTrackingServices.Value.m_matchStats
+    //                //    // .Player.m_iKills = 0;
+    //                //}
+    //            });
+    //            return HookResult.Continue;
 
-            }
-        }
+    //        }
+    //    }
 
-        return HookResult.Continue;
-    }
+    //    return HookResult.Continue;
+    //}
 
 
 
