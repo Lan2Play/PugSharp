@@ -243,11 +243,11 @@ public class SharpTournament : BasePlugin, IMatchCallback
         var player = new CCSPlayerController(entity);
 
         // // Userid will give you a reference to a CCSPlayerController class
-        Console.WriteLine($"Player {player.PlayerName} has put on server!");
+        Console.WriteLine($"Player {name} has put on server!");
 
         if (_Match == null)
         {
-            Console.WriteLine($"Player {player.PlayerName} kicked because no match has been loaded!");
+            Console.WriteLine($"Player {name} kicked because no match has been loaded!");
             KickPlayer(player.UserId.Value);
         }
         else /*if (_RoundStarted)*/
