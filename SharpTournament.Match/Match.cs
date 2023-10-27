@@ -70,6 +70,7 @@ public class Match
             .OnExit(SetSelectedTeamSite);
 
         _MatchStateMachine.Configure(MatchState.SwitchMap)
+            .Permit(MatchCommand.SwitchMap, MatchState.WaitingForPlayersReady)
             .OnEntry(SwitchToMatchMap);
 
         _MatchStateMachine.Configure(MatchState.WaitingForPlayersReady)

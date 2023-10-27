@@ -249,15 +249,15 @@ public class SharpTournament : BasePlugin, IMatchCallback
             Console.WriteLine($"Player {@event.Userid.PlayerName} kicked because no match has been loaded!");
             KickPlayer(@event.Userid.UserId.Value);
         }
-        //else /*if (_RoundStarted)*/
-        //{
-        //    var userId = @event.Userid;
-        //    userId.PrintToChat($"Hello {userId.PlayerName}, welcome to match {_Match.Config.MatchId}");
-        //    if (!_Match.TryAddPlayer(new Player(userId)) && userId.UserId != null)
-        //    {
-        //        KickPlayer(userId.UserId.Value);
-        //    }
-        //}
+        else /*if (_RoundStarted)*/
+        {
+            var userId = @event.Userid;
+            userId.PrintToChat($"Hello {userId.PlayerName}, welcome to match {_Match.Config.MatchId}");
+            if (!_Match.TryAddPlayer(new Player(userId)) && userId.UserId != null)
+            {
+                KickPlayer(userId.UserId.Value);
+            }
+        }
 
         return HookResult.Continue;
     }
@@ -265,6 +265,7 @@ public class SharpTournament : BasePlugin, IMatchCallback
     [GameEventHandler]
     public HookResult OnPlayerTeam(EventPlayerTeam @event, GameEventInfo info)
     {
+
         if (_Match != null)
         {
             var configTeam = _Match.GetPlayerTeam(@event.Userid.SteamID);

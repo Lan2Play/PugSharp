@@ -8,4 +8,5 @@ public enum MatchCommand
     PlayerReady,
     VoteMap,
     VoteTeam,
+    SwitchMap,
 }
