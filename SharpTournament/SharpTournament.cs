@@ -236,10 +236,10 @@ public class SharpTournament : BasePlugin, IMatchCallback
     [GameEventHandler]
     public HookResult OnPlayerConnect(EventPlayerConnect @event, GameEventInfo info)
     {
-        if (PlayerState(@event.Userid) != PlayerConnectedState.PlayerConnected && PlayerState(@event.Userid) != PlayerConnectedState.PlayerReconnecting)
+        if (PlayerState(@event.Userid) == PlayerConnectedState.PlayerConnected 
+           || PlayerState(@event.Userid) == PlayerConnectedState.PlayerReconnecting)
         {
-            return HookResult.Continue;
-        }
+            
 
         // // Userid will give you a reference to a CCSPlayerController class
         Console.WriteLine($"Player {@event.Userid.PlayerName} has connected full!");
@@ -257,6 +257,7 @@ public class SharpTournament : BasePlugin, IMatchCallback
             {
                 KickPlayer(userId.UserId.Value);
             }
+        }
         }
 
         return HookResult.Continue;
