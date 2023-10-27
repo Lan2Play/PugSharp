@@ -351,7 +351,7 @@ public class SharpTournament : BasePlugin, IMatchCallback
     {
         Console.WriteLine($"Switch player to team {team}");
         _SwitchTeamFunc?.Invoke(player.Handle, (int)team);
-        player.PlayerPawn.CommitSuicide();
+        //player.PlayerPawn.CommitSuicide();
     }
 
     public void SwitchMap(string selectedMap)
