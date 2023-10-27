@@ -27,7 +27,7 @@ public class SharpTournament : BasePlugin, IMatchCallback
 
         _SwitchTeamFunc = VirtualFunction.CreateVoid<IntPtr, int>(GameData.GetSignature("CCSPlayerController_SwitchTeam"));
 
-        RegisterListener<CounterStrikeSharp.API.Core.Listeners.OnClientAuthorized>(OnClientAuthorized);
+        RegisterListener<CounterStrikeSharp.API.Core.Listeners.OnClientPutInServer>(OnClientAuthorized);
     }
 
 
@@ -235,13 +235,13 @@ public class SharpTournament : BasePlugin, IMatchCallback
         return HookResult.Continue;
     }
 
-    private void OnClientAuthorized(int playerSlot, SteamID steamId)
+    private void OnClientPutInServer(int playerSlot)
     {
         var entity = NativeAPI.GetEntityFromIndex(playerSlot);
         var player = new CCSPlayerController(entity);
 
         // // Userid will give you a reference to a CCSPlayerController class
-        Console.WriteLine($"Player {player.PlayerName} has connected full!");
+        Console.WriteLine($"Player {player.PlayerName} has put on server!");
 
         if (_Match == null)
         {
