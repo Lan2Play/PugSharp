@@ -266,22 +266,23 @@ public class SharpTournament : BasePlugin, IMatchCallback
     [GameEventHandler]
     public HookResult OnPlayerConnect(EventPlayerConnectFull @event, GameEventInfo info)
     {
-        if (PlayerState(@event.Userid) == PlayerConnectedState.PlayerConnected
-           || PlayerState(@event.Userid) == PlayerConnectedState.PlayerReconnecting)
+        var userId = @event.Userid;
+
+        if (PlayerState(userId) == PlayerConnectedState.PlayerConnected
+           || PlayerState(userId) == PlayerConnectedState.PlayerReconnecting)
         {
 
 
             // // Userid will give you a reference to a CCSPlayerController class
-            Console.WriteLine($"Player {@event.Userid.PlayerName} has connected full!");
+            Console.WriteLine($"Player {userId.PlayerName} has connected full!");
 
             if (_Match == null)
             {
-                Console.WriteLine($"Player {@event.Userid.PlayerName} kicked because no match has been loaded!");
-                KickPlayer(@event.Userid.UserId.Value);
+                Console.WriteLine($"Player {userId.PlayerName} kicked because no match has been loaded!");
+                KickPlayer(userId.UserId.Value);
             }
             else /*if (_RoundStarted)*/
             {
-                var userId = @event.Userid;
                 userId.PrintToChat($"Hello {userId.PlayerName}, welcome to match {_Match.Config.MatchId}");
                 if (!_Match.TryAddPlayer(new Player(userId)) && userId.UserId != null)
                 {
