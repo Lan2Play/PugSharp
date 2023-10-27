@@ -233,39 +233,40 @@ public class SharpTournament : BasePlugin, IMatchCallback
     }
 
 
-    [GameEventHandler]
-    public HookResult OnPlayerConnect(EventPlayerConnect @event, GameEventInfo info)
-    {
-        if (PlayerState(@event.Userid) != PlayerConnectedState.PlayerConnected)
-        {
-            return HookResult.Continue;
-        }
+    //[GameEventHandler]
+    //public HookResult OnPlayerConnect(EventPlayerConnect @event, GameEventInfo info)
+    //{
+    //    if (PlayerState(@event.Userid) != PlayerConnectedState.PlayerConnected)
+    //    {
+    //        return HookResult.Continue;
+    //    }
 
-        // // Userid will give you a reference to a CCSPlayerController class
-        Console.WriteLine($"Player {@event.Userid.PlayerName} has connected full!");
+    //    // // Userid will give you a reference to a CCSPlayerController class
+    //    Console.WriteLine($"Player {@event.Userid.PlayerName} has connected full!");
 
-        if (_Match == null)
-        {
-            Console.WriteLine($"Player {@event.Userid.PlayerName} kicked because no match has been loaded!");
-            KickPlayer(@event.Userid.UserId.Value);
-        }
-        else /*if (_RoundStarted)*/
-        {
-            var userId = @event.Userid;
-            userId.PrintToChat($"Hello {userId.PlayerName}, welcome to match {_Match.Config.MatchId}");
-            if (!_Match.TryAddPlayer(new Player(userId)) && userId.UserId != null)
-            {
-                KickPlayer(userId.UserId.Value);
-            }
-        }
+    //    if (_Match == null)
+    //    {
+    //        Console.WriteLine($"Player {@event.Userid.PlayerName} kicked because no match has been loaded!");
+    //        KickPlayer(@event.Userid.UserId.Value);
+    //    }
+    //    else /*if (_RoundStarted)*/
+    //    {
+    //        var userId = @event.Userid;
+    //        userId.PrintToChat($"Hello {userId.PlayerName}, welcome to match {_Match.Config.MatchId}");
+    //        if (!_Match.TryAddPlayer(new Player(userId)) && userId.UserId != null)
+    //        {
+    //            KickPlayer(userId.UserId.Value);
+    //        }
+    //    }
 
-        return HookResult.Continue;
-    }
+    //    return HookResult.Continue;
+    //}
+
+
 
     [GameEventHandler]
     public HookResult OnPlayerTeam(EventPlayerTeam @event, GameEventInfo info)
     {
-
         if (_Match != null)
         {
             var configTeam = _Match.GetPlayerTeam(@event.Userid.SteamID);
@@ -278,7 +279,12 @@ public class SharpTournament : BasePlugin, IMatchCallback
 
                 Server.NextFrame(() =>
                 {
-                    SwitchTeam(new Player(player), configTeam);
+                    if (!_Match.TryAddPlayer(new Player(player)) && player.UserId != null)
+                    {
+                        KickPlayer(player.UserId.Value);
+                    }
+
+                    //SwitchTeam(new Player(player), configTeam);
                     //if (team == 1)
                     //{
                     //    //TODO: player can cheat kills if switched to spectator

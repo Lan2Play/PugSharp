@@ -27,7 +27,6 @@ public class Match
     private readonly System.Timers.Timer _VoteTimer = new();
     private readonly IMatchCallback _MatchCallback;
     private readonly StateMachine<MatchState, MatchCommand> _MatchStateMachine;
-    private readonly List<MatchTeam> _MatchTeams = new();
 
     private readonly List<Vote> _MapsToSelect;
     private readonly List<Vote> _TeamVotes = new() { new("T"), new("CT") };
@@ -86,9 +85,16 @@ public class Match
 
         _MatchStateMachine.Configure(MatchState.MatchCompleted);
 
-        _MatchStateMachine.Fire(MatchCommand.LoadMatch);
 
+        _MatchStateMachine.OnTransitioned(OnMatchStateChanged);
+
+        _MatchStateMachine.Fire(MatchCommand.LoadMatch);
         //string graph = UmlDotGraph.Format(_MatchStateMachine.GetInfo());
+    }
+
+    private void OnMatchStateChanged(StateMachine<MatchState, MatchCommand>.Transition transition)
+    {
+        Console.WriteLine($"MatchState Changed: {transition.Source} => {transition.Destination}");
     }
 
     private void SwitchToMatchMap()
@@ -114,7 +120,7 @@ public class Match
 
     public Config.MatchConfig Config { get; }
 
-
+    public List<MatchTeam> MatchTeams { get; } = new();
 
     private void SendRemainingMapsToVotingTeam()
     {
@@ -194,7 +200,7 @@ public class Match
     {
         if (_CurrentMatchTeamToVote == null)
         {
-            _CurrentMatchTeamToVote = _MatchTeams.First();
+            _CurrentMatchTeamToVote = MatchTeams.First();
         }
         else
         {
@@ -218,12 +224,12 @@ public class Match
 
     private bool AllPlayersAreReady()
     {
-        return _MatchTeams.SelectMany(m => m.Players).All(p => p.IsReady);
+        return MatchTeams.SelectMany(m => m.Players).All(p => p.IsReady);
     }
 
     private void SetAllPlayersNotReady()
     {
-        foreach (var player in _MatchTeams.SelectMany(m => m.Players))
+        foreach (var player in MatchTeams.SelectMany(m => m.Players))
         {
             player.IsReady = false;
         }
@@ -256,12 +262,12 @@ public class Match
 
     private MatchTeam? GetMatchTeam(Team team)
     {
-        return _MatchTeams.Find(x => x.Team == team);
+        return MatchTeams.Find(x => x.Team == team);
     }
 
     private MatchPlayer GetMatchPlayer(ulong steamID)
     {
-        return _MatchTeams.SelectMany(x => x.Players).First(x => x.Player.SteamID == steamID);
+        return MatchTeams.SelectMany(x => x.Players).First(x => x.Player.SteamID == steamID);
     }
 
     #region Match Functions
@@ -277,11 +283,11 @@ public class Match
         Console.WriteLine($"Player belongs to {playerTeam}");
         _MatchCallback.SwitchTeam(player, playerTeam);
 
-        var team = _MatchTeams.Find(m => m.Team == playerTeam);
+        var team = MatchTeams.Find(m => m.Team == playerTeam);
         if (team == null)
         {
             team = new MatchTeam(playerTeam);
-            _MatchTeams.Add(team);
+            MatchTeams.Add(team);
         }
 
         var existingPlayer = team.Players.Find(x => x.Player.SteamID.Equals(player.SteamID));
@@ -301,7 +307,7 @@ public class Match
         var matchPlayer = GetMatchPlayer(player.SteamID);
         matchPlayer.IsReady = !matchPlayer.IsReady;
 
-        var readyPlayers = _MatchTeams.SelectMany(x => x.Players).Count(x => x.IsReady);
+        var readyPlayers = MatchTeams.SelectMany(x => x.Players).Count(x => x.IsReady);
 
         // Min Players per Team
         var requiredPlayers = Config.MinPlayersToReady * 2;
