@@ -280,7 +280,7 @@ public class Match
             return false;
         }
 
-        Console.WriteLine($"Player belongs to {playerTeam}");
+        Console.WriteLine($"Player {player.PlayerName} belongs to {playerTeam}");
         _MatchCallback.SwitchTeam(player, playerTeam);
 
         var team = MatchTeams.Find(m => m.Team == playerTeam);
