@@ -251,11 +251,15 @@ public class SharpTournament : BasePlugin, IMatchCallback
         }
         else /*if (_RoundStarted)*/
         {
-            player.PrintToChat($"Hello {player.PlayerName}, welcome to match {_Match.Config.MatchId}");
-            if (!_Match.TryAddPlayer(new Player(player)) && player.UserId != null)
+            Server.NextFrame(() =>
             {
-                KickPlayer(player.UserId.Value);
-            }
+                player.PrintToChat($"Hello {player.PlayerName}, welcome to match {_Match.Config.MatchId}");
+
+                if (!_Match.TryAddPlayer(new Player(player)) && player.UserId != null)
+                {
+                    KickPlayer(player.UserId.Value);
+                }
+            });
         }
     }
 
