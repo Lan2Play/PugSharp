@@ -236,7 +236,7 @@ public class SharpTournament : BasePlugin, IMatchCallback
     [GameEventHandler]
     public HookResult OnPlayerConnect(EventPlayerConnect @event, GameEventInfo info)
     {
-        if (PlayerState(@event.Userid) != PlayerConnectedState.PlayerConnected)
+        if (PlayerState(@event.Userid) != PlayerConnectedState.PlayerConnected && PlayerState(@event.Userid) != PlayerConnectedState.PlayerReconnecting)
         {
             return HookResult.Continue;
         }
