@@ -26,7 +26,7 @@ namespace SharpTournament.Config
         public int MinPlayersToReady { get; set; }
 
         [JsonPropertyName("vote_timeout")]
-        public long VoteTimeout { get; set; } = 20000;
+        public long VoteTimeout { get; set; } = 60000;
 
         [JsonPropertyName("eventula_apistats_url")]
         public string EventulaApistatsUrl { get; set; }
