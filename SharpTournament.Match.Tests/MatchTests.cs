@@ -66,21 +66,21 @@ namespace SharpTournament.Match.Tests
             Assert.Equal(MatchState.MapVote, match.CurrentState);
 
             var matchCount = config.Maplist.Count();
-            var vetoPlayer = player1;
+            var banPlayer = player1;
 
-            Assert.False(match.SetVeto(vetoPlayer, matchCount.ToString()));
-            Assert.False(match.SetVeto(vetoPlayer, "abc"));
+            Assert.False(match.BanMap(banPlayer, matchCount.ToString()));
+            Assert.False(match.BanMap(banPlayer, "abc"));
 
             while (matchCount > 1)
             {
-                Assert.True(match.SetVeto(vetoPlayer, "0"));
-                Assert.False(match.SetVeto(vetoPlayer, "0"));
+                Assert.True(match.BanMap(banPlayer, "0"));
+                Assert.False(match.BanMap(banPlayer, "0"));
                 if (matchCount > 2)
                 {
                     Assert.Equal(MatchState.MapVote, match.CurrentState);
                 }
 
-                vetoPlayer = vetoPlayer == player1 ? player2 : player1;
+                banPlayer = banPlayer == player1 ? player2 : player1;
                 matchCount--;
             }
 

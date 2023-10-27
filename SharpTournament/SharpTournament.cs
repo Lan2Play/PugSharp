@@ -112,28 +112,27 @@ public class SharpTournament : BasePlugin, IMatchCallback
     }
 
 
-    [ConsoleCommand("veto", "Set veto for selection")]
-    public void OnCommandVeto(CCSPlayerController? player, CommandInfo command)
+    [ConsoleCommand("banmap", "Set map to ban")]
+    public void OnCommandBanMap(CCSPlayerController? player, CommandInfo command)
     {
+        Console.WriteLine("Command banmap called.");
+
         if (player == null)
         {
-            Console.WriteLine("Command Veto has been called by the server. Player is required to set a veto");
+            Console.WriteLine("Command banmap has been called by the server. Player is required to ban a map");
             return;
         }
 
         if (command.ArgCount != 2)
         {
-            player.PrintToChat("Veto requires exact one argument!");
+            player.PrintToChat("banmap requires exact one argument!");
         }
 
         var mapNumber = command.ArgByIndex(1);
 
 
 
-        _Match?.SetVeto(new Player(player), mapNumber);
-
-
-        Console.WriteLine("Command ready called.");
+        _Match?.BanMap(new Player(player), mapNumber);
     }
 
     [ConsoleCommand("st_start", "Starts a match")]

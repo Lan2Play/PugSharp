@@ -58,7 +58,7 @@ public class Match
             .OnExit(RemoveBannedMap);
 
         _MatchStateMachine.Configure(MatchState.TeamVote)
-            .PermitIf(MatchCommand.VoteTeam, MatchState.SwitchMap, () => { /*TODO Check if not all maps are vetoed*/ return true; });
+            .PermitIf(MatchCommand.VoteTeam, MatchState.SwitchMap, () => { /*TODO Check if team is selected*/ return true; });
 
         _MatchStateMachine.Configure(MatchState.SwitchMap);
 
@@ -103,7 +103,7 @@ public class Match
 
         var mapMessageBuilder = new StringBuilder();
 
-        mapMessageBuilder.AppendLine("Remaining maps to Veto: ");
+        mapMessageBuilder.AppendLine("Remaining maps to ban: ");
         mapMessageBuilder.AppendLine();
         for (int i = 0; i < _MapsToSelect.Count; i++)
         {
@@ -112,9 +112,9 @@ public class Match
         }
 
         mapMessageBuilder.AppendLine();
-        mapMessageBuilder.AppendLine("To Veto: !veto [mapnumber] ");
+        mapMessageBuilder.AppendLine("To ban a map: !banmap [mapnumber] ");
 
-        if(_CurrentMatchTeamToVote == null)
+        if (_CurrentMatchTeamToVote == null)
         {
             _CurrentMatchTeamToVote = _MatchTeams.First();
         }
@@ -269,9 +269,9 @@ public class Match
         return Team.None;
     }
 
-    public bool SetVeto(IPlayer player, string mapNumber)
+    public bool BanMap(IPlayer player, string mapNumber)
     {
-        if(CurrentState != MatchState.MapVote)
+        if (CurrentState != MatchState.MapVote)
         {
             player.PrintToChat("Currently no Map Vote is active!");
             return false;
@@ -279,7 +279,7 @@ public class Match
 
         if (!_CurrentMatchTeamToVote.Players.Select(x => x.Player.UserId).Contains(player.UserId))
         {
-            player.PrintToChat("You are currently not permitted to veto!");
+            player.PrintToChat("You are currently not permitted to ban a map!");
             return false;
         }
 
@@ -295,10 +295,10 @@ public class Match
             return false;
         }
 
-        var vetoedMap = _MapsToSelect.FirstOrDefault(x => x.Votes.Any(x => x.UserId == player.UserId));
-        if (vetoedMap != null)
+        var bannedMap = _MapsToSelect.FirstOrDefault(x => x.Votes.Any(x => x.UserId == player.UserId));
+        if (bannedMap != null)
         {
-            player.PrintToChat($"You already vetoed Mapnumber {_MapsToSelect.IndexOf(vetoedMap)}: {vetoedMap.MapName} !");
+            player.PrintToChat($"You already banned mapnumber {_MapsToSelect.IndexOf(bannedMap)}: {bannedMap.MapName} !");
             return false;
         }
 
