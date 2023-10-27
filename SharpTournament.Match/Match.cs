@@ -20,7 +20,6 @@ public class MatchInfo
 {
     public string SelectedMap { get; set; }
     public string StartTeam1 { get; set; }
-    public string StartTeam2 { get; set; }
 }
 
 public class Match
@@ -66,11 +65,12 @@ public class Match
             .OnExit(RemoveBannedMap);
 
         _MatchStateMachine.Configure(MatchState.TeamVote)
-            .PermitIf(MatchCommand.VoteTeam, MatchState.SwitchMap, () => { /*TODO Check if team is selected*/ return true; })
+            .Permit(MatchCommand.VoteTeam, MatchState.SwitchMap)
             .OnEntry(SendTeamVoteToVotingteam)
             .OnExit(SetSelectedTeamSite);
 
-        _MatchStateMachine.Configure(MatchState.SwitchMap);
+        _MatchStateMachine.Configure(MatchState.SwitchMap)
+            .OnEntry(SwitchToMatchMap);
 
         _MatchStateMachine.Configure(MatchState.WaitingForPlayersReady)
             .PermitIf(MatchCommand.PlayerReady, MatchState.MatchStarting, AllPlayersAreReady);
@@ -90,6 +90,11 @@ public class Match
         //string graph = UmlDotGraph.Format(_MatchStateMachine.GetInfo());
     }
 
+    private void SwitchToMatchMap()
+    {
+        _MatchCallback.SwitchMap(_MatchInfo.SelectedMap);
+    }
+
     private void _VoteTimer_Elapsed(object? sender, System.Timers.ElapsedEventArgs e)
     {
         _VoteTimer.Stop();
@@ -97,6 +102,9 @@ public class Match
         {
             case MatchState.MapVote:
                 TryFireState(MatchCommand.VoteMap);
+                break;
+            case MatchState.TeamVote:
+                TryFireState(MatchCommand.VoteTeam);
                 break;
         }
     }
@@ -128,6 +136,7 @@ public class Match
 
         var mapMessage = mapMessageBuilder.ToString();
         SendMessageToTeam(_CurrentMatchTeamToVote!, mapMessage);
+        _VoteTimer.Start();
     }
 
     private void RemoveBannedMap()
@@ -156,6 +165,7 @@ public class Match
 
         var teamMessage = teamMessageBuilder.ToString();
         SendMessageToTeam(_CurrentMatchTeamToVote!, teamMessage);
+        _VoteTimer.Start();
     }
 
     private void SetSelectedTeamSite()
@@ -221,8 +231,7 @@ public class Match
     private bool MapIsSelected()
     {
         // The SelectedCount is checked when the Votes are done but the map is still in the list
-        return _MapsToSelect.Count == 1
-            || (_MapsToSelect.Count == 2 && _MapsToSelect.SelectMany(x => x.Votes).Any());
+        return _MapsToSelect.Count == 2;
     }
 
     private bool MapIsNotSelected()

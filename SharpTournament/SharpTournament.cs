@@ -318,6 +318,17 @@ public class SharpTournament : BasePlugin, IMatchCallback
         player.PlayerPawn.CommitSuicide();
     }
 
+    public void SwitchMap(string selectedMap)
+    {
+        if (!Server.IsMapValid(selectedMap))
+        {
+            Console.WriteLine($"The selected map is not valid: \"{selectedMap}\"!");
+            return;
+        }
+
+        Server.ExecuteCommand($"map {selectedMap}");
+    }
+
     public IReadOnlyList<IPlayer> GetAllPlayers()
     {
         var playerEntities = Utilities.FindAllEntitiesByDesignerName<CCSPlayerController>("cs_player_controller");

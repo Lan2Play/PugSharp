@@ -6,4 +6,5 @@ public interface IMatchCallback
     IReadOnlyCollection<string> GetAvailableMaps();
     void SendMessage(string message);
     void SwitchTeam(IPlayer player, Team team);
+    void SwitchMap(string selectedMap);
 }
