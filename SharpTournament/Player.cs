@@ -1,5 +1,6 @@
 ﻿using CounterStrikeSharp.API.Core;
 using SharpTournament.Match.Contract;
+using System.Text.Json.Serialization;
 
 namespace SharpTournament;
 
@@ -12,6 +13,7 @@ public class Player : IPlayer
         _PlayerController = playerController;
     }
 
+    [JsonIgnore]
     public nint Handle => _PlayerController.Handle;
 
     public ulong SteamID => _PlayerController.SteamID;
