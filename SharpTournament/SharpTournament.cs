@@ -237,7 +237,8 @@ public class SharpTournament : BasePlugin, IMatchCallback
 
     private void OnClientPutInServer(int playerSlot)
     {
-        var entity = NativeAPI.GetEntityFromIndex(playerSlot);
+        // Slot is one less than index
+        var entity = NativeAPI.GetEntityFromIndex(playerSlot + 1);
         var player = new CCSPlayerController(entity);
 
         // // Userid will give you a reference to a CCSPlayerController class
