@@ -130,9 +130,28 @@ public class SharpTournament : BasePlugin, IMatchCallback
 
         var mapNumber = command.ArgByIndex(1);
 
-
-
         _Match?.BanMap(new Player(player), mapNumber);
+    }
+
+    [ConsoleCommand("voteteam", "Vote a teamsite for startup")]
+    public void OnCommandVoteTeam(CCSPlayerController? player, CommandInfo command)
+    {
+        Console.WriteLine("Command voteteam called.");
+
+        if (player == null)
+        {
+            Console.WriteLine("Command voteteam has been called by the server. Player is required to vote a team");
+            return;
+        }
+
+        if (command.ArgCount != 2)
+        {
+            player.PrintToChat("voteteam requires exact one argument!");
+        }
+
+        var team = command.ArgByIndex(1);
+
+        _Match?.VoteTeam(new Player(player), team);
     }
 
     [ConsoleCommand("st_start", "Starts a match")]

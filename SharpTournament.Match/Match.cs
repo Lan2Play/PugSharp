@@ -4,28 +4,39 @@ using System.Text;
 
 namespace SharpTournament.Match;
 
-public class MapVote
+public class Vote
 {
-    public MapVote(string mapName)
+    public Vote(string name)
     {
-        MapName = mapName;
+        Name = name;
     }
 
-    public string MapName { get; }
+    public string Name { get; }
 
     public List<IPlayer> Votes { get; } = new List<IPlayer>();
 }
 
+public class MatchInfo
+{
+    public string SelectedMap { get; set; }
+    public string StartTeam1 { get; set; }
+    public string StartTeam2 { get; set; }
+}
+
 public class Match
 {
+    private readonly System.Timers.Timer _VoteTimer = new();
     private readonly IMatchCallback _MatchCallback;
     private readonly StateMachine<MatchState, MatchCommand> _MatchStateMachine;
     private readonly List<MatchTeam> _MatchTeams = new();
 
-    private List<MapVote> _MapsToSelect = new();
+    private readonly List<Vote> _MapsToSelect;
+    private readonly List<Vote> _TeamVotes = new() { new("T"), new("CT") };
+
+    private readonly MatchInfo _MatchInfo = new();
+
     private MatchTeam? _CurrentMatchTeamToVote;
 
-    private System.Timers.Timer _VoteTimer = new();
 
     public Match(IMatchCallback matchCallback, Config.MatchConfig matchConfig)
     {
@@ -34,10 +45,7 @@ public class Match
         _VoteTimer.Interval = Config.VoteTimeout;
         _VoteTimer.Elapsed += _VoteTimer_Elapsed;
 
-        //var availbaleMaps = _MatchCallback.GetAvailableMaps();
-        //_MapsToSelect = availbaleMaps.Intersect(matchConfig.Maplist).Select(x => new MapVote(x)).ToList();
-        _MapsToSelect = matchConfig.Maplist.Select(x => new MapVote(x)).ToList();
-
+        _MapsToSelect = matchConfig.Maplist.Select(x => new Vote(x)).ToList();
 
         _MatchStateMachine = new StateMachine<MatchState, MatchCommand>(MatchState.None);
 
@@ -58,7 +66,9 @@ public class Match
             .OnExit(RemoveBannedMap);
 
         _MatchStateMachine.Configure(MatchState.TeamVote)
-            .PermitIf(MatchCommand.VoteTeam, MatchState.SwitchMap, () => { /*TODO Check if team is selected*/ return true; });
+            .PermitIf(MatchCommand.VoteTeam, MatchState.SwitchMap, () => { /*TODO Check if team is selected*/ return true; })
+            .OnEntry(SendTeamVoteToVotingteam)
+            .OnExit(SetSelectedTeamSite);
 
         _MatchStateMachine.Configure(MatchState.SwitchMap);
 
@@ -99,6 +109,8 @@ public class Match
 
     private void SendRemainingMapsToVotingTeam()
     {
+        SwitchVotingTeam();
+
         _MapsToSelect.ForEach(m => m.Votes.Clear());
 
         var mapMessageBuilder = new StringBuilder();
@@ -107,13 +119,68 @@ public class Match
         mapMessageBuilder.AppendLine();
         for (int i = 0; i < _MapsToSelect.Count; i++)
         {
-            string? map = _MapsToSelect[i].MapName;
+            string? map = _MapsToSelect[i].Name;
             mapMessageBuilder.Append(i).Append(": ").AppendLine(map);
         }
 
         mapMessageBuilder.AppendLine();
         mapMessageBuilder.AppendLine("To ban a map: !banmap [mapnumber] ");
 
+        var mapMessage = mapMessageBuilder.ToString();
+        SendMessageToTeam(_CurrentMatchTeamToVote!, mapMessage);
+    }
+
+    private void RemoveBannedMap()
+    {
+        var mapToBan = _MapsToSelect.MaxBy(m => m.Votes.Count);
+        _MapsToSelect.Remove(mapToBan!);
+        _MapsToSelect.ForEach(x => x.Votes.Clear());
+
+        if (_MapsToSelect.Count == 1)
+        {
+            _MatchInfo.SelectedMap = _MapsToSelect[0].Name;
+        }
+    }
+
+    private void SendTeamVoteToVotingteam()
+    {
+        SwitchVotingTeam();
+
+        var teamMessageBuilder = new StringBuilder();
+
+        teamMessageBuilder.AppendLine("Vote for your starting team");
+        teamMessageBuilder.AppendLine();
+        teamMessageBuilder.AppendLine("For T:  !voteteam T ");
+        teamMessageBuilder.AppendLine("For CT: !voteteam CT ");
+
+
+        var teamMessage = teamMessageBuilder.ToString();
+        SendMessageToTeam(_CurrentMatchTeamToVote!, teamMessage);
+    }
+
+    private void SetSelectedTeamSite()
+    {
+        if (_CurrentMatchTeamToVote!.Team == Team.Team1)
+        {
+            _MatchInfo.StartTeam1 = _TeamVotes.MaxBy(m => m.Votes.Count)!.Name;
+        }
+        else
+        {
+            _MatchInfo.StartTeam1 = _TeamVotes.MinBy(m => m.Votes.Count)!.Name;
+        }
+    }
+
+
+    private void SendMessageToTeam(MatchTeam team, string mapMessage)
+    {
+        team.Players.ForEach(p =>
+        {
+            p.Player.PrintToChat(mapMessage);
+        });
+    }
+
+    private void SwitchVotingTeam()
+    {
         if (_CurrentMatchTeamToVote == null)
         {
             _CurrentMatchTeamToVote = _MatchTeams.First();
@@ -122,20 +189,6 @@ public class Match
         {
             _CurrentMatchTeamToVote = GetMatchTeam(_CurrentMatchTeamToVote.Team == Team.Team1 ? Team.Team2 : Team.Team1);
         }
-
-        var mapMessage = mapMessageBuilder.ToString();
-        _CurrentMatchTeamToVote!.Players.ForEach(p =>
-        {
-            p.Player.PrintToChat(mapMessage);
-        });
-    }
-
-
-    private void RemoveBannedMap()
-    {
-        var mapToBan = _MapsToSelect.MaxBy(m => m.Votes.Count);
-        _MapsToSelect.Remove(mapToBan!);
-        _MapsToSelect.ForEach(x => x.Votes.Clear());
     }
 
 
@@ -273,7 +326,7 @@ public class Match
     {
         if (CurrentState != MatchState.MapVote)
         {
-            player.PrintToChat("Currently no Map Vote is active!");
+            player.PrintToChat("Currently no map vote is active!");
             return false;
         }
 
@@ -298,7 +351,7 @@ public class Match
         var bannedMap = _MapsToSelect.FirstOrDefault(x => x.Votes.Any(x => x.UserId == player.UserId));
         if (bannedMap != null)
         {
-            player.PrintToChat($"You already banned mapnumber {_MapsToSelect.IndexOf(bannedMap)}: {bannedMap.MapName} !");
+            player.PrintToChat($"You already banned mapnumber {_MapsToSelect.IndexOf(bannedMap)}: {bannedMap.Name} !");
             return false;
         }
 
@@ -308,6 +361,44 @@ public class Match
         if (_MapsToSelect.Sum(x => x.Votes.Count) >= Config.PlayersPerTeam)
         {
             TryFireState(MatchCommand.VoteMap);
+        }
+
+        return true;
+    }
+
+    public bool VoteTeam(IPlayer player, string teamName)
+    {
+        if (CurrentState != MatchState.TeamVote)
+        {
+            player.PrintToChat("Currently no team vote is active!");
+            return false;
+        }
+
+        if (!_CurrentMatchTeamToVote.Players.Select(x => x.Player.UserId).Contains(player.UserId))
+        {
+            player.PrintToChat("You are currently not permitted to vote for a team!");
+            return false;
+        }
+
+        var votedTeam = _TeamVotes.Find(x => x.Votes.Any(x => x.UserId == player.UserId));
+        if (votedTeam != null)
+        {
+            player.PrintToChat($"You already banned mapnumber {_MapsToSelect.IndexOf(votedTeam)}: {votedTeam.Name} !");
+            return false;
+        }
+
+        var teamToVote = _TeamVotes.Find(x => x.Name.Equals(teamName, StringComparison.OrdinalIgnoreCase));
+        if (teamToVote == null)
+        {
+            player.PrintToChat($"Team with name {teamName} is not available!");
+            return false;
+        }
+
+        teamToVote.Votes.Add(player);
+
+        if (_TeamVotes.Sum(x => x.Votes.Count) >= Config.PlayersPerTeam)
+        {
+            TryFireState(MatchCommand.VoteTeam);
         }
 
         return true;
