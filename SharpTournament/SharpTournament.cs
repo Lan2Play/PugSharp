@@ -271,8 +271,6 @@ public class SharpTournament : BasePlugin, IMatchCallback
         if (PlayerState(userId) == PlayerConnectedState.PlayerConnected
            || PlayerState(userId) == PlayerConnectedState.PlayerReconnecting)
         {
-
-
             // // Userid will give you a reference to a CCSPlayerController class
             Console.WriteLine($"Player {userId.PlayerName} has connected full!");
 
@@ -309,12 +307,12 @@ public class SharpTournament : BasePlugin, IMatchCallback
 
                 Server.NextFrame(() =>
                 {
-                    if (!_Match.TryAddPlayer(new Player(player)) && player.UserId != null)
-                    {
-                        KickPlayer(player.UserId.Value);
-                    }
+                    //if (!_Match.TryAddPlayer(new Player(player)) && player.UserId != null)
+                    //{
+                    //    KickPlayer(player.UserId.Value);
+                    //}
 
-                    //SwitchTeam(new Player(player), configTeam);
+                    SwitchTeam(new Player(player), configTeam);
                     //if (team == 1)
                     //{
                     //    //TODO: player can cheat kills if switched to spectator

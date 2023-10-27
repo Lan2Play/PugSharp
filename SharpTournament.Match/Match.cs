@@ -148,6 +148,8 @@ public class Match
 
     private void RemoveBannedMap()
     {
+        _VoteTimer.Stop();
+
         var mapToBan = _MapsToSelect.MaxBy(m => m.Votes.Count);
         _MapsToSelect.Remove(mapToBan!);
         _MapsToSelect.ForEach(x => x.Votes.Clear());
@@ -177,6 +179,8 @@ public class Match
 
     private void SetSelectedTeamSite()
     {
+        _VoteTimer.Stop();
+
         if (_CurrentMatchTeamToVote!.Team == Team.Team1)
         {
             _MatchInfo.StartTeam1 = _TeamVotes.MaxBy(m => m.Votes.Count)!.Name;
