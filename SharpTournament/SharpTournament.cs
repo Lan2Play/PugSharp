@@ -27,7 +27,7 @@ public class SharpTournament : BasePlugin, IMatchCallback
 
         _SwitchTeamFunc = VirtualFunction.CreateVoid<IntPtr, int>(GameData.GetSignature("CCSPlayerController_SwitchTeam"));
 
-        RegisterListener<CounterStrikeSharp.API.Core.Listeners.OnClientPutInServer>(OnClientAuthorized);
+        RegisterListener<CounterStrikeSharp.API.Core.Listeners.OnClientPutInServer>(OnClientPutInServer);
     }
 
 
