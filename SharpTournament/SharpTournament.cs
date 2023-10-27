@@ -293,50 +293,50 @@ public class SharpTournament : BasePlugin, IMatchCallback
     //    return HookResult.Continue;
     //}
 
-    [GameEventHandler]
-    public HookResult OnPlayerTeam(EventPlayerTeam @event, GameEventInfo info)
-    {
-        if (_Match != null)
-        {
-            var configTeam = _Match.GetPlayerTeam(@event.Userid.SteamID);
+    //[GameEventHandler]
+    //public HookResult OnPlayerTeam(EventPlayerTeam @event, GameEventInfo info)
+    //{
+    //    if (_Match != null)
+    //    {
+    //        var configTeam = _Match.GetPlayerTeam(@event.Userid.SteamID);
 
-            if ((int)configTeam != @event.Team)
-            {
-                Console.WriteLine($"Player {@event.Userid.PlayerName} tried to join {@event.Team} but is not allowed!");
-                var player = @event.Userid;
-                var team = @event.Team;
+    //        if ((int)configTeam != @event.Team)
+    //        {
+    //            Console.WriteLine($"Player {@event.Userid.PlayerName} tried to join {@event.Team} but is not allowed!");
+    //            var player = @event.Userid;
+    //            var team = @event.Team;
 
-                Server.NextFrame(() =>
-                {
-                    if (!_Match.TryAddPlayer(new Player(player)) && player.UserId != null)
-                    {
-                        KickPlayer(player.UserId.Value);
-                    }
+    //            Server.NextFrame(() =>
+    //            {
+    //                if (!_Match.TryAddPlayer(new Player(player)) && player.UserId != null)
+    //                {
+    //                    KickPlayer(player.UserId.Value);
+    //                }
 
-                    //SwitchTeam(new Player(player), configTeam);
-                    //if (team == 1)
-                    //{
-                    //    //TODO: player can cheat kills if switched to spectator
-                    //    player.Score = 0;
-                    //    //.m_pActionTrackingServices.Value.m_matchStats
-                    //    // .Player.m_iKills = 0;
-                    //}
-                });
-                return HookResult.Continue;
+    //                //SwitchTeam(new Player(player), configTeam);
+    //                //if (team == 1)
+    //                //{
+    //                //    //TODO: player can cheat kills if switched to spectator
+    //                //    player.Score = 0;
+    //                //    //.m_pActionTrackingServices.Value.m_matchStats
+    //                //    // .Player.m_iKills = 0;
+    //                //}
+    //            });
+    //            return HookResult.Continue;
 
-            }
-        }
-        else
-        {
-            var players = GetAllPlayers();
-            foreach (var player in players.Where(x => x.UserId != null))
-            {
-                KickPlayer(player.UserId!.Value);
-            }
-        }
+    //        }
+    //    }
+    //    else
+    //    {
+    //        var players = GetAllPlayers();
+    //        foreach (var player in players.Where(x => x.UserId != null))
+    //        {
+    //            KickPlayer(player.UserId!.Value);
+    //        }
+    //    }
 
-        return HookResult.Continue;
-    }
+    //    return HookResult.Continue;
+    //}
 
 
 
