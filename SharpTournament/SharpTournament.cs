@@ -27,7 +27,7 @@ public class SharpTournament : BasePlugin, IMatchCallback
 
         _SwitchTeamFunc = VirtualFunction.CreateVoid<IntPtr, int>(GameData.GetSignature("CCSPlayerController_SwitchTeam"));
 
-        RegisterListener<CounterStrikeSharp.API.Core.Listeners.OnClientPutInServer>(OnClientPutInServer);
+        RegisterListener<CounterStrikeSharp.API.Core.Listeners.OnClientConnect>(OnClientConnect);
     }
 
 
@@ -235,7 +235,8 @@ public class SharpTournament : BasePlugin, IMatchCallback
         return HookResult.Continue;
     }
 
-    private void OnClientPutInServer(int playerSlot)
+    //private void OnClientPutInServer(int playerSlot)
+    private void OnClientConnect(int playerSlot, string name, string ipAddress)
     {
         // Slot is one less than index
         var entity = NativeAPI.GetEntityFromIndex(playerSlot + 1);
