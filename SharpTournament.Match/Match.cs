@@ -130,16 +130,16 @@ public class Match
 
         var mapMessageBuilder = new StringBuilder();
 
-        mapMessageBuilder.AppendLine("Remaining maps to ban: ");
-        mapMessageBuilder.AppendLine();
+        mapMessageBuilder.Append("Remaining maps to ban: \n");
+        mapMessageBuilder.Append('\n'); ;
         for (int i = 0; i < _MapsToSelect.Count; i++)
         {
             string? map = _MapsToSelect[i].Name;
-            mapMessageBuilder.Append(i).Append(": ").AppendLine(map);
+            mapMessageBuilder.Append(i).Append(": ").Append(map).Append('\n');
         }
 
-        mapMessageBuilder.AppendLine();
-        mapMessageBuilder.AppendLine("To ban a map: !banmap [mapnumber] ");
+        mapMessageBuilder.Append('\n');
+        mapMessageBuilder.Append("To ban a map: !banmap [mapnumber] ");
 
         var mapMessage = mapMessageBuilder.ToString();
         SendMessageToTeam(_CurrentMatchTeamToVote!, mapMessage);
@@ -318,12 +318,12 @@ public class Match
 
         if (matchPlayer.IsReady)
         {
-            _MatchCallback.SendMessage($"\\x04{player.PlayerName} \\x06is ready! {readyPlayers} of {requiredPlayers} are ready.");
+            _MatchCallback.SendMessage($" \\x01\\x0B\\x04{player.PlayerName} \\x06is ready! {readyPlayers} of {requiredPlayers} are ready.");
             TryFireState(MatchCommand.PlayerReady);
         }
         else
         {
-            _MatchCallback.SendMessage($"\\x04{player.PlayerName} \\x02is not ready! {readyPlayers} of {requiredPlayers} are ready.");
+            _MatchCallback.SendMessage($" \\x01\\x0B\\x04{player.PlayerName} \\x02is not ready! {readyPlayers} of {requiredPlayers} are ready.");
         }
     }
 
