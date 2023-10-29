@@ -1,5 +1,6 @@
 ﻿using SharpTournament.Match.Contract;
 using Stateless;
+using System.Runtime.Intrinsics.X86;
 using System.Text;
 
 namespace SharpTournament.Match;
@@ -304,6 +305,36 @@ public class Match
 
         TryFireState(MatchCommand.ConnectPlayer);
         return true;
+    }
+
+    public void SetPlayerDisconnected(IPlayer player)
+    {
+        var matchTeam = GetMatchTeam(player.SteamID);
+        if (matchTeam == null)
+        {
+            return;
+        }
+
+        var matchPlayer = GetMatchPlayer(player.SteamID);
+
+        switch (CurrentState)
+        {
+            case MatchState.WaitingForPlayersConnectedReady:
+                matchPlayer.IsReady = false;
+                break;
+            case MatchState.MapVote:
+            case MatchState.TeamVote:
+            case MatchState.SwitchMap:
+            case MatchState.WaitingForPlayersReady:
+            case MatchState.MatchStarting:
+            case MatchState.MatchRunning:
+            case MatchState.MatchPaused:
+            case MatchState.MatchCompleted:
+                break;
+            default:
+                matchTeam.Players.Remove(matchPlayer);
+                break;
+        }
     }
 
     public void TogglePlayerIsReady(IPlayer player)

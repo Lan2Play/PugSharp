@@ -291,6 +291,23 @@ public class SharpTournament : BasePlugin, IMatchCallback
         return HookResult.Continue;
     }
 
+
+    [GameEventHandler]
+    public HookResult OnPlayerDisconnect(EventPlayerDisconnect @event, GameEventInfo info)
+    {
+        var userId = @event.Userid;
+
+        // // Userid will give you a reference to a CCSPlayerController class
+        Console.WriteLine($"Player {userId.PlayerName} has disconnected!");
+
+        if (_Match != null)
+        {
+            _Match.SetPlayerDisconnected(new Player(userId));
+        }
+
+        return HookResult.Continue;
+    }
+
     [GameEventHandler]
     public HookResult OnPlayerTeam(EventPlayerTeam @event, GameEventInfo info)
     {
