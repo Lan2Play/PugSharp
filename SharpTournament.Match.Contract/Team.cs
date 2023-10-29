@@ -3,6 +3,7 @@
 public enum Team
 {
     None,
-    Team1 = 2,
-    Team2 = 3,
+    Spectator = 1,
+    Terrorist = 2,
+    CounterTerrorist = 3,
 }

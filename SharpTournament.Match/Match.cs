@@ -181,7 +181,7 @@ public class Match
     {
         _VoteTimer.Stop();
 
-        if (_CurrentMatchTeamToVote!.Team == Team.Team1)
+        if (_CurrentMatchTeamToVote!.Team == Team.Terrorist)
         {
             _MatchInfo.StartTeam1 = _TeamVotes.MaxBy(m => m.Votes.Count)!.Name;
         }
@@ -208,7 +208,7 @@ public class Match
         }
         else
         {
-            _CurrentMatchTeamToVote = GetMatchTeam(_CurrentMatchTeamToVote.Team == Team.Team1 ? Team.Team2 : Team.Team1);
+            _CurrentMatchTeamToVote = GetMatchTeam(_CurrentMatchTeamToVote.Team == Team.Terrorist ? Team.CounterTerrorist : Team.Terrorist);
         }
     }
 
@@ -285,7 +285,7 @@ public class Match
         }
 
         Console.WriteLine($"Player {player.PlayerName} belongs to {playerTeam}");
-        _MatchCallback.SwitchTeam(player, playerTeam);
+        player.SwitchTeam(playerTeam);
 
         var team = MatchTeams.Find(m => m.Team == playerTeam);
         if (team == null)
@@ -332,11 +332,11 @@ public class Match
     {
         if (Config.Team1.Players.ContainsKey(steamID))
         {
-            return Team.Team1;
+            return Team.Terrorist;
         }
         else if (Config.Team2.Players.ContainsKey(steamID))
         {
-            return Team.Team2;
+            return Team.CounterTerrorist;
         }
 
         return Team.None;

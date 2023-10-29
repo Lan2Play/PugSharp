@@ -28,4 +28,9 @@ public class Player : IPlayer
     {
         _PlayerController.PrintToChat(message);
     }
+
+    public void SwitchTeam(Team team)
+    {
+        _PlayerController.SwitchTeam((CounterStrikeSharp.API.Modules.Utils.CsTeam)(int)team);
+    }
 }

@@ -13,4 +13,5 @@ public interface IPlayer
     string PlayerName { get; }
 
     void PrintToChat(string message);
+    void SwitchTeam(Team team);
 }

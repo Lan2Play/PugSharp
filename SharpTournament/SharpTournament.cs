@@ -311,8 +311,7 @@ public class SharpTournament : BasePlugin, IMatchCallback
                     //{
                     //    KickPlayer(player.UserId.Value);
                     //}
-
-                    SwitchTeam(new Player(player), configTeam);
+                    new Player(player).SwitchTeam(configTeam);
                     //if (team == 1)
                     //{
                     //    //TODO: player can cheat kills if switched to spectator
@@ -345,13 +344,6 @@ public class SharpTournament : BasePlugin, IMatchCallback
     }
 
     #region Implementation of IMatchCallback
-
-    public void SwitchTeam(IPlayer player, Match.Contract.Team team)
-    {
-        Console.WriteLine($"Switch player to team {team}");
-        _SwitchTeamFunc?.Invoke(player.Handle, (int)team);
-        //player.PlayerPawn.CommitSuicide();
-    }
 
     public void SwitchMap(string selectedMap)
     {
