@@ -2,20 +2,16 @@
 using CounterStrikeSharp.API.Core;
 using CounterStrikeSharp.API.Core.Attributes.Registration;
 using CounterStrikeSharp.API.Modules.Commands;
-using CounterStrikeSharp.API.Modules.Entities;
 using CounterStrikeSharp.API.Modules.Memory;
 using SharpTournament.Config;
 using SharpTournament.Match.Contract;
-using System.Numerics;
 using System.Text.Json;
-using static CounterStrikeSharp.API.Core.Listeners;
 
 namespace SharpTournament;
 
 public class SharpTournament : BasePlugin, IMatchCallback
 {
     private readonly ConfigProvider _ConfigProvider = new();
-    private Action<nint, int>? _SwitchTeamFunc;
     private Match.Match? _Match;
 
     public override string ModuleName => "SharpTournament Plugin";
@@ -25,9 +21,6 @@ public class SharpTournament : BasePlugin, IMatchCallback
     public override void Load(bool hotReload)
     {
         Console.WriteLine("Loading SharpTournament!");
-
-        _SwitchTeamFunc = VirtualFunction.CreateVoid<IntPtr, int>(GameData.GetSignature("CCSPlayerController_SwitchTeam"));
-        //RegisterListener<CounterStrikeSharp.API.Core.Listeners.OnClientPutInServer>(OnClientPutInServer);
     }
 
 
@@ -44,7 +37,6 @@ public class SharpTournament : BasePlugin, IMatchCallback
     {
         Server.ExecuteCommand("sv_disable_teamselect_menu true");
         Server.ExecuteCommand("sv_human_autojoin_team 2");
-        //Server.ExecuteCommand("mp_team_intro_time 6");
         Server.ExecuteCommand("mp_warmuptime 6000");
 
         ExecuteServerCommand($"mp_endmatch_votenextmap", "false");
@@ -182,48 +174,6 @@ public class SharpTournament : BasePlugin, IMatchCallback
 
     #endregion
 
-    private bool _RoundStarted = false;
-
-    //[GameEventHandler]
-    //public HookResult OnRoundStart(EventRoundStart @event, GameEventInfo info)
-    //{
-    //    _RoundStarted = true;
-    //    var players = GetAllPlayers();
-    //    foreach (var player in players.Where(x => x.UserId.HasValue && x.UserId >= 0))
-    //    {
-    //        if (player.UserId != null && !_Match.TryAddPlayer(player))
-    //        {
-    //            KickPlayer(player.UserId.Value);
-    //        }
-    //    }
-
-    //    return HookResult.Continue;
-    //}
-
-    //[GameEventHandler]
-    //public HookResult OnPlayerConnect(EventPlayerConnect @event, GameEventInfo info)
-    //{
-    //    // // Userid will give you a reference to a CCSPlayerController class
-    //    Console.WriteLine($"Player {@event.Userid.PlayerName} has connected full!");
-
-    //    if (_Match == null)
-    //    {
-    //        Console.WriteLine($"Player {@event.Userid.PlayerName} kicked because no match has been loaded!");
-    //        KickPlayer(@event.Userid.UserId.Value);
-    //    }
-    //    else /*if (_RoundStarted)*/
-    //    {
-    //        var userId = @event.Userid;
-    //        userId.PrintToChat($"Hello {userId.PlayerName}, welcome to match {_Match.Config.MatchId}");
-    //        if (!_Match.TryAddPlayer(new Player(userId)) && userId.UserId != null)
-    //        {
-    //            KickPlayer(userId.UserId.Value);
-    //        }
-    //    }
-
-    //    return HookResult.Continue;
-    //}
-
     [GameEventHandler]
     public HookResult OnGameInit(EventGameNewmap @event, GameEventInfo info)
     {
@@ -234,41 +184,12 @@ public class SharpTournament : BasePlugin, IMatchCallback
         return HookResult.Continue;
     }
 
-    private void OnClientPutInServer(int playerSlot)
-    {
-        // Slot is one less than index
-        var entity = NativeAPI.GetEntityFromIndex(playerSlot + 1);
-        var player = new CCSPlayerController(entity);
-
-        // // Userid will give you a reference to a CCSPlayerController class
-        Console.WriteLine($"Player {player.PlayerName} has put on server!");
-
-        if (_Match == null)
-        {
-            Console.WriteLine($"Player {player.PlayerName} kicked because no match has been loaded!");
-            KickPlayer(player.UserId.Value);
-        }
-        else /*if (_RoundStarted)*/
-        {
-            Server.NextFrame(() =>
-            {
-                player.PrintToChat($"Hello {player.PlayerName}, welcome to match {_Match.Config.MatchId}");
-
-                if (!_Match.TryAddPlayer(new Player(player)) && player.UserId != null)
-                {
-                    KickPlayer(player.UserId.Value);
-                }
-            });
-        }
-    }
-
     [GameEventHandler]
     public HookResult OnPlayerConnect(EventPlayerConnectFull @event, GameEventInfo info)
     {
         var userId = @event.Userid;
 
-        if (PlayerState(userId) == PlayerConnectedState.PlayerConnected
-           || PlayerState(userId) == PlayerConnectedState.PlayerReconnecting)
+        if (userId != null && (PlayerState(userId) == PlayerConnectedState.PlayerConnected || PlayerState(userId) == PlayerConnectedState.PlayerReconnecting))
         {
             // // Userid will give you a reference to a CCSPlayerController class
             Console.WriteLine($"Player {userId.PlayerName} has connected full!");
@@ -276,9 +197,9 @@ public class SharpTournament : BasePlugin, IMatchCallback
             if (_Match == null)
             {
                 Console.WriteLine($"Player {userId.PlayerName} kicked because no match has been loaded!");
-                KickPlayer(userId.UserId.Value);
+                KickPlayer(userId.UserId);
             }
-            else /*if (_RoundStarted)*/
+            else
             {
                 userId.PrintToChat($"Hello {userId.PlayerName}, welcome to match {_Match.Config.MatchId}");
                 if (!_Match.TryAddPlayer(new Player(userId)) && userId.UserId != null)
@@ -300,10 +221,7 @@ public class SharpTournament : BasePlugin, IMatchCallback
         // // Userid will give you a reference to a CCSPlayerController class
         Console.WriteLine($"Player {userId.PlayerName} has disconnected!");
 
-        if (_Match != null)
-        {
-            _Match.SetPlayerDisconnected(new Player(userId));
-        }
+        _Match?.SetPlayerDisconnected(new Player(userId));
 
         return HookResult.Continue;
     }
@@ -322,19 +240,8 @@ public class SharpTournament : BasePlugin, IMatchCallback
 
                 Server.NextFrame(() =>
                 {
-                    //if (!_Match.TryAddPlayer(new Player(player)) && player.UserId != null)
-                    //{
-                    //    KickPlayer(player.UserId.Value);
-                    //}
                     player.SwitchTeam(configTeam);
                     player.MatchStats?.ResetStats();
-                    //if (team == 1)
-                    //{
-                    //    //TODO: player can cheat kills if switched to spectator
-                    //    player.Score = 0;
-                    //    //.m_pActionTrackingServices.Value.m_matchStats
-                    //    // .Player.m_iKills = 0;
-                    //}
                 });
                 return HookResult.Continue;
 
@@ -354,8 +261,13 @@ public class SharpTournament : BasePlugin, IMatchCallback
 
 
 
-    private static void KickPlayer(int userId)
+    private static void KickPlayer(int? userId)
     {
+        if (userId == null)
+        {
+            return;
+        }
+
         Server.ExecuteCommand($"kickid {userId} \"You are not part of the current match!\"");
     }
 
@@ -379,7 +291,7 @@ public class SharpTournament : BasePlugin, IMatchCallback
         return playerEntities.Where(x => PlayerState(x) == PlayerConnectedState.PlayerConnected).Select(p => new Player(p)).ToArray();
     }
 
-    private PlayerConnectedState PlayerState(CCSPlayerController player)
+    private static PlayerConnectedState PlayerState(CCSPlayerController player)
     {
         if (player == null || !player.IsValid)
         {

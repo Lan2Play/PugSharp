@@ -69,7 +69,7 @@ namespace SharpTournament.Match.Tests
             Assert.Equal(MatchState.MapVote, match.CurrentState);
 
             // Vote Map
-            var matchCount = config.Maplist.Count();
+            var matchCount = config.Maplist.Length;
             var votePlayer = player1;
 
             Assert.False(match.BanMap(votePlayer, matchCount.ToString()));
