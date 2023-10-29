@@ -95,7 +95,22 @@ namespace SharpTournament.Match.Tests
             Assert.False(match.VoteTeam(votePlayer == player1 ? player2 : player1, "T"));
             Assert.True(match.VoteTeam(votePlayer, "T"));
 
-            Assert.Equal(MatchState.SwitchMap, match.CurrentState);
+            matchCallback.Received().SwitchMap(config.Maplist[^1]);
+
+            Assert.Equal(MatchState.WaitingForPlayersReady, match.CurrentState);
+            match.TogglePlayerIsReady(player1);
+            Assert.Equal(MatchState.WaitingForPlayersReady, match.CurrentState);
+            match.TogglePlayerIsReady(player2);
+
+            Assert.Equal(MatchState.MatchRunning, match.CurrentState);
+
+            match.SetPlayerDisconnected(player1);
+            Assert.Equal(MatchState.MatchPaused, match.CurrentState);
+            matchCallback.Received().PauseServer();
+
+            match.TryAddPlayer(player1);
+            Assert.Equal(MatchState.MatchRunning, match.CurrentState);
+            matchCallback.Received().UnpauseServer();
         }
 
         private static MatchConfig CreateExampleConfig()

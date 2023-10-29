@@ -116,6 +116,7 @@ public class Match
     private void SwitchToMatchMap()
     {
         _MatchCallback.SwitchMap(_MatchInfo.SelectedMap);
+        TryFireState(MatchCommand.SwitchMap);
     }
 
     private void VoteTimer_Elapsed(object? sender, System.Timers.ElapsedEventArgs e)
