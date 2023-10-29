@@ -56,7 +56,6 @@ public class SharpTournament : BasePlugin, IMatchCallback
 
         _Match = new Match.Match(this, matchConfig);
 
-
         var players = GetAllPlayers();
         foreach (var player in players.Where(x => x.UserId.HasValue && x.UserId >= 0))
         {
@@ -302,8 +301,7 @@ public class SharpTournament : BasePlugin, IMatchCallback
             if ((int)configTeam != @event.Team)
             {
                 Console.WriteLine($"Player {@event.Userid.PlayerName} tried to join {@event.Team} but is not allowed!");
-                var player = @event.Userid;
-                var team = @event.Team;
+                var player = new Player(@event.Userid);
 
                 Server.NextFrame(() =>
                 {
@@ -311,7 +309,8 @@ public class SharpTournament : BasePlugin, IMatchCallback
                     //{
                     //    KickPlayer(player.UserId.Value);
                     //}
-                    new Player(player).SwitchTeam(configTeam);
+                    player.SwitchTeam(configTeam);
+                    player.MatchStats?.ResetStats();
                     //if (team == 1)
                     //{
                     //    //TODO: player can cheat kills if switched to spectator

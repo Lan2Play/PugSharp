@@ -11,6 +11,10 @@ public class Player : IPlayer
     public Player(CCSPlayerController playerController)
     {
         _PlayerController = playerController;
+        if (_PlayerController.ActionTrackingServices != null)
+        {
+            MatchStats = new PlayerMatchStats(_PlayerController.ActionTrackingServices.MatchStats, this);
+        }
     }
 
     [JsonIgnore]
@@ -33,4 +37,6 @@ public class Player : IPlayer
     {
         _PlayerController.SwitchTeam((CounterStrikeSharp.API.Modules.Utils.CsTeam)(int)team);
     }
+
+    public IPlayerMatchStats? MatchStats { get; }
 }
