@@ -1,4 +1,4 @@
-﻿namespace SharpTournament;
+﻿namespace SharpTournament.Match.Contract;
 
 public interface IPlayerMatchStats
 {

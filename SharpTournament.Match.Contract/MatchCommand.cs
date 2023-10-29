@@ -9,4 +9,6 @@ public enum MatchCommand
     VoteMap,
     VoteTeam,
     SwitchMap,
+    StartMatch,
+    CompleteMatch,
 }

@@ -39,6 +39,15 @@ public class SharpTournament : BasePlugin, IMatchCallback
         Server.ExecuteCommand("sv_human_autojoin_team 2");
         Server.ExecuteCommand("mp_warmuptime 6000");
 
+        Server.ExecuteCommand("mp_overtime_enable true");
+        Server.ExecuteCommand("mp_overtime_maxrounds 6");
+        Server.ExecuteCommand("mp_maxrounds 24");
+        Server.ExecuteCommand("mp_tournament 1");
+
+        Server.ExecuteCommand("mp_team_timeout_time 30");
+        Server.ExecuteCommand("mp_team_timeout_max 3");
+
+
         ExecuteServerCommand($"mp_endmatch_votenextmap", "false");
 
         ExecuteServerCommand($"mp_teamname_1", matchConfig.Team1.Name);
@@ -175,16 +184,6 @@ public class SharpTournament : BasePlugin, IMatchCallback
     #endregion
 
     [GameEventHandler]
-    public HookResult OnGameInit(EventGameNewmap @event, GameEventInfo info)
-    {
-        Console.WriteLine("################################ Event ServerSpawn! ################################");
-
-
-
-        return HookResult.Continue;
-    }
-
-    [GameEventHandler]
     public HookResult OnPlayerConnect(EventPlayerConnectFull @event, GameEventInfo info)
     {
         var userId = @event.Userid;
@@ -211,7 +210,6 @@ public class SharpTournament : BasePlugin, IMatchCallback
 
         return HookResult.Continue;
     }
-
 
     [GameEventHandler]
     public HookResult OnPlayerDisconnect(EventPlayerDisconnect @event, GameEventInfo info)
@@ -324,6 +322,21 @@ public class SharpTournament : BasePlugin, IMatchCallback
         Server.PrintToChatAll(message);
     }
 
+    public void EndWarmup()
+    {
+        Server.ExecuteCommand("mp_warmup_end");
+    }
+
+    public void PauseServer()
+    {
+        // TODO Oder lieber mp_pause_match/mp_unpause_match sodass erst am ende der Runde eine pause gestartet wird?
+        Server.ExecuteCommand("pause");
+    }
+
+    public void UnpauseServer()
+    {
+        Server.ExecuteCommand("unpause");
+    }
     #endregion
 
 

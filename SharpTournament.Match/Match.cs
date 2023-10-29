@@ -38,7 +38,7 @@ public class Match
 
         _MatchStateMachine.Configure(MatchState.WaitingForPlayersConnectedReady)
             .PermitIf(MatchCommand.PlayerReady, MatchState.MapVote, AllPlayersAreReady)
-            .OnExit(SetAllPlayersNotReady);
+            .OnEntry(SetAllPlayersNotReady);
 
         _MatchStateMachine.Configure(MatchState.MapVote)
             .PermitReentryIf(MatchCommand.VoteMap, MapIsNotSelected)
@@ -56,15 +56,21 @@ public class Match
             .OnEntry(SwitchToMatchMap);
 
         _MatchStateMachine.Configure(MatchState.WaitingForPlayersReady)
-            .PermitIf(MatchCommand.PlayerReady, MatchState.MatchStarting, AllPlayersAreReady);
+            .PermitIf(MatchCommand.PlayerReady, MatchState.MatchStarting, AllPlayersAreReady)
+            .OnEntry(SetAllPlayersNotReady);
 
-        _MatchStateMachine.Configure(MatchState.MatchStarting);
+        _MatchStateMachine.Configure(MatchState.MatchStarting)
+            .Permit(MatchCommand.StartMatch, MatchState.MatchRunning)
+            .OnEntry(StartMatch);
 
         _MatchStateMachine.Configure(MatchState.MatchRunning)
-            .Permit(MatchCommand.DisconnectPlayer, MatchState.MatchPaused);
+            .Permit(MatchCommand.DisconnectPlayer, MatchState.MatchPaused)
+            .PermitIf(MatchCommand.CompleteMatch, MatchState.MatchCompleted, IsMatchReady);
 
         _MatchStateMachine.Configure(MatchState.MatchPaused)
-            .PermitIf(MatchCommand.ConnectPlayer, MatchState.MatchRunning, AllPlayersAreConnected);
+            .PermitIf(MatchCommand.ConnectPlayer, MatchState.MatchRunning, AllPlayersAreConnected)
+            .OnEntry(PauseMatch)
+            .OnExit(UnpauseMatch);
 
         _MatchStateMachine.Configure(MatchState.MatchCompleted);
 
@@ -72,6 +78,34 @@ public class Match
         _MatchStateMachine.OnTransitioned(OnMatchStateChanged);
 
         _MatchStateMachine.Fire(MatchCommand.LoadMatch);
+    }
+
+    private bool IsMatchReady()
+    {
+        // TODO Check if one team has x rounds won or one team has given up?
+        return true;
+    }
+
+    private void UnpauseMatch()
+    {
+        _MatchCallback.UnpauseServer();
+    }
+
+    private void PauseMatch()
+    {
+        _MatchCallback.PauseServer();
+    }
+
+    private void StartMatch()
+    {
+        foreach (var player in MatchTeams.SelectMany(x => x.Players).Where(x => x.Player.MatchStats != null))
+        {
+            player.Player.MatchStats!.ResetStats();
+        }
+
+        _MatchCallback.EndWarmup();
+
+        TryFireState(MatchCommand.StartMatch);
     }
 
     private void OnMatchStateChanged(StateMachine<MatchState, MatchCommand>.Transition transition)
@@ -301,6 +335,7 @@ public class Match
         }
 
         var matchPlayer = GetMatchPlayer(player.SteamID);
+        TryFireState(MatchCommand.DisconnectPlayer);
 
         switch (CurrentState)
         {
