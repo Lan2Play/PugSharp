@@ -9,4 +9,6 @@ public interface IMatchCallback
     void SendMessage(string message);
     void SwitchMap(string selectedMap);
     void UnpauseServer();
+
+    void DisableCheats();
 }

@@ -1,4 +1,6 @@
-﻿using CounterStrikeSharp.API.Core;
+﻿using CounterStrikeSharp.API;
+using CounterStrikeSharp.API.Core;
+using CounterStrikeSharp.API.Modules.Menu;
 using SharpTournament.Match.Contract;
 using System.Text.Json.Serialization;
 
@@ -28,9 +30,36 @@ public class Player : IPlayer
 
     public IPlayerPawn PlayerPawn => new PlayerPawn(_PlayerController.PlayerPawn.Value);
 
+    public int? Money
+    {
+        get
+        {
+            return _PlayerController.InGameMoneyServices?.Account;
+        }
+        
+        set
+        {
+
+            var money = _PlayerController.InGameMoneyServices?.Account;
+            money = value;
+        }
+    }
+
     public void PrintToChat(string message)
     {
         _PlayerController.PrintToChat(message);
+    }
+
+    public void ShowMenu(string title, IEnumerable<MenuOption> menuOptions)
+    {
+        var menu = new ChatMenu(title);
+
+        foreach (var menuOption in menuOptions)
+        {
+            menu.AddMenuOption(menuOption.DisplayName, (player, opt) => menuOption.Action.Invoke(menuOption, this));
+        }
+
+        ChatMenus.OpenMenu(_PlayerController, menu);
     }
 
     public void SwitchTeam(Team team)

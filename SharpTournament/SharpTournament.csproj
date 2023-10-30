@@ -8,7 +8,6 @@
 
 	<ItemGroup>
 		<PackageReference Include="Microsoft.AspNetCore.WebUtilities" Version="2.2.0" />
-		<PackageReference Include="Stateless" Version="5.13.0" />
 	</ItemGroup>
 
 	<ItemGroup>

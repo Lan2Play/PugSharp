@@ -11,8 +11,12 @@ public interface IPlayer
     IPlayerPawn PlayerPawn { get; }
 
     string PlayerName { get; }
+    
     IPlayerMatchStats? MatchStats { get; }
 
     void PrintToChat(string message);
+    
     void SwitchTeam(Team team);
+
+    void ShowMenu(string title, IEnumerable<MenuOption> menuOptions);
 }

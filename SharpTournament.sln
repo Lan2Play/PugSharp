@@ -5,13 +5,13 @@ VisualStudioVersion = 17.8.34212.112
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SharpTournament", "SharpTournament\SharpTournament.csproj", "{66F8D8D6-163D-47A5-B228-C35E93BA8752}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SharpTournament.Match", "SharpTournament.Match\SharpTournament.Match.csproj", "{FC9B05E6-0A45-4B17-986D-3A6214073BBD}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SharpTournament.Match", "SharpTournament.Match\SharpTournament.Match.csproj", "{FC9B05E6-0A45-4B17-986D-3A6214073BBD}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SharpTournament.Match.Contract", "SharpTournament.Match.Contract\SharpTournament.Match.Contract.csproj", "{08EFFD57-94C0-4458-A048-A0A777A38029}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SharpTournament.Match.Contract", "SharpTournament.Match.Contract\SharpTournament.Match.Contract.csproj", "{08EFFD57-94C0-4458-A048-A0A777A38029}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SharpTournament.Config", "SharpTournament.Config\SharpTournament.Config.csproj", "{49A6E80A-EECA-4858-8EB3-1CD342149944}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SharpTournament.Config", "SharpTournament.Config\SharpTournament.Config.csproj", "{49A6E80A-EECA-4858-8EB3-1CD342149944}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SharpTournament.Match.Tests", "SharpTournament.Match.Tests\SharpTournament.Match.Tests.csproj", "{C124CD7A-AEA7-4679-8A6E-E82FF4256969}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SharpTournament.Match.Tests", "SharpTournament.Match.Tests\SharpTournament.Match.Tests.csproj", "{C124CD7A-AEA7-4679-8A6E-E82FF4256969}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

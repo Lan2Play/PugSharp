@@ -21,15 +21,34 @@ public class SharpTournament : BasePlugin, IMatchCallback
     public override void Load(bool hotReload)
     {
         Console.WriteLine("Loading SharpTournament!");
+
+        RegisterEventHandlers();
     }
 
+    private void RegisterEventHandlers()
+    {
+        Console.WriteLine("Begin RegisterEventHandlers");
+
+        RegisterEventHandler<EventCsWinPanelRound>(OnRoundWinPanel, HookMode.Pre);
+        RegisterEventHandler<EventCsWinPanelMatch>(OnMatchOver);
+        RegisterEventHandler<EventPlayerConnectFull>(OnPlayerConnect);
+        RegisterEventHandler<EventPlayerDisconnect>(OnPlayerDisconnect);
+        RegisterEventHandler<EventPlayerSpawn>(OnPlayerSpawn);
+        RegisterEventHandler<EventRoundEnd>(OnRoundEnd, HookMode.Pre);
+        RegisterEventHandler<EventRoundFreezeEnd>(OnRoundFreezeEnd);
+        RegisterEventHandler<EventRoundPrestart>(OnRoundPreStart);
+        RegisterEventHandler<EventRoundPrestart>(OnRoundStart);
+        RegisterEventHandler<EventServerCvar>(OnCvarChanged, HookMode.Pre);
+        RegisterEventHandler<EventPlayerTeam>(OnPlayerTeam);
+
+        Console.WriteLine("End RegisterEventHandlers");
+    }
 
     private void ExecuteServerCommand(string command, string value)
     {
         if (!string.IsNullOrEmpty(value))
         {
             Server.ExecuteCommand($"{command} {value}");
-
         }
     }
 
@@ -91,7 +110,7 @@ public class SharpTournament : BasePlugin, IMatchCallback
         }
     }
 
-    [ConsoleCommand("st_dumpmatch", "Load a match config")]
+    [ConsoleCommand("st_dumpmatch", "Serialize match to JSON on console")]
     public void OnCommandDumpMatch(CCSPlayerController? player, CommandInfo command)
     {
         Console.WriteLine("################ dump match ################");
@@ -112,49 +131,6 @@ public class SharpTournament : BasePlugin, IMatchCallback
 
 
         Console.WriteLine("Command ready called.");
-    }
-
-
-    [ConsoleCommand("banmap", "Set map to ban")]
-    public void OnCommandBanMap(CCSPlayerController? player, CommandInfo command)
-    {
-        Console.WriteLine("Command banmap called.");
-
-        if (player == null)
-        {
-            Console.WriteLine("Command banmap has been called by the server. Player is required to ban a map");
-            return;
-        }
-
-        if (command.ArgCount != 2)
-        {
-            player.PrintToChat("banmap requires exact one argument!");
-        }
-
-        var mapNumber = command.ArgByIndex(1);
-
-        _Match?.BanMap(new Player(player), mapNumber);
-    }
-
-    [ConsoleCommand("voteteam", "Vote a teamsite for startup")]
-    public void OnCommandVoteTeam(CCSPlayerController? player, CommandInfo command)
-    {
-        Console.WriteLine("Command voteteam called.");
-
-        if (player == null)
-        {
-            Console.WriteLine("Command voteteam has been called by the server. Player is required to vote a team");
-            return;
-        }
-
-        if (command.ArgCount != 2)
-        {
-            player.PrintToChat("voteteam requires exact one argument!");
-        }
-
-        var team = command.ArgByIndex(1);
-
-        _Match?.VoteTeam(new Player(player), team);
     }
 
     [ConsoleCommand("st_start", "Starts a match")]
@@ -183,7 +159,8 @@ public class SharpTournament : BasePlugin, IMatchCallback
 
     #endregion
 
-    [GameEventHandler]
+    #region EventHandlers
+
     public HookResult OnPlayerConnect(EventPlayerConnectFull @event, GameEventInfo info)
     {
         var userId = @event.Userid;
@@ -211,7 +188,6 @@ public class SharpTournament : BasePlugin, IMatchCallback
         return HookResult.Continue;
     }
 
-    [GameEventHandler]
     public HookResult OnPlayerDisconnect(EventPlayerDisconnect @event, GameEventInfo info)
     {
         var userId = @event.Userid;
@@ -224,7 +200,6 @@ public class SharpTournament : BasePlugin, IMatchCallback
         return HookResult.Continue;
     }
 
-    [GameEventHandler]
     public HookResult OnPlayerTeam(EventPlayerTeam @event, GameEventInfo info)
     {
         if (_Match != null)
@@ -257,7 +232,145 @@ public class SharpTournament : BasePlugin, IMatchCallback
         return HookResult.Continue;
     }
 
+    private HookResult OnCvarChanged(EventServerCvar eventCvarChanged, GameEventInfo info)
+    {
+        if (_Match != null && _Match.CurrentState != MatchState.None)
+        {
+            // Silences cvar changes when executing live/knife/warmup configs, *unless* it's sv_cheats.
+            if (!eventCvarChanged.Cvarname.Equals("sv_cheats"))
+            {
+                info.DontBroadcast = true;
+            }
+        }
 
+        return HookResult.Continue;
+    }
+
+    private HookResult OnRoundStart(EventRoundPrestart @event, GameEventInfo info)
+    {
+        Console.WriteLine($"OnRoundStart called");
+
+        if (_Match == null)
+        {
+            return HookResult.Continue;
+        }
+
+        if (_Match.CurrentState == MatchState.None)
+        {
+            return HookResult.Continue;
+        }
+
+        // TODO Write Backup file
+
+        return HookResult.Continue;
+    }
+
+    private HookResult OnRoundPreStart(EventRoundPrestart @event, GameEventInfo info)
+    {
+        Console.WriteLine($"OnRoundPreStart called");
+
+        return HookResult.Continue;
+    }
+
+    private HookResult OnRoundFreezeEnd(EventRoundFreezeEnd @event, GameEventInfo info)
+    {
+        Console.WriteLine($"OnRoundFreezeEnd called");
+
+        return HookResult.Continue;
+    }
+
+    private HookResult OnRoundEnd(EventRoundEnd eventRoundEnd, GameEventInfo info)
+    {
+        Console.WriteLine($"OnRoundEnd called");
+
+        if(_Match == null)
+        {
+            return HookResult.Continue;
+        }
+
+        if (_Match.CurrentState == MatchState.None)
+        {
+            return HookResult.Continue;
+        }
+
+        if(_Match.CurrentState == MatchState.MatchRunning)
+        {
+            // TODO Update stats
+
+            // TODO OT handling
+        }
+
+        return HookResult.Continue;
+    }
+
+    private HookResult OnPlayerSpawn(EventPlayerSpawn @event, GameEventInfo info)
+    {
+        if (_Match == null)
+        {
+            return HookResult.Continue;
+        }
+
+        if (_Match.CurrentState == MatchState.None)
+        {
+            return HookResult.Continue;
+        }
+
+        if (_Match.CurrentState < MatchState.MatchRunning)
+        {
+            // Give players max money if no match is running
+            Server.NextFrame(() =>
+            {
+                var player = new Player(@event.Userid);
+
+                // TODO read mp_maxmoney cvar
+                player.Money = 16000;
+            });
+        }
+
+        return HookResult.Continue;
+    }
+
+    private HookResult OnMatchOver(EventCsWinPanelMatch @event, GameEventInfo info)
+    {
+        Console.WriteLine($"OnMatchOver called");
+
+        if (_Match == null)
+        {
+            return HookResult.Continue;
+        }
+
+        if (_Match.CurrentState == MatchState.None)
+        {
+            return HookResult.Continue;
+        }
+
+        // TODO wait for GOTV recording to finish
+
+        if (_Match.CurrentState == MatchState.MatchRunning)
+        {
+            // TODO Figure out who won
+
+            // TODO Update stats
+
+            // TODO Fire map result event
+
+            // TODO If we use series functionality check if the series is over
+
+            // TODO Fire series event
+
+            // TODO Reset server to defaults
+        }
+        return HookResult.Continue;
+    }
+
+    private HookResult OnRoundWinPanel(EventCsWinPanelRound eventCsWinPanelRound, GameEventInfo info)
+    {
+        Console.WriteLine($"On Round win panel");
+
+        return HookResult.Continue;
+    }
+
+    #endregion
 
     private static void KickPlayer(int? userId)
     {
@@ -337,6 +450,12 @@ public class SharpTournament : BasePlugin, IMatchCallback
     {
         Server.ExecuteCommand("unpause");
     }
+
+    public void DisableCheats()
+    {
+        Server.ExecuteCommand("sv_cheats 0");
+    }
+
     #endregion
 
 

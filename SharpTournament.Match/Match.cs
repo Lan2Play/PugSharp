@@ -1,7 +1,6 @@
 ﻿using SharpTournament.Match.Contract;
 using Stateless;
 using Stateless.Graph;
-using System.Text;
 
 namespace SharpTournament.Match;
 
@@ -65,7 +64,8 @@ public class Match
 
         _MatchStateMachine.Configure(MatchState.MatchRunning)
             .Permit(MatchCommand.DisconnectPlayer, MatchState.MatchPaused)
-            .PermitIf(MatchCommand.CompleteMatch, MatchState.MatchCompleted, IsMatchReady);
+            .PermitIf(MatchCommand.CompleteMatch, MatchState.MatchCompleted, IsMatchReady)
+            .OnEntryAsync(MatchLiveAsync);
 
         _MatchStateMachine.Configure(MatchState.MatchPaused)
             .PermitIf(MatchCommand.ConnectPlayer, MatchState.MatchRunning, AllPlayersAreConnected)
@@ -105,7 +105,19 @@ public class Match
 
         _MatchCallback.EndWarmup();
 
+        _MatchCallback.DisableCheats();
+
         TryFireState(MatchCommand.StartMatch);
+    }
+
+    private async Task MatchLiveAsync()
+    {
+        for (int i = 0; i < 10; i++)
+        {
+            _MatchCallback.SendMessage($"Match is LIVE");
+
+            await Task.Delay(TimeSpan.FromSeconds(1));
+        }
     }
 
     private void OnMatchStateChanged(StateMachine<MatchState, MatchCommand>.Transition transition)
@@ -150,21 +162,16 @@ public class Match
 
         _MapsToSelect.ForEach(m => m.Votes.Clear());
 
-        var mapMessageBuilder = new StringBuilder();
+        var mapOptions = new List<MenuOption>();
 
-        mapMessageBuilder.Append("Remaining maps to ban: \n");
-        mapMessageBuilder.Append('\n');
         for (int i = 0; i < _MapsToSelect.Count; i++)
         {
             string? map = _MapsToSelect[i].Name;
-            mapMessageBuilder.Append(i).Append(": ").Append(map).Append('\n');
+            mapOptions.Add(new MenuOption(map, (opt, player) => BanMap(player, i.ToString())));
         }
 
-        mapMessageBuilder.Append('\n');
-        mapMessageBuilder.Append("To ban a map: !banmap [mapnumber] ");
+        ShowMenuToTeam(_CurrentMatchTeamToVote!, "Ban a map", mapOptions);
 
-        var mapMessage = mapMessageBuilder.ToString();
-        SendMessageToTeam(_CurrentMatchTeamToVote!, mapMessage);
         _VoteTimer.Start();
     }
 
@@ -186,16 +193,14 @@ public class Match
     {
         SwitchVotingTeam();
 
-        var teamMessageBuilder = new StringBuilder();
+        var mapOptions = new List<MenuOption>()
+        {
+            new MenuOption("T", (opt, player) => VoteTeam(player, "T")),
+            new MenuOption("CT", (opt, player) => VoteTeam(player, "CT")),
+        };
 
-        teamMessageBuilder.AppendLine("Vote for your starting team");
-        teamMessageBuilder.AppendLine();
-        teamMessageBuilder.AppendLine("For T:  !voteteam T ");
-        teamMessageBuilder.AppendLine("For CT: !voteteam CT ");
+        ShowMenuToTeam(_CurrentMatchTeamToVote!, "Choose starting side:", mapOptions);
 
-
-        var teamMessage = teamMessageBuilder.ToString();
-        SendMessageToTeam(_CurrentMatchTeamToVote!, teamMessage);
         _VoteTimer.Start();
     }
 
@@ -213,12 +218,11 @@ public class Match
         }
     }
 
-
-    private void SendMessageToTeam(MatchTeam team, string mapMessage)
+    private void ShowMenuToTeam(MatchTeam team, string title, IEnumerable<MenuOption> options)
     {
         team.Players.ForEach(p =>
         {
-            p.Player.PrintToChat(mapMessage);
+            p.Player.ShowMenu(title, options);
         });
     }
 
@@ -300,7 +304,7 @@ public class Match
     public bool TryAddPlayer(IPlayer player)
     {
         var playerTeam = GetPlayerTeam(player.SteamID);
-        if (playerTeam == Contract.Team.None)
+        if (playerTeam == Team.None)
         {
             return false;
         }
@@ -378,7 +382,6 @@ public class Match
             _MatchCallback.SendMessage($" \\x01\\x0B\\x04{player.PlayerName} \\x02is not ready! {readyPlayers} of {requiredPlayers} are ready.");
         }
     }
-
 
     public Team GetPlayerTeam(ulong steamID)
     {
@@ -467,7 +470,7 @@ public class Match
         var votedTeam = _TeamVotes.Find(x => x.Votes.Exists(x => x.UserId == player.UserId));
         if (votedTeam != null)
         {
-            player.PrintToChat($"You already banned mapnumber {_MapsToSelect.IndexOf(votedTeam)}: {votedTeam.Name} !");
+            player.PrintToChat($"You already voted for team {_MapsToSelect.IndexOf(votedTeam)}: {votedTeam.Name} !");
             return false;
         }
 
