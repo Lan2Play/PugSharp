@@ -1,0 +1,23 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+		<TargetFramework>net7.0</TargetFramework>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<Nullable>enable</Nullable>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<PackageReference Include="Microsoft.AspNetCore.WebUtilities" Version="2.2.0" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <ProjectReference Include="..\PugSharp.Match\PugSharp.Match.csproj" />
+	</ItemGroup>
+
+	<ItemGroup>
+
+		<Reference Include="CounterStrikeSharp.API">
+			<HintPath>../counterstrikesharp/api/CounterStrikeSharp.API.dll</HintPath>
+		</Reference>
+	</ItemGroup>
+</Project>

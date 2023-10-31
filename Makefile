@@ -6,8 +6,8 @@ build:
 	dotnet publish -c debug
 
 copy:
-	rm SharpTournament/bin/Debug/net7.0/publish/CounterStrikeSharp.API.dll
-	cp -rf SharpTournament/bin/Debug/net7.0/publish/* /home/volza/temp/cs2/cs2-data/game/csgo/addons/counterstrikesharp/plugins/SharpTournament
+	rm PugSharp/bin/Debug/net7.0/publish/CounterStrikeSharp.API.dll
+	cp -rf PugSharp/bin/Debug/net7.0/publish/* /home/volza/temp/cs2/cs2-data/game/csgo/addons/counterstrikesharp/plugins/PugSharp
 
 start-ds:
 	cd /home/volza/temp/cs2
