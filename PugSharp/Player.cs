@@ -95,7 +95,7 @@ public class Player : IPlayer
         if (_PlayerController.IsValid)
         {
             _PlayerController.SwitchTeam((CounterStrikeSharp.API.Modules.Utils.CsTeam)(int)team);
-            _PlayerController.PlayerPawn.Value.CommitSuicide(true, true);
+            //_PlayerController.PlayerPawn.Value.CommitSuicide(true, true);
             //MatchStats?.ResetStats();
         }
     }
