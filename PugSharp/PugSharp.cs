@@ -31,7 +31,7 @@ public class PugSharp : BasePlugin, IMatchCallback
 
         RegisterEventHandler<EventCsWinPanelRound>(OnRoundWinPanel, HookMode.Pre);
         RegisterEventHandler<EventCsWinPanelMatch>(OnMatchOver);
-        RegisterEventHandler<EventPlayerConnectFull>(OnPlayerConnect);
+        RegisterEventHandler<EventPlayerConnect>(OnPlayerConnect);
         RegisterEventHandler<EventPlayerDisconnect>(OnPlayerDisconnect);
         RegisterEventHandler<EventPlayerSpawn>(OnPlayerSpawn);
         RegisterEventHandler<EventRoundEnd>(OnRoundEnd, HookMode.Pre);
@@ -161,7 +161,7 @@ public class PugSharp : BasePlugin, IMatchCallback
 
     #region EventHandlers
 
-    public HookResult OnPlayerConnect(EventPlayerConnectFull @event, GameEventInfo info)
+    public HookResult OnPlayerConnect(EventPlayerConnect @event, GameEventInfo info)
     {
         var userId = @event.Userid;
 
