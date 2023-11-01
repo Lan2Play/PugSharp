@@ -269,6 +269,9 @@ public class Match
         {
             player.IsReady = false;
         }
+
+        _MatchCallback.SendMessage($"Waiting for all players to be ready.");
+        _MatchCallback.SendMessage($"!ready to toggle your ready state.");
     }
 
     private bool MapIsSelected()
