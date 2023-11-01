@@ -12,7 +12,7 @@ public class Player : IPlayer
 
     public Player(CCSPlayerController playerController)
     {
-        if (!_PlayerController.IsValid)
+        if (!playerController.IsValid)
         {
             Console.WriteLine("PlayerController is invalid!");
         }
