@@ -283,7 +283,7 @@ public class PugSharp : BasePlugin, IMatchCallback
     {
         Console.WriteLine($"OnRoundEnd called");
 
-        if(_Match == null)
+        if (_Match == null)
         {
             return HookResult.Continue;
         }
@@ -293,7 +293,7 @@ public class PugSharp : BasePlugin, IMatchCallback
             return HookResult.Continue;
         }
 
-        if(_Match.CurrentState == MatchState.MatchRunning)
+        if (_Match.CurrentState == MatchState.MatchRunning)
         {
             // TODO Update stats
 
@@ -316,7 +316,7 @@ public class PugSharp : BasePlugin, IMatchCallback
         }
 
         var userId = @event.Userid;
-        if (_Match.CurrentState < MatchState.MatchRunning && userId != null)
+        if (_Match.CurrentState < MatchState.MatchRunning && userId != null && userId.IsValid)
         {
             // Give players max money if no match is running
             Server.NextFrame(() =>

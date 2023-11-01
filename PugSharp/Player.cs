@@ -12,21 +12,42 @@ public class Player : IPlayer
 
     public Player(CCSPlayerController playerController)
     {
+        if (!_PlayerController.IsValid)
+        {
+            Console.WriteLine("PlayerController is invalid!");
+        }
+
         _PlayerController = playerController;
-        if (_PlayerController.IsValid && _PlayerController.ActionTrackingServices != null)
+        if (_PlayerController.ActionTrackingServices != null)
         {
             MatchStats = new PlayerMatchStats(_PlayerController.ActionTrackingServices.MatchStats, this);
         }
     }
 
+    private T DefaultIfInvalid<T>(Func<T> loadValue) where T : struct
+    {
+        return _PlayerController != null && _PlayerController.IsValid ? loadValue() : default;
+    }
+
+    private T DefaultIfInvalid<T>(Func<T> loadValue, T defaultValue)
+    {
+        return _PlayerController != null && _PlayerController.IsValid ? loadValue() : defaultValue;
+    }
+
+
+    private T? NullIfInvalid<T>(Func<T?> loadValue)
+    {
+        return _PlayerController != null && _PlayerController.IsValid ? loadValue() : default;
+    }
+
     [JsonIgnore]
-    public nint Handle => _PlayerController.Handle;
+    public nint Handle => DefaultIfInvalid(() => _PlayerController.Handle);
 
-    public ulong SteamID => _PlayerController.SteamID;
+    public ulong SteamID => DefaultIfInvalid(() => _PlayerController.SteamID);
 
-    public int? UserId => _PlayerController.UserId;
+    public int? UserId => NullIfInvalid(() => _PlayerController.UserId);
 
-    public string PlayerName => _PlayerController.PlayerName;
+    public string PlayerName => DefaultIfInvalid(() => _PlayerController.PlayerName, string.Empty);
 
     public IPlayerPawn PlayerPawn => new PlayerPawn(_PlayerController.PlayerPawn.Value);
 
@@ -34,14 +55,21 @@ public class Player : IPlayer
     {
         get
         {
+            if (!_PlayerController.IsValid)
+            {
+                return null;
+            }
+
             return _PlayerController.InGameMoneyServices?.Account;
         }
 
         set
         {
-
-            var money = _PlayerController.InGameMoneyServices?.Account;
-            money = value;
+            if (_PlayerController.IsValid)
+            {
+                var money = _PlayerController.InGameMoneyServices?.Account;
+                money = value;
+            }
         }
     }
 
