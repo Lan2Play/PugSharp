@@ -315,7 +315,7 @@ public class PugSharp : BasePlugin, IMatchCallback
             return HookResult.Continue;
         }
 
-        if (_Match.CurrentState < MatchState.MatchRunning)
+        if (_Match.CurrentState < MatchState.MatchRunning && @event.Userid != null)
         {
             // Give players max money if no match is running
             var userId = @event.Userid;
