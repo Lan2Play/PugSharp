@@ -17,20 +17,38 @@ public class PlayerMatchStats : IPlayerMatchStats
     public int Kills
     {
         get => _MatchStats.Kills;
-        set => _MatchStats.Kills = value;
+        set
+        {
+            if (_MatchStats.Kills != value)
+            {
+                _MatchStats.Kills = value;
+            }
+        }
     }
 
     public int Assists
     {
         get => _MatchStats.Assists;
-        set => _MatchStats.Assists = value;
+        set
+        {
+            if (_MatchStats.Assists != value)
+            {
+                _MatchStats.Assists = value;
+            }
+        }
     }
+
     public int Deaths
     {
         get => _MatchStats.Deaths;
-        set => _MatchStats.Deaths = value;
+        set
+        {
+            if (_MatchStats.Deaths != value)
+            {
+                _MatchStats.Deaths = value;
+            }
+        }
     }
-
 
     public void ResetStats()
     {
