@@ -92,7 +92,10 @@ public class Player : IPlayer
 
     public void SwitchTeam(Team team)
     {
-        _PlayerController.SwitchTeam((CounterStrikeSharp.API.Modules.Utils.CsTeam)(int)team);
+        if (_PlayerController.IsValid)
+        {
+            _PlayerController.SwitchTeam((CounterStrikeSharp.API.Modules.Utils.CsTeam)(int)team);
+        }
     }
 
     public IPlayerMatchStats? MatchStats { get; }
