@@ -13,7 +13,7 @@ public class Player : IPlayer
     public Player(CCSPlayerController playerController)
     {
         _PlayerController = playerController;
-        if (_PlayerController.ActionTrackingServices != null)
+        if (_PlayerController.IsValid && _PlayerController.ActionTrackingServices != null)
         {
             MatchStats = new PlayerMatchStats(_PlayerController.ActionTrackingServices.MatchStats, this);
         }
