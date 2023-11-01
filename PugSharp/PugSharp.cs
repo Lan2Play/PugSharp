@@ -165,10 +165,10 @@ public class PugSharp : BasePlugin, IMatchCallback
     {
         var userId = @event.Userid;
 
-        if (userId != null && userId.IsValid && (PlayerState(userId) == PlayerConnectedState.PlayerConnected || PlayerState(userId) == PlayerConnectedState.PlayerReconnecting))
+        if (userId != null && userId.IsValid)
         {
             // // Userid will give you a reference to a CCSPlayerController class
-            Console.WriteLine($"Player {userId.PlayerName} has connected full!");
+            Console.WriteLine($"Player {userId.PlayerName} has connected!");
 
             if (_Match == null)
             {
@@ -183,6 +183,10 @@ public class PugSharp : BasePlugin, IMatchCallback
                     KickPlayer(userId.UserId.Value);
                 }
             }
+        }
+        else
+        {
+            Console.WriteLine($"Ivalid Player has connected!");
         }
 
         return HookResult.Continue;
