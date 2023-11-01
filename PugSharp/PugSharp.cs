@@ -321,6 +321,11 @@ public class PugSharp : BasePlugin, IMatchCallback
             // Give players max money if no match is running
             Server.NextFrame(() =>
             {
+                if (userId == null)
+                {
+                    return;
+                }
+
                 var player = new Player(userId);
 
                 // TODO read mp_maxmoney cvar
