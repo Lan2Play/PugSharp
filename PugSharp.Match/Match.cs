@@ -375,12 +375,12 @@ public class Match
 
         if (matchPlayer.IsReady)
         {
-            _MatchCallback.SendMessage($" \\x01\\x0B\\x04{player.PlayerName} \\x06is ready! {readyPlayers} of {requiredPlayers} are ready.");
+            _MatchCallback.SendMessage($"{player.PlayerName} is ready! {readyPlayers} of {requiredPlayers} are ready.");
             TryFireState(MatchCommand.PlayerReady);
         }
         else
         {
-            _MatchCallback.SendMessage($" \\x01\\x0B\\x04{player.PlayerName} \\x02is not ready! {readyPlayers} of {requiredPlayers} are ready.");
+            _MatchCallback.SendMessage($"{player.PlayerName} is not ready! {readyPlayers} of {requiredPlayers} are ready.");
         }
     }
 
