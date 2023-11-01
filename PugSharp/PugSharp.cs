@@ -318,9 +318,10 @@ public class PugSharp : BasePlugin, IMatchCallback
         if (_Match.CurrentState < MatchState.MatchRunning)
         {
             // Give players max money if no match is running
+            var userId = @event.Userid;
             Server.NextFrame(() =>
             {
-                var player = new Player(@event.Userid);
+                var player = new Player(userId);
 
                 // TODO read mp_maxmoney cvar
                 player.Money = 16000;
