@@ -165,7 +165,7 @@ public class PugSharp : BasePlugin, IMatchCallback
     {
         var userId = @event.Userid;
 
-        if (userId != null && (PlayerState(userId) == PlayerConnectedState.PlayerConnected || PlayerState(userId) == PlayerConnectedState.PlayerReconnecting))
+        if (userId != null && userId.IsValid && (PlayerState(userId) == PlayerConnectedState.PlayerConnected || PlayerState(userId) == PlayerConnectedState.PlayerReconnecting))
         {
             // // Userid will give you a reference to a CCSPlayerController class
             Console.WriteLine($"Player {userId.PlayerName} has connected full!");
