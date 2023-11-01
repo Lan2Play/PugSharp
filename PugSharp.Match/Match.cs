@@ -166,8 +166,9 @@ public class Match
 
         for (int i = 0; i < _MapsToSelect.Count; i++)
         {
-            string? map = _MapsToSelect[i].Name;
-            mapOptions.Add(new MenuOption(map, (opt, player) => BanMap(player, i.ToString())));
+            var mapNumber = i;
+            string? map = _MapsToSelect[mapNumber].Name;
+            mapOptions.Add(new MenuOption(map, (opt, player) => BanMap(player, mapNumber)));
         }
 
         ShowMenuToTeam(_CurrentMatchTeamToVote!, "Ban a map", mapOptions);
@@ -195,8 +196,8 @@ public class Match
 
         var mapOptions = new List<MenuOption>()
         {
-            new MenuOption("T", (opt, player) => VoteTeam(player, "T")),
-            new MenuOption("CT", (opt, player) => VoteTeam(player, "CT")),
+            new("T", (opt, player) => VoteTeam(player, "T")),
+            new("CT", (opt, player) => VoteTeam(player, "CT")),
         };
 
         ShowMenuToTeam(_CurrentMatchTeamToVote!, "Choose starting side:", mapOptions);
@@ -397,7 +398,7 @@ public class Match
         return Team.None;
     }
 
-    public bool BanMap(IPlayer player, string mapNumber)
+    public bool BanMap(IPlayer player, int mapNumber)
     {
         if (CurrentState != MatchState.MapVote)
         {
@@ -417,13 +418,8 @@ public class Match
             return false;
         }
 
-        if (!int.TryParse(mapNumber, out int mapNumberInt))
-        {
-            player.PrintToChat($"Mapnumber {mapNumber} is invalid!");
-            return false;
-        }
 
-        if (_MapsToSelect.Count <= mapNumberInt || mapNumberInt < 0)
+        if (_MapsToSelect.Count <= mapNumber || mapNumber < 0)
         {
             player.PrintToChat($"Mapnumber {mapNumber} is not available!");
             return false;
@@ -436,7 +432,7 @@ public class Match
             return false;
         }
 
-        var mapToSelect = _MapsToSelect[mapNumberInt];
+        var mapToSelect = _MapsToSelect[mapNumber];
         mapToSelect.Votes.Add(player);
 
         if (_MapsToSelect.Sum(x => x.Votes.Count) >= Config.PlayersPerTeam)

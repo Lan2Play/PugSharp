@@ -72,13 +72,12 @@ namespace PugSharp.Match.Tests
             var matchCount = config.Maplist.Length;
             var votePlayer = player1;
 
-            Assert.False(match.BanMap(votePlayer, matchCount.ToString()));
-            Assert.False(match.BanMap(votePlayer, "abc"));
+            Assert.False(match.BanMap(votePlayer, matchCount));
 
             while (matchCount > 1)
             {
-                Assert.True(match.BanMap(votePlayer, "0"));
-                Assert.False(match.BanMap(votePlayer, "0"));
+                Assert.True(match.BanMap(votePlayer, 0));
+                Assert.False(match.BanMap(votePlayer, 0));
                 if (matchCount > 2)
                 {
                     Assert.Equal(MatchState.MapVote, match.CurrentState);
