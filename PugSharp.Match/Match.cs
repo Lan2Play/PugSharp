@@ -184,6 +184,8 @@ public class Match
         _MapsToSelect.Remove(mapToBan!);
         _MapsToSelect.ForEach(x => x.Votes.Clear());
 
+        _MatchCallback.SendMessage($"Map {mapToBan} was banned!");
+
         if (_MapsToSelect.Count == 1)
         {
             _MatchInfo.SelectedMap = _MapsToSelect[0].Name;
@@ -254,7 +256,11 @@ public class Match
 
     private bool AllPlayersAreReady()
     {
-        return MatchTeams.SelectMany(m => m.Players).All(p => p.IsReady);
+        var allMatchPlayers = MatchTeams.SelectMany(m => m.Players);
+
+        Console.WriteLine($"Match has {allMatchPlayers.Count()} players:{string.Join("; ", allMatchPlayers.Select(a => $"{a.Player.PlayerName}[{a.IsReady}]"))}");
+
+        return allMatchPlayers.All(p => p.IsReady);
     }
 
     private void SetAllPlayersNotReady()

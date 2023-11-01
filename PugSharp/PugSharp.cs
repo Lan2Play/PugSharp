@@ -54,6 +54,22 @@ public class PugSharp : BasePlugin, IMatchCallback
 
     public void InitializeMatch(MatchConfig matchConfig)
     {
+        SetMatchVariable(matchConfig);
+
+        _Match = new Match.Match(this, matchConfig);
+
+        var players = GetAllPlayers();
+        foreach (var player in players.Where(x => x.UserId.HasValue && x.UserId >= 0))
+        {
+            if (player.UserId != null && !_Match.TryAddPlayer(player))
+            {
+                KickPlayer(player.UserId.Value);
+            }
+        }
+    }
+
+    private void SetMatchVariable(MatchConfig matchConfig)
+    {
         Server.ExecuteCommand("sv_disable_teamselect_menu true");
         Server.ExecuteCommand("sv_human_autojoin_team 2");
         Server.ExecuteCommand("mp_warmuptime 6000");
@@ -73,17 +89,6 @@ public class PugSharp : BasePlugin, IMatchCallback
         ExecuteServerCommand($"mp_teamflag_1", matchConfig.Team1.Flag);
         ExecuteServerCommand($"mp_teamname_2", matchConfig.Team2.Name);
         ExecuteServerCommand($"mp_teamflag_2", matchConfig.Team2.Flag);
-
-        _Match = new Match.Match(this, matchConfig);
-
-        var players = GetAllPlayers();
-        foreach (var player in players.Where(x => x.UserId.HasValue && x.UserId >= 0))
-        {
-            if (player.UserId != null && !_Match.TryAddPlayer(player))
-            {
-                KickPlayer(player.UserId.Value);
-            }
-        }
     }
 
     #region Commands
@@ -398,6 +403,11 @@ public class PugSharp : BasePlugin, IMatchCallback
         }
 
         Server.ExecuteCommand($"map {selectedMap}");
+
+        if (_Match != null)
+        {
+            SetMatchVariable(_Match.Config);
+        }
     }
 
     public IReadOnlyList<IPlayer> GetAllPlayers()
