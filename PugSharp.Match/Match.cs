@@ -371,6 +371,12 @@ public class Match
 
     public void TogglePlayerIsReady(IPlayer player)
     {
+        if (CurrentState != MatchState.WaitingForPlayersConnectedReady && CurrentState != MatchState.WaitingForPlayersReady)
+        {
+            player.PrintToChat("Currently ready state is not awaited!");
+            return;
+        }
+
         var matchPlayer = GetMatchPlayer(player.SteamID);
         matchPlayer.IsReady = !matchPlayer.IsReady;
 
