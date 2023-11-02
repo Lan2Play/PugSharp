@@ -425,7 +425,7 @@ public class PugSharp : BasePlugin, IMatchCallback
         }
 
         _Logger.LogInformation("Switch map to: \"{selectedMap}\"!", selectedMap);
-        Server.ExecuteCommand($"map {selectedMap}");
+        Server.ExecuteCommand($"changelevel {selectedMap}");
 
         if (_Match != null)
         {
