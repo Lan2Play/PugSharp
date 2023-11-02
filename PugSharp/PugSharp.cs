@@ -224,7 +224,7 @@ public class PugSharp : BasePlugin, IMatchCallback
         var userId = @event.Userid;
 
         // // Userid will give you a reference to a CCSPlayerController class
-        _Logger.LogInformation($"Player {userId.PlayerName} has disconnected!");
+        _Logger.LogInformation("Player {playerName} has disconnected!", userId.PlayerName);
 
         _Match?.SetPlayerDisconnected(new Player(userId));
 
@@ -239,7 +239,7 @@ public class PugSharp : BasePlugin, IMatchCallback
 
             if ((int)configTeam != @event.Team)
             {
-                _Logger.LogInformation($"Player {@event.Userid.PlayerName} tried to join {@event.Team} but is not allowed!");
+                _Logger.LogInformation("Player {playerName} tried to join {team} but is not allowed!", @event.Userid.PlayerName, @event.Team);
                 var player = new Player(@event.Userid);
 
                 Server.NextFrame(() =>
@@ -275,7 +275,7 @@ public class PugSharp : BasePlugin, IMatchCallback
 
     private HookResult OnRoundStart(EventRoundPrestart @event, GameEventInfo info)
     {
-        _Logger.LogInformation($"OnRoundStart called");
+        _Logger.LogInformation("OnRoundStart called");
 
         if (_Match == null)
         {
@@ -294,21 +294,21 @@ public class PugSharp : BasePlugin, IMatchCallback
 
     private HookResult OnRoundPreStart(EventRoundPrestart @event, GameEventInfo info)
     {
-        _Logger.LogInformation($"OnRoundPreStart called");
+        _Logger.LogInformation("OnRoundPreStart called");
 
         return HookResult.Continue;
     }
 
     private HookResult OnRoundFreezeEnd(EventRoundFreezeEnd @event, GameEventInfo info)
     {
-        _Logger.LogInformation($"OnRoundFreezeEnd called");
+        _Logger.LogInformation("OnRoundFreezeEnd called");
 
         return HookResult.Continue;
     }
 
     private HookResult OnRoundEnd(EventRoundEnd eventRoundEnd, GameEventInfo info)
     {
-        _Logger.LogInformation($"OnRoundEnd called");
+        _Logger.LogInformation("OnRoundEnd called");
 
         if (_Match == null)
         {
@@ -360,7 +360,7 @@ public class PugSharp : BasePlugin, IMatchCallback
 
     private HookResult OnMatchOver(EventCsWinPanelMatch @event, GameEventInfo info)
     {
-        _Logger.LogInformation($"OnMatchOver called");
+        _Logger.LogInformation("OnMatchOver called");
 
         if (_Match == null)
         {
@@ -393,7 +393,7 @@ public class PugSharp : BasePlugin, IMatchCallback
 
     private HookResult OnRoundWinPanel(EventCsWinPanelRound eventCsWinPanelRound, GameEventInfo info)
     {
-        _Logger.LogInformation($"On Round win panel");
+        _Logger.LogInformation("On Round win panel");
 
         return HookResult.Continue;
     }
@@ -406,7 +406,7 @@ public class PugSharp : BasePlugin, IMatchCallback
     {
         if (!Server.IsMapValid(selectedMap))
         {
-            _Logger.LogInformation($"The selected map is not valid: \"{selectedMap}\"!");
+            _Logger.LogInformation("The selected map is not valid: \"{selectedMap}\"!", selectedMap);
             return;
         }
 
@@ -465,7 +465,12 @@ public class PugSharp : BasePlugin, IMatchCallback
 
     public void StartDemoRecording()
     {
-        var demoFileName = $"PugSharp_Match_{_Match.Config.MatchId}_{DateTime.UtcNow.ToString("yyyyMMddHHmmss")}";
+        if (_Match == null)
+        {
+            return;
+        }
+
+        var demoFileName = $"PugSharp_Match_{_Match.Config.MatchId}_{DateTime.UtcNow:yyyyMMddHHmmss}";
         try
         {
             string directoryPath = Path.Join(Server.GameDirectory, "PugSharp", "Demo");
@@ -475,7 +480,7 @@ public class PugSharp : BasePlugin, IMatchCallback
             }
 
             var fullDemoFileName = Path.Join(directoryPath, demoFileName);
-            _Logger.LogInformation($"Starting demo recording, path: {fullDemoFileName}");
+            _Logger.LogInformation("Starting demo recording, path: {fullDemoFileName}", fullDemoFileName);
             Server.ExecuteCommand($"tv_record {fullDemoFileName}");
         }
         catch (Exception e)
@@ -487,7 +492,7 @@ public class PugSharp : BasePlugin, IMatchCallback
 
     public void StopDemoRecording()
     {
-        Server.ExecuteCommand($"tv_stoprecord");
+        Server.ExecuteCommand("tv_stoprecord");
     }
 
     #endregion
