@@ -268,15 +268,18 @@ public class Match : IDisposable
         if (_CurrentMatchTeamToVote!.Team == Team.Terrorist)
         {
             _MatchInfo.StartTeam1 = _TeamVotes.MaxBy(m => m.Votes.Count)!.Name;
+            if(_MatchInfo.StartTeam1.Equals("CT", StringComparison.OrdinalIgnoreCase))
+            {
+                _MatchCallback.SwapTeams();
+            }
         }
         else
         {
             _MatchInfo.StartTeam1 = _TeamVotes.MinBy(m => m.Votes.Count)!.Name;
-        }
-
-        if (_MatchInfo.StartTeam1.Equals(_CurrentMatchTeamToVote.Team.ToString(), StringComparison.OrdinalIgnoreCase))
-        {
-            _MatchCallback.SwapTeams();
+            if (_MatchInfo.StartTeam1.Equals("T", StringComparison.OrdinalIgnoreCase))
+            {
+                _MatchCallback.SwapTeams();
+            }
         }
 
         _MatchCallback.SendMessage($"{_CurrentMatchTeamToVote!.Team} selected {_MatchInfo.StartTeam1} as startside!");
@@ -577,6 +580,8 @@ public class Match : IDisposable
 
         teamToVote.Votes.Add(player);
 
+        player.PrintToChat($" {ChatColors.Default}You voted for {ChatColors.Highlight}{teamToVote.Name}");
+
         if (_TeamVotes.Sum(x => x.Votes.Count) >= Config.PlayersPerTeam)
         {
             TryFireState(MatchCommand.VoteTeam);
@@ -603,7 +608,7 @@ public class Match : IDisposable
         }
 
         team.IsPaused = false;
-        TryFireState(MatchCommand.Pause);
+        TryFireState(MatchCommand.Unpause);
     }
 
     protected virtual void Dispose(bool disposing)
