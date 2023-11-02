@@ -165,16 +165,17 @@ public class PugSharp : BasePlugin, IMatchCallback
         _Logger.LogInformation("Command ready called.");
     }
 
-    [ConsoleCommand("css_start", "Starts a match")]
-    public void OnCommandStart(CCSPlayerController? player, CommandInfo command)
+    [ConsoleCommand("css_unpause", "Starts a match")]
+    public void OnCommandUnpause(CCSPlayerController? player, CommandInfo command)
     {
         if (player == null)
         {
-            _Logger.LogInformation("Command Start has been called by the server.");
+            _Logger.LogInformation("Command unpause has been called by the server.");
             return;
         }
 
-        _Logger.LogInformation("Start Command called.");
+        _Logger.LogInformation("Unpause Command called.");
+        _Match?.Unpause(new Player(player));
     }
 
     [ConsoleCommand("css_pause", "Pauses the current match")]
@@ -187,6 +188,7 @@ public class PugSharp : BasePlugin, IMatchCallback
         }
 
         _Logger.LogInformation("Pause Command called.");
+        _Match?.Pause(new Player(player));
     }
 
     #endregion
@@ -439,13 +441,12 @@ public class PugSharp : BasePlugin, IMatchCallback
 
     public void PauseServer()
     {
-        // TODO Oder lieber mp_pause_match/mp_unpause_match sodass erst am ende der Runde eine pause gestartet wird?
-        Server.ExecuteCommand("pause");
+        Server.ExecuteCommand("mp_pause_match");
     }
 
     public void UnpauseServer()
     {
-        Server.ExecuteCommand("unpause");
+        Server.ExecuteCommand("mp_unpause_match");
     }
 
     public void DisableCheats()

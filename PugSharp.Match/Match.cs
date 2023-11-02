@@ -64,11 +64,13 @@ public class Match
 
         _MatchStateMachine.Configure(MatchState.MatchRunning)
             .Permit(MatchCommand.DisconnectPlayer, MatchState.MatchPaused)
+            .Permit(MatchCommand.Pause, MatchState.MatchPaused)
             .PermitIf(MatchCommand.CompleteMatch, MatchState.MatchCompleted, IsMatchReady)
             .OnEntryAsync(MatchLiveAsync);
 
         _MatchStateMachine.Configure(MatchState.MatchPaused)
             .PermitIf(MatchCommand.ConnectPlayer, MatchState.MatchRunning, AllPlayersAreConnected)
+            .PermitIf(MatchCommand.Unpause, MatchState.MatchRunning, AllTeamsUnpaused)
             .OnEntry(PauseMatch)
             .OnExit(UnpauseMatch);
 
@@ -94,6 +96,7 @@ public class Match
 
     private void PauseMatch()
     {
+        MatchTeams.ForEach(team => { team.IsPaused = true; });
         _MatchCallback.PauseServer();
     }
 
@@ -271,6 +274,8 @@ public class Match
         return readyPlayers.Count() == rquiredPlayers;
     }
 
+    private bool AllTeamsUnpaused() => MatchTeams.TrueForAll(x => !x.IsPaused);
+
     private void SetAllPlayersNotReady()
     {
         foreach (var player in MatchTeams.SelectMany(m => m.Players))
@@ -293,12 +298,15 @@ public class Match
         return !MapIsSelected();
     }
 
-    private void TryFireState(MatchCommand command)
+    private bool TryFireState(MatchCommand command)
     {
         if (_MatchStateMachine.CanFire(command))
         {
             _MatchStateMachine.Fire(command);
+            return true;
         }
+
+        return false;
     }
 
     private Task TryFireStateAsync(MatchCommand command)
@@ -523,6 +531,28 @@ public class Match
 
         return true;
     }
+
+    public void Pause(IPlayer player)
+    {
+        if (!TryFireState(MatchCommand.Pause))
+        {
+            player.PrintToChat("Pause is currently not possible!");
+        }
+    }
+
+    public void Unpause(IPlayer player)
+    {
+        var team = GetMatchTeam(player.SteamID);
+        if (team == null)
+        {
+            player.PrintToChat("Unpause is currently not possible!");
+            return;
+        }
+
+        team.IsPaused = false;
+        TryFireState(MatchCommand.Pause);
+    }
+
 
     #endregion
 

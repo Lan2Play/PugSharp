@@ -2,13 +2,6 @@
 
 namespace PugSharp.Config
 {
-    public class ServerConfig
-    {
-        [JsonPropertyName("admins")]
-        public Dictionary<ulong, string> Admins { get; set; }
-    }
-
-
     public class MatchConfig
     {
         [JsonPropertyName("maplist")]

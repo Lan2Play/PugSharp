@@ -10,5 +10,8 @@ public class MatchTeam
     }
 
     public List<MatchPlayer> Players { get; } = new List<MatchPlayer>();
+
     public Team Team { get; }
+
+    public bool IsPaused { get; internal set; }
 }
