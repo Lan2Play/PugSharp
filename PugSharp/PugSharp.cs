@@ -445,6 +445,12 @@ public class PugSharp : BasePlugin, IMatchCallback
         Server.ExecuteCommand($"changelevel {selectedMap}");
     }
 
+    public void SwapTeams()
+    {
+        _Logger.LogInformation("Swap Teams");
+        Server.ExecuteCommand("mp_swapteams");
+    }
+
     public IReadOnlyList<IPlayer> GetAllPlayers()
     {
         var playerEntities = Utilities.FindAllEntitiesByDesignerName<CCSPlayerController>("cs_player_controller");
