@@ -429,7 +429,10 @@ public class PugSharp : BasePlugin, IMatchCallback
 
         if (_Match != null)
         {
-            SetMatchVariable(_Match.Config);
+            Server.NextFrame(() =>
+            {
+                SetMatchVariable(_Match.Config);
+            });
         }
     }
 
