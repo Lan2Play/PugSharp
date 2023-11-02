@@ -34,6 +34,29 @@ namespace PugSharp.Config
             return (false, null);
         }
 
+        public async Task<(bool Successful, ServerConfig? Config)> LoadServerConfigAsync(string configPath)
+        {
+            try
+            {
+                if (!File.Exists(configPath))
+                {
+                    var config = new ServerConfig();
+                    using FileStream createStream = File.Create(configPath);
+                    await JsonSerializer.SerializeAsync(createStream, config).ConfigureAwait(false);
+                    return (true, config);
+                }
+
+                using var loadingStream = File.OpenRead(configPath);
+                var loadedConfig = await JsonSerializer.DeserializeAsync<ServerConfig>(loadingStream).ConfigureAwait(false);
+                return (true, loadedConfig);
+            }
+            catch (Exception ex)
+            {
+                _Logger.LogError(ex, "Error Loading Server Config");
+            }
+            return (false, null);
+        }
+
         #region IDisposable
 
         protected virtual void Dispose(bool disposing)

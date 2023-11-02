@@ -20,6 +20,7 @@ public class PugSharp : BasePlugin, IMatchCallback
     private readonly ConfigProvider _ConfigProvider = new();
 
     private Match.Match? _Match;
+    private ServerConfig? _ServerConfig;
 
     public override string ModuleName => "PugSharp Plugin";
 
@@ -29,8 +30,16 @@ public class PugSharp : BasePlugin, IMatchCallback
     public override void Load(bool hotReload)
     {
         _Logger.LogInformation("Loading PugSharp!");
-
         RegisterEventHandlers();
+        Task.Run(async () =>
+        {
+            var configPath = Path.Join(Server.GameDirectory, "PugSharp", "Config", "server.json");
+            var serverConfigResult = await _ConfigProvider.LoadServerConfigAsync(configPath).ConfigureAwait(false);
+            if (serverConfigResult.Successful)
+            {
+                _ServerConfig = serverConfigResult.Config;
+            }
+        });
     }
 
     private void RegisterEventHandlers()
@@ -58,6 +67,16 @@ public class PugSharp : BasePlugin, IMatchCallback
         {
             Server.ExecuteCommand($"{command} {value}");
         }
+    }
+
+    private bool IsAdmin(ulong? steamId)
+    {
+        if (_ServerConfig == null || steamId == null)
+        {
+            return false;
+        }
+
+        return _ServerConfig.Admins.ContainsKey(steamId.Value);
     }
 
     public void InitializeMatch(MatchConfig matchConfig)
@@ -104,6 +123,12 @@ public class PugSharp : BasePlugin, IMatchCallback
     [ConsoleCommand("css_loadconfig", "Load a match config")]
     public void OnCommandLoadConfig(CCSPlayerController? player, CommandInfo command)
     {
+        if (player != null && !IsAdmin(player.SteamID))
+        {
+            player.PrintToCenter("Command is only allowed for admins!");
+            return;
+        }
+
         _Logger.LogInformation("Start loading match config!");
         if (command.ArgCount != 3)
         {
@@ -236,7 +261,7 @@ public class PugSharp : BasePlugin, IMatchCallback
 
             }
         }
-        else
+        else if (!IsAdmin(@event.Userid?.SteamID))
         {
             var players = GetAllPlayers();
             foreach (var player in players.Where(x => x.UserId != null))
