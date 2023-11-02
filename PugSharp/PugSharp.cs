@@ -46,7 +46,7 @@ public class PugSharp : BasePlugin, IMatchCallback
 
         RegisterEventHandler<EventCsWinPanelRound>(OnRoundWinPanel, HookMode.Pre);
         RegisterEventHandler<EventCsWinPanelMatch>(OnMatchOver);
-        RegisterEventHandler<EventPlayerConnectFull>(OnPlayerconnectFull);
+        RegisterEventHandler<EventPlayerConnectFull>(OnPlayerConnectFull);
         RegisterEventHandler<EventPlayerDisconnect>(OnPlayerDisconnect);
         RegisterEventHandler<EventPlayerSpawn>(OnPlayerSpawn);
         RegisterEventHandler<EventRoundEnd>(OnRoundEnd, HookMode.Pre);
@@ -196,19 +196,25 @@ public class PugSharp : BasePlugin, IMatchCallback
 
     #region EventHandlers
 
-    private HookResult OnPlayerconnectFull(EventPlayerConnectFull @event, GameEventInfo info)
+    private HookResult OnPlayerConnectFull(EventPlayerConnectFull @event, GameEventInfo info)
     {
         var userId = @event.Userid;
 
         if (userId != null && userId.IsValid)
         {
             // // Userid will give you a reference to a CCSPlayerController class
-            _Logger.LogInformation($"Player {userId.PlayerName} has connected!");
+            _Logger.LogInformation("Player {playerName} has connected!", userId.PlayerName);
 
             if (_Match != null && _Match.CurrentState == MatchState.WaitingForPlayersConnectedReady)
             {
                 userId.PrintToChat($" {ChatColors.Default}Hello {ChatColors.Green}{userId.PlayerName}{ChatColors.Default}, welcome to match {_Match.Config.MatchId}");
                 userId.PrintToChat($" {ChatColors.Default}type {ChatColors.BlueGrey}!ready {ChatColors.Default}to be marked as ready for the match");
+            }
+
+            if (!userId.IsAdmin(_ServerConfig))
+            {
+                _Logger.LogInformation("No match is loaded. Kick Player {player}!", userId.PlayerName);
+                userId.Kick();
             }
         }
         else
@@ -248,8 +254,8 @@ public class PugSharp : BasePlugin, IMatchCallback
                     player.SwitchTeam(configTeam);
                     player.MatchStats?.ResetStats();
                 });
-                return HookResult.Continue;
 
+                return HookResult.Continue;
             }
         }
         else if (!@event.Userid.IsAdmin(_ServerConfig))
