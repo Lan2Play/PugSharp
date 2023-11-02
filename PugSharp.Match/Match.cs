@@ -1,4 +1,6 @@
-﻿using PugSharp.Match.Contract;
+﻿using Microsoft.Extensions.Logging;
+using PugSharp.Logging;
+using PugSharp.Match.Contract;
 using Stateless;
 using Stateless.Graph;
 
@@ -6,6 +8,8 @@ namespace PugSharp.Match;
 
 public class Match
 {
+    private static readonly ILogger<Match> _Logger = LogManager.CreateLogger<Match>();
+
     private readonly System.Timers.Timer _VoteTimer = new();
     private readonly IMatchCallback _MatchCallback;
     private readonly StateMachine<MatchState, MatchCommand> _MatchStateMachine;
@@ -119,7 +123,7 @@ public class Match
 
     private void OnMatchStateChanged(StateMachine<MatchState, MatchCommand>.Transition transition)
     {
-        Console.WriteLine($"MatchState Changed: {transition.Source} => {transition.Destination}");
+        _Logger.LogInformation($"MatchState Changed: {transition.Source} => {transition.Destination}");
     }
 
     private void SwitchToMatchMap()
@@ -256,7 +260,7 @@ public class Match
         var readyPlayers = MatchTeams.SelectMany(m => m.Players).Where(p => p.IsReady);
         var rquiredPlayers = Config.PlayersPerTeam * 2;
 
-        Console.WriteLine($"Match has {readyPlayers.Count()} of {rquiredPlayers} ready players: {string.Join("; ", readyPlayers.Select(a => $"{a.Player.PlayerName}[{a.IsReady}]"))}");
+        _Logger.LogInformation($"Match has {readyPlayers.Count()} of {rquiredPlayers} ready players: {string.Join("; ", readyPlayers.Select(a => $"{a.Player.PlayerName}[{a.IsReady}]"))}");
 
         return readyPlayers.Count() == rquiredPlayers;
     }
@@ -327,7 +331,7 @@ public class Match
             return false;
         }
 
-        Console.WriteLine($"Player {player.PlayerName} belongs to {playerTeam}");
+        _Logger.LogInformation($"Player {player.PlayerName} belongs to {playerTeam}");
 
         if (player.Team != playerTeam)
         {

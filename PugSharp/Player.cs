@@ -1,6 +1,8 @@
 ﻿using CounterStrikeSharp.API;
 using CounterStrikeSharp.API.Core;
 using CounterStrikeSharp.API.Modules.Menu;
+using Microsoft.Extensions.Logging;
+using PugSharp.Logging;
 using PugSharp.Match.Contract;
 using System.Text.Json.Serialization;
 
@@ -8,13 +10,14 @@ namespace PugSharp;
 
 public class Player : IPlayer
 {
+    private static readonly ILogger<Player> _Logger = LogManager.CreateLogger<Player>();
     private readonly CCSPlayerController _PlayerController;
 
     public Player(CCSPlayerController playerController)
     {
         if (!playerController.IsValid)
         {
-            Console.WriteLine("PlayerController is invalid!");
+            _Logger.LogError("PlayerController is invalid!");
         }
 
         _PlayerController = playerController;

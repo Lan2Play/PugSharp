@@ -3,31 +3,39 @@ using CounterStrikeSharp.API.Core;
 using CounterStrikeSharp.API.Core.Attributes.Registration;
 using CounterStrikeSharp.API.Modules.Commands;
 using CounterStrikeSharp.API.Modules.Memory;
+using Microsoft.Extensions.Logging;
 using PugSharp.Config;
+using PugSharp.Logging;
 using PugSharp.Match.Contract;
 using System.Text.Json;
 
 namespace PugSharp;
 
+
+
 public class PugSharp : BasePlugin, IMatchCallback
 {
+    private static readonly ILogger<PugSharp> _Logger = LogManager.CreateLogger<PugSharp>();
+
     private readonly ConfigProvider _ConfigProvider = new();
+
     private Match.Match? _Match;
 
     public override string ModuleName => "PugSharp Plugin";
 
     public override string ModuleVersion => "0.0.1";
 
+
     public override void Load(bool hotReload)
     {
-        Console.WriteLine("Loading PugSharp!");
+        _Logger.LogInformation("Loading PugSharp!");
 
         RegisterEventHandlers();
     }
 
     private void RegisterEventHandlers()
     {
-        Console.WriteLine("Begin RegisterEventHandlers");
+        _Logger.LogInformation("Begin RegisterEventHandlers");
 
         RegisterEventHandler<EventCsWinPanelRound>(OnRoundWinPanel, HookMode.Pre);
         RegisterEventHandler<EventCsWinPanelMatch>(OnMatchOver);
@@ -41,7 +49,7 @@ public class PugSharp : BasePlugin, IMatchCallback
         RegisterEventHandler<EventServerCvar>(OnCvarChanged, HookMode.Pre);
         RegisterEventHandler<EventPlayerTeam>(OnPlayerTeam);
 
-        Console.WriteLine("End RegisterEventHandlers");
+        _Logger.LogInformation("End RegisterEventHandlers");
     }
 
     private void ExecuteServerCommand(string command, string value)
@@ -96,10 +104,10 @@ public class PugSharp : BasePlugin, IMatchCallback
     [ConsoleCommand("st_loadconfig", "Load a match config")]
     public void OnCommandLoadConfig(CCSPlayerController? player, CommandInfo command)
     {
-        Console.WriteLine("Start loading match config!");
+        _Logger.LogInformation("Start loading match config!");
         if (command.ArgCount != 3)
         {
-            Console.WriteLine("Url is required as Argument!");
+            _Logger.LogInformation("Url is required as Argument!");
             player?.PrintToCenter("Url is required as Argument!");
 
             return;
@@ -118,9 +126,9 @@ public class PugSharp : BasePlugin, IMatchCallback
     [ConsoleCommand("st_dumpmatch", "Serialize match to JSON on console")]
     public void OnCommandDumpMatch(CCSPlayerController? player, CommandInfo command)
     {
-        Console.WriteLine("################ dump match ################");
-        Console.WriteLine(JsonSerializer.Serialize(_Match));
-        Console.WriteLine("################ dump match ################");
+        _Logger.LogInformation("################ dump match ################");
+        _Logger.LogInformation(JsonSerializer.Serialize(_Match));
+        _Logger.LogInformation("################ dump match ################");
     }
 
     [ConsoleCommand("ready", "Mark player as ready")]
@@ -128,7 +136,7 @@ public class PugSharp : BasePlugin, IMatchCallback
     {
         if (player == null)
         {
-            Console.WriteLine("Command Start has been called by the server. Player is required to be marked as ready");
+            _Logger.LogInformation("Command Start has been called by the server. Player is required to be marked as ready");
             return;
         }
 
@@ -142,7 +150,7 @@ public class PugSharp : BasePlugin, IMatchCallback
         _Match.TogglePlayerIsReadyAsync(matchPlayer);
 
 
-        Console.WriteLine("Command ready called.");
+        _Logger.LogInformation("Command ready called.");
     }
 
     [ConsoleCommand("st_start", "Starts a match")]
@@ -150,11 +158,11 @@ public class PugSharp : BasePlugin, IMatchCallback
     {
         if (player == null)
         {
-            Console.WriteLine("Command Start has been called by the server.");
+            _Logger.LogInformation("Command Start has been called by the server.");
             return;
         }
 
-        Console.WriteLine("Start Command called.");
+        _Logger.LogInformation("Start Command called.");
     }
 
     [ConsoleCommand("st_pause", "Pauses the current match")]
@@ -162,11 +170,11 @@ public class PugSharp : BasePlugin, IMatchCallback
     {
         if (player == null)
         {
-            Console.WriteLine("Command Pause has been called by the server.");
+            _Logger.LogInformation("Command Pause has been called by the server.");
             return;
         }
 
-        Console.WriteLine("Pause Command called.");
+        _Logger.LogInformation("Pause Command called.");
     }
 
     #endregion
@@ -180,7 +188,7 @@ public class PugSharp : BasePlugin, IMatchCallback
         if (userId != null && userId.IsValid)
         {
             // // Userid will give you a reference to a CCSPlayerController class
-            Console.WriteLine($"Player {userId.PlayerName} has connected!");
+            _Logger.LogInformation($"Player {userId.PlayerName} has connected!");
 
             if (_Match != null && _Match.CurrentState == MatchState.WaitingForPlayersConnectedReady)
             {
@@ -190,7 +198,7 @@ public class PugSharp : BasePlugin, IMatchCallback
         }
         else
         {
-            Console.WriteLine($"Ivalid Player has connected!");
+            _Logger.LogInformation($"Ivalid Player has connected!");
         }
 
         return HookResult.Continue;
@@ -201,7 +209,7 @@ public class PugSharp : BasePlugin, IMatchCallback
         var userId = @event.Userid;
 
         // // Userid will give you a reference to a CCSPlayerController class
-        Console.WriteLine($"Player {userId.PlayerName} has disconnected!");
+        _Logger.LogInformation($"Player {userId.PlayerName} has disconnected!");
 
         _Match?.SetPlayerDisconnected(new Player(userId));
 
@@ -216,7 +224,7 @@ public class PugSharp : BasePlugin, IMatchCallback
 
             if ((int)configTeam != @event.Team)
             {
-                Console.WriteLine($"Player {@event.Userid.PlayerName} tried to join {@event.Team} but is not allowed!");
+                _Logger.LogInformation($"Player {@event.Userid.PlayerName} tried to join {@event.Team} but is not allowed!");
                 var player = new Player(@event.Userid);
 
                 Server.NextFrame(() =>
@@ -256,7 +264,7 @@ public class PugSharp : BasePlugin, IMatchCallback
 
     private HookResult OnRoundStart(EventRoundPrestart @event, GameEventInfo info)
     {
-        Console.WriteLine($"OnRoundStart called");
+        _Logger.LogInformation($"OnRoundStart called");
 
         if (_Match == null)
         {
@@ -275,21 +283,21 @@ public class PugSharp : BasePlugin, IMatchCallback
 
     private HookResult OnRoundPreStart(EventRoundPrestart @event, GameEventInfo info)
     {
-        Console.WriteLine($"OnRoundPreStart called");
+        _Logger.LogInformation($"OnRoundPreStart called");
 
         return HookResult.Continue;
     }
 
     private HookResult OnRoundFreezeEnd(EventRoundFreezeEnd @event, GameEventInfo info)
     {
-        Console.WriteLine($"OnRoundFreezeEnd called");
+        _Logger.LogInformation($"OnRoundFreezeEnd called");
 
         return HookResult.Continue;
     }
 
     private HookResult OnRoundEnd(EventRoundEnd eventRoundEnd, GameEventInfo info)
     {
-        Console.WriteLine($"OnRoundEnd called");
+        _Logger.LogInformation($"OnRoundEnd called");
 
         if (_Match == null)
         {
@@ -341,7 +349,7 @@ public class PugSharp : BasePlugin, IMatchCallback
 
     private HookResult OnMatchOver(EventCsWinPanelMatch @event, GameEventInfo info)
     {
-        Console.WriteLine($"OnMatchOver called");
+        _Logger.LogInformation($"OnMatchOver called");
 
         if (_Match == null)
         {
@@ -374,7 +382,7 @@ public class PugSharp : BasePlugin, IMatchCallback
 
     private HookResult OnRoundWinPanel(EventCsWinPanelRound eventCsWinPanelRound, GameEventInfo info)
     {
-        Console.WriteLine($"On Round win panel");
+        _Logger.LogInformation($"On Round win panel");
 
         return HookResult.Continue;
     }
@@ -397,7 +405,7 @@ public class PugSharp : BasePlugin, IMatchCallback
     {
         if (!Server.IsMapValid(selectedMap))
         {
-            Console.WriteLine($"The selected map is not valid: \"{selectedMap}\"!");
+            _Logger.LogInformation($"The selected map is not valid: \"{selectedMap}\"!");
             return;
         }
 

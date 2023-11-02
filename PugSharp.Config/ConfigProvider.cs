@@ -1,15 +1,19 @@
-﻿using System.Text.Json;
+﻿using Microsoft.Extensions.Logging;
+using PugSharp.Logging;
+using System.Text.Json;
 
 namespace PugSharp.Config
 {
     public class ConfigProvider : IDisposable
     {
+        private static readonly ILogger<ConfigProvider> _Logger = LogManager.CreateLogger<ConfigProvider>();
+
         private readonly HttpClient _HttpClient = new();
         private bool disposedValue;
 
         public async Task<(bool Successful, MatchConfig? Config)> TryLoadConfigAsync(string url, string authToken)
         {
-            Console.WriteLine($"Loading match from \"{url}\"");
+            _Logger.LogInformation($"Loading match from \"{url}\"");
 
             try
             {
@@ -18,13 +22,13 @@ namespace PugSharp.Config
                 var config = await JsonSerializer.DeserializeAsync<MatchConfig>(configJsonStream).ConfigureAwait(false);
                 if (config != null)
                 {
-                    Console.WriteLine($"Successfully loaded config for match {config.MatchId}");
+                    _Logger.LogInformation($"Successfully loaded config for match {config.MatchId}");
                     return (true, config);
                 }
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Failed loading config from \"{url}\". Error: {ex.Message};");
+                _Logger.LogError(ex, $"Failed loading config from \"{url}\".");
             }
 
             return (false, null);

@@ -6,4 +6,8 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\PugSharp.Logging\PugSharp.Logging.csproj" />
+  </ItemGroup>
+
 </Project>

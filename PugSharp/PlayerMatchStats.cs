@@ -1,10 +1,14 @@
 ﻿using CounterStrikeSharp.API.Core;
+using Microsoft.Extensions.Logging;
+using PugSharp.Logging;
 using PugSharp.Match.Contract;
 
 namespace PugSharp;
 
 public class PlayerMatchStats : IPlayerMatchStats
 {
+    private static readonly ILogger<PlayerMatchStats> _Logger = LogManager.CreateLogger<PlayerMatchStats>();
+
     private readonly CSMatchStats_t _MatchStats;
     private readonly IPlayer _Player;
 
@@ -52,7 +56,7 @@ public class PlayerMatchStats : IPlayerMatchStats
 
     public void ResetStats()
     {
-        Console.WriteLine($"ResetStats for Player {_Player.PlayerName}. Kills: {Kills}; Assists: {Assists}; Deaths: {Deaths}");
+        _Logger.LogInformation($"ResetStats for Player {_Player.PlayerName}. Kills: {Kills}; Assists: {Assists}; Deaths: {Deaths}");
         Kills = 0;
         Assists = 0;
         Deaths = 0;

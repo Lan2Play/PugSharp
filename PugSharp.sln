@@ -13,6 +13,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PugSharp.Config", "PugSharp
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PugSharp.Match.Tests", "PugSharp.Match.Tests\PugSharp.Match.Tests.csproj", "{C124CD7A-AEA7-4679-8A6E-E82FF4256969}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PugSharp.Logging", "PugSharp.Logging\PugSharp.Logging.csproj", "{1D42D630-EA6B-4C6D-8841-D095AE951430}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -39,6 +41,10 @@ Global
 		{C124CD7A-AEA7-4679-8A6E-E82FF4256969}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C124CD7A-AEA7-4679-8A6E-E82FF4256969}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C124CD7A-AEA7-4679-8A6E-E82FF4256969}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1D42D630-EA6B-4C6D-8841-D095AE951430}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1D42D630-EA6B-4C6D-8841-D095AE951430}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1D42D630-EA6B-4C6D-8841-D095AE951430}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1D42D630-EA6B-4C6D-8841-D095AE951430}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

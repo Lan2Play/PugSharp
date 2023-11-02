@@ -1,4 +1,6 @@
 ﻿using Microsoft.AspNetCore.WebUtilities;
+using Microsoft.Extensions.Logging;
+using PugSharp.Logging;
 using System.Globalization;
 using System.Net.Http.Headers;
 
@@ -6,6 +8,8 @@ namespace PugSharp
 {
     internal class ApiStats : IDisposable
     {
+        private static readonly ILogger<ApiStats> _Logger = LogManager.CreateLogger<ApiStats>();
+
         private readonly HttpClient _HttpClient;
 
         public ApiStats(string apiStatsUrl, string apiStatsKey)
@@ -174,13 +178,13 @@ namespace PugSharp
 
             if (!httpResponseMessage.IsSuccessStatusCode)
             {
-                Console.WriteLine($"API request failed, HTTP status code = {httpResponseMessage.StatusCode}");
+                _Logger.LogError($"API request failed, HTTP status code = {httpResponseMessage.StatusCode}");
 
                 try
                 {
                     var responseContent = await httpResponseMessage.Content.ReadAsStringAsync(cancellationToken);
 
-                    Console.WriteLine($"ResponseContent: {responseContent}");
+                    _Logger.LogError($"ResponseContent: {responseContent}");
                 }
                 catch (Exception)
                 {
