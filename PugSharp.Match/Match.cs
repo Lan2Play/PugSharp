@@ -175,6 +175,11 @@ public class Match
 
     private void ReadyReminderTimer_Elapsed(object? sender, System.Timers.ElapsedEventArgs e)
     {
+        if (!_ReadyReminderTimer.Enabled)
+        {
+            return;
+        }
+
         try
         {
             _Logger.LogInformation("ReadyReminder Elapsed");
