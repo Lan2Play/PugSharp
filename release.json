@@ -1,0 +1,6 @@
+{
+ "PluginName": "PugSharp",
+ "Version": "%%VERSION%%",
+ "CounterStrikeSharpVersion": "%%COUNTERSTRIKESHARPVERSION%%",
+ "CS2Version": "%%CS2VERSION%%"
+}
