@@ -108,20 +108,24 @@ jobs:
       - name: copy package content
         run: cp -rf PugSharp/bin/Debug/net7.0/publish/* packagebuild/addons/counterstrikesharp/plugins/PugSharp
       - name: build package
-        run: zip -r PugSharp_${PUGSHARPNETVER}.zip packagebuild/addons
+        run: zip -r PugSharp_$PUGSHARPNETVER.zip packagebuild/addons
+      - name: ls
+        run: ls -la
+      - name: find
+        run: find .
       - name: replace version variable in meta files
-        run: sed -i 's|%%VERSION%%|${PUGSHARPNETVER}|g' ./release.json;       
+        run: sed -i "s|%%VERSION%%|$PUGSHARPNETVER|g" ./release.json;       
       - name: replace CounterStrikeSharpVersion variable in meta files
-        run: sed -i 's|%%COUNTERSTRIKESHARPVERSION%%|0.0.1|g' ./release.json; 
+        run: sed -i "s|%%COUNTERSTRIKESHARPVERSION%%|0.0.1|g" ./release.json; 
       - name: replace CS2VERSION variable in meta files
-        run: sed -i 's|%%CS2VERSION%%|1.39.6.5/13965 9842|g' ./release.json; 
+        run: sed -i "s|%%CS2VERSION%%|1.39.6.5/13965 9842|g" ./release.json; 
       - name: Release
         if: ${{ (startsWith(github.ref, 'refs/tags/v')) && !(contains(github.ref, '-beta')) }}
         uses: softprops/action-gh-release@v1
         with:
           files: |
             ./release.json
-            ./PugSharp_${PUGSHARPNETVER}.zip 
+            ./PugSharp_$PUGSHARPNETVER.zip 
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: pre Release
@@ -131,7 +135,7 @@ jobs:
           prerelease: true
           files: |
             ./release.json
-            ./PugSharp_${PUGSHARPNETVER}.zip 
+            ./PugSharp_$PUGSHARPNETVER.zip 
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: upload pre - pre release
@@ -140,5 +144,5 @@ jobs:
           name: latest_pre_pre
           path: |
             ./release.json
-            ./PugSharp_${PUGSHARPNETVER}.zip 
+            ./PugSharp_$PUGSHARPNETVER.zip 
           retention-days: 10
