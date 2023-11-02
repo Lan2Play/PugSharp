@@ -11,4 +11,6 @@ public interface IMatchCallback
     void UnpauseServer();
 
     void DisableCheats();
+    void StartDemoRecording();
+    void StopDemoRecording();
 }

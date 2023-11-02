@@ -73,7 +73,8 @@ public class Match
             .OnEntry(PauseMatch)
             .OnExit(UnpauseMatch);
 
-        _MatchStateMachine.Configure(MatchState.MatchCompleted);
+        _MatchStateMachine.Configure(MatchState.MatchCompleted)
+            .OnEntry(CompleteMatch);
 
 
         _MatchStateMachine.OnTransitioned(OnMatchStateChanged);
@@ -105,10 +106,15 @@ public class Match
         }
 
         _MatchCallback.EndWarmup();
-
         _MatchCallback.DisableCheats();
+        _MatchCallback.StartDemoRecording();
 
         TryFireState(MatchCommand.StartMatch);
+    }
+
+    private void CompleteMatch()
+    {
+        _MatchCallback.StopDemoRecording();
     }
 
     private async Task MatchLiveAsync()

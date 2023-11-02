@@ -478,6 +478,33 @@ public class PugSharp : BasePlugin, IMatchCallback
         Server.ExecuteCommand("sv_cheats 0");
     }
 
+    public void StartDemoRecording()
+    {
+        var demoFileName = $"PugSharp_Match_{_Match.Config.MatchId}_{DateTime.UtcNow.ToString("yyyyMMddHHmmss")}";
+        try
+        {
+            string directoryPath = Path.Join(Server.GameDirectory, "PugSharp", "Demo");
+            if (!Directory.Exists(directoryPath))
+            {
+                Directory.CreateDirectory(directoryPath);
+            }
+
+            var fullDemoFileName = Path.Join(directoryPath, demoFileName);
+            _Logger.LogInformation($"Starting demo recording, path: {fullDemoFileName}");
+            Server.ExecuteCommand($"tv_record {fullDemoFileName}");
+        }
+        catch (Exception e)
+        {
+            _Logger.LogError(e, "Error Starting DemoRecording. Fallback to tv_record ");
+            Server.ExecuteCommand($"tv_record {demoFileName}");
+        }
+    }
+
+    public void StopDemoRecording()
+    {
+        Server.ExecuteCommand($"tv_stoprecord");
+    }
+
     #endregion
 
 
