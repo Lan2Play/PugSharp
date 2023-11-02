@@ -6,7 +6,7 @@ using Stateless.Graph;
 
 namespace PugSharp.Match;
 
-public class Match
+public class Match : IDisposable
 {
     private static readonly ILogger<Match> _Logger = LogManager.CreateLogger<Match>();
 
@@ -21,6 +21,7 @@ public class Match
     private readonly MatchInfo _MatchInfo = new();
 
     private MatchTeam? _CurrentMatchTeamToVote;
+    private bool disposedValue;
 
     public Match(IMatchCallback matchCallback, Config.MatchConfig matchConfig)
     {
@@ -273,7 +274,7 @@ public class Match
             _MatchInfo.StartTeam1 = _TeamVotes.MinBy(m => m.Votes.Count)!.Name;
         }
 
-        if(_MatchInfo.StartTeam1.Equals(_CurrentMatchTeamToVote.Team.ToString(), StringComparison.OrdinalIgnoreCase))
+        if (_MatchInfo.StartTeam1.Equals(_CurrentMatchTeamToVote.Team.ToString(), StringComparison.OrdinalIgnoreCase))
         {
             _MatchCallback.SwapTeams();
         }
@@ -603,6 +604,30 @@ public class Match
 
         team.IsPaused = false;
         TryFireState(MatchCommand.Pause);
+    }
+
+    protected virtual void Dispose(bool disposing)
+    {
+        if (!disposedValue)
+        {
+            if (disposing)
+            {
+                _VoteTimer.Elapsed -= VoteTimer_Elapsed;
+                _VoteTimer.Dispose();
+
+                _ReadyReminderTimer.Elapsed -= ReadyReminderTimer_Elapsed;
+                _ReadyReminderTimer.Dispose();
+            }
+
+            disposedValue = true;
+        }
+    }
+
+    public void Dispose()
+    {
+        // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
+        Dispose(disposing: true);
+        GC.SuppressFinalize(this);
     }
 
 

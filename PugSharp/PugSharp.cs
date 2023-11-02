@@ -76,6 +76,7 @@ public class PugSharp : BasePlugin, IMatchCallback
     {
         SetMatchVariable(matchConfig);
 
+        _Match?.Dispose();
         _Match = new Match.Match(this, matchConfig);
 
         var players = GetAllPlayers();
@@ -554,6 +555,7 @@ public class PugSharp : BasePlugin, IMatchCallback
 
         if (disposing)
         {
+            _Match?.Dispose();
             _ConfigProvider.Dispose();
         }
     }
