@@ -2,6 +2,7 @@
 using CounterStrikeSharp.API.Core;
 using CounterStrikeSharp.API.Core.Attributes.Registration;
 using CounterStrikeSharp.API.Modules.Commands;
+using CounterStrikeSharp.API.Modules.Entities;
 using CounterStrikeSharp.API.Modules.Utils;
 using Microsoft.Extensions.Logging;
 using PugSharp.Config;
@@ -217,13 +218,19 @@ public class PugSharp : BasePlugin, IMatchCallback
             // // Userid will give you a reference to a CCSPlayerController class
             _Logger.LogInformation("Player {playerName} has connected!", userId.PlayerName);
 
-            if (_Match != null && _Match.CurrentState == MatchState.WaitingForPlayersConnectedReady)
+            if (_Match != null)
             {
-                userId.PrintToChat($" {ChatColors.Default}Hello {ChatColors.Green}{userId.PlayerName}{ChatColors.Default}, welcome to match {_Match.Config.MatchId}");
-                userId.PrintToChat($" {ChatColors.Default}type {ChatColors.BlueGrey}!ready {ChatColors.Default}to be marked as ready for the match");
+                if (_Match.CurrentState == MatchState.WaitingForPlayersConnectedReady)
+                {
+                    userId.PrintToChat($" {ChatColors.Default}Hello {ChatColors.Green}{userId.PlayerName}{ChatColors.Default}, welcome to match {_Match.Config.MatchId}");
+                    userId.PrintToChat($" {ChatColors.Default}type {ChatColors.BlueGrey}!ready {ChatColors.Default}to be marked as ready for the match");
+                }
+                else if (_Match.CurrentState == MatchState.MatchPaused)
+                {
+                    _Match.TryAddPlayer(new Player(userId));
+                }
             }
-
-            if (_Match == null && !userId.IsAdmin(_ServerConfig))
+            else if (!userId.IsAdmin(_ServerConfig))
             {
                 _Logger.LogInformation("No match is loaded. Kick Player {player}!", userId.PlayerName);
                 userId.Kick();
@@ -537,7 +544,7 @@ public class PugSharp : BasePlugin, IMatchCallback
         }
         catch (Exception e)
         {
-            _Logger.LogError(e, "Error Starting DemoRecording. Fallback to tv_record ");
+            _Logger.LogError(e, "Error Starting DemoRecording. Fallback to tv_record. Fallback to {demoFileName}", demoFileName);
             Server.ExecuteCommand($"tv_record {demoFileName}");
         }
     }
