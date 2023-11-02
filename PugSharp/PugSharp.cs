@@ -511,7 +511,7 @@ public class PugSharp : BasePlugin, IMatchCallback
     public void SetupRoundBackup()
     {
         var prefix = $"PugSharp_{_Match?.Config.MatchId}_";
-        _Logger.LogInformation("Starting demo recording: {prefix}", prefix);
+        _Logger.LogInformation("Create round backup files: {prefix}", prefix);
         Server.ExecuteCommand($"mp_backup_round_file {prefix}");
     }
 
@@ -522,7 +522,7 @@ public class PugSharp : BasePlugin, IMatchCallback
             return;
         }
 
-        var demoFileName = $"PugSharp_Match_{_Match.Config.MatchId}_{DateTime.UtcNow:yyyyMMddHHmmss}";
+        var demoFileName = $"PugSharp_Match_{_Match.Config.MatchId}_{DateTime.UtcNow:yyyyMMddHHmmss}.dem";
         try
         {
             string directoryPath = Path.Join(Server.GameDirectory, "PugSharp", "Demo");
