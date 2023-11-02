@@ -179,7 +179,7 @@ public class Match
         {
             _Logger.LogInformation("ReadyReminder Elapsed");
             var readyPlayerIds = MatchTeams.SelectMany(x => x.Players).Where(p => p.IsReady).Select(x => x.Player.SteamID).ToList();
-            var notReadyPlayers = _MatchCallback.GetAllPlayers().Where(p=> readyPlayerIds.Contains(p.SteamID));
+            var notReadyPlayers = _MatchCallback.GetAllPlayers().Where(p=> !readyPlayerIds.Contains(p.SteamID));
             
             var remindMessage = $" {ChatColors.Default}You are not ready! Type {ChatColors.BlueGrey}!ready {ChatColors.Default}if you are ready.";
             foreach (var player in notReadyPlayers)
