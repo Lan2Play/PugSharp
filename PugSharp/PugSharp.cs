@@ -58,8 +58,11 @@ public class PugSharp : BasePlugin, IMatchCallback
 
         RegisterListener<CounterStrikeSharp.API.Core.Listeners.OnMapStart>(OnMapStartHandler);
 
+        AddCommandListener("jointeam", OnClientCommandJoinTeam);
+
         _Logger.LogInformation("End RegisterEventHandlers");
     }
+
 
     private void ExecuteServerCommand(string command, string value)
     {
@@ -427,6 +430,21 @@ public class PugSharp : BasePlugin, IMatchCallback
                 SetMatchVariable(_Match.Config);
             });
         }
+    }
+
+    #endregion
+
+    #region ClientCommandListener
+
+    private HookResult OnClientCommandJoinTeam(CCSPlayerController? player, CommandInfo commandInfo)
+    {
+        _Logger.LogInformation("OnClientCommandJoinTeam was called!");
+        if (player != null && player.IsValid)
+        {
+            _Logger.LogInformation("Player {playerName} tried to switch team!", player.PlayerName);
+        }
+
+        return HookResult.Stop;
     }
 
     #endregion
