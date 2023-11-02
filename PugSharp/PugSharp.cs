@@ -56,7 +56,6 @@ public class PugSharp : BasePlugin, IMatchCallback
         RegisterEventHandler<EventRoundPrestart>(OnRoundStart);
         RegisterEventHandler<EventServerCvar>(OnCvarChanged, HookMode.Pre);
         RegisterEventHandler<EventPlayerTeam>(OnPlayerTeam);
-        RegisterEventHandler<EventCsWinPanelMatch>(OnMatchWinPanel);
 
 
         RegisterListener<CounterStrikeSharp.API.Core.Listeners.OnMapStart>(OnMapStartHandler);
@@ -120,6 +119,8 @@ public class PugSharp : BasePlugin, IMatchCallback
 
         _Logger.LogInformation("Set match variables done");
     }
+
+
 
     #region Commands
 
@@ -407,7 +408,10 @@ public class PugSharp : BasePlugin, IMatchCallback
 
         if (_Match.CurrentState == MatchState.MatchRunning)
         {
-            // TODO Figure out who won
+            _Match?.Complete(LoadMatchWinnerName());
+
+
+            // TODO Figure out who won => Done In match Complete
 
             // TODO Update stats
 
@@ -429,13 +433,6 @@ public class PugSharp : BasePlugin, IMatchCallback
         return HookResult.Continue;
     }
 
-
-    private HookResult OnMatchWinPanel(EventCsWinPanelMatch @event, GameEventInfo info)
-    {
-        _Logger.LogInformation("On Match win panel");
-        _Match?.Complete();
-        return HookResult.Continue;
-    }
 
     #endregion
 
@@ -564,6 +561,46 @@ public class PugSharp : BasePlugin, IMatchCallback
     public void StopDemoRecording()
     {
         Server.ExecuteCommand("tv_stoprecord");
+    }
+
+    public Match.Contract.Team LoadMatchWinnerName()
+    {
+        var (CtScore, TScore) = LoadTeamsScore();
+        if (CtScore > TScore)
+        {
+            return Match.Contract.Team.CounterTerrorist;
+        }
+
+        if (TScore > CtScore)
+        {
+            return Match.Contract.Team.Terrorist;
+        }
+
+        return Match.Contract.Team.None;
+    }
+
+    private (int CtScore, int TScore) LoadTeamsScore()
+    {
+        var teamEntities = Utilities.FindAllEntitiesByDesignerName<CCSTeam>("cs_team_manager");
+        int ctScore = 0;
+        int tScore = 0;
+        foreach (var team in teamEntities)
+        {
+            if (team.Teamname == "CT")
+            {
+                ctScore = team.Score;
+            }
+            else if (team.Teamname == "TERRORIST")
+            {
+                tScore = team.Score;
+            }
+            else
+            {
+                _Logger.LogError("Error during GetTeamsScore: Unknown Teamname: {teamname}", team.Teamname);
+            }
+        }
+
+        return (ctScore, tScore);
     }
 
     #endregion

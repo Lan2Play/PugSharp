@@ -631,8 +631,9 @@ public class Match : IDisposable
         GC.SuppressFinalize(this);
     }
 
-    public void Complete()
+    public void Complete(Team winner)
     {
+        _Logger.LogInformation("The winner is: {winner}", winner);
         TryFireState(MatchCommand.CompleteMatch);
     }
 

@@ -15,4 +15,5 @@ public interface IMatchCallback
     void StartDemoRecording();
     void StopDemoRecording();
     void SetupRoundBackup();
+    Team LoadMatchWinnerName();
 }
