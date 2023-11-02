@@ -1,9 +1,17 @@
+currentDir = $(shell dirname $(realpath $(lastword $(MAKEFILE_LIST))))
+userId = $(shell id -u)
+groupId = $(shell id -g)
+
+
 build-and-copy: build copy
 
 
 
 build:
 	dotnet publish -c debug
+
+init-csserver:
+
 
 copy:
 	rm PugSharp/bin/Debug/net7.0/publish/CounterStrikeSharp.API.dll
