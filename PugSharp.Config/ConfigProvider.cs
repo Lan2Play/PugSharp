@@ -13,7 +13,7 @@ namespace PugSharp.Config
 
         public async Task<(bool Successful, MatchConfig? Config)> TryLoadConfigAsync(string url, string authToken)
         {
-            _Logger.LogInformation($"Loading match from \"{url}\"");
+            _Logger.LogInformation("Loading match from \"{url}\"", url);
 
             try
             {
@@ -22,13 +22,13 @@ namespace PugSharp.Config
                 var config = await JsonSerializer.DeserializeAsync<MatchConfig>(configJsonStream).ConfigureAwait(false);
                 if (config != null)
                 {
-                    _Logger.LogInformation($"Successfully loaded config for match {config.MatchId}");
+                    _Logger.LogInformation("Successfully loaded config for match {matchId}", config.MatchId);
                     return (true, config);
                 }
             }
             catch (Exception ex)
             {
-                _Logger.LogError(ex, $"Failed loading config from \"{url}\".");
+                _Logger.LogError(ex, "Failed loading config from \"{url}\".", url);
             }
 
             return (false, null);

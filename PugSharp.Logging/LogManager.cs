@@ -12,7 +12,7 @@ namespace PugSharp.Logging
             {
                 LoggerFactory = Microsoft.Extensions.Logging.LoggerFactory.Create(builder =>
                 {
-                    builder.AddConsole();
+                    builder.AddSimpleConsole();
                 });
             }
 
