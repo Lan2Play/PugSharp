@@ -56,6 +56,8 @@ public class PugSharp : BasePlugin, IMatchCallback
         RegisterEventHandler<EventServerCvar>(OnCvarChanged, HookMode.Pre);
         RegisterEventHandler<EventPlayerTeam>(OnPlayerTeam);
 
+        RegisterListener<CounterStrikeSharp.API.Core.Listeners.OnMapStart>(OnMapStartHandler);
+
         _Logger.LogInformation("End RegisterEventHandlers");
     }
 
@@ -414,6 +416,18 @@ public class PugSharp : BasePlugin, IMatchCallback
 
     #endregion
 
+    #region Listeners
+
+    private void OnMapStartHandler(string mapName)
+    {
+        if (_Match != null)
+        {
+            SetMatchVariable(_Match.Config);
+        }
+    }
+
+    #endregion
+
     #region Implementation of IMatchCallback
 
     public void SwitchMap(string selectedMap)
@@ -426,14 +440,6 @@ public class PugSharp : BasePlugin, IMatchCallback
 
         _Logger.LogInformation("Switch map to: \"{selectedMap}\"!", selectedMap);
         Server.ExecuteCommand($"changelevel {selectedMap}");
-
-        if (_Match != null)
-        {
-            Server.NextFrame(() =>
-            {
-                SetMatchVariable(_Match.Config);
-            });
-        }
     }
 
     public IReadOnlyList<IPlayer> GetAllPlayers()
