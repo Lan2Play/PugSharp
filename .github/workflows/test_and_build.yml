@@ -137,6 +137,8 @@ jobs:
         run: sed -i "s|%%COUNTERSTRIKESHARPVERSION%%|0.0.1|g" ./release.json; 
       - name: replace CS2VERSION variable in meta files
         run: sed -i "s|%%CS2VERSION%%|1.39.6.5/13965 9842|g" ./release.json; 
+      - name: replace METAMODVERSION variable in meta files
+        run: sed -i "s|%%METAMODVERSION%%|2.0 - 1256|g" ./release.json; 
       - name: Release
         if: ${{ (startsWith(github.ref, 'refs/tags/v')) && !(contains(github.ref, '-beta')) }}
         uses: softprops/action-gh-release@v1
@@ -159,7 +161,7 @@ jobs:
       - name: upload pre - pre release
         uses: actions/upload-artifact@v3
         with:
-          name: latest_pre_pre
+          name: latest_alpha
           path: |
             ./release.json
             ./PugSharp_*.zip 

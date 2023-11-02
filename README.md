@@ -16,6 +16,19 @@ If you want to help developing or translating, join our discord:
 
 > **Warning**
 > Don't use this in production right now!
+>
+### Prereqs
+* [CounterStrikeSharp by roflmuffin](https://github.com/roflmuffin/CounterStrikeSharp) (currently no need to install seperatly, we package it with the releases until there is a steady release cycle available)
+* [MetaMod 2.0](https://www.sourcemm.net/downloads.php?branch=dev)
+* Linux Dedicated Server
+
+### Installation
+* Install [MetaMod 2.0](https://www.sourcemm.net/downloads.php?branch=dev) on your Linux Dedicated Server 
+* Download one of our releases including [CounterStrikeSharp by roflmuffin](https://github.com/roflmuffin/CounterStrikeSharp) and the Dotnet Runtime and unpack it to your csgo folder.
+* Have fun and report bugs :D
+
+### local development
+Hop over to our discord if you want to help with the development. We will update the makefile soon, so you can easily setup a testing environment.  We keep you updated on our discord above.
 
 ## Commands
 
@@ -25,8 +38,8 @@ If you want to help developing or translating, join our discord:
 
 ### Admin/Rcon Commands
 
-- `!loadconfig <url>` Load a [MatchConfig](#MatchConfig) to initialize a match 
-- `!dumpmatch` Dumps the current matchstate and config to console
+- `!ps_loadconfig <url>` Load a [MatchConfig](#MatchConfig) to initialize a match 
+- `!ps_dumpmatch` Dumps the current matchstate and config to console
 
 ## Configuration
 
@@ -100,12 +113,8 @@ If you want to help developing or translating, join our discord:
 }
 ```
 
-## Prereqs
-* [CounterStrikeSharp by roflmuffin](https://github.com/roflmuffin/CounterStrikeSharp)
-* [MetaMod 2.0](https://www.sourcemm.net/downloads.php?branch=dev)
 
-### local development
-Hop over to our discord if you want to help with the development. We will update the makefile soon, so you can easily setup a testing environment.  We keep you updated on our discord above.
+
 
 <!-- 
 ## Tanslation

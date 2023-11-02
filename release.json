@@ -2,5 +2,6 @@
  "PluginName": "PugSharp",
  "Version": "%%VERSION%%",
  "CounterStrikeSharpVersion": "%%COUNTERSTRIKESHARPVERSION%%",
+ "MetaModVersion": "%%METAMODVERSION%%",
  "CS2Version": "%%CS2VERSION%%"
 }
