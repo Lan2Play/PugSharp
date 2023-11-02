@@ -21,7 +21,6 @@ public class Match
 
     private MatchTeam? _CurrentMatchTeamToVote;
 
-
     public Match(IMatchCallback matchCallback, Config.MatchConfig matchConfig)
     {
         _MatchCallback = matchCallback;
