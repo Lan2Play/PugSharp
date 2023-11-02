@@ -113,6 +113,8 @@ jobs:
         run: mkdir -p packagebuild/addons/counterstrikesharp/plugins/PugSharp
       - name: copy included counterstrikesharp
         run: cp -rf PugSharp/counterstrikesharp packagebuild/addons/counterstrikesharp
+      - name: copy included counterstrikesharp vdf
+        run: cp -rf PugSharp/metamod packagebuild/addons/metamod
       - name: copy package content
         run: cp -rf PugSharp/bin/Debug/net7.0/publish/* packagebuild/addons/counterstrikesharp/plugins/PugSharp
       - name: Add dotnet runtime
