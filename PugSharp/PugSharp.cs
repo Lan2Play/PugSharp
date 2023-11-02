@@ -114,6 +114,8 @@ public class PugSharp : BasePlugin, IMatchCallback
         ExecuteServerCommand($"mp_teamname_2", matchConfig.Team2.Name);
         ExecuteServerCommand($"mp_teamflag_2", matchConfig.Team2.Flag);
 
+        Server.ExecuteCommand("tv_autorecord 0");
+
         _Logger.LogInformation("Set match variables done");
     }
 
@@ -532,7 +534,7 @@ public class PugSharp : BasePlugin, IMatchCallback
         var demoFileName = $"PugSharp_Match_{_Match.Config.MatchId}_{DateTime.UtcNow:yyyyMMddHHmmss}.dem";
         try
         {
-            string directoryPath = Path.Join(Server.GameDirectory, "PugSharp", "Demo");
+            string directoryPath = Path.Join(Server.GameDirectory, "csgo", "Demo");
             if (!Directory.Exists(directoryPath))
             {
                 Directory.CreateDirectory(directoryPath);
