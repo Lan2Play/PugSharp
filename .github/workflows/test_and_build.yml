@@ -126,6 +126,9 @@ jobs:
       - name: build package
         run: zip -r PugSharp_$PUGSHARPNETVER.zip addons
         working-directory: ./packagebuild
+      - name: move package
+        run: mv PugSharp_$PUGSHARPNETVER.zip ../
+        working-directory: ./packagebuild
       - name: replace version variable in meta files
         run: sed -i "s|%%VERSION%%|$PUGSHARPNETVER|g" ./release.json;       
       - name: replace CounterStrikeSharpVersion variable in meta files
@@ -148,7 +151,7 @@ jobs:
           prerelease: true
           files: |
             ./release.json
-            ./packagebuild/PugSharp_*.zip 
+            ./PugSharp_*.zip 
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: upload pre - pre release
@@ -157,5 +160,5 @@ jobs:
           name: latest_pre_pre
           path: |
             ./release.json
-            ./packagebuild/PugSharp_*.zip 
+            ./PugSharp_*.zip 
           retention-days: 10
