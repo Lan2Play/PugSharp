@@ -101,10 +101,12 @@ jobs:
           submodules: recursive
       - name: set Version
         if: ${{ (startsWith(github.ref, 'refs/tags/v')) }}
-        run:  echo "PUGSHARPNETVER=$(echo ${GITHUB_REF} | sed 's|refs/heads/||g' | sed 's|refs/tags/v||g' | sed 's|-beta||g' )" >> $GITHUB_ENV
+        run:  echo "PUGSHARPNETVER=$(echo ${GITHUB_REF} | sed 's|refs/heads/||g' | sed 's|refs/tags/v||g' )" >> $GITHUB_ENV
       - name: set Version
         if: ${{ !(startsWith(github.ref, 'refs/tags/v')) }}
-        run:  echo "PUGSHARPNETVER=0.0.1" >> $GITHUB_ENV
+        run:  echo "PUGSHARPNETVER=0.0.1-alpha" >> $GITHUB_ENV
+      - name: set Pugsharp version
+        run: sed -i "s|0.0.1|$PUGSHARPNETVER|g" PugSharp/PugSharp.cs
       - name: Build Pugsharp
         run: dotnet publish
       - name: cleanup build
