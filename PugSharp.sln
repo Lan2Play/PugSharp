@@ -13,7 +13,12 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PugSharp.Config", "PugSharp
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PugSharp.Match.Tests", "PugSharp.Match.Tests\PugSharp.Match.Tests.csproj", "{C124CD7A-AEA7-4679-8A6E-E82FF4256969}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PugSharp.Logging", "PugSharp.Logging\PugSharp.Logging.csproj", "{1D42D630-EA6B-4C6D-8841-D095AE951430}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PugSharp.Logging", "PugSharp.Logging\PugSharp.Logging.csproj", "{1D42D630-EA6B-4C6D-8841-D095AE951430}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{B039A9AD-1F69-4482-95D9-5FBC18DF987C}"
+	ProjectSection(SolutionItems) = preProject
+		README.md = README.md
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

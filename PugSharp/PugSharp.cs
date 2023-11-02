@@ -2,7 +2,6 @@
 using CounterStrikeSharp.API.Core;
 using CounterStrikeSharp.API.Core.Attributes.Registration;
 using CounterStrikeSharp.API.Modules.Commands;
-using CounterStrikeSharp.API.Modules.Memory;
 using Microsoft.Extensions.Logging;
 using PugSharp.Config;
 using PugSharp.Logging;
@@ -10,8 +9,6 @@ using PugSharp.Match.Contract;
 using System.Text.Json;
 
 namespace PugSharp;
-
-
 
 public class PugSharp : BasePlugin, IMatchCallback
 {
@@ -69,16 +66,6 @@ public class PugSharp : BasePlugin, IMatchCallback
         }
     }
 
-    private bool IsAdmin(ulong? steamId)
-    {
-        if (_ServerConfig == null || steamId == null)
-        {
-            return false;
-        }
-
-        return _ServerConfig.Admins.ContainsKey(steamId.Value);
-    }
-
     public void InitializeMatch(MatchConfig matchConfig)
     {
         SetMatchVariable(matchConfig);
@@ -90,7 +77,7 @@ public class PugSharp : BasePlugin, IMatchCallback
         {
             if (player.UserId != null && !_Match.TryAddPlayer(player))
             {
-                KickPlayer(player.UserId.Value);
+                player.Kick();
             }
         }
     }
@@ -123,7 +110,7 @@ public class PugSharp : BasePlugin, IMatchCallback
     [ConsoleCommand("css_loadconfig", "Load a match config")]
     public void OnCommandLoadConfig(CCSPlayerController? player, CommandInfo command)
     {
-        if (player != null && !IsAdmin(player.SteamID))
+        if (player != null && !player.IsAdmin(_ServerConfig))
         {
             player.PrintToCenter("Command is only allowed for admins!");
             return;
@@ -261,13 +248,9 @@ public class PugSharp : BasePlugin, IMatchCallback
 
             }
         }
-        else if (!IsAdmin(@event.Userid?.SteamID))
+        else if (!@event.Userid.IsAdmin(_ServerConfig))
         {
-            var players = GetAllPlayers();
-            foreach (var player in players.Where(x => x.UserId != null))
-            {
-                KickPlayer(player.UserId!.Value);
-            }
+            @event.Userid.Kick();
         }
 
         return HookResult.Continue;
@@ -414,16 +397,6 @@ public class PugSharp : BasePlugin, IMatchCallback
 
     #endregion
 
-    private static void KickPlayer(int? userId)
-    {
-        if (userId == null)
-        {
-            return;
-        }
-
-        Server.ExecuteCommand($"kickid {userId} \"You are not part of the current match!\"");
-    }
-
     #region Implementation of IMatchCallback
 
     public void SwitchMap(string selectedMap)
@@ -446,30 +419,7 @@ public class PugSharp : BasePlugin, IMatchCallback
     {
         var playerEntities = Utilities.FindAllEntitiesByDesignerName<CCSPlayerController>("cs_player_controller");
 
-        return playerEntities.Where(x => PlayerState(x) == PlayerConnectedState.PlayerConnected).Select(p => new Player(p)).ToArray();
-    }
-
-    private static PlayerConnectedState PlayerState(CCSPlayerController player)
-    {
-        if (player == null || !player.IsValid)
-        {
-            return PlayerConnectedState.PlayerNeverConnected;
-        }
-
-        var statusRef = Schema.GetRef<UInt32>(player.Handle, "CBasePlayerController", "m_iConnected");
-
-        return (PlayerConnectedState)statusRef;
-    }
-
-    public enum PlayerConnectionState
-    {
-        PlayerNeverConnected = 0xfffffff,
-        PlayerConnected = 0x0,
-        PlayerConnecting = 0x1,
-        PlayerReconnecting = 0x2,
-        PlayerDisconnecting = 0x3,
-        PlayerDisconnected = 0x4,
-        PlayerReserved = 0x5,
+        return playerEntities.Where(x => x.PlayerState() == PlayerConnectedState.PlayerConnected).Select(p => new Player(p)).ToArray();
     }
 
     public IReadOnlyCollection<string> GetAvailableMaps()
@@ -539,7 +489,6 @@ public class PugSharp : BasePlugin, IMatchCallback
     }
 
     #endregion
-
 
     protected override void Dispose(bool disposing)
     {
