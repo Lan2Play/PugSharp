@@ -220,7 +220,7 @@ public class Match
         _MapsToSelect.Remove(mapToBan!);
         _MapsToSelect.ForEach(x => x.Votes.Clear());
 
-        _MatchCallback.SendMessage($"Map {mapToBan} was banned!");
+        _MatchCallback.SendMessage($"Map {mapToBan!.Name} was banned!");
 
         if (_MapsToSelect.Count == 1)
         {
