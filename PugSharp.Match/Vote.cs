@@ -16,6 +16,10 @@ public class Vote
 
 public class ChatColors
 {
+    public const char Command = Green;
+    public const char Highlight = DarkBlue;
+    public const char Error = Red;
+
     public const char Default = '\u0001';
 
     public const char White = '\u0001';

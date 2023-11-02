@@ -142,7 +142,7 @@ public class Match
     {
         for (int i = 0; i < 10; i++)
         {
-            _MatchCallback.SendMessage($"Match is LIVE");
+            _MatchCallback.SendMessage($" {ChatColors.Default}Match is {ChatColors.Green}LIVE");
 
             await Task.Delay(TimeSpan.FromSeconds(1));
         }
@@ -179,9 +179,9 @@ public class Match
         {
             _Logger.LogInformation("ReadyReminder Elapsed");
             var readyPlayerIds = MatchTeams.SelectMany(x => x.Players).Where(p => p.IsReady).Select(x => x.Player.SteamID).ToList();
-            var notReadyPlayers = _MatchCallback.GetAllPlayers().Where(p=> !readyPlayerIds.Contains(p.SteamID));
-            
-            var remindMessage = $" {ChatColors.Default}You are not ready! Type {ChatColors.BlueGrey}!ready {ChatColors.Default}if you are ready.";
+            var notReadyPlayers = _MatchCallback.GetAllPlayers().Where(p => !readyPlayerIds.Contains(p.SteamID));
+
+            var remindMessage = $" {ChatColors.Default}You are {ChatColors.Error}not {ChatColors.Default}ready! Type {ChatColors.Command}!ready {ChatColors.Default}if you are ready.";
             foreach (var player in notReadyPlayers)
             {
                 player.PrintToChat(remindMessage);
@@ -219,7 +219,7 @@ public class Match
             mapOptions.Add(new MenuOption(map, (opt, player) => BanMap(player, mapNumber)));
         }
 
-        ShowMenuToTeam(_CurrentMatchTeamToVote!, "Ban a map", mapOptions);
+        ShowMenuToTeam(_CurrentMatchTeamToVote!, $" {ChatColors.Default}Match is LIVEtype {ChatColors.Command}!<mapnumber>", mapOptions);
 
         _VoteTimer.Start();
     }
@@ -232,7 +232,7 @@ public class Match
         _MapsToSelect.Remove(mapToBan!);
         _MapsToSelect.ForEach(x => x.Votes.Clear());
 
-        _MatchCallback.SendMessage($"Map {mapToBan!.Name} was banned by {_CurrentMatchTeamToVote?.Team}!");
+        _MatchCallback.SendMessage($" {ChatColors.Default}Map {ChatColors.Highlight}{mapToBan!.Name} {ChatColors.Default}was banned by {_CurrentMatchTeamToVote?.TeamConfig.Name}!");
 
         if (_MapsToSelect.Count == 1)
         {
@@ -326,7 +326,7 @@ public class Match
         }
 
         _MatchCallback.SendMessage($"Waiting for all players to be ready.");
-        _MatchCallback.SendMessage($"!ready to toggle your ready state.");
+        _MatchCallback.SendMessage($" {ChatColors.Command}!ready {ChatColors.Default}to toggle your ready state.");
     }
 
     private bool MapIsSelected()
@@ -397,7 +397,7 @@ public class Match
         var team = MatchTeams.Find(m => m.Team == playerTeam);
         if (team == null)
         {
-            team = new MatchTeam(playerTeam);
+            team = new MatchTeam(playerTeam, playerTeam == Team.Terrorist ? Config.Team1 : Config.Team2);
             MatchTeams.Add(team);
         }
 
