@@ -253,6 +253,7 @@ public class PugSharp : BasePlugin, IMatchCallback
         }
         else if (!@event.Userid.IsAdmin(_ServerConfig))
         {
+            _Logger.LogInformation("No match is loaded. Kick Player {player}!", @event.Userid.PlayerName);
             @event.Userid.Kick();
         }
 
