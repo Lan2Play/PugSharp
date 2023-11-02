@@ -85,6 +85,8 @@ public class PugSharp : BasePlugin, IMatchCallback
 
     private void SetMatchVariable(MatchConfig matchConfig)
     {
+        _Logger.LogInformation("Start set match variables");
+
         Server.ExecuteCommand("sv_disable_teamselect_menu true");
         Server.ExecuteCommand("sv_human_autojoin_team 2");
         Server.ExecuteCommand("mp_warmuptime 6000");
@@ -104,6 +106,8 @@ public class PugSharp : BasePlugin, IMatchCallback
         ExecuteServerCommand($"mp_teamflag_1", matchConfig.Team1.Flag);
         ExecuteServerCommand($"mp_teamname_2", matchConfig.Team2.Name);
         ExecuteServerCommand($"mp_teamflag_2", matchConfig.Team2.Flag);
+
+        _Logger.LogInformation("Set match variables done");
     }
 
     #region Commands
@@ -420,6 +424,7 @@ public class PugSharp : BasePlugin, IMatchCallback
             return;
         }
 
+        _Logger.LogInformation("Switch map to: \"{selectedMap}\"!", selectedMap);
         Server.ExecuteCommand($"map {selectedMap}");
 
         if (_Match != null)

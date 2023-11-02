@@ -185,7 +185,7 @@ public class Match
                 player.Player.PrintToChat(remindMessage);
             }
         }
-        catch(Exception ex)
+        catch (Exception ex)
         {
             _Logger.LogError(ex, "Error sending vote reminder");
         }
@@ -230,7 +230,7 @@ public class Match
         _MapsToSelect.Remove(mapToBan!);
         _MapsToSelect.ForEach(x => x.Votes.Clear());
 
-        _MatchCallback.SendMessage($"Map {mapToBan!.Name} was banned!");
+        _MatchCallback.SendMessage($"Map {mapToBan!.Name} was banned by {_CurrentMatchTeamToVote?.Team}!");
 
         if (_MapsToSelect.Count == 1)
         {
@@ -265,6 +265,8 @@ public class Match
         {
             _MatchInfo.StartTeam1 = _TeamVotes.MinBy(m => m.Votes.Count)!.Name;
         }
+
+        _MatchCallback.SendMessage($"{_CurrentMatchTeamToVote!.Team} selected {_MatchInfo.StartTeam1} as startside!");
     }
 
     private void ShowMenuToTeam(MatchTeam team, string title, IEnumerable<MenuOption> options)
@@ -314,6 +316,8 @@ public class Match
 
     private void SetAllPlayersNotReady()
     {
+        _Logger.LogInformation("Reset Readystate for all players");
+        
         foreach (var player in MatchTeams.SelectMany(m => m.Players))
         {
             player.IsReady = false;
