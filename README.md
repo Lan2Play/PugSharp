@@ -11,15 +11,16 @@ If you want to help developing or translating, join our discord:
 
 [![Discord](https://discordapp.com/api/guilds/748086853449810013/widget.png?style=banner3)](https://discord.gg/zF5C9WPWFq)
 
-## Features
+## Working features
 
-- Configuration via http(s) json (example below) 
-- api reporting to a http(s) server
-- automatic team assignment
-- map and starting team vote
-- automatic pause if player disconnects
-- pause / unpause feature
-- demo recording and upload
+- [x] Configuration via http(s) json (example below) 
+- [ ] api reporting to a http(s) server
+- [x] automatic team assignment
+- [x] map and starting team vote
+- [x] automatic pause if player disconnects
+- [x] pause / unpause feature
+- [ ] demo recording 
+- [ ] demo upload
 
 
 ## Usage
@@ -34,7 +35,7 @@ If you want to help developing or translating, join our discord:
 
 ### Installation
 * Install [MetaMod 2.0](https://www.sourcemm.net/downloads.php?branch=dev) on your Linux Dedicated Server 
-* Download one of our releases including [CounterStrikeSharp by roflmuffin](https://github.com/roflmuffin/CounterStrikeSharp) and the Dotnet Runtime and unpack it to your csgo folder.
+* Download one of our releases including [CounterStrikeSharp by roflmuffin](https://github.com/roflmuffin/CounterStrikeSharp) and the Dotnet Runtime and unpack it to your csgo folder. Currently you can find really early alpha releases on our [Actions](https://github.com/Lan2Play/PugSharp/actions) as Artifacts.
 * Have fun and report bugs :D
 
 ### local development
