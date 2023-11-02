@@ -11,6 +11,7 @@ public class Match
     private static readonly ILogger<Match> _Logger = LogManager.CreateLogger<Match>();
 
     private readonly System.Timers.Timer _VoteTimer = new();
+    private readonly System.Timers.Timer _ReadyReminderTimer = new(10000);
     private readonly IMatchCallback _MatchCallback;
     private readonly StateMachine<MatchState, MatchCommand> _MatchStateMachine;
 
@@ -27,6 +28,7 @@ public class Match
         Config = matchConfig;
         _VoteTimer.Interval = Config.VoteTimeout;
         _VoteTimer.Elapsed += VoteTimer_Elapsed;
+        _ReadyReminderTimer.Elapsed += ReadyReminderTimer_Elapsed;
 
         _MapsToSelect = matchConfig.Maplist.Select(x => new Vote(x)).ToList();
 
@@ -37,7 +39,9 @@ public class Match
 
         _MatchStateMachine.Configure(MatchState.WaitingForPlayersConnectedReady)
             .PermitIf(MatchCommand.PlayerReady, MatchState.MapVote, AllPlayersAreReady)
-            .OnEntry(SetAllPlayersNotReady);
+            .OnEntry(SetAllPlayersNotReady)
+            .OnEntry(StartReadyReminder)
+            .OnExit(StopReadyReminder);
 
         _MatchStateMachine.Configure(MatchState.MapVote)
             .PermitReentryIf(MatchCommand.VoteMap, MapIsNotSelected)
@@ -56,7 +60,9 @@ public class Match
 
         _MatchStateMachine.Configure(MatchState.WaitingForPlayersReady)
             .PermitIf(MatchCommand.PlayerReady, MatchState.MatchStarting, AllPlayersAreReady)
-            .OnEntry(SetAllPlayersNotReady);
+            .OnEntry(SetAllPlayersNotReady)
+            .OnEntry(StartReadyReminder)
+            .OnExit(StopReadyReminder);
 
         _MatchStateMachine.Configure(MatchState.MatchStarting)
             .Permit(MatchCommand.StartMatch, MatchState.MatchRunning)
@@ -81,6 +87,16 @@ public class Match
         _MatchStateMachine.OnTransitioned(OnMatchStateChanged);
 
         _MatchStateMachine.Fire(MatchCommand.LoadMatch);
+    }
+
+    private void StartReadyReminder()
+    {
+        _ReadyReminderTimer.Start();
+    }
+
+    private void StopReadyReminder()
+    {
+        _ReadyReminderTimer.Stop();
     }
 
     private bool IsMatchReady()
@@ -152,6 +168,16 @@ public class Match
             case MatchState.TeamVote:
                 TryFireState(MatchCommand.VoteTeam);
                 break;
+        }
+    }
+
+    private void ReadyReminderTimer_Elapsed(object? sender, System.Timers.ElapsedEventArgs e)
+    {
+        var notReadyPlayers = MatchTeams.SelectMany(x => x.Players).Where(p => !p.IsReady);
+        var remindMessage = $" {ChatColors.Default}You are not ready! Type {ChatColors.BlueGrey}!ready {ChatColors.Default}if you are ready.";
+        foreach (var player in notReadyPlayers)
+        {
+            player.Player.PrintToChat(remindMessage);
         }
     }
 
