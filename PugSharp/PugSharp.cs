@@ -532,7 +532,7 @@ public class PugSharp : BasePlugin, IMatchCallback
         var demoFileName = $"PugSharp_Match_{_Match.Config.MatchId}_{DateTime.UtcNow:yyyyMMddHHmmss}.dem";
         try
         {
-            string directoryPath = Path.Join(Server.GameDirectory, "PugSharp", "Demo");
+            string directoryPath = Path.Join(Server.GameDirectory, "csgo", "Demo");
             if (!Directory.Exists(directoryPath))
             {
                 Directory.CreateDirectory(directoryPath);
