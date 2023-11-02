@@ -173,11 +173,18 @@ public class Match
 
     private void ReadyReminderTimer_Elapsed(object? sender, System.Timers.ElapsedEventArgs e)
     {
-        var notReadyPlayers = MatchTeams.SelectMany(x => x.Players).Where(p => !p.IsReady);
-        var remindMessage = $" {ChatColors.Default}You are not ready! Type {ChatColors.BlueGrey}!ready {ChatColors.Default}if you are ready.";
-        foreach (var player in notReadyPlayers)
+        try
         {
-            player.Player.PrintToChat(remindMessage);
+            var notReadyPlayers = MatchTeams.SelectMany(x => x.Players).Where(p => !p.IsReady);
+            var remindMessage = $" {ChatColors.Default}You are not ready! Type {ChatColors.BlueGrey}!ready {ChatColors.Default}if you are ready.";
+            foreach (var player in notReadyPlayers)
+            {
+                player.Player.PrintToChat(remindMessage);
+            }
+        }
+        catch(Exception ex)
+        {
+            _Logger.LogError(ex, "Error sending vote reminder");
         }
     }
 
