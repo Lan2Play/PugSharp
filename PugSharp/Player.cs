@@ -49,6 +49,8 @@ public class Player : IPlayer
 
     public string PlayerName => DefaultIfInvalid(() => _PlayerController.PlayerName, string.Empty);
 
+    public Team Team => (Team)_PlayerController.TeamNum;
+
     public IPlayerPawn PlayerPawn => new PlayerPawn(_PlayerController.PlayerPawn.Value);
 
     public int? Money

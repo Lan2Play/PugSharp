@@ -30,10 +30,7 @@ public class Match
         _MatchStateMachine = new StateMachine<MatchState, MatchCommand>(MatchState.None);
 
         _MatchStateMachine.Configure(MatchState.None)
-            .Permit(MatchCommand.LoadMatch, MatchState.WaitingForPlayersConnected);
-
-        _MatchStateMachine.Configure(MatchState.WaitingForPlayersConnected)
-            .PermitIf(MatchCommand.ConnectPlayer, MatchState.WaitingForPlayersConnectedReady, AllPlayersAreConnected);
+            .Permit(MatchCommand.LoadMatch, MatchState.WaitingForPlayersConnectedReady);
 
         _MatchStateMachine.Configure(MatchState.WaitingForPlayersConnectedReady)
             .PermitIf(MatchCommand.PlayerReady, MatchState.MapVote, AllPlayersAreReady)
@@ -256,11 +253,12 @@ public class Match
 
     private bool AllPlayersAreReady()
     {
-        var allMatchPlayers = MatchTeams.SelectMany(m => m.Players);
+        var readyPlayers = MatchTeams.SelectMany(m => m.Players).Where(p => p.IsReady);
+        var rquiredPlayers = Config.PlayersPerTeam * 2;
 
-        Console.WriteLine($"Match has {allMatchPlayers.Count()} players:{string.Join("; ", allMatchPlayers.Select(a => $"{a.Player.PlayerName}[{a.IsReady}]"))}");
+        Console.WriteLine($"Match has {readyPlayers.Count()} of {rquiredPlayers} ready players: {string.Join("; ", readyPlayers.Select(a => $"{a.Player.PlayerName}[{a.IsReady}]"))}");
 
-        return allMatchPlayers.All(p => p.IsReady);
+        return readyPlayers.Count() == rquiredPlayers;
     }
 
     private void SetAllPlayersNotReady()
@@ -293,6 +291,16 @@ public class Match
         }
     }
 
+    private Task TryFireStateAsync(MatchCommand command)
+    {
+        if (_MatchStateMachine.CanFire(command))
+        {
+            return _MatchStateMachine.FireAsync(command);
+        }
+
+        return Task.CompletedTask;
+    }
+
     private MatchTeam? GetMatchTeam(ulong steamID)
     {
         var team = GetPlayerTeam(steamID);
@@ -320,7 +328,11 @@ public class Match
         }
 
         Console.WriteLine($"Player {player.PlayerName} belongs to {playerTeam}");
-        player.SwitchTeam(playerTeam);
+
+        if (player.Team != playerTeam)
+        {
+            player.SwitchTeam(playerTeam);
+        }
 
         var team = MatchTeams.Find(m => m.Team == playerTeam);
         if (team == null)
@@ -337,7 +349,7 @@ public class Match
 
         team.Players.Add(new MatchPlayer(player));
 
-        TryFireState(MatchCommand.ConnectPlayer);
+        TryFireStateAsync(MatchCommand.ConnectPlayer);
         return true;
     }
 
@@ -372,7 +384,7 @@ public class Match
         }
     }
 
-    public void TogglePlayerIsReady(IPlayer player)
+    public async Task TogglePlayerIsReadyAsync(IPlayer player)
     {
         if (CurrentState != MatchState.WaitingForPlayersConnectedReady && CurrentState != MatchState.WaitingForPlayersReady)
         {
@@ -391,7 +403,7 @@ public class Match
         if (matchPlayer.IsReady)
         {
             _MatchCallback.SendMessage($"{player.PlayerName} is ready! {readyPlayers} of {requiredPlayers} are ready.");
-            TryFireState(MatchCommand.PlayerReady);
+            await TryFireStateAsync(MatchCommand.PlayerReady).ConfigureAwait(false);
         }
         else
         {

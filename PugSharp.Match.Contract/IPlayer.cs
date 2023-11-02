@@ -13,6 +13,7 @@ public interface IPlayer
     string PlayerName { get; }
 
     IPlayerMatchStats? MatchStats { get; }
+    Team Team { get; }
 
     void PrintToChat(string message);
 

@@ -3,7 +3,6 @@
 public enum MatchState
 {
     None,
-    WaitingForPlayersConnected,
     WaitingForPlayersConnectedReady,
     MapVote,
     TeamVote,

@@ -31,7 +31,7 @@ public class PugSharp : BasePlugin, IMatchCallback
 
         RegisterEventHandler<EventCsWinPanelRound>(OnRoundWinPanel, HookMode.Pre);
         RegisterEventHandler<EventCsWinPanelMatch>(OnMatchOver);
-        RegisterEventHandler<EventPlayerConnect>(OnPlayerConnect);
+        RegisterEventHandler<EventPlayerConnectFull>(OnPlayerconnectFull);
         RegisterEventHandler<EventPlayerDisconnect>(OnPlayerDisconnect);
         RegisterEventHandler<EventPlayerSpawn>(OnPlayerSpawn);
         RegisterEventHandler<EventRoundEnd>(OnRoundEnd, HookMode.Pre);
@@ -132,7 +132,14 @@ public class PugSharp : BasePlugin, IMatchCallback
             return;
         }
 
-        _Match?.TogglePlayerIsReady(new Player(player));
+        if (_Match == null)
+        {
+            return;
+        }
+
+        var matchPlayer = new Player(player);
+        _Match.TryAddPlayer(matchPlayer);
+        _Match.TogglePlayerIsReadyAsync(matchPlayer);
 
 
         Console.WriteLine("Command ready called.");
@@ -166,7 +173,7 @@ public class PugSharp : BasePlugin, IMatchCallback
 
     #region EventHandlers
 
-    public HookResult OnPlayerConnect(EventPlayerConnect @event, GameEventInfo info)
+    private HookResult OnPlayerconnectFull(EventPlayerConnectFull @event, GameEventInfo info)
     {
         var userId = @event.Userid;
 
@@ -175,18 +182,10 @@ public class PugSharp : BasePlugin, IMatchCallback
             // // Userid will give you a reference to a CCSPlayerController class
             Console.WriteLine($"Player {userId.PlayerName} has connected!");
 
-            if (_Match == null)
-            {
-                Console.WriteLine($"Player {userId.PlayerName} kicked because no match has been loaded!");
-                KickPlayer(userId.UserId);
-            }
-            else
+            if (_Match != null && _Match.CurrentState == MatchState.WaitingForPlayersConnectedReady)
             {
                 userId.PrintToChat($"Hello {userId.PlayerName}, welcome to match {_Match.Config.MatchId}");
-                if (!_Match.TryAddPlayer(new Player(userId)) && userId.UserId != null)
-                {
-                    KickPlayer(userId.UserId.Value);
-                }
+                userId.PrintToChat($"type !ready to be marked as ready for the match");
             }
         }
         else
