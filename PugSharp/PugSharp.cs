@@ -101,7 +101,7 @@ public class PugSharp : BasePlugin, IMatchCallback
 
     #region Commands
 
-    [ConsoleCommand("st_loadconfig", "Load a match config")]
+    [ConsoleCommand("css_loadconfig", "Load a match config")]
     public void OnCommandLoadConfig(CCSPlayerController? player, CommandInfo command)
     {
         _Logger.LogInformation("Start loading match config!");
@@ -123,7 +123,7 @@ public class PugSharp : BasePlugin, IMatchCallback
         }
     }
 
-    [ConsoleCommand("st_dumpmatch", "Serialize match to JSON on console")]
+    [ConsoleCommand("css_dumpmatch", "Serialize match to JSON on console")]
     public void OnCommandDumpMatch(CCSPlayerController? player, CommandInfo command)
     {
         _Logger.LogInformation("################ dump match ################");
@@ -131,7 +131,7 @@ public class PugSharp : BasePlugin, IMatchCallback
         _Logger.LogInformation("################ dump match ################");
     }
 
-    [ConsoleCommand("ready", "Mark player as ready")]
+    [ConsoleCommand("css_ready", "Mark player as ready")]
     public void OnCommandReady(CCSPlayerController? player, CommandInfo command)
     {
         if (player == null)
@@ -147,13 +147,13 @@ public class PugSharp : BasePlugin, IMatchCallback
 
         var matchPlayer = new Player(player);
         _Match.TryAddPlayer(matchPlayer);
-        _Match.TogglePlayerIsReadyAsync(matchPlayer);
+        _ = _Match.TogglePlayerIsReadyAsync(matchPlayer);
 
 
         _Logger.LogInformation("Command ready called.");
     }
 
-    [ConsoleCommand("st_start", "Starts a match")]
+    [ConsoleCommand("css_start", "Starts a match")]
     public void OnCommandStart(CCSPlayerController? player, CommandInfo command)
     {
         if (player == null)
@@ -165,7 +165,7 @@ public class PugSharp : BasePlugin, IMatchCallback
         _Logger.LogInformation("Start Command called.");
     }
 
-    [ConsoleCommand("st_pause", "Pauses the current match")]
+    [ConsoleCommand("css_pause", "Pauses the current match")]
     public void OnCommandPause(CCSPlayerController? player, CommandInfo command)
     {
         if (player == null)
