@@ -631,6 +631,11 @@ public class Match : IDisposable
         GC.SuppressFinalize(this);
     }
 
+    public void Complete()
+    {
+        TryFireState(MatchCommand.CompleteMatch);
+    }
+
 
     #endregion
 

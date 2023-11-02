@@ -56,6 +56,8 @@ public class PugSharp : BasePlugin, IMatchCallback
         RegisterEventHandler<EventRoundPrestart>(OnRoundStart);
         RegisterEventHandler<EventServerCvar>(OnCvarChanged, HookMode.Pre);
         RegisterEventHandler<EventPlayerTeam>(OnPlayerTeam);
+        RegisterEventHandler<EventCsWinPanelMatch>(OnMatchWinPanel);
+
 
         RegisterListener<CounterStrikeSharp.API.Core.Listeners.OnMapStart>(OnMapStartHandler);
 
@@ -424,6 +426,14 @@ public class PugSharp : BasePlugin, IMatchCallback
     {
         _Logger.LogInformation("On Round win panel");
 
+        return HookResult.Continue;
+    }
+
+
+    private HookResult OnMatchWinPanel(EventCsWinPanelMatch @event, GameEventInfo info)
+    {
+        _Logger.LogInformation("On Match win panel");
+        _Match?.Complete();
         return HookResult.Continue;
     }
 
