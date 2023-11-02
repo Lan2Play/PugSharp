@@ -233,6 +233,7 @@ public class PugSharp : BasePlugin, IMatchCallback
 
     public HookResult OnPlayerTeam(EventPlayerTeam @event, GameEventInfo info)
     {
+        _Logger.LogInformation("OnPlayerTeam called");
         if (_Match != null)
         {
             var configTeam = _Match.GetPlayerTeam(@event.Userid.SteamID);
