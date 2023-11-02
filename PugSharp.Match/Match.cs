@@ -91,11 +91,13 @@ public class Match
 
     private void StartReadyReminder()
     {
+        _Logger.LogInformation("Start ReadyReminder");
         _ReadyReminderTimer.Start();
     }
 
     private void StopReadyReminder()
     {
+        _Logger.LogInformation("Stop ReadyReminder");
         _ReadyReminderTimer.Stop();
     }
 
@@ -175,6 +177,7 @@ public class Match
     {
         try
         {
+            _Logger.LogInformation("ReadyReminder Elapsed");
             var notReadyPlayers = MatchTeams.SelectMany(x => x.Players).Where(p => !p.IsReady);
             var remindMessage = $" {ChatColors.Default}You are not ready! Type {ChatColors.BlueGrey}!ready {ChatColors.Default}if you are ready.";
             foreach (var player in notReadyPlayers)
