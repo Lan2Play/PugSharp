@@ -40,6 +40,12 @@ namespace PugSharp.Config
             {
                 if (!File.Exists(configPath))
                 {
+                    var directoryName = Path.GetDirectoryName(configPath);
+                    if (directoryName != null && !Directory.Exists(directoryName))
+                    {
+                        Directory.CreateDirectory(directoryName);
+                    }
+
                     var config = new ServerConfig();
                     using FileStream createStream = File.Create(configPath);
                     await JsonSerializer.SerializeAsync(createStream, config).ConfigureAwait(false);
