@@ -213,7 +213,7 @@ public class PugSharp : BasePlugin, IMatchCallback
                 userId.PrintToChat($" {ChatColors.Default}type {ChatColors.BlueGrey}!ready {ChatColors.Default}to be marked as ready for the match");
             }
 
-            if (!userId.IsAdmin(_ServerConfig))
+            if (_Match == null && !userId.IsAdmin(_ServerConfig))
             {
                 _Logger.LogInformation("No match is loaded. Kick Player {player}!", userId.PlayerName);
                 userId.Kick();
