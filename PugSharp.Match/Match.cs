@@ -264,11 +264,13 @@ public class Match : IDisposable
     private void SetSelectedTeamSite()
     {
         _VoteTimer.Stop();
+        _Logger.LogInformation("Set selected teamsite. Voted by {team}", _CurrentMatchTeamToVote!.Team.ToString());
 
         if (_CurrentMatchTeamToVote!.Team == Team.Terrorist)
         {
             _MatchInfo.StartTeam1 = _TeamVotes.MaxBy(m => m.Votes.Count)!.Name;
-            if(_MatchInfo.StartTeam1.Equals("CT", StringComparison.OrdinalIgnoreCase))
+            _Logger.LogInformation("StartTeam is {team}", _MatchInfo.StartTeam1);
+            if (_MatchInfo.StartTeam1.Equals("CT", StringComparison.OrdinalIgnoreCase))
             {
                 _MatchCallback.SwapTeams();
             }
@@ -276,6 +278,7 @@ public class Match : IDisposable
         else
         {
             _MatchInfo.StartTeam1 = _TeamVotes.MinBy(m => m.Votes.Count)!.Name;
+            _Logger.LogInformation("StartTeam is {team}", _MatchInfo.StartTeam1);
             if (_MatchInfo.StartTeam1.Equals("T", StringComparison.OrdinalIgnoreCase))
             {
                 _MatchCallback.SwapTeams();
