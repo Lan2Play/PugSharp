@@ -17,6 +17,89 @@ If you want to help developing or translating, join our discord:
 > **Warning**
 > Don't use this in production right now!
 
+## Commands
+
+- `!ready` Mark the player as ready
+- `!pause` Pause the match in the next freezetime
+- `!unpause` Unpause the match. To continue the match, both teams have to !unpause.
+
+### Admin/Rcon Commands
+
+- `!loadconfig <url>` Load a [MatchConfig](#MatchConfig) to initialize a match 
+- `!dumpmatch` Dumps the current matchstate and config to console
+
+## Configuration
+
+### MatchConfig
+
+| Field                    | Description                                                                                  |
+|--------------------------|----------------------------------------------------------------------------------------------|
+| maplist                  | List of availbale maps for the map vote                                                      |
+| team1                    | [Team](TODO Link) Description                                                                |
+| team2                    | [Team](TODO Link) Description                                                                |
+| matchid                  | Unique Identifier for the match                                                              |
+| num_maps                 | Number of Maps to be played. This should be an odd number to be able to determine an winner. |
+| players_per_team         | Maximum possible number of players per team.                                                 |
+| min_players_to_ready     | Number of players per team, that have to be ready to start the game.                         |
+| eventula_apistats_url    | Url where the Game State have to be send.                                                    |
+| eventula_demo_upload_url | Url to upload the game demo to [Eventula](https://github.com/Lan2Play/eventula-manager)      |
+
+**Example Config**
+```json
+{
+    "maplist": [
+        "de_vertigo",
+        "de_dust2",
+        "de_inferno",
+        "de_mirage",
+        "de_nuke",
+        "de_overpass",
+        "de_ancient"
+    ],
+    "team1": {
+        "name": "hallo",
+        "tag": "hallo",
+        "flag": "DE",
+        "players": {
+            "12345678901234567": "Apfelwurm",
+            "12345678901234568": "strange name"
+        }
+    },
+    "team2": {
+        "name": "asd",
+        "tag": "asd",
+        "flag": "DE",
+        "players": {
+            "12345678901234569": "BOT R00st3r",
+            "76561198064576360": "heatwave"
+        }
+    },
+    "matchid": "40",
+    "num_maps": 1,
+    "players_per_team": 2,
+    "min_players_to_ready": 2,
+    "eventula_apistats_url": "https:\/\/dev.lan2play.de\/api\/matchmaking\/40\/",
+    "eventula_demo_upload_url": "https:\/\/dev.lan2play.de\/api\/matchmaking\/40\/demo"
+}
+```
+
+
+### ServerConfig
+
+| Field                    | Description                                                                                  |
+|--------------------------|----------------------------------------------------------------------------------------------|
+| admins                   | List of admins with the steamId and a Name                                                   |
+
+**Example Config**
+```json
+{
+    "admins": {
+        "12345678901234569": "BOT R00st3r",
+        "12345678901234567": "Apfelwurm"
+    }
+}
+```
+
 ## Prereqs
 * [CounterStrikeSharp by roflmuffin](https://github.com/roflmuffin/CounterStrikeSharp)
 * [MetaMod 2.0](https://www.sourcemm.net/downloads.php?branch=dev)
