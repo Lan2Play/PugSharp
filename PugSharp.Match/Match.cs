@@ -150,7 +150,7 @@ public class Match
 
     private void OnMatchStateChanged(StateMachine<MatchState, MatchCommand>.Transition transition)
     {
-        _Logger.LogInformation($"MatchState Changed: {transition.Source} => {transition.Destination}");
+        _Logger.LogInformation("MatchState Changed: {source} => {destination}", transition.Source, transition.Destination);
     }
 
     private void SwitchToMatchMap()
@@ -317,7 +317,7 @@ public class Match
     private void SetAllPlayersNotReady()
     {
         _Logger.LogInformation("Reset Readystate for all players");
-        
+
         foreach (var player in MatchTeams.SelectMany(m => m.Players))
         {
             player.IsReady = false;
