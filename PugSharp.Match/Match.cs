@@ -268,21 +268,13 @@ public class Match : IDisposable
 
         if (_CurrentMatchTeamToVote!.Team == Team.Terrorist)
         {
-            _MatchInfo.StartTeam1 = _TeamVotes.MaxBy(m => m.Votes.Count)!.Name;
+            _MatchInfo.StartTeam1 = _TeamVotes.MaxBy(m => m.Votes.Count)!.Name.Equals("T") ? Team.Terrorist : Team.CounterTerrorist;
             _Logger.LogInformation("StartTeam is {team}", _MatchInfo.StartTeam1);
-            if (_MatchInfo.StartTeam1.Equals("CT", StringComparison.OrdinalIgnoreCase))
-            {
-                _MatchCallback.SwapTeams();
-            }
         }
         else
         {
-            _MatchInfo.StartTeam1 = _TeamVotes.MinBy(m => m.Votes.Count)!.Name;
+            _MatchInfo.StartTeam1 = _TeamVotes.MinBy(m => m.Votes.Count)!.Name.Equals("T") ? Team.Terrorist : Team.CounterTerrorist;
             _Logger.LogInformation("StartTeam is {team}", _MatchInfo.StartTeam1);
-            if (_MatchInfo.StartTeam1.Equals("T", StringComparison.OrdinalIgnoreCase))
-            {
-                _MatchCallback.SwapTeams();
-            }
         }
 
         _MatchCallback.SendMessage($"{_CurrentMatchTeamToVote!.Team} selected {_MatchInfo.StartTeam1} as startside!");
@@ -438,6 +430,7 @@ public class Match : IDisposable
             return;
         }
 
+        // TODO Error when Player was not ready
         var matchPlayer = GetMatchPlayer(player.SteamID);
         TryFireState(MatchCommand.DisconnectPlayer);
 
@@ -492,11 +485,11 @@ public class Match : IDisposable
     {
         if (Config.Team1.Players.ContainsKey(steamID))
         {
-            return Team.Terrorist;
+            return _MatchInfo.StartTeam1 ?? Team.Terrorist;
         }
         else if (Config.Team2.Players.ContainsKey(steamID))
         {
-            return Team.CounterTerrorist;
+            return _MatchInfo.StartTeam1 == Team.CounterTerrorist ? Team.Terrorist : Team.CounterTerrorist;
         }
 
         return Team.None;
