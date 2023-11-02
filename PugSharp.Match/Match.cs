@@ -106,6 +106,7 @@ public class Match
 
         _MatchCallback.EndWarmup();
         _MatchCallback.DisableCheats();
+        _MatchCallback.SetupRoundBackup();
         _MatchCallback.StartDemoRecording();
 
         TryFireState(MatchCommand.StartMatch);

@@ -475,7 +475,15 @@ public class PugSharp : BasePlugin, IMatchCallback
 
     public void DisableCheats()
     {
+        _Logger.LogInformation("Disable cheats");
         Server.ExecuteCommand("sv_cheats 0");
+    }
+
+    public void SetupRoundBackup()
+    {
+        var prefix = $"PugSharp_{_Match?.Config.MatchId}_";
+        _Logger.LogInformation("Starting demo recording: {prefix}", prefix);
+        Server.ExecuteCommand($"mp_backup_round_file {prefix}");
     }
 
     public void StartDemoRecording()
