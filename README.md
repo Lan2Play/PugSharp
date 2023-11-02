@@ -11,6 +11,16 @@ If you want to help developing or translating, join our discord:
 
 [![Discord](https://discordapp.com/api/guilds/748086853449810013/widget.png?style=banner3)](https://discord.gg/zF5C9WPWFq)
 
+## Features
+
+- Configuration via http(s) json (example below) 
+- api reporting to a http(s) server
+- automatic team assignment
+- map and starting team vote
+- automatic pause if player disconnects
+- pause / unpause feature
+- demo recording and upload
+
 
 ## Usage
 
@@ -122,7 +132,3 @@ Hop over to our discord if you want to help with the development. We will update
 [![Translation status](https://translate.lan2play.de/widgets/eventula-manager/-/multi-auto.svg)](https://translate.lan2play.de/engage/eventula-manager/) -->
 
 
-## Features
-
-- Configuration via http(s) json content
-- api reporting to a server
