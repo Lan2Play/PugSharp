@@ -15,7 +15,7 @@ namespace PugSharp
     {
         internal static bool IsAdmin(this CCSPlayerController? playerController, ServerConfig? serverConfig)
         {
-            if (serverConfig == null || playerController == null)
+            if (serverConfig?.Admins == null || playerController == null)
             {
                 return false;
             }
