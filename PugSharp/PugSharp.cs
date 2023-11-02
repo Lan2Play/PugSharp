@@ -2,6 +2,7 @@
 using CounterStrikeSharp.API.Core;
 using CounterStrikeSharp.API.Core.Attributes.Registration;
 using CounterStrikeSharp.API.Modules.Commands;
+using CounterStrikeSharp.API.Modules.Utils;
 using Microsoft.Extensions.Logging;
 using PugSharp.Config;
 using PugSharp.Logging;
@@ -206,8 +207,8 @@ public class PugSharp : BasePlugin, IMatchCallback
 
             if (_Match != null && _Match.CurrentState == MatchState.WaitingForPlayersConnectedReady)
             {
-                userId.PrintToChat($"Hello {userId.PlayerName}, welcome to match {_Match.Config.MatchId}");
-                userId.PrintToChat($"type !ready to be marked as ready for the match");
+                userId.PrintToChat($" {ChatColors.Default}Hello {ChatColors.Green}{userId.PlayerName}{ChatColors.Default}, welcome to match {_Match.Config.MatchId}");
+                userId.PrintToChat($" {ChatColors.Default}type {ChatColors.BlueGrey}!ready {ChatColors.Default}to be marked as ready for the match");
             }
         }
         else
