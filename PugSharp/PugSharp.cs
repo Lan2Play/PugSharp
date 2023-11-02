@@ -109,6 +109,7 @@ public class PugSharp : BasePlugin, IMatchCallback
     #region Commands
 
     [ConsoleCommand("css_loadconfig", "Load a match config")]
+    [ConsoleCommand("ps_loadconfig", "Load a match config")]
     public void OnCommandLoadConfig(CCSPlayerController? player, CommandInfo command)
     {
         if (player != null && !player.IsAdmin(_ServerConfig))
@@ -137,6 +138,7 @@ public class PugSharp : BasePlugin, IMatchCallback
     }
 
     [ConsoleCommand("css_dumpmatch", "Serialize match to JSON on console")]
+    [ConsoleCommand("ps_dumpmatch", "Load a match config")]
     public void OnCommandDumpMatch(CCSPlayerController? player, CommandInfo command)
     {
         _Logger.LogInformation("################ dump match ################");
