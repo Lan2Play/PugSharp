@@ -273,6 +273,11 @@ public class Match
             _MatchInfo.StartTeam1 = _TeamVotes.MinBy(m => m.Votes.Count)!.Name;
         }
 
+        if(_MatchInfo.StartTeam1.Equals(_CurrentMatchTeamToVote.Team.ToString(), StringComparison.OrdinalIgnoreCase))
+        {
+            _MatchCallback.SwapTeams();
+        }
+
         _MatchCallback.SendMessage($"{_CurrentMatchTeamToVote!.Team} selected {_MatchInfo.StartTeam1} as startside!");
     }
 

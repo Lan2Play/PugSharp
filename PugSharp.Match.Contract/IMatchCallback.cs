@@ -8,6 +8,7 @@ public interface IMatchCallback
     void PauseServer();
     void SendMessage(string message);
     void SwitchMap(string selectedMap);
+    void SwapTeams();
     void UnpauseServer();
 
     void DisableCheats();
