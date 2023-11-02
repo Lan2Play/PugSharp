@@ -109,6 +109,10 @@ jobs:
         run: cp -rf PugSharp/bin/Debug/net7.0/publish/* packagebuild/addons/counterstrikesharp/plugins/PugSharp
       - name: build package
         run: zip -r PugSharp_$PUGSHARPNETVER.zip packagebuild/addons
+      - name: ls
+        run: ls -la
+      - name: find
+        run: find .
       - name: replace version variable in meta files
         run: sed -i "s|%%VERSION%%|$PUGSHARPNETVER|g" ./release.json;       
       - name: replace CounterStrikeSharpVersion variable in meta files
