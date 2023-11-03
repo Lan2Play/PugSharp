@@ -41,6 +41,8 @@ namespace PugSharp.ApiStats
             var response = await _HttpClient.PostAsync(uri, null, cancellationToken).ConfigureAwait(false);
 
             await HandleResponseAsync(response, cancellationToken).ConfigureAwait(false);
+
+
         }
 
         public async Task SendMapResultAsync(MapResultParams mapResultParams, CancellationToken cancellationToken)
@@ -182,22 +184,31 @@ namespace PugSharp.ApiStats
                 return;
             }
 
-            if (!httpResponseMessage.IsSuccessStatusCode)
+            try
             {
-                _Logger.LogError($"API request failed, HTTP status code = {httpResponseMessage.StatusCode}");
-
-                try
+                if (httpResponseMessage.IsSuccessStatusCode)
                 {
+                    _Logger.LogInformation("API request was succesful, HTTP status code = {statusCode}", httpResponseMessage.StatusCode);
+
                     var responseContent = await httpResponseMessage.Content.ReadAsStringAsync(cancellationToken).ConfigureAwait(false);
 
-                    _Logger.LogError($"ResponseContent: {responseContent}");
+                    _Logger.LogInformation("ResponseContent: {responseContent}", responseContent);
+
                 }
-                catch (Exception)
+                else
                 {
-                    // TODO
+                    _Logger.LogError("API request failed, HTTP status code = {statusCode}", httpResponseMessage.StatusCode);
+
+                    var responseContent = await httpResponseMessage.Content.ReadAsStringAsync(cancellationToken).ConfigureAwait(false);
+
+                    _Logger.LogError("ResponseContent: {responseContent}", responseContent);
+
                 }
             }
-
+            catch (Exception e)
+            {
+                _Logger.LogError(e, "Error handling response");
+            }
         }
 
         public void Dispose()
