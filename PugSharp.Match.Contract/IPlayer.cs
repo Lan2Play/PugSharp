@@ -1,7 +1,10 @@
-﻿namespace PugSharp.Match.Contract;
+﻿using System.Text.Json.Serialization;
+
+namespace PugSharp.Match.Contract;
 
 public interface IPlayer
 {
+    [JsonIgnore]
     nint Handle { get; }
 
     ulong SteamID { get; }
