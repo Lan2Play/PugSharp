@@ -103,6 +103,7 @@ public class PugSharp : BasePlugin, IMatchCallback
         Server.ExecuteCommand("mp_overtime_maxrounds 6");
         Server.ExecuteCommand("mp_maxrounds 24");
         Server.ExecuteCommand("mp_tournament 1");
+        Server.ExecuteCommand("mp_autokick 0");
 
         Server.ExecuteCommand("mp_team_timeout_time 30");
         Server.ExecuteCommand("mp_team_timeout_max 3");
