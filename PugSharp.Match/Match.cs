@@ -428,11 +428,13 @@ public class Match : IDisposable
 
     private MatchTeam? GetMatchTeam(ulong steamID)
     {
+        _Logger.LogInformation("GetMatchTeam for {steamId} in MatchTeam1: {team1Ids}", steamID, string.Join(", ", MatchTeam1.Players.Select(x => x.Player.SteamID)));
         if (MatchTeam1.Players.Exists(x => x.Player.SteamID.Equals(steamID)))
         {
             return MatchTeam1;
         }
 
+        _Logger.LogInformation("GetMatchTeam for {steamId} in MatchTeam2: {team1Ids}", steamID, string.Join(", ", MatchTeam2.Players.Select(x => x.Player.SteamID)));
         if (MatchTeam2.Players.Exists(x => x.Player.SteamID.Equals(steamID)))
         {
             return MatchTeam2;
