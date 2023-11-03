@@ -1,0 +1,57 @@
+name: PugSharp_website_build
+
+on:
+  push:
+    branches: [ main ]
+    tags: [ v**]
+    paths:
+    - 'Docs/**'
+    - 'packaging/Docs/**'
+    - '.github/workflows/website_build.yml'
+  pull_request:
+    branches: 
+    - main
+    - develop
+    - 'feature/**'
+    tags: [ v**]
+    paths:
+    - 'Docs/**'
+    - 'packaging/Docs/**'
+    - '.github/workflows/website_build.yml'
+
+jobs:
+
+  build_only:
+    runs-on: ubuntu-latest
+    if: ${{ ((!startsWith(github.ref, 'refs/tags/v')) && (!contains(github.event.head_commit.message, 'forcepublish')) && github.event_name == 'pull_request') || (((!startsWith(github.ref, 'refs/tags/v')) && (!contains(github.event.head_commit.message, 'forcepublish')) && github.event_name == 'push' )) }}
+    steps:
+    - uses: actions/checkout@v3
+    - name: build
+      run: docker run --rm -v ${{ github.workspace }}/Docs:/docs -e USERID=$(id -u ${USER}) -e GROUPID=$(id -g ${USER}) lan2play/docker-sphinxbuild:latest
+
+
+  publish_prd:
+    runs-on: ubuntu-latest
+    if: ${{ (startsWith(github.ref, 'refs/tags/v') && github.event_name == 'push') || (contains(github.event.head_commit.message, 'forcepublish') && github.event_name == 'push') }}
+    steps:
+    - uses: actions/checkout@v3
+    - name: build
+      run: docker run --rm -v ${{ github.workspace }}/Docs:/docs -e USERID=$(id -u ${USER}) -e GROUPID=$(id -g ${USER}) lan2play/docker-sphinxbuild:latest
+    - name: Install SSH key
+      uses: shimataro/ssh-key-action@v2
+      with:
+        key: ${{ secrets.PUGSHARP_LAN2PLAY_DE_SSH }}
+        name: id_rsa
+        # config: ${{ secrets.SSH_CONFIG }} 
+        known_hosts: unnecessary
+        if_key_exists: fail 
+    - name: git config
+      run: git config --global user.email "ci@pugsharp.lan2play.de" && git config --global user.name "PugSharp CI"
+    - name: clone pages repo
+      run: git clone git@github.com:Lan2Play/pugsharp.lan2play.de.git
+    - name: remove old things and add new
+      run: rm -rf ./pugsharp.lan2play.de/docs/* && cp -rf ./Docs/build/html/* ./pugsharp.lan2play.de/docs/
+    - name: readd cname and nojekyll
+      run: echo "pugsharp.lan2play.de" >> ./pugsharp.lan2play.de/docs/CNAME ; touch ./pugsharp.lan2play.de/docs/.nojekyll
+    - name: push pages repo
+      run: cd ./pugsharp.lan2play.de && if [ $(git status --short | wc -l) -gt 0 ]; then git add . && git commit -m "CI Build" && git push; fi
