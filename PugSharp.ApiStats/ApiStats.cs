@@ -14,9 +14,10 @@ namespace PugSharp.ApiStats
 
         public ApiStats(string apiStatsUrl, string apiStatsKey)
         {
+            _Logger.LogInformation("Create Api Stats with BaseUrl: {url}", apiStatsUrl);
             _HttpClient = new HttpClient()
             {
-                BaseAddress = new Uri(apiStatsUrl)
+                BaseAddress = new Uri(apiStatsUrl),
             };
 
             _HttpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", apiStatsKey);
@@ -139,7 +140,6 @@ namespace PugSharp.ApiStats
         {
             return param.ToString(CultureInfo.InvariantCulture);
         }
-
 
         public async Task SendSeriesResultAsync(SeriesResultParams seriesResultParams, CancellationToken cancellationToken)
         {
