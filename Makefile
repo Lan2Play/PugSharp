@@ -10,9 +10,6 @@ build-and-copy: build copy
 build:
 	dotnet publish -c debug
 
-init-csserver:
-
-
 copy:
 	rm PugSharp/bin/Debug/net7.0/publish/CounterStrikeSharp.API.dll
 	cp -rf PugSharp/bin/Debug/net7.0/publish/* /home/volza/temp/cs2/cs2-data/game/csgo/addons/counterstrikesharp/plugins/PugSharp
@@ -23,3 +20,11 @@ start-ds:
 
 fix-mm:
 	sed -i '/^			Game	csgo$/i			Game	csgo/addons/metamod' /home/volza/temp/cs2/cs2-data/game/csgo/gameinfo.gi
+
+# Make Documentation
+docs-html:
+ifeq ($(OS),Windows_NT)
+	echo you currently need docker on linux to build the documentation
+else
+	docker run --rm -v $(shell dirname $(realpath $(lastword $(MAKEFILE_LIST))))/Docs:/docs -e USERID=$(shell id -u ${USER}) -e GROUPID=$(shell id -g ${USER}) lan2play/docker-sphinxbuild:latest
+endif

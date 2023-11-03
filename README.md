@@ -1,9 +1,28 @@
 # PugSharp
+
+
+
+[![PugSharp_test_and_build](https://github.com/Lan2Play/PugSharp/actions/workflows/test_and_build.yml/badge.svg)](https://github.com/Lan2Play/PugSharp/actions/workflows/test_and_build.yml)
+[![PugSharp_website_build](https://github.com/Lan2Play/PugSharp/actions/workflows/website_build.yml/badge.svg)](https://github.com/Lan2Play/PugSharp/actions/workflows/website_build.yml)
+[![Lines of Code](https://sonarcloud.io/api/project_badges/measure?project=Lan2Play_PugSharp&metric=ncloc)](https://sonarcloud.io/summary/new_code?id=Lan2Play_PugSharp)
+[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=Lan2Play_PugSharp&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=Lan2Play_PugSharp)
+[![Duplicated Lines (%)](https://sonarcloud.io/api/project_badges/measure?project=Lan2Play_PugSharp&metric=duplicated_lines_density)](https://sonarcloud.io/summary/new_code?id=Lan2Play_PugSharp)
+[![Coverage](https://sonarcloud.io/api/project_badges/measure?project=Lan2Play_PugSharp&metric=coverage)](https://sonarcloud.io/summary/new_code?id=Lan2Play_PugSharp)
+[![Maintainability Rating](https://sonarcloud.io/api/project_badges/measure?project=Lan2Play_PugSharp&metric=sqale_rating)](https://sonarcloud.io/summary/new_code?id=Lan2Play_PugSharp)
+[![Reliability Rating](https://sonarcloud.io/api/project_badges/measure?project=Lan2Play_PugSharp&metric=reliability_rating)](https://sonarcloud.io/summary/new_code?id=Lan2Play_PugSharp)
+[![Security Rating](https://sonarcloud.io/api/project_badges/measure?project=Lan2Play_PugSharp&metric=security_rating)](https://sonarcloud.io/summary/new_code?id=Lan2Play_PugSharp)
+[![Vulnerabilities](https://sonarcloud.io/api/project_badges/measure?project=Lan2Play_PugSharp&metric=vulnerabilities)](https://sonarcloud.io/summary/new_code?id=Lan2Play_PugSharp)
+[![Code Smells](https://sonarcloud.io/api/project_badges/measure?project=Lan2Play_PugSharp&metric=code_smells)](https://sonarcloud.io/summary/new_code?id=Lan2Play_PugSharp)
+[![Bugs](https://sonarcloud.io/api/project_badges/measure?project=Lan2Play_PugSharp&metric=bugs)](https://sonarcloud.io/summary/new_code?id=Lan2Play_PugSharp)
+<!-- [![Translation status](https://translate.lan2play.de/widgets/netevent-client/-/netevent-client/svg-badge.svg)](https://translate.lan2play.de/engage/netevent-client/) -->
+
 Pugsharp is a PUG System Plugin for CS2 based on the awsome [CounterStrikeSharp by roflmuffin](https://github.com/roflmuffin/CounterStrikeSharp). It's intended purpose is to be used with our fork of [eventula](https://github.com/Lan2Play/eventula-manager), but ofc can be used in a different environment as well.
 
 
 > **Warning**
 > This Plugin is in a very early state of development and is not fully working right now! We keep you updated on our discord below, if you are interested in using it.
+
+You can find the full documentation on [pugsharp.lan2play.de](https://pugsharp.lan2play.de) .
 
 
 If you want to help developing or translating, join our discord:
@@ -21,6 +40,8 @@ If you want to help developing or translating, join our discord:
 - [x] pause / unpause feature
 - [ ] demo recording 
 - [ ] demo upload
+- [ ] hltv support
+- [ ] i18n
 
 
 ## Usage
@@ -28,18 +49,8 @@ If you want to help developing or translating, join our discord:
 > **Warning**
 > Don't use this in production right now!
 >
-### Prereqs
-* [CounterStrikeSharp by roflmuffin](https://github.com/roflmuffin/CounterStrikeSharp) (currently no need to install seperatly, we package it with the releases until there is a steady release cycle available)
-* [MetaMod 2.0](https://www.sourcemm.net/downloads.php?branch=dev)
-* Linux Dedicated Server
 
-### Installation
-* Install [MetaMod 2.0](https://www.sourcemm.net/downloads.php?branch=dev) on your Linux Dedicated Server 
-* Download one of our releases including [CounterStrikeSharp by roflmuffin](https://github.com/roflmuffin/CounterStrikeSharp) and the Dotnet Runtime and unpack it to your csgo folder. Currently you can find really early alpha releases on our [Actions](https://github.com/Lan2Play/PugSharp/actions) as Artifacts.
-* Have fun and report bugs :D
-
-### local development
-Hop over to our discord if you want to help with the development. We will update the makefile soon, so you can easily setup a testing environment.  We keep you updated on our discord above.
+If you want to know how to use PugSharp, hop over to our [Documentation](https://pugsharp.lan2play.de) .
 
 ## Commands
 
