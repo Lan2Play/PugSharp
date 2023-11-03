@@ -409,7 +409,8 @@ public class PugSharp : BasePlugin, IMatchCallback
 
         if (_Match.CurrentState == MatchState.MatchRunning)
         {
-            _Match?.Complete(LoadMatchWinnerName());
+            var scores = LoadTeamsScore();
+            _Match?.CompleteMap(scores.TScore, scores.CtScore);
 
 
             // TODO Figure out who won => Done In match Complete

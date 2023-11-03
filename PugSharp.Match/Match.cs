@@ -91,17 +91,17 @@ public class Match : IDisposable
 
         _MatchStateMachine.Configure(MatchState.MapCompleted)
             .PermitIf(MatchCommand.CompleteMatch, MatchState.MatchCompleted, AllMapsArePlayed)
-            .PermitIf(MatchCommand.CompleteMatch, MatchState.WaitingForPlayersConnectedReady, NotAllMapsArePlayed);
+            .PermitIf(MatchCommand.CompleteMatch, MatchState.WaitingForPlayersConnectedReady, NotAllMapsArePlayed)
+            .OnEntry(SendMapResults)
+            .OnEntry(TryCompleteMatch);
 
         _MatchStateMachine.Configure(MatchState.MatchCompleted)
             .OnEntry(CompleteMatch);
-
 
         _MatchStateMachine.OnTransitioned(OnMatchStateChanged);
 
         _MatchStateMachine.Fire(MatchCommand.LoadMatch);
     }
-
 
     private void StartReadyReminder()
     {
@@ -147,6 +147,22 @@ public class Match : IDisposable
         _ = _ApiStats?.SendGoingLiveAsync(new GoingLiveParams(_MatchInfo.CurrentMap.MapName, 1), CancellationToken.None);
 
         TryFireState(MatchCommand.StartMatch);
+    }
+
+    private void SendMapResults()
+    {
+        if (_MatchInfo.CurrentMap.Winner == null)
+        {
+            throw new NotSupportedException("Map Winner is not yet set. Can not send map results");
+        }
+
+        var mapResultParams = new MapResultParams(_MatchInfo.CurrentMap.Winner.TeamConfig.Name, _MatchInfo.CurrentMap.Team1Points, _MatchInfo.CurrentMap.Team2Points, _MatchInfo.CurrentMap.MapNumber);
+        _ = _ApiStats?.SendMapResultAsync(mapResultParams, CancellationToken.None);
+    }
+
+    private void TryCompleteMatch()
+    {
+        TryFireState(MatchCommand.CompleteMatch);
     }
 
     private void CompleteMatch()
@@ -514,6 +530,11 @@ public class Match : IDisposable
             return matchTeam.Team;
         }
 
+        return GetConfigTeam(steamID);
+    }
+
+    private Team GetConfigTeam(ulong steamID)
+    {
         if (Config.Team1.Players.ContainsKey(steamID))
         {
             return Team.Terrorist;
@@ -663,10 +684,32 @@ public class Match : IDisposable
         GC.SuppressFinalize(this);
     }
 
-    public void Complete(Team winner)
+    public void CompleteMap(int tPoints, int ctPoints)
     {
+        var winner = tPoints > ctPoints ? Team.Terrorist : Team.CounterTerrorist;
+
         var winnerTeam = GetMatchTeam(winner);
+        if (winnerTeam == null)
+        {
+            throw new NotSupportedException("Winner Team could not be found!");
+        }
+
         _MatchInfo.CurrentMap.Winner = winnerTeam;
+
+        var configWinnerTeam = GetConfigTeam(winnerTeam.Players.First().Player.SteamID);
+        if (configWinnerTeam == Team.Terrorist)
+        {
+            // Team 1 won
+            _MatchInfo.CurrentMap.Team1Points = winner == Team.Terrorist ? tPoints : ctPoints;
+            _MatchInfo.CurrentMap.Team2Points = winner == Team.Terrorist ? ctPoints : tPoints;
+        }
+        else
+        {
+            // Team 2 won
+            _MatchInfo.CurrentMap.Team1Points = winner == Team.Terrorist ? ctPoints : tPoints;
+            _MatchInfo.CurrentMap.Team2Points = winner == Team.Terrorist ? tPoints : ctPoints;
+        }
+
         _Logger.LogInformation("The winner is: {winner}", winnerTeam!.TeamConfig.Name);
         TryFireState(MatchCommand.CompleteMap);
     }

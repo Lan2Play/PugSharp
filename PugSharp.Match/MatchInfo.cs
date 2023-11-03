@@ -28,4 +28,8 @@ public class MatchMap
     public string MapName { get; set; }
 
     public MatchTeam? Winner { get; internal set; }
+
+    public int Team1Points { get; set; }
+
+    public int Team2Points { get; set; }
 }
