@@ -4,15 +4,14 @@ namespace PugSharp.Match;
 
 public class MatchTeam
 {
-    public MatchTeam(Team team, Config.Team teamConfig)
+    public MatchTeam(Config.Team teamConfig)
     {
-        Team = team;
         TeamConfig = teamConfig;
     }
 
     public List<MatchPlayer> Players { get; } = new List<MatchPlayer>();
 
-    public Team Team { get; set; }
+    public Team StartTeam { get; set; }
 
     public Config.Team TeamConfig { get; }
 

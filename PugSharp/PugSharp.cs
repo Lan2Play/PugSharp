@@ -57,14 +57,12 @@ public class PugSharp : BasePlugin, IMatchCallback
         RegisterEventHandler<EventServerCvar>(OnCvarChanged, HookMode.Pre);
         RegisterEventHandler<EventPlayerTeam>(OnPlayerTeam);
 
-
         RegisterListener<CounterStrikeSharp.API.Core.Listeners.OnMapStart>(OnMapStartHandler);
 
         AddCommandListener("jointeam", OnClientCommandJoinTeam);
 
         _Logger.LogInformation("End RegisterEventHandlers");
     }
-
 
     private void ExecuteServerCommand(string command, string value)
     {
@@ -292,7 +290,7 @@ public class PugSharp : BasePlugin, IMatchCallback
 
         return HookResult.Continue;
     }
-
+   
     private HookResult OnCvarChanged(EventServerCvar eventCvarChanged, GameEventInfo info)
     {
         if (_Match != null && _Match.CurrentState != MatchState.None)

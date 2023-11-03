@@ -24,11 +24,23 @@ public class Match : IDisposable
     private MatchTeam? _CurrentMatchTeamToVote;
     private bool disposedValue;
 
+    public MatchState CurrentState => _MatchStateMachine.State;
+
+    public Config.MatchConfig Config { get; }
+
+    public MatchTeam MatchTeam1 { get; }
+
+    public MatchTeam MatchTeam2 { get; }
+
+    public IEnumerable<MatchPlayer> AllMatchPlayers => MatchTeam1.Players.Concat(MatchTeam2.Players);
+
     public Match(IMatchCallback matchCallback, Config.MatchConfig matchConfig)
     {
         _MatchCallback = matchCallback;
         Config = matchConfig;
         _MatchInfo = new MatchInfo(matchConfig.NumMaps);
+        MatchTeam1 = new MatchTeam(Config.Team1);
+        MatchTeam2 = new MatchTeam(Config.Team2);
 
         _VoteTimer.Interval = Config.VoteTimeout;
         _VoteTimer.Elapsed += VoteTimer_Elapsed;
@@ -128,13 +140,15 @@ public class Match : IDisposable
 
     private void PauseMatch()
     {
-        MatchTeams.ForEach(team => { team.IsPaused = true; });
+        MatchTeam1.IsPaused = true;
+        MatchTeam2.IsPaused = true;
+
         _MatchCallback.PauseServer();
     }
 
     private void StartMatch()
     {
-        foreach (var player in MatchTeams.SelectMany(x => x.Players).Where(x => x.Player.MatchStats != null))
+        foreach (var player in AllMatchPlayers.Where(x => x.Player.MatchStats != null))
         {
             player.Player.MatchStats!.ResetStats();
         }
@@ -143,6 +157,8 @@ public class Match : IDisposable
         _MatchCallback.DisableCheats();
         _MatchCallback.SetupRoundBackup();
         _MatchCallback.StartDemoRecording();
+
+        _MatchCallback.SendMessage($" {ChatColors.Default}Starting Match. {ChatColors.Highlight}{MatchTeam1.TeamConfig.Name} {ChatColors.Default}as {ChatColors.Highlight}{MatchTeam1.StartTeam}{ChatColors.Default}. {ChatColors.Highlight}{MatchTeam2.TeamConfig.Name}{ChatColors.Default} as {ChatColors.Highlight}{MatchTeam2.StartTeam}");
 
         _ = _ApiStats?.SendGoingLiveAsync(new GoingLiveParams(_MatchInfo.CurrentMap.MapName, _MatchInfo.CurrentMap.MapNumber), CancellationToken.None);
 
@@ -168,6 +184,7 @@ public class Match : IDisposable
     private void CompleteMatch()
     {
         _MatchCallback.StopDemoRecording();
+        //_ApiStats?.SendSeriesResultAsync(new SeriesResultParams(_Match))
     }
 
     private async Task MatchLiveAsync()
@@ -215,7 +232,7 @@ public class Match : IDisposable
         try
         {
             _Logger.LogInformation("ReadyReminder Elapsed");
-            var readyPlayerIds = MatchTeams.SelectMany(x => x.Players).Where(p => p.IsReady).Select(x => x.Player.SteamID).ToList();
+            var readyPlayerIds = AllMatchPlayers.Where(p => p.IsReady).Select(x => x.Player.SteamID).ToList();
             var notReadyPlayers = _MatchCallback.GetAllPlayers().Where(p => !readyPlayerIds.Contains(p.SteamID));
 
             var remindMessage = $" {ChatColors.Default}You are {ChatColors.Error}not {ChatColors.Default}ready! Type {ChatColors.Command}!ready {ChatColors.Default}if you are ready.";
@@ -229,12 +246,6 @@ public class Match : IDisposable
             _Logger.LogError(ex, "Error sending vote reminder");
         }
     }
-
-    public MatchState CurrentState => _MatchStateMachine.State;
-
-    public Config.MatchConfig Config { get; }
-
-    public List<MatchTeam> MatchTeams { get; } = new();
 
     public string CreateDotGraph()
     {
@@ -256,7 +267,7 @@ public class Match : IDisposable
             mapOptions.Add(new MenuOption(map, (opt, player) => BanMap(player, mapNumber)));
         }
 
-        ShowMenuToTeam(_CurrentMatchTeamToVote!, $" {ChatColors.Default}Match is LIVEtype {ChatColors.Command}!<mapnumber>", mapOptions);
+        ShowMenuToTeam(_CurrentMatchTeamToVote!, $" {ChatColors.Default}Vote to ban map: type {ChatColors.Command}!<mapnumber>", mapOptions);
 
         _VoteTimer.Start();
     }
@@ -297,12 +308,13 @@ public class Match : IDisposable
         _VoteTimer.Stop();
 
         var startTeam = _TeamVotes.MaxBy(m => m.Votes.Count)!.Name.Equals("T") ? Team.Terrorist : Team.CounterTerrorist;
-        _Logger.LogInformation("Set selected teamsite to {startTeam}. Voted by {team}", startTeam, _CurrentMatchTeamToVote!.Team.ToString());
+        _Logger.LogInformation("Set selected teamsite to {startTeam}. Voted by {team}", startTeam, _CurrentMatchTeamToVote!.StartTeam.ToString());
 
-        if (_CurrentMatchTeamToVote!.Team != startTeam)
+        if (_CurrentMatchTeamToVote!.StartTeam != startTeam)
         {
-            _CurrentMatchTeamToVote.Team = startTeam;
-            MatchTeams.First(t => t != _CurrentMatchTeamToVote).Team = startTeam == Team.Terrorist ? Team.CounterTerrorist : Team.Terrorist;
+            _CurrentMatchTeamToVote.StartTeam = startTeam;
+            var otherTeam = _CurrentMatchTeamToVote == MatchTeam1 ? MatchTeam2 : MatchTeam1;
+            otherTeam.StartTeam = startTeam == Team.Terrorist ? Team.CounterTerrorist : Team.Terrorist;
         }
 
         _MatchCallback.SendMessage($"{_CurrentMatchTeamToVote!.TeamConfig.Name} selected {startTeam} as startside!");
@@ -320,11 +332,11 @@ public class Match : IDisposable
     {
         if (_CurrentMatchTeamToVote == null)
         {
-            _CurrentMatchTeamToVote = MatchTeams[0];
+            _CurrentMatchTeamToVote = MatchTeam1;
         }
         else
         {
-            _CurrentMatchTeamToVote = MatchTeams.First(x => x != _CurrentMatchTeamToVote);
+            _CurrentMatchTeamToVote = _CurrentMatchTeamToVote == MatchTeam1 ? MatchTeam2 : MatchTeam1;
         }
     }
 
@@ -343,7 +355,7 @@ public class Match : IDisposable
 
     private bool AllPlayersAreReady()
     {
-        var readyPlayers = MatchTeams.SelectMany(m => m.Players).Where(p => p.IsReady);
+        var readyPlayers = AllMatchPlayers.Where(p => p.IsReady);
         var rquiredPlayers = Config.PlayersPerTeam * 2;
 
         _Logger.LogInformation($"Match has {readyPlayers.Count()} of {rquiredPlayers} ready players: {string.Join("; ", readyPlayers.Select(a => $"{a.Player.PlayerName}[{a.IsReady}]"))}");
@@ -351,7 +363,7 @@ public class Match : IDisposable
         return readyPlayers.Count() == rquiredPlayers;
     }
 
-    private bool AllTeamsUnpaused() => MatchTeams.TrueForAll(x => !x.IsPaused);
+    private bool AllTeamsUnpaused() => !MatchTeam1.IsPaused && !MatchTeam2.IsPaused;
 
     private bool AllMapsArePlayed()
     {
@@ -370,7 +382,7 @@ public class Match : IDisposable
     {
         _Logger.LogInformation("Reset Readystate for all players");
 
-        foreach (var player in MatchTeams.SelectMany(m => m.Players))
+        foreach (var player in AllMatchPlayers)
         {
             player.IsReady = false;
         }
@@ -413,42 +425,51 @@ public class Match : IDisposable
 
     private MatchTeam? GetMatchTeam(ulong steamID)
     {
-        return MatchTeams.Find(x => x.Players.Exists(x => x.Player.SteamID == steamID));
+        if (MatchTeam1.Players.Exists(x => x.Player.SteamID == steamID))
+        {
+            return MatchTeam1;
+        }
+
+        if (MatchTeam1.Players.Exists(x => x.Player.SteamID == steamID))
+        {
+            return MatchTeam2;
+        }
+
+        return null;
     }
 
     private MatchTeam? GetMatchTeam(Team team)
     {
-        return MatchTeams.First(x => x.Team == team);
+        return MatchTeam1.StartTeam == team ? MatchTeam1 : MatchTeam2;
     }
 
     private MatchPlayer GetMatchPlayer(ulong steamID)
     {
-        return MatchTeams.SelectMany(x => x.Players).First(x => x.Player.SteamID == steamID);
+        return AllMatchPlayers.First(x => x.Player.SteamID == steamID);
     }
 
     #region Match Functions
 
     public bool TryAddPlayer(IPlayer player)
     {
-        var playerTeam = GetPlayerTeam(player.SteamID);
-        if (playerTeam == Team.None)
+        //var playerTeam = GetConfigTeam(player.SteamID);
+        //if (playerTeam == Team.None)
+        //{
+        //    return false;
+        //}
+
+        var isTeam1 = Config.Team1.Players.ContainsKey(player.SteamID);
+        var teamName = isTeam1 ? Config.Team1.Name : Config.Team2.Name;
+        var startSite = isTeam1 ? Team.Terrorist : Team.CounterTerrorist;
+
+        _Logger.LogInformation("Player {playerName} belongs to {teamName}", player.PlayerName, teamName);
+
+        if (player.Team != startSite)
         {
-            return false;
+            player.SwitchTeam(startSite);
         }
 
-        _Logger.LogInformation($"Player {player.PlayerName} belongs to {playerTeam}");
-
-        if (player.Team != playerTeam)
-        {
-            player.SwitchTeam(playerTeam);
-        }
-
-        var team = MatchTeams.Find(m => m.Team == playerTeam);
-        if (team == null)
-        {
-            team = new MatchTeam(playerTeam, playerTeam == Team.Terrorist ? Config.Team1 : Config.Team2);
-            MatchTeams.Add(team);
-        }
+        var team = isTeam1 ? MatchTeam1 : MatchTeam2;
 
         var existingPlayer = team.Players.Find(x => x.Player.SteamID.Equals(player.SteamID));
         if (existingPlayer != null)
@@ -505,7 +526,7 @@ public class Match : IDisposable
         var matchPlayer = GetMatchPlayer(player.SteamID);
         matchPlayer.IsReady = !matchPlayer.IsReady;
 
-        var readyPlayers = MatchTeams.SelectMany(x => x.Players).Count(x => x.IsReady);
+        var readyPlayers = MatchTeam1.Players.Count(x => x.IsReady) + MatchTeam2.Players.Count(x => x.IsReady);
 
         // Min Players per Team
         var requiredPlayers = Config.MinPlayersToReady * 2;
@@ -527,7 +548,7 @@ public class Match : IDisposable
 
         if (matchTeam != null)
         {
-            return matchTeam.Team;
+            return matchTeam.StartTeam;
         }
 
         return GetConfigTeam(steamID);
@@ -659,6 +680,18 @@ public class Match : IDisposable
         team.IsPaused = false;
         TryFireState(MatchCommand.Unpause);
     }
+
+    //public void RoundCompleted()
+    //{
+    //    var teamInfo1 = new TeamInfo
+    //    {
+    //        //Id = Config.Team1.Name,
+    //        TeamName = Config.Team1.Name
+    //    };
+
+    //    var roundStats = new RoundStatusUpdateParams(_MatchInfo.CurrentMap.MapNumber, teamInfo1, teamInfo2, new Map { });
+    //    _ApiStats?.SendRoundStatsUpdateAsync(roundStats, CancellationToken.None);
+    //}
 
     protected virtual void Dispose(bool disposing)
     {
