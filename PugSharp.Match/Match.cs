@@ -19,7 +19,7 @@ public class Match : IDisposable
     private readonly List<Vote> _MapsToSelect;
     private readonly List<Vote> _TeamVotes = new() { new("T"), new("CT") };
 
-    private readonly MatchInfo _MatchInfo = new();
+    private readonly MatchInfo _MatchInfo;
 
     private MatchTeam? _CurrentMatchTeamToVote;
     private bool disposedValue;
@@ -28,6 +28,8 @@ public class Match : IDisposable
     {
         _MatchCallback = matchCallback;
         Config = matchConfig;
+        _MatchInfo = new MatchInfo(matchConfig.NumMaps);
+
         _VoteTimer.Interval = Config.VoteTimeout;
         _VoteTimer.Elapsed += VoteTimer_Elapsed;
         _ReadyReminderTimer.Elapsed += ReadyReminderTimer_Elapsed;
@@ -137,7 +139,7 @@ public class Match : IDisposable
         _MatchCallback.SetupRoundBackup();
         _MatchCallback.StartDemoRecording();
 
-        _ = _ApiStats?.SendGoingLiveAsync(new GoingLiveParams(_MatchInfo.SelectedMap, 1), CancellationToken.None);
+        _ = _ApiStats?.SendGoingLiveAsync(new GoingLiveParams(_MatchInfo.CurrentMap.MapName, 1), CancellationToken.None);
 
         TryFireState(MatchCommand.StartMatch);
     }
@@ -164,7 +166,7 @@ public class Match : IDisposable
 
     private void SwitchToMatchMap()
     {
-        _MatchCallback.SwitchMap(_MatchInfo.SelectedMap);
+        _MatchCallback.SwitchMap(_MatchInfo.CurrentMap.MapName);
         TryFireState(MatchCommand.SwitchMap);
     }
 
@@ -250,7 +252,7 @@ public class Match : IDisposable
 
         if (_MapsToSelect.Count == 1)
         {
-            _MatchInfo.SelectedMap = _MapsToSelect[0].Name;
+            _MatchInfo.CurrentMap.MapName = _MapsToSelect[0].Name;
         }
     }
 
@@ -378,6 +380,11 @@ public class Match : IDisposable
     private MatchTeam? GetMatchTeam(ulong steamID)
     {
         return MatchTeams.Find(x => x.Players.Exists(x => x.Player.SteamID == steamID));
+    }
+
+    private MatchTeam? GetMatchTeam(Team team)
+    {
+        return MatchTeams.First(x => x.Team == team);
     }
 
     private MatchPlayer GetMatchPlayer(ulong steamID)
@@ -630,12 +637,11 @@ public class Match : IDisposable
 
     public void Complete(Team winner)
     {
-        //_MatchInfo.Winner = winner;
-        _Logger.LogInformation("The winner is: {winner}", winner);
+        var winnerTeam = GetMatchTeam(winner);
+        _MatchInfo.CurrentMap.Winner = winnerTeam;
+        _Logger.LogInformation("The winner is: {winner}", winnerTeam!.TeamConfig.Name);
         TryFireState(MatchCommand.CompleteMatch);
     }
 
-
     #endregion
-
 }
