@@ -142,6 +142,8 @@ public class PugSharp : BasePlugin, IMatchCallback
 
         var url = command.ArgByIndex(1);
         var authToken = command.ArgByIndex(2);
+
+        SendMessage($"Loading Config from {url}");
         var result = _ConfigProvider.TryLoadConfigAsync(url, authToken).Result;
         if (result.Successful)
         {

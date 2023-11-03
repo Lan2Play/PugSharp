@@ -315,6 +315,9 @@ public class Match : IDisposable
             _CurrentMatchTeamToVote.StartTeam = startTeam;
             var otherTeam = _CurrentMatchTeamToVote == MatchTeam1 ? MatchTeam2 : MatchTeam1;
             otherTeam.StartTeam = startTeam == Team.Terrorist ? Team.CounterTerrorist : Team.Terrorist;
+        
+            _Logger.LogInformation("{team} starts as Team {startTeam}", _CurrentMatchTeamToVote.TeamConfig.Name, _CurrentMatchTeamToVote!.StartTeam.ToString());
+            _Logger.LogInformation("{team} starts as Team {startTeam}", otherTeam.TeamConfig.Name, otherTeam!.StartTeam.ToString());
         }
 
         _MatchCallback.SendMessage($"{_CurrentMatchTeamToVote!.TeamConfig.Name} selected {startTeam} as startside!");
