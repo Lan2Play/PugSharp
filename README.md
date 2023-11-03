@@ -3,6 +3,7 @@
 
 
 [![PugSharp_test_and_build](https://github.com/Lan2Play/PugSharp/actions/workflows/test_and_build.yml/badge.svg)](https://github.com/Lan2Play/PugSharp/actions/workflows/test_and_build.yml)
+[![PugSharp_website_build](https://github.com/Lan2Play/PugSharp/actions/workflows/website_build.yml/badge.svg)](https://github.com/Lan2Play/PugSharp/actions/workflows/website_build.yml)
 [![Lines of Code](https://sonarcloud.io/api/project_badges/measure?project=Lan2Play_PugSharp&metric=ncloc)](https://sonarcloud.io/summary/new_code?id=Lan2Play_PugSharp)
 [![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=Lan2Play_PugSharp&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=Lan2Play_PugSharp)
 [![Duplicated Lines (%)](https://sonarcloud.io/api/project_badges/measure?project=Lan2Play_PugSharp&metric=duplicated_lines_density)](https://sonarcloud.io/summary/new_code?id=Lan2Play_PugSharp)

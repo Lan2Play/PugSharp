@@ -2,7 +2,7 @@
 PugSharp
 ==================================================
 
-|PugSharp_test_and_build| |Lines of Code| |Quality Gate Status|
+|PugSharp_test_and_build| |PugSharp_website_build| |Lines of Code| |Quality Gate Status|
 |Duplicated Lines (%)| |Coverage| |Maintainability Rating| |Reliability
 Rating| |Security Rating| |Vulnerabilities| |Code Smells| |Bugs| 
 
@@ -45,6 +45,8 @@ If you implement software to interface with PugSharp let us know please!
 
 .. |PugSharp_test_and_build| image:: https://github.com/Lan2Play/PugSharp/actions/workflows/test_and_build.yml/badge.svg
    :target: https://github.com/Lan2Play/PugSharp/actions/workflows/test_and_build.yml
+.. |PugSharp_website_build| image:: https://github.com/Lan2Play/PugSharp/actions/workflows/website_build.yml/badge.svg
+   :target: https://github.com/Lan2Play/PugSharp/actions/workflows/website_build.yml
 .. |Lines of Code| image:: https://sonarcloud.io/api/project_badges/measure?project=Lan2Play_PugSharp&metric=ncloc
    :target: https://sonarcloud.io/summary/new_code?id=Lan2Play_PugSharp
 .. |Quality Gate Status| image:: https://sonarcloud.io/api/project_badges/measure?project=Lan2Play_PugSharp&metric=alert_status
