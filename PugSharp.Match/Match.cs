@@ -1,4 +1,5 @@
 ﻿using Microsoft.Extensions.Logging;
+using PugSharp.ApiStats;
 using PugSharp.Logging;
 using PugSharp.Match.Contract;
 using Stateless;
@@ -14,11 +15,11 @@ public class Match : IDisposable
     private readonly System.Timers.Timer _ReadyReminderTimer = new(10000);
     private readonly IMatchCallback _MatchCallback;
     private readonly StateMachine<MatchState, MatchCommand> _MatchStateMachine;
-
+    private readonly ApiStats.ApiStats? _ApiStats;
     private readonly List<Vote> _MapsToSelect;
     private readonly List<Vote> _TeamVotes = new() { new("T"), new("CT") };
 
-    private readonly MatchInfo _MatchInfo = new();
+    private readonly MatchInfo _MatchInfo;
 
     private MatchTeam? _CurrentMatchTeamToVote;
     private bool disposedValue;
@@ -27,9 +28,16 @@ public class Match : IDisposable
     {
         _MatchCallback = matchCallback;
         Config = matchConfig;
+        _MatchInfo = new MatchInfo(matchConfig.NumMaps);
+
         _VoteTimer.Interval = Config.VoteTimeout;
         _VoteTimer.Elapsed += VoteTimer_Elapsed;
         _ReadyReminderTimer.Elapsed += ReadyReminderTimer_Elapsed;
+
+        if (!string.IsNullOrEmpty(Config.EventulaApistatsUrl) && !string.IsNullOrEmpty(Config.EventulaApistatsToken))
+        {
+            _ApiStats = new ApiStats.ApiStats(Config.EventulaApistatsUrl, Config.EventulaApistatsToken);
+        }
 
         _MapsToSelect = matchConfig.Maplist.Select(x => new Vote(x)).ToList();
 
@@ -131,6 +139,8 @@ public class Match : IDisposable
         _MatchCallback.SetupRoundBackup();
         _MatchCallback.StartDemoRecording();
 
+        _ = _ApiStats?.SendGoingLiveAsync(new GoingLiveParams(_MatchInfo.CurrentMap.MapName, 1), CancellationToken.None);
+
         TryFireState(MatchCommand.StartMatch);
     }
 
@@ -145,7 +155,7 @@ public class Match : IDisposable
         {
             _MatchCallback.SendMessage($" {ChatColors.Default}Match is {ChatColors.Green}LIVE");
 
-            await Task.Delay(TimeSpan.FromSeconds(1));
+            await Task.Delay(TimeSpan.FromSeconds(1)).ConfigureAwait(false);
         }
     }
 
@@ -156,7 +166,7 @@ public class Match : IDisposable
 
     private void SwitchToMatchMap()
     {
-        _MatchCallback.SwitchMap(_MatchInfo.SelectedMap);
+        _MatchCallback.SwitchMap(_MatchInfo.CurrentMap.MapName);
         TryFireState(MatchCommand.SwitchMap);
     }
 
@@ -242,7 +252,7 @@ public class Match : IDisposable
 
         if (_MapsToSelect.Count == 1)
         {
-            _MatchInfo.SelectedMap = _MapsToSelect[0].Name;
+            _MatchInfo.CurrentMap.MapName = _MapsToSelect[0].Name;
         }
     }
 
@@ -264,20 +274,17 @@ public class Match : IDisposable
     private void SetSelectedTeamSite()
     {
         _VoteTimer.Stop();
-        _Logger.LogInformation("Set selected teamsite. Voted by {team}", _CurrentMatchTeamToVote!.Team.ToString());
 
-        if (_CurrentMatchTeamToVote!.Team == Team.Terrorist)
+        var startTeam = _TeamVotes.MaxBy(m => m.Votes.Count)!.Name.Equals("T") ? Team.Terrorist : Team.CounterTerrorist;
+        _Logger.LogInformation("Set selected teamsite to {startTeam}. Voted by {team}", startTeam, _CurrentMatchTeamToVote!.Team.ToString());
+
+        if (_CurrentMatchTeamToVote!.Team != startTeam)
         {
-            _MatchInfo.StartTeam1 = _TeamVotes.MaxBy(m => m.Votes.Count)!.Name.Equals("T") ? Team.Terrorist : Team.CounterTerrorist;
-            _Logger.LogInformation("StartTeam is {team}", _MatchInfo.StartTeam1);
-        }
-        else
-        {
-            _MatchInfo.StartTeam1 = _TeamVotes.MinBy(m => m.Votes.Count)!.Name.Equals("T") ? Team.Terrorist : Team.CounterTerrorist;
-            _Logger.LogInformation("StartTeam is {team}", _MatchInfo.StartTeam1);
+            _CurrentMatchTeamToVote.Team = startTeam;
+            MatchTeams.First(t => t != _CurrentMatchTeamToVote).Team = startTeam == Team.Terrorist ? Team.CounterTerrorist : Team.Terrorist;
         }
 
-        _MatchCallback.SendMessage($"{_CurrentMatchTeamToVote!.Team} selected {_MatchInfo.StartTeam1} as startside!");
+        _MatchCallback.SendMessage($"{_CurrentMatchTeamToVote!.TeamConfig.Name} selected {startTeam} as startside!");
     }
 
     private void ShowMenuToTeam(MatchTeam team, string title, IEnumerable<MenuOption> options)
@@ -296,7 +303,7 @@ public class Match : IDisposable
         }
         else
         {
-            _CurrentMatchTeamToVote = GetMatchTeam(_CurrentMatchTeamToVote.Team == Team.Terrorist ? Team.CounterTerrorist : Team.Terrorist);
+            _CurrentMatchTeamToVote = MatchTeams.First(x => x != _CurrentMatchTeamToVote);
         }
     }
 
@@ -372,13 +379,12 @@ public class Match : IDisposable
 
     private MatchTeam? GetMatchTeam(ulong steamID)
     {
-        var team = GetPlayerTeam(steamID);
-        return GetMatchTeam(team);
+        return MatchTeams.Find(x => x.Players.Exists(x => x.Player.SteamID == steamID));
     }
 
     private MatchTeam? GetMatchTeam(Team team)
     {
-        return MatchTeams.Find(x => x.Team == team);
+        return MatchTeams.First(x => x.Team == team);
     }
 
     private MatchPlayer GetMatchPlayer(ulong steamID)
@@ -418,7 +424,7 @@ public class Match : IDisposable
 
         team.Players.Add(new MatchPlayer(player));
 
-        TryFireStateAsync(MatchCommand.ConnectPlayer);
+        _ = TryFireStateAsync(MatchCommand.ConnectPlayer);
         return true;
     }
 
@@ -483,13 +489,11 @@ public class Match : IDisposable
 
     public Team GetPlayerTeam(ulong steamID)
     {
-        if (Config.Team1.Players.ContainsKey(steamID))
+        var matchTeam = GetMatchTeam(steamID);
+
+        if (matchTeam != null)
         {
-            return _MatchInfo.StartTeam1 ?? Team.Terrorist;
-        }
-        else if (Config.Team2.Players.ContainsKey(steamID))
-        {
-            return _MatchInfo.StartTeam1 == Team.CounterTerrorist ? Team.Terrorist : Team.CounterTerrorist;
+            return matchTeam.Team;
         }
 
         return Team.None;
@@ -633,11 +637,11 @@ public class Match : IDisposable
 
     public void Complete(Team winner)
     {
-        _Logger.LogInformation("The winner is: {winner}", winner);
+        var winnerTeam = GetMatchTeam(winner);
+        _MatchInfo.CurrentMap.Winner = winnerTeam;
+        _Logger.LogInformation("The winner is: {winner}", winnerTeam!.TeamConfig.Name);
         TryFireState(MatchCommand.CompleteMatch);
     }
 
-
     #endregion
-
 }

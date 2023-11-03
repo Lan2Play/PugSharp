@@ -47,28 +47,47 @@ namespace PugSharp.Match.Tests
 
             var match = new Match(matchCallback, config);
 
-
             Assert.Equal(MatchState.WaitingForPlayersConnectedReady, match.CurrentState);
 
             IPlayer player1 = CreatePlayerSub(0, 0);
             IPlayer player2 = CreatePlayerSub(1, 1);
 
-            // Connect Players
-            matchPlayers.Add(player1);
-            Assert.True(match.TryAddPlayer(player1));
-            Assert.Equal(MatchState.WaitingForPlayersConnectedReady, match.CurrentState);
+            ConnectPlayers(matchPlayers, match, player1, player2);
+            await SetPlayersReady(match, player1, player2);
+            IPlayer votePlayer = VoteForMap(config, match, player1, player2);
+            await VoteTeam(matchCallback, config, match, player1, player2, votePlayer);
+            PauseUnpauseMatch(matchCallback, match, player1);
+        }
 
-            matchPlayers.Add(player2);
-            Assert.True(match.TryAddPlayer(player2));
-            Assert.Equal(MatchState.WaitingForPlayersConnectedReady, match.CurrentState);
+        private static void PauseUnpauseMatch(IMatchCallback matchCallback, Match match, IPlayer player1)
+        {
+            match.SetPlayerDisconnected(player1);
+            Assert.Equal(MatchState.MatchPaused, match.CurrentState);
+            matchCallback.Received().PauseServer();
 
-            // Set Ready for Players
-            await match.TogglePlayerIsReadyAsync(player1);
-            Assert.Equal(MatchState.WaitingForPlayersConnectedReady, match.CurrentState);
-            await match.TogglePlayerIsReadyAsync(player2);
-            Assert.Equal(MatchState.MapVote, match.CurrentState);
+            match.TryAddPlayer(player1);
+            Assert.Equal(MatchState.MatchRunning, match.CurrentState);
+            matchCallback.Received().UnpauseServer();
+        }
 
-            // Vote Map
+        private static async Task VoteTeam(IMatchCallback matchCallback, MatchConfig config, Match match, IPlayer player1, IPlayer player2, IPlayer votePlayer)
+        {
+            Assert.False(match.VoteTeam(votePlayer, "pizza"));
+            Assert.False(match.VoteTeam(votePlayer == player1 ? player2 : player1, "T"));
+            Assert.True(match.VoteTeam(votePlayer, "T"));
+
+            matchCallback.Received().SwitchMap(config.Maplist[^1]);
+
+            Assert.Equal(MatchState.WaitingForPlayersReady, match.CurrentState);
+            await match.TogglePlayerIsReadyAsync(player1).ConfigureAwait(false);
+            Assert.Equal(MatchState.WaitingForPlayersReady, match.CurrentState);
+            await match.TogglePlayerIsReadyAsync(player2).ConfigureAwait(false);
+
+            Assert.Equal(MatchState.MatchRunning, match.CurrentState);
+        }
+
+        private static IPlayer VoteForMap(MatchConfig config, Match match, IPlayer player1, IPlayer player2)
+        {
             var matchCount = config.Maplist.Length;
             var votePlayer = player1;
 
@@ -88,28 +107,26 @@ namespace PugSharp.Match.Tests
             }
 
             Assert.Equal(MatchState.TeamVote, match.CurrentState);
+            return votePlayer;
+        }
 
-            // Vote Team
-            Assert.False(match.VoteTeam(votePlayer, "pizza"));
-            Assert.False(match.VoteTeam(votePlayer == player1 ? player2 : player1, "T"));
-            Assert.True(match.VoteTeam(votePlayer, "T"));
+        private static async Task SetPlayersReady(Match match, IPlayer player1, IPlayer player2)
+        {
+            await match.TogglePlayerIsReadyAsync(player1).ConfigureAwait(false);
+            Assert.Equal(MatchState.WaitingForPlayersConnectedReady, match.CurrentState);
+            await match.TogglePlayerIsReadyAsync(player2).ConfigureAwait(false);
+            Assert.Equal(MatchState.MapVote, match.CurrentState);
+        }
 
-            matchCallback.Received().SwitchMap(config.Maplist[^1]);
+        private static void ConnectPlayers(List<IPlayer> matchPlayers, Match match, IPlayer player1, IPlayer player2)
+        {
+            matchPlayers.Add(player1);
+            Assert.True(match.TryAddPlayer(player1));
+            Assert.Equal(MatchState.WaitingForPlayersConnectedReady, match.CurrentState);
 
-            Assert.Equal(MatchState.WaitingForPlayersReady, match.CurrentState);
-            await match.TogglePlayerIsReadyAsync(player1);
-            Assert.Equal(MatchState.WaitingForPlayersReady, match.CurrentState);
-            await match.TogglePlayerIsReadyAsync(player2);
-
-            Assert.Equal(MatchState.MatchRunning, match.CurrentState);
-
-            match.SetPlayerDisconnected(player1);
-            Assert.Equal(MatchState.MatchPaused, match.CurrentState);
-            matchCallback.Received().PauseServer();
-
-            match.TryAddPlayer(player1);
-            Assert.Equal(MatchState.MatchRunning, match.CurrentState);
-            matchCallback.Received().UnpauseServer();
+            matchPlayers.Add(player2);
+            Assert.True(match.TryAddPlayer(player2));
+            Assert.Equal(MatchState.WaitingForPlayersConnectedReady, match.CurrentState);
         }
 
         private static MatchConfig CreateExampleConfig()

@@ -29,24 +29,13 @@ namespace PugSharp.Config
         public long VoteTimeout { get; set; } = 60000;
 
         [JsonPropertyName("eventula_apistats_url")]
-        public string EventulaApistatsUrl { get; set; }
+        public string? EventulaApistatsUrl { get; set; }
+
+        [JsonPropertyName("eventula_apistats_token")]
+        public string? EventulaApistatsToken { get; set; }
 
         [JsonPropertyName("eventula_demo_upload_url")]
-        public string EventulaDemoUploadUrl { get; set; }
-    }
+        public string? EventulaDemoUploadUrl { get; set; }
 
-    public class Team
-    {
-        [JsonPropertyName("name")]
-        public string Name { get; set; }
-
-        [JsonPropertyName("tag")]
-        public string Tag { get; set; }
-
-        [JsonPropertyName("flag")]
-        public string Flag { get; set; }
-
-        [JsonPropertyName("players")]
-        public Dictionary<ulong, string> Players { get; set; }
     }
 }

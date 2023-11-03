@@ -10,6 +10,10 @@
 	</PropertyGroup>
 
 	<ItemGroup>
+		<PackageReference Include="Meziantou.Analyzer" Version="2.0.103">
+		  <PrivateAssets>all</PrivateAssets>
+		  <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+		</PackageReference>
 		<PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.7.2" />
 		<PackageReference Include="NSubstitute" Version="5.1.0" />
 		<PackageReference Include="xunit" Version="2.6.1" />

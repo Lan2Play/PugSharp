@@ -4,9 +4,9 @@ using PugSharp.Logging;
 using System.Globalization;
 using System.Net.Http.Headers;
 
-namespace PugSharp
+namespace PugSharp.ApiStats
 {
-    internal class ApiStats : IDisposable
+    public class ApiStats : IDisposable
     {
         private static readonly ILogger<ApiStats> _Logger = LogManager.CreateLogger<ApiStats>();
 
@@ -24,21 +24,21 @@ namespace PugSharp
 
         public async Task SendGoingLiveAsync(GoingLiveParams goingLiveParams, CancellationToken cancellationToken)
         {
-            var queryParams = new Dictionary<string, string>
+            var queryParams = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
             {
                 {ApiStatsConstants.StatsMapName, goingLiveParams.MapName}
             };
 
             var uri = QueryHelpers.AddQueryString($"/golive/{goingLiveParams.MapNumber}", queryParams);
 
-            var response = await _HttpClient.PostAsync(uri, null, cancellationToken);
+            var response = await _HttpClient.PostAsync(uri, null, cancellationToken).ConfigureAwait(false);
 
-            await HandleResponseAsync(response, cancellationToken);
+            await HandleResponseAsync(response, cancellationToken).ConfigureAwait(false);
         }
 
         public async Task SendMapResultAsync(MapResultParams mapResultParams, CancellationToken cancellationToken)
         {
-            var queryParams = new Dictionary<string, string>
+            var queryParams = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
             {
                 {"team1score", CreateIntParam(mapResultParams.Team1Score)},
                 {"team2score", CreateIntParam(mapResultParams.Team2Score)},
@@ -47,14 +47,14 @@ namespace PugSharp
 
             var uri = QueryHelpers.AddQueryString($"/finalize/{mapResultParams.MapNumber}", queryParams);
 
-            var response = await _HttpClient.PostAsync(uri, null, cancellationToken);
+            var response = await _HttpClient.PostAsync(uri, null, cancellationToken).ConfigureAwait(false);
 
-            await HandleResponseAsync(response, cancellationToken);
+            await HandleResponseAsync(response, cancellationToken).ConfigureAwait(false);
         }
 
         public async Task SendRoundStatsUpdateAsync(RoundStatusUpdateParams roundStatusUpdateParams, CancellationToken cancellationToken)
         {
-            var queryParams = new Dictionary<string, string>
+            var queryParams = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
             {
                 {"team1score", CreateIntParam(roundStatusUpdateParams.CurrentMap.Team1.Score)},
                 {"team2score", CreateIntParam(roundStatusUpdateParams.CurrentMap.Team2.Score)},
@@ -62,16 +62,16 @@ namespace PugSharp
 
             var uri = QueryHelpers.AddQueryString($"/updateround/{roundStatusUpdateParams.MapNumber}", queryParams);
 
-            var response = await _HttpClient.PostAsync(uri, null, cancellationToken);
+            var response = await _HttpClient.PostAsync(uri, null, cancellationToken).ConfigureAwait(false);
 
-            await HandleResponseAsync(response, cancellationToken);
+            await HandleResponseAsync(response, cancellationToken).ConfigureAwait(false);
 
-            await UpdatePlayerStatsInternalAsync(roundStatusUpdateParams.MapNumber, roundStatusUpdateParams.TeamInfo1, roundStatusUpdateParams.TeamInfo2, roundStatusUpdateParams.CurrentMap, cancellationToken);
+            await UpdatePlayerStatsInternalAsync(roundStatusUpdateParams.MapNumber, roundStatusUpdateParams.TeamInfo1, roundStatusUpdateParams.TeamInfo2, roundStatusUpdateParams.CurrentMap, cancellationToken).ConfigureAwait(false);
         }
 
         private async Task UpdatePlayerStatsInternalAsync(int mapNumber, TeamInfo teamInfo1, TeamInfo teamInfo2, Map currentMap, CancellationToken cancellationToken)
         {
-            var dict = new Dictionary<string, MapTeamInfo>()
+            var dict = new Dictionary<string, MapTeamInfo>(StringComparer.OrdinalIgnoreCase)
             {
                 { teamInfo1.TeamName, currentMap.Team1 },
                 { teamInfo2.TeamName, currentMap.Team2 },
@@ -87,7 +87,7 @@ namespace PugSharp
                 {
                     var playerStatistics = player.Value;
 
-                    var queryParams = new Dictionary<string, string>
+                    var queryParams = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
                     {
                         {ApiStatsConstants.StatsTeamName, teamName},
                         {ApiStatsConstants.StatsName, playerStatistics.Name},
@@ -128,9 +128,9 @@ namespace PugSharp
 
                     var uri = QueryHelpers.AddQueryString($"/updateplayer/{mapNumber}", queryParams);
 
-                    var response = await _HttpClient.PostAsync(uri, null, cancellationToken);
+                    var response = await _HttpClient.PostAsync(uri, null, cancellationToken).ConfigureAwait(false);
 
-                    await HandleResponseAsync(response, cancellationToken);
+                    await HandleResponseAsync(response, cancellationToken).ConfigureAwait(false);
                 }
             }
         }
@@ -143,7 +143,7 @@ namespace PugSharp
 
         public async Task SendSeriesResultAsync(SeriesResultParams seriesResultParams, CancellationToken cancellationToken)
         {
-            var queryParams = new Dictionary<string, string>
+            var queryParams = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
             {
                 {ApiStatsConstants.StatsSeriesWinner, seriesResultParams.WinnerTeamName},
                 {ApiStatsConstants.StatsSeriesForfeit, CreateIntParam(Convert.ToInt32(seriesResultParams.Forfeit))},
@@ -151,21 +151,21 @@ namespace PugSharp
 
             var uri = QueryHelpers.AddQueryString($"/finalize", queryParams);
 
-            var response = await _HttpClient.PostAsync(uri, null, cancellationToken);
+            var response = await _HttpClient.PostAsync(uri, null, cancellationToken).ConfigureAwait(false);
 
-            await HandleResponseAsync(response, cancellationToken);
+            await HandleResponseAsync(response, cancellationToken).ConfigureAwait(false);
 
             // Wait before freeing server
-            await Task.Delay(TimeSpan.FromMilliseconds(seriesResultParams.TimeBeforeFreeingServerMs), cancellationToken);
+            await Task.Delay(TimeSpan.FromMilliseconds(seriesResultParams.TimeBeforeFreeingServerMs), cancellationToken).ConfigureAwait(false);
 
-            await SendFreeServerInternalAsync(cancellationToken);
+            await SendFreeServerInternalAsync(cancellationToken).ConfigureAwait(false);
         }
 
         internal async Task SendFreeServerInternalAsync(CancellationToken cancellationToken)
         {
-            var response = await _HttpClient.PostAsync(new Uri("/freeserver"), null, cancellationToken);
+            var response = await _HttpClient.PostAsync(new Uri("/freeserver"), null, cancellationToken).ConfigureAwait(false);
 
-            await HandleResponseAsync(response, cancellationToken);
+            await HandleResponseAsync(response, cancellationToken).ConfigureAwait(false);
         }
 
         internal static async Task HandleResponseAsync(HttpResponseMessage? httpResponseMessage, CancellationToken cancellationToken)
@@ -182,7 +182,7 @@ namespace PugSharp
 
                 try
                 {
-                    var responseContent = await httpResponseMessage.Content.ReadAsStringAsync(cancellationToken);
+                    var responseContent = await httpResponseMessage.Content.ReadAsStringAsync(cancellationToken).ConfigureAwait(false);
 
                     _Logger.LogError($"ResponseContent: {responseContent}");
                 }
@@ -261,150 +261,4 @@ namespace PugSharp
             public const string StatsMvp = "mvp";
         }
     }
-
-    internal record GoingLiveParams(string MapName, int MapNumber);
-
-    internal record MapResultParams(string WinnerTeamName, int Team1Score, int Team2Score, int MapNumber);
-
-    internal record SeriesResultParams(string WinnerTeamName, bool Forfeit, uint TimeBeforeFreeingServerMs);
-
-    internal record RoundStatusUpdateParams(int MapNumber, TeamInfo TeamInfo1, TeamInfo TeamInfo2, Map CurrentMap);
-
-    public class Series
-    {
-        public Dictionary<string, Map> Maps { get; set; }
-
-        public TeamInfo Team1 { get; set; }
-
-        public TeamInfo Team2 { get; set; }
-
-        public string SeriesType => $"bo{Maps.Count}";
-
-        public Config.Team Winner { get; set; }
-
-        public bool Forfeit { get; set; }
-
-        public Map GetMap(int mapNumber)
-        {
-            var mapNumberString = $"map{mapNumber}";
-
-            return Maps[mapNumberString];
-        }
-    }
-
-    public class TeamInfo
-    {
-        public string Id { get; set; }
-
-        public string TeamName { get; set; }
-    }
-
-    public class Map
-    {
-        public string Name { get; set; }
-
-        public string DemoFileName { get; set; }
-
-        public Config.Team Winner { get; set; }
-
-        public MapTeamInfo Team1 { get; set; }
-
-        public MapTeamInfo Team2 { get; set; }
-    }
-
-    public class MapTeamInfo
-    {
-        public Dictionary<SteamId, PlayerStatistics> Players { get; set; }
-
-        public int Score { get; set; }
-
-        public int ScoreT { get; set; }
-
-        public int ScoreCT { get; set; }
-
-        public StartingSide StartingSide { get; set; }
-    }
-
-    public class PlayerStatistics
-    {
-        public bool Coaching { get; set; }
-
-        public string Name { get; set; }
-
-        public int Kills { get; set; }
-
-        public int Deaths { get; set; }
-
-        public int Assists { get; set; }
-
-        public int FlashbangAssists { get; set; }
-
-        public int TeamKills { get; set; }
-
-        public int Suicides { get; set; }
-
-        public int Damage { get; set; }
-
-        public int UtilityDamage { get; set; }
-
-        public int EnemiesFlashed { get; set; }
-
-        public int FriendliesFlashed { get; set; }
-
-        public int KnifeKills { get; set; }
-
-        public int HeadshotKills { get; set; }
-
-        public int RoundsPlayed { get; set; }
-
-        public int BombDefuses { get; set; }
-
-        public int BombPlants { get; set; }
-
-        public int Count1K { get; set; }
-
-        public int Count2K { get; set; }
-
-        public int Count3K { get; set; }
-
-        public int Count4K { get; set; }
-
-        public int Count5K { get; set; }
-
-        public int V1 { get; set; }
-
-        public int V2 { get; set; }
-
-        public int V3 { get; set; }
-
-        public int V4 { get; set; }
-
-        public int V5 { get; set; }
-
-        public int FirstKillT { get; set; }
-
-        public int FirstKillCt { get; set; }
-
-        public int FirstDeathT { get; set; }
-
-        public int FirstDeathCt { get; set; }
-
-        public int TradeKill { get; set; }
-
-        public int Kast { get; set; }
-
-        public int ContributionScore { get; set; }
-
-        public int Mvp { get; set; }
-    }
-
-
-    public enum StartingSide
-    {
-        None,
-        T = 2,
-        CT = 3
-    }
-
-    public record SteamId(string SteamId64);
 }
