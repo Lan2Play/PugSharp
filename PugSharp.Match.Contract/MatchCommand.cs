@@ -11,6 +11,7 @@ public enum MatchCommand
     SwitchMap,
     StartMatch,
     CompleteMatch,
+    CompleteMap,
     Pause,
     Unpause,
 }

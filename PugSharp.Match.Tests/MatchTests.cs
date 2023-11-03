@@ -135,6 +135,7 @@ namespace PugSharp.Match.Tests
             {
                 PlayersPerTeam = 1,
                 MinPlayersToReady = 1,
+                NumMaps = 1,
                 Team1 = new Config.Team
                 {
                     Name = "Team1",

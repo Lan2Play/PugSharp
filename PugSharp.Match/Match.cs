@@ -80,7 +80,7 @@ public class Match : IDisposable
         _MatchStateMachine.Configure(MatchState.MatchRunning)
             .Permit(MatchCommand.DisconnectPlayer, MatchState.MatchPaused)
             .Permit(MatchCommand.Pause, MatchState.MatchPaused)
-            .PermitIf(MatchCommand.CompleteMatch, MatchState.MatchCompleted, IsMatchReady)
+            .PermitIf(MatchCommand.CompleteMap, MatchState.MapCompleted, IsMatchReady)
             .OnEntryAsync(MatchLiveAsync);
 
         _MatchStateMachine.Configure(MatchState.MatchPaused)
@@ -88,6 +88,10 @@ public class Match : IDisposable
             .PermitIf(MatchCommand.Unpause, MatchState.MatchRunning, AllTeamsUnpaused)
             .OnEntry(PauseMatch)
             .OnExit(UnpauseMatch);
+
+        _MatchStateMachine.Configure(MatchState.MapCompleted)
+            .PermitIf(MatchCommand.CompleteMatch, MatchState.MatchCompleted, AllMapsArePlayed)
+            .PermitIf(MatchCommand.CompleteMatch, MatchState.WaitingForPlayersConnectedReady, NotAllMapsArePlayed);
 
         _MatchStateMachine.Configure(MatchState.MatchCompleted)
             .OnEntry(CompleteMatch);
@@ -97,6 +101,7 @@ public class Match : IDisposable
 
         _MatchStateMachine.Fire(MatchCommand.LoadMatch);
     }
+
 
     private void StartReadyReminder()
     {
@@ -332,6 +337,19 @@ public class Match : IDisposable
 
     private bool AllTeamsUnpaused() => MatchTeams.TrueForAll(x => !x.IsPaused);
 
+    private bool AllMapsArePlayed()
+    {
+        var teamWithMostWins = _MatchInfo.MatchMaps.Where(x => x.Winner != null).GroupBy(x => x.Winner).MaxBy(x => x.Count());
+        if (teamWithMostWins?.Key == null)
+        {
+            return false;
+        }
+
+        return teamWithMostWins.Count() > Config.NumMaps / 2d;
+    }
+
+    private bool NotAllMapsArePlayed() => !AllMapsArePlayed();
+
     private void SetAllPlayersNotReady()
     {
         _Logger.LogInformation("Reset Readystate for all players");
@@ -496,6 +514,16 @@ public class Match : IDisposable
             return matchTeam.Team;
         }
 
+        if (Config.Team1.Players.ContainsKey(steamID))
+        {
+            return Team.Terrorist;
+        }
+
+        if (Config.Team2.Players.ContainsKey(steamID))
+        {
+            return Team.CounterTerrorist;
+        }
+
         return Team.None;
     }
 
@@ -640,7 +668,7 @@ public class Match : IDisposable
         var winnerTeam = GetMatchTeam(winner);
         _MatchInfo.CurrentMap.Winner = winnerTeam;
         _Logger.LogInformation("The winner is: {winner}", winnerTeam!.TeamConfig.Name);
-        TryFireState(MatchCommand.CompleteMatch);
+        TryFireState(MatchCommand.CompleteMap);
     }
 
     #endregion

@@ -11,5 +11,6 @@ public enum MatchState
     MatchStarting,
     MatchRunning,
     MatchPaused,
+    MapCompleted,
     MatchCompleted,
 }
