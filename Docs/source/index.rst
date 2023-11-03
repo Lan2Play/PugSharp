@@ -38,6 +38,7 @@ If you implement software to interface with PugSharp let us know please!
    :maxdepth: 1
 
    develop/quickstart
+   develop/makefile
    develop/folderstructure
    develop/cicd
    develop/release

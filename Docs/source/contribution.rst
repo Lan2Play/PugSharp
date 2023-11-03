@@ -27,8 +27,8 @@ To build the documentation locally to the ``Docs/build`` subfolder you have two 
 Building with docker and the make file
 .......................................
 
-Windows
-'''''''
+Docker Windows
+'''''''''''''''''''''
 Prerequisites: 
 
 - Docker for Windows with wsl2 backend (https://docs.docker.com/docker-for-windows/wsl/ Follow the prerequisites, the download and the install part!)
@@ -41,8 +41,8 @@ Prerequisites:
 To build the documentation just enter yor wsl2 distribution and follow the linux part below!
 
 
-Linux
-'''''''
+Docker Linux
+'''''''''''''''''''''
 Prerequisites: 
 
 - Docker (https://docs.docker.com/engine/install)
@@ -57,8 +57,8 @@ In order to build the documentation you have to change to the root folder of the
 Building manually with the sphinx make file
 ............................................
 
-Windows
-'''''''
+Manual Windows
+'''''''''''''''''''''
 Prerequisites: 
 
 - python 3 (https://docs.python.org/3/using/index.html) with pip
@@ -80,8 +80,8 @@ Psh
    ./make.bat html
 
 
-Linux
-'''''''
+Manual Linux
+'''''''''''''''''''''
 Prerequisites: 
 
 - python 3 (https://docs.python.org/3/using/index.html) with pip

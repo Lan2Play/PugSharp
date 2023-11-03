@@ -1,4 +1,5 @@
-######## You can find a detailed documentation on https://pugsharp.lan2play.de/develop/quickstart.html#run-pugsharp-locally
+######## You can find a getting started documentation on https://pugsharp.lan2play.de/develop/quickstart.html#run-pugsharp-locally
+######## and a detailed documentation on https://pugsharp.lan2play.de/develop/makefile.html
 
 ## Silent functions
 .SILENT: init-env
@@ -7,6 +8,8 @@
 currentDir = $(shell dirname $(realpath $(lastword $(MAKEFILE_LIST))))
 userId = $(shell id -u)
 groupId = $(shell id -g)
+user = $(userId):$(groupId)
+dockeruser = --user $(user)
 
 ## Docker Compose detection
 ifeq ($(OS),Windows_NT)
@@ -21,6 +24,7 @@ endif
 
 ## group commands
 build-and-copy: build-debug copy-pugsharp
+build-and-copy-docker: build-debug-docker copy-pugsharp
 init-all: prepare-folders init-env copy-counterstrikesharp install-metamod start-csserver
 clean-all: clean-csserver clean-env clean-build
 
@@ -60,14 +64,14 @@ copy-counterstrikesharp:
 	cp -rf $(currentDir)/PugSharp/counterstrikesharp $(currentDir)/cs2/game/csgo/addons/
 	cp -rf $(currentDir)/PugSharp/metamod $(currentDir)/cs2/game/csgo/addons/
 
-#TODO!!!
-fix-metamod:
-	sed -i '/^			Game	csgo$/i			Game	csgo/addons/metamod' /home/volza/temp/cs2/cs2-data/game/csgo/gameinfo.gi
-
 install-metamod:
 	mkdir -p $(currentDir)/cs2/game/csgo/
 	export LATESTMM=$(shell wget -qO- https://mms.alliedmods.net/mmsdrop/2.0/mmsource-latest-linux); \
 	wget -qO- https://mms.alliedmods.net/mmsdrop/2.0/$$LATESTMM | tar xvzf - -C $(currentDir)/cs2/game/csgo
+
+#TODO!!!
+fix-metamod:
+	sed -i '/^			Game	csgo$/i			Game	csgo/addons/metamod' /home/volza/temp/cs2/cs2-data/game/csgo/gameinfo.gi
 
 
 
@@ -85,6 +89,18 @@ build-debug:
 build-release:
 	dotnet publish -c release
 
+build-debug-docker:
+	docker run --rm --interactive \
+	-v $(currentDir):/app \
+	mcr.microsoft.com/dotnet/sdk:7.0 /bin/sh -c " \
+	cd /app && dotnet publish -c debug; chown -R $(user) /app"
+
+build-release-docker:
+	docker run --rm --interactive \
+	-v $(currentDir):/app \
+	$(user) mcr.microsoft.com/dotnet/sdk:7.0 /bin/sh -c " \
+	cd /app && dotnet publish -c release; chown -R $(user) /app"
+
 copy-pugsharp:
 	rm -rf $(currentDir)/PugSharp/bin/Debug/net7.0/publish/CounterStrikeSharp.API.dll
 	mkdir -p $(currentDir)/cs2/game/csgo/addons/counterstrikesharp/plugins/PugSharp
@@ -98,7 +114,7 @@ docs-html:
 ifeq ($(OS),Windows_NT)
 	echo you currently need docker on linux to build the documentation
 else
-	docker run --rm -v $(currentDir)/Docs:/docs -e USERID=$(shell id -u ${USER}) -e GROUPID=$(shell id -g ${USER}) lan2play/docker-sphinxbuild:latest
+	docker run --rm -v $(currentDir)/Docs:/docs -e USERID=$(userId) -e GROUPID=$(groupId) lan2play/docker-sphinxbuild:latest
 endif
 
 
@@ -115,7 +131,7 @@ clean-env:
 	rm -rf $(currentDir)/.env
 
 clean-build:
-	find $(currentDir) -wholename '*PugSharp*/bin' | xargs rm -rf
+	find $(currentDir) -wholename '*PugSharp*/bin' -not -path "*PugSharp/counterstrikesharp/bin" | xargs rm -rf
 	find $(currentDir) -wholename '*PugSharp*/obj' | xargs rm -rf
 	rm -rf Docs/build
 
