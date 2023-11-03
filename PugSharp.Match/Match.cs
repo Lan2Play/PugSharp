@@ -308,7 +308,7 @@ public class Match : IDisposable
         _VoteTimer.Stop();
 
         var startTeam = _TeamVotes.MaxBy(m => m.Votes.Count)!.Name.Equals("T") ? Team.Terrorist : Team.CounterTerrorist;
-        _Logger.LogInformation("Set selected teamsite to {startTeam}. Voted by {team}", startTeam, _CurrentMatchTeamToVote!.StartTeam.ToString());
+        _Logger.LogInformation("Set selected teamsite to {startTeam}. Voted by {team}", startTeam, _CurrentMatchTeamToVote!.TeamConfig.Name);
 
         if (_CurrentMatchTeamToVote!.StartTeam != startTeam)
         {
@@ -428,12 +428,12 @@ public class Match : IDisposable
 
     private MatchTeam? GetMatchTeam(ulong steamID)
     {
-        if (MatchTeam1.Players.Exists(x => x.Player.SteamID == steamID))
+        if (MatchTeam1.Players.Exists(x => x.Player.SteamID.Equals(steamID)))
         {
             return MatchTeam1;
         }
 
-        if (MatchTeam2.Players.Exists(x => x.Player.SteamID == steamID))
+        if (MatchTeam2.Players.Exists(x => x.Player.SteamID.Equals(steamID)))
         {
             return MatchTeam2;
         }
@@ -552,6 +552,7 @@ public class Match : IDisposable
             return matchTeam.StartTeam;
         }
 
+        _Logger.LogInformation("No matchTeam found. Fallback to Config Team!");
         return GetConfigTeam(steamID);
     }
 
