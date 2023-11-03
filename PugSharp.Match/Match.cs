@@ -144,7 +144,7 @@ public class Match : IDisposable
         _MatchCallback.SetupRoundBackup();
         _MatchCallback.StartDemoRecording();
 
-        _ = _ApiStats?.SendGoingLiveAsync(new GoingLiveParams(_MatchInfo.CurrentMap.MapName, 1), CancellationToken.None);
+        _ = _ApiStats?.SendGoingLiveAsync(new GoingLiveParams(_MatchInfo.CurrentMap.MapName, _MatchInfo.CurrentMap.MapNumber), CancellationToken.None);
 
         TryFireState(MatchCommand.StartMatch);
     }
