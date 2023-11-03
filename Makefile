@@ -1,4 +1,4 @@
-######## You can find a getting started documentation on https://pugsharp.lan2play.de/develop/quickstart.html#run-pugsharp-locally
+######## You can find a getting started documentation on https://pugsharp.lan2play.de/develop/quickstart.html#run-develop-pugsharp-locally-with-the-make-file
 ######## and a detailed documentation on https://pugsharp.lan2play.de/develop/makefile.html
 
 ## Silent functions
