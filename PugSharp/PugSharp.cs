@@ -59,7 +59,7 @@ public class PugSharp : BasePlugin, IMatchCallback
 
         RegisterListener<CounterStrikeSharp.API.Core.Listeners.OnMapStart>(OnMapStartHandler);
 
-        AddCommandListener("jointeam", OnClientCommandJoinTeam);
+        //AddCommandListener("jointeam", OnClientCommandJoinTeam);
 
         _Logger.LogInformation("End RegisterEventHandlers");
     }
@@ -275,6 +275,7 @@ public class PugSharp : BasePlugin, IMatchCallback
 
                 Server.NextFrame(() =>
                 {
+                    _Logger.LogInformation("Switch {playerName} to team {team}!", player.PlayerName, configTeam);
                     player.SwitchTeam(configTeam);
                     player.MatchStats?.ResetStats();
                 });
