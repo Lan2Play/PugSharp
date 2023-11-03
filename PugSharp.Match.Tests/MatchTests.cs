@@ -7,6 +7,18 @@ namespace PugSharp.Match.Tests
     public class MatchTests
     {
         [Fact]
+        public void CreateDotGraphTest()
+        {
+            var matchCallback = Substitute.For<IMatchCallback>();
+            MatchConfig config = CreateExampleConfig();
+
+            var match = new Match(matchCallback, config);
+
+            var dotGraphString = match.CreateDotGraph();
+            Assert.True(!string.IsNullOrEmpty(dotGraphString));
+        }
+
+        [Fact]
         public void WrongPlayerConnectTest()
         {
             var matchCallback = Substitute.For<IMatchCallback>();
