@@ -1,4 +1,20 @@
 # PugSharp
+
+
+
+[![PugSharp_test_and_build](https://github.com/Lan2Play/PugSharp/actions/workflows/test_and_build.yml/badge.svg)](https://github.com/Lan2Play/PugSharp/actions/workflows/test_and_build.yml)
+[![Lines of Code](https://sonarcloud.io/api/project_badges/measure?project=Lan2Play_PugSharp&metric=ncloc)](https://sonarcloud.io/summary/new_code?id=Lan2Play_PugSharp)
+[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=Lan2Play_PugSharp&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=Lan2Play_PugSharp)
+[![Duplicated Lines (%)](https://sonarcloud.io/api/project_badges/measure?project=Lan2Play_PugSharp&metric=duplicated_lines_density)](https://sonarcloud.io/summary/new_code?id=Lan2Play_PugSharp)
+[![Coverage](https://sonarcloud.io/api/project_badges/measure?project=Lan2Play_PugSharp&metric=coverage)](https://sonarcloud.io/summary/new_code?id=Lan2Play_PugSharp)
+[![Maintainability Rating](https://sonarcloud.io/api/project_badges/measure?project=Lan2Play_PugSharp&metric=sqale_rating)](https://sonarcloud.io/summary/new_code?id=Lan2Play_PugSharp)
+[![Reliability Rating](https://sonarcloud.io/api/project_badges/measure?project=Lan2Play_PugSharp&metric=reliability_rating)](https://sonarcloud.io/summary/new_code?id=Lan2Play_PugSharp)
+[![Security Rating](https://sonarcloud.io/api/project_badges/measure?project=Lan2Play_PugSharp&metric=security_rating)](https://sonarcloud.io/summary/new_code?id=Lan2Play_PugSharp)
+[![Vulnerabilities](https://sonarcloud.io/api/project_badges/measure?project=Lan2Play_PugSharp&metric=vulnerabilities)](https://sonarcloud.io/summary/new_code?id=Lan2Play_PugSharp)
+[![Code Smells](https://sonarcloud.io/api/project_badges/measure?project=Lan2Play_PugSharp&metric=code_smells)](https://sonarcloud.io/summary/new_code?id=Lan2Play_PugSharp)
+[![Bugs](https://sonarcloud.io/api/project_badges/measure?project=Lan2Play_PugSharp&metric=bugs)](https://sonarcloud.io/summary/new_code?id=Lan2Play_PugSharp)
+<!-- [![Translation status](https://translate.lan2play.de/widgets/netevent-client/-/netevent-client/svg-badge.svg)](https://translate.lan2play.de/engage/netevent-client/) -->
+
 Pugsharp is a PUG System Plugin for CS2 based on the awsome [CounterStrikeSharp by roflmuffin](https://github.com/roflmuffin/CounterStrikeSharp). It's intended purpose is to be used with our fork of [eventula](https://github.com/Lan2Play/eventula-manager), but ofc can be used in a different environment as well.
 
 
