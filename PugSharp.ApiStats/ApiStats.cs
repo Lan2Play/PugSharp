@@ -15,6 +15,12 @@ namespace PugSharp.ApiStats
         public ApiStats(string apiStatsUrl, string apiStatsKey)
         {
             _Logger.LogInformation("Create Api Stats with BaseUrl: {url}", apiStatsUrl);
+
+            if (!apiStatsUrl.EndsWith('/'))
+            {
+                apiStatsUrl += "/";
+            }
+
             _HttpClient = new HttpClient()
             {
                 BaseAddress = new Uri(apiStatsUrl),
@@ -30,7 +36,7 @@ namespace PugSharp.ApiStats
                 {ApiStatsConstants.StatsMapName, goingLiveParams.MapName}
             };
 
-            var uri = QueryHelpers.AddQueryString($"/golive/{goingLiveParams.MapNumber}", queryParams);
+            var uri = QueryHelpers.AddQueryString($"golive/{goingLiveParams.MapNumber}", queryParams);
 
             var response = await _HttpClient.PostAsync(uri, null, cancellationToken).ConfigureAwait(false);
 
@@ -46,7 +52,7 @@ namespace PugSharp.ApiStats
                 {ApiStatsConstants.StatsMapWinner, mapResultParams.WinnerTeamName}
             };
 
-            var uri = QueryHelpers.AddQueryString($"/finalize/{mapResultParams.MapNumber}", queryParams);
+            var uri = QueryHelpers.AddQueryString($"finalize/{mapResultParams.MapNumber}", queryParams);
 
             var response = await _HttpClient.PostAsync(uri, null, cancellationToken).ConfigureAwait(false);
 
@@ -61,7 +67,7 @@ namespace PugSharp.ApiStats
                 {"team2score", CreateIntParam(roundStatusUpdateParams.CurrentMap.Team2.Score)},
             };
 
-            var uri = QueryHelpers.AddQueryString($"/updateround/{roundStatusUpdateParams.MapNumber}", queryParams);
+            var uri = QueryHelpers.AddQueryString($"updateround/{roundStatusUpdateParams.MapNumber}", queryParams);
 
             var response = await _HttpClient.PostAsync(uri, null, cancellationToken).ConfigureAwait(false);
 
@@ -127,7 +133,7 @@ namespace PugSharp.ApiStats
                         {ApiStatsConstants.StatsMvp, CreateIntParam(playerStatistics.Mvp)},
                     };
 
-                    var uri = QueryHelpers.AddQueryString($"/updateplayer/{mapNumber}", queryParams);
+                    var uri = QueryHelpers.AddQueryString($"updateplayer/{mapNumber}", queryParams);
 
                     var response = await _HttpClient.PostAsync(uri, null, cancellationToken).ConfigureAwait(false);
 
@@ -149,7 +155,7 @@ namespace PugSharp.ApiStats
                 {ApiStatsConstants.StatsSeriesForfeit, CreateIntParam(Convert.ToInt32(seriesResultParams.Forfeit))},
             };
 
-            var uri = QueryHelpers.AddQueryString($"/finalize", queryParams);
+            var uri = QueryHelpers.AddQueryString($"finalize", queryParams);
 
             var response = await _HttpClient.PostAsync(uri, null, cancellationToken).ConfigureAwait(false);
 
@@ -163,7 +169,7 @@ namespace PugSharp.ApiStats
 
         internal async Task SendFreeServerInternalAsync(CancellationToken cancellationToken)
         {
-            var response = await _HttpClient.PostAsync(new Uri("/freeserver"), null, cancellationToken).ConfigureAwait(false);
+            var response = await _HttpClient.PostAsync(new Uri("freeserver"), null, cancellationToken).ConfigureAwait(false);
 
             await HandleResponseAsync(response, cancellationToken).ConfigureAwait(false);
         }
