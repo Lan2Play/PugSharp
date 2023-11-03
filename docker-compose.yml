@@ -1,0 +1,15 @@
+version: '3.7'
+services:
+  cs2-server:
+    image: joedwards32/cs2
+    container_name: cs2-dedicated
+    env_file:
+      - .env
+    volumes:
+      - $PWD/cs2:/home/steam/cs2-dedicated/  # (Change /mnt/cs2 according to your volume location)
+    ports:
+      - "27015:27015/tcp"           # TCP
+      - "27015:27015/udp"           # UDP
+      - "27020:27020/udp"           # UDP
+    stdin_open: true 
+    tty: true
