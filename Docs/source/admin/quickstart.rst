@@ -15,7 +15,7 @@ Installation
 ^^^^^^^^^^^^^^^^^^^
 
 - Install `MetaMod 2.0 <https://www.sourcemm.net/downloads.php?branch=dev>`_ on your Linux Dedicated Server 
-- Download one of our releases including `CounterStrikeSharp by roflmuffin <https://github.com/roflmuffin/CounterStrikeSharp>`_ and the Dotnet Runtime and unpack it to your csgo folder. Currently you can find really early alpha releases on our `Github Actions <https://github.com/Lan2Play/PugSharp/actions>`_ as Artifacts.
+- Download one of our releases including `CounterStrikeSharp by roflmuffin <https://github.com/roflmuffin/CounterStrikeSharp>`_ and the Dotnet Runtime and unpack it to your csgo folder. Currently you can find really early alpha releases on our `Github Actions <https://github.com/Lan2Play/PugSharp/actions/workflows/test_and_build.yml>`_ as Artifacts.
 - Have fun and report bugs :D
 
 Notes
