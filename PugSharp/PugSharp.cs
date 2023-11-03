@@ -146,6 +146,11 @@ public class PugSharp : BasePlugin, IMatchCallback
         var result = _ConfigProvider.TryLoadConfigAsync(url, authToken).Result;
         if (result.Successful)
         {
+            if (string.IsNullOrEmpty(result.Config!.EventulaApistatsToken))
+            {
+                result.Config!.EventulaApistatsToken = authToken;
+            }
+
             InitializeMatch(result.Config!);
         }
     }

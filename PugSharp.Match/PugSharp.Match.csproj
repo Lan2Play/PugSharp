@@ -19,6 +19,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
+		<ProjectReference Include="..\PugSharp.ApiStats\PugSharp.ApiStats.csproj" />
 		<ProjectReference Include="..\PugSharp.Config\PugSharp.Config.csproj" />
 		<ProjectReference Include="..\PugSharp.Match.Contract\PugSharp.Match.Contract.csproj" />
 	</ItemGroup>
