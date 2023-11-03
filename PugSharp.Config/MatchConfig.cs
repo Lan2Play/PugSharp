@@ -34,19 +34,4 @@ namespace PugSharp.Config
         [JsonPropertyName("eventula_demo_upload_url")]
         public string EventulaDemoUploadUrl { get; set; }
     }
-
-    public class Team
-    {
-        [JsonPropertyName("name")]
-        public string Name { get; set; }
-
-        [JsonPropertyName("tag")]
-        public string Tag { get; set; }
-
-        [JsonPropertyName("flag")]
-        public string Flag { get; set; }
-
-        [JsonPropertyName("players")]
-        public Dictionary<ulong, string> Players { get; set; }
-    }
 }

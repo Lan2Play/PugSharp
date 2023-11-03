@@ -145,7 +145,7 @@ public class Match : IDisposable
         {
             _MatchCallback.SendMessage($" {ChatColors.Default}Match is {ChatColors.Green}LIVE");
 
-            await Task.Delay(TimeSpan.FromSeconds(1));
+            await Task.Delay(TimeSpan.FromSeconds(1)).ConfigureAwait(false);
         }
     }
 
@@ -418,7 +418,7 @@ public class Match : IDisposable
 
         team.Players.Add(new MatchPlayer(player));
 
-        TryFireStateAsync(MatchCommand.ConnectPlayer);
+        _ = TryFireStateAsync(MatchCommand.ConnectPlayer);
         return true;
     }
 

@@ -30,7 +30,7 @@ public class PugSharp : BasePlugin, IMatchCallback
     {
         _Logger.LogInformation("Loading PugSharp!");
         RegisterEventHandlers();
-        Task.Run(async () =>
+        _ = Task.Run(async () =>
         {
             var configPath = Path.Join(Server.GameDirectory, "PugSharp", "Config", "server.json");
             var serverConfigResult = await _ConfigProvider.LoadServerConfigAsync(configPath).ConfigureAwait(false);
@@ -74,7 +74,7 @@ public class PugSharp : BasePlugin, IMatchCallback
         }
     }
 
-    public void InitializeMatch(MatchConfig matchConfig)
+    private void InitializeMatch(MatchConfig matchConfig)
     {
         SetMatchVariable(matchConfig);
 
@@ -120,8 +120,6 @@ public class PugSharp : BasePlugin, IMatchCallback
         _Logger.LogInformation("Set match variables done");
     }
 
-
-
     #region Commands
 
     [ConsoleCommand("css_loadconfig", "Load a match config")]
@@ -141,7 +139,6 @@ public class PugSharp : BasePlugin, IMatchCallback
             player?.PrintToCenter("Url is required as Argument!");
 
             return;
-
         }
 
         var url = command.ArgByIndex(1);
@@ -179,7 +176,6 @@ public class PugSharp : BasePlugin, IMatchCallback
         var matchPlayer = new Player(player);
         _Match.TryAddPlayer(matchPlayer);
         _ = _Match.TogglePlayerIsReadyAsync(matchPlayer);
-
 
         _Logger.LogInformation("Command ready called.");
     }
@@ -586,11 +582,11 @@ public class PugSharp : BasePlugin, IMatchCallback
         int tScore = 0;
         foreach (var team in teamEntities)
         {
-            if (team.Teamname == "CT")
+            if (team.Teamname.Equals("CT", StringComparison.OrdinalIgnoreCase))
             {
                 ctScore = team.Score;
             }
-            else if (team.Teamname == "TERRORIST")
+            else if (team.Teamname.Equals("TERRORIST", StringComparison.OrdinalIgnoreCase))
             {
                 tScore = team.Score;
             }

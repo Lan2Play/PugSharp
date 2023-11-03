@@ -7,6 +7,13 @@
 	</PropertyGroup>
 
 	<ItemGroup>
+	  <PackageReference Include="Meziantou.Analyzer" Version="2.0.103">
+	    <PrivateAssets>all</PrivateAssets>
+	    <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+	  </PackageReference>
+	</ItemGroup>
+
+	<ItemGroup>
 	  <ProjectReference Include="..\PugSharp.Logging\PugSharp.Logging.csproj" />
 	  <ProjectReference Include="..\PugSharp.Match\PugSharp.Match.csproj" />
 	</ItemGroup>

@@ -24,21 +24,21 @@ namespace PugSharp
 
         public async Task SendGoingLiveAsync(GoingLiveParams goingLiveParams, CancellationToken cancellationToken)
         {
-            var queryParams = new Dictionary<string, string>
+            var queryParams = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
             {
                 {ApiStatsConstants.StatsMapName, goingLiveParams.MapName}
             };
 
             var uri = QueryHelpers.AddQueryString($"/golive/{goingLiveParams.MapNumber}", queryParams);
 
-            var response = await _HttpClient.PostAsync(uri, null, cancellationToken);
+            var response = await _HttpClient.PostAsync(uri, null, cancellationToken).ConfigureAwait(false);
 
-            await HandleResponseAsync(response, cancellationToken);
+            await HandleResponseAsync(response, cancellationToken).ConfigureAwait(false);
         }
 
         public async Task SendMapResultAsync(MapResultParams mapResultParams, CancellationToken cancellationToken)
         {
-            var queryParams = new Dictionary<string, string>
+            var queryParams = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
             {
                 {"team1score", CreateIntParam(mapResultParams.Team1Score)},
                 {"team2score", CreateIntParam(mapResultParams.Team2Score)},
@@ -47,14 +47,14 @@ namespace PugSharp
 
             var uri = QueryHelpers.AddQueryString($"/finalize/{mapResultParams.MapNumber}", queryParams);
 
-            var response = await _HttpClient.PostAsync(uri, null, cancellationToken);
+            var response = await _HttpClient.PostAsync(uri, null, cancellationToken).ConfigureAwait(false);
 
-            await HandleResponseAsync(response, cancellationToken);
+            await HandleResponseAsync(response, cancellationToken).ConfigureAwait(false);
         }
 
         public async Task SendRoundStatsUpdateAsync(RoundStatusUpdateParams roundStatusUpdateParams, CancellationToken cancellationToken)
         {
-            var queryParams = new Dictionary<string, string>
+            var queryParams = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
             {
                 {"team1score", CreateIntParam(roundStatusUpdateParams.CurrentMap.Team1.Score)},
                 {"team2score", CreateIntParam(roundStatusUpdateParams.CurrentMap.Team2.Score)},
@@ -62,16 +62,16 @@ namespace PugSharp
 
             var uri = QueryHelpers.AddQueryString($"/updateround/{roundStatusUpdateParams.MapNumber}", queryParams);
 
-            var response = await _HttpClient.PostAsync(uri, null, cancellationToken);
+            var response = await _HttpClient.PostAsync(uri, null, cancellationToken).ConfigureAwait(false);
 
-            await HandleResponseAsync(response, cancellationToken);
+            await HandleResponseAsync(response, cancellationToken).ConfigureAwait(false);
 
-            await UpdatePlayerStatsInternalAsync(roundStatusUpdateParams.MapNumber, roundStatusUpdateParams.TeamInfo1, roundStatusUpdateParams.TeamInfo2, roundStatusUpdateParams.CurrentMap, cancellationToken);
+            await UpdatePlayerStatsInternalAsync(roundStatusUpdateParams.MapNumber, roundStatusUpdateParams.TeamInfo1, roundStatusUpdateParams.TeamInfo2, roundStatusUpdateParams.CurrentMap, cancellationToken).ConfigureAwait(false);
         }
 
         private async Task UpdatePlayerStatsInternalAsync(int mapNumber, TeamInfo teamInfo1, TeamInfo teamInfo2, Map currentMap, CancellationToken cancellationToken)
         {
-            var dict = new Dictionary<string, MapTeamInfo>()
+            var dict = new Dictionary<string, MapTeamInfo>(StringComparer.OrdinalIgnoreCase)
             {
                 { teamInfo1.TeamName, currentMap.Team1 },
                 { teamInfo2.TeamName, currentMap.Team2 },
@@ -87,7 +87,7 @@ namespace PugSharp
                 {
                     var playerStatistics = player.Value;
 
-                    var queryParams = new Dictionary<string, string>
+                    var queryParams = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
                     {
                         {ApiStatsConstants.StatsTeamName, teamName},
                         {ApiStatsConstants.StatsName, playerStatistics.Name},
@@ -128,9 +128,9 @@ namespace PugSharp
 
                     var uri = QueryHelpers.AddQueryString($"/updateplayer/{mapNumber}", queryParams);
 
-                    var response = await _HttpClient.PostAsync(uri, null, cancellationToken);
+                    var response = await _HttpClient.PostAsync(uri, null, cancellationToken).ConfigureAwait(false);
 
-                    await HandleResponseAsync(response, cancellationToken);
+                    await HandleResponseAsync(response, cancellationToken).ConfigureAwait(false);
                 }
             }
         }
@@ -143,7 +143,7 @@ namespace PugSharp
 
         public async Task SendSeriesResultAsync(SeriesResultParams seriesResultParams, CancellationToken cancellationToken)
         {
-            var queryParams = new Dictionary<string, string>
+            var queryParams = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
             {
                 {ApiStatsConstants.StatsSeriesWinner, seriesResultParams.WinnerTeamName},
                 {ApiStatsConstants.StatsSeriesForfeit, CreateIntParam(Convert.ToInt32(seriesResultParams.Forfeit))},
@@ -151,21 +151,21 @@ namespace PugSharp
 
             var uri = QueryHelpers.AddQueryString($"/finalize", queryParams);
 
-            var response = await _HttpClient.PostAsync(uri, null, cancellationToken);
+            var response = await _HttpClient.PostAsync(uri, null, cancellationToken).ConfigureAwait(false);
 
-            await HandleResponseAsync(response, cancellationToken);
+            await HandleResponseAsync(response, cancellationToken).ConfigureAwait(false);
 
             // Wait before freeing server
-            await Task.Delay(TimeSpan.FromMilliseconds(seriesResultParams.TimeBeforeFreeingServerMs), cancellationToken);
+            await Task.Delay(TimeSpan.FromMilliseconds(seriesResultParams.TimeBeforeFreeingServerMs), cancellationToken).ConfigureAwait(false);
 
-            await SendFreeServerInternalAsync(cancellationToken);
+            await SendFreeServerInternalAsync(cancellationToken).ConfigureAwait(false);
         }
 
         internal async Task SendFreeServerInternalAsync(CancellationToken cancellationToken)
         {
-            var response = await _HttpClient.PostAsync(new Uri("/freeserver"), null, cancellationToken);
+            var response = await _HttpClient.PostAsync(new Uri("/freeserver"), null, cancellationToken).ConfigureAwait(false);
 
-            await HandleResponseAsync(response, cancellationToken);
+            await HandleResponseAsync(response, cancellationToken).ConfigureAwait(false);
         }
 
         internal static async Task HandleResponseAsync(HttpResponseMessage? httpResponseMessage, CancellationToken cancellationToken)
@@ -182,7 +182,7 @@ namespace PugSharp
 
                 try
                 {
-                    var responseContent = await httpResponseMessage.Content.ReadAsStringAsync(cancellationToken);
+                    var responseContent = await httpResponseMessage.Content.ReadAsStringAsync(cancellationToken).ConfigureAwait(false);
 
                     _Logger.LogError($"ResponseContent: {responseContent}");
                 }
