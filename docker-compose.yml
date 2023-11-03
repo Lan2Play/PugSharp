@@ -2,7 +2,6 @@ version: '3.7'
 services:
   cs2-server:
     image: joedwards32/cs2
-    container_name: cs2-dedicated
     env_file:
       - .env
     volumes:
