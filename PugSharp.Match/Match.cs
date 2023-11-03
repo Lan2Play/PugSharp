@@ -315,7 +315,7 @@ public class Match : IDisposable
             _CurrentMatchTeamToVote.StartTeam = startTeam;
             var otherTeam = _CurrentMatchTeamToVote == MatchTeam1 ? MatchTeam2 : MatchTeam1;
             otherTeam.StartTeam = startTeam == Team.Terrorist ? Team.CounterTerrorist : Team.Terrorist;
-        
+
             _Logger.LogInformation("{team} starts as Team {startTeam}", _CurrentMatchTeamToVote.TeamConfig.Name, _CurrentMatchTeamToVote!.StartTeam.ToString());
             _Logger.LogInformation("{team} starts as Team {startTeam}", otherTeam.TeamConfig.Name, otherTeam!.StartTeam.ToString());
         }
@@ -433,7 +433,7 @@ public class Match : IDisposable
             return MatchTeam1;
         }
 
-        if (MatchTeam1.Players.Exists(x => x.Player.SteamID == steamID))
+        if (MatchTeam2.Players.Exists(x => x.Player.SteamID == steamID))
         {
             return MatchTeam2;
         }
@@ -462,17 +462,15 @@ public class Match : IDisposable
         //}
 
         var isTeam1 = Config.Team1.Players.ContainsKey(player.SteamID);
-        var teamName = isTeam1 ? Config.Team1.Name : Config.Team2.Name;
+        var team = isTeam1 ? MatchTeam1 : MatchTeam2;
         var startSite = isTeam1 ? Team.Terrorist : Team.CounterTerrorist;
 
-        _Logger.LogInformation("Player {playerName} belongs to {teamName}", player.PlayerName, teamName);
+        _Logger.LogInformation("Player {playerName} belongs to {teamName}", player.PlayerName, team.TeamConfig.Name);
 
         if (player.Team != startSite)
         {
             player.SwitchTeam(startSite);
         }
-
-        var team = isTeam1 ? MatchTeam1 : MatchTeam2;
 
         var existingPlayer = team.Players.Find(x => x.Player.SteamID.Equals(player.SteamID));
         if (existingPlayer != null)
