@@ -122,10 +122,13 @@ public class PugSharp : BasePlugin, IMatchCallback
 
         ExecuteServerCommand("mp_endmatch_votenextmap", "false");
 
-        ExecuteServerCommand("mp_teamname_1", matchConfig.Team1.Name);
-        ExecuteServerCommand("mp_teamflag_1", matchConfig.Team1.Flag);
-        ExecuteServerCommand("mp_teamname_2", matchConfig.Team2.Name);
-        ExecuteServerCommand("mp_teamflag_2", matchConfig.Team2.Flag);
+        // Set T Name
+        ExecuteServerCommand("mp_teamname_1", matchConfig.Team2.Name);
+        ExecuteServerCommand("mp_teamflag_1", matchConfig.Team2.Flag);
+        
+        // Set CT Name
+        ExecuteServerCommand("mp_teamname_2", matchConfig.Team1.Name);
+        ExecuteServerCommand("mp_teamflag_2", matchConfig.Team1.Flag);
 
         ExecuteServerCommand("tv_autorecord", "0");
 
