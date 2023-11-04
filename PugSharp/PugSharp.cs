@@ -46,7 +46,6 @@ public class PugSharp : BasePlugin, IMatchCallback
 
         RegisterEventHandler<EventCsWinPanelRound>(OnRoundWinPanel, HookMode.Pre);
         RegisterEventHandler<EventCsWinPanelMatch>(OnMatchOver);
-        RegisterEventHandler<EventStartHalftime>(OnMatchHalfTime);
         RegisterEventHandler<EventRoundAnnounceLastRoundHalf>(OnEventRoundAnnounceLastRoundHalf);
         RegisterEventHandler<EventPlayerConnectFull>(OnPlayerConnectFull);
         RegisterEventHandler<EventPlayerDisconnect>(OnPlayerDisconnect);
@@ -455,13 +454,6 @@ public class PugSharp : BasePlugin, IMatchCallback
         return HookResult.Continue;
     }
 
-    private HookResult OnMatchHalfTime(EventStartHalftime @event, GameEventInfo info)
-    {
-        _Logger.LogInformation("OnMatchHalfTime");
-        _Match?.SwitchTeam();
-        return HookResult.Continue;
-    }
-
     private HookResult OnEventRoundAnnounceLastRoundHalf(EventRoundAnnounceLastRoundHalf @event, GameEventInfo info)
     {
         _Logger.LogInformation("OnEventRoundAnnounceLastRoundHalf");
@@ -628,10 +620,6 @@ public class PugSharp : BasePlugin, IMatchCallback
             else if (team.Teamname.Equals("TERRORIST", StringComparison.OrdinalIgnoreCase))
             {
                 tScore = team.Score;
-            }
-            else
-            {
-                _Logger.LogError("Error during GetTeamsScore: Unknown Teamname: {teamname}", team.Teamname);
             }
         }
 
