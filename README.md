@@ -60,7 +60,10 @@ If you want to know how to use PugSharp, hop over to our [Documentation](https:/
 
 ### Admin/Rcon Commands
 
-- `!ps_loadconfig <url>` Load a [MatchConfig](#MatchConfig) to initialize a match 
+`<requiredParameter>` This marks parameters that are required for commands
+`[optionalParameter]` This marks parameters that can be optional added to commands
+
+- `!ps_loadconfig <url> [authToken]` Load a [MatchConfig](#MatchConfig) to initialize a match 
 - `!ps_dumpmatch` Dumps the current matchstate and config to console
 
 ## Configuration

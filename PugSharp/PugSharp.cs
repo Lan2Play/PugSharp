@@ -149,7 +149,7 @@ public class PugSharp : BasePlugin, IMatchCallback
         }
 
         _Logger.LogInformation("Start loading match config!");
-        if (command.ArgCount != 3)
+        if (command.ArgCount < 2)
         {
             _Logger.LogInformation("Url is required as Argument!");
             player?.PrintToCenter("Url is required as Argument!");
@@ -158,7 +158,7 @@ public class PugSharp : BasePlugin, IMatchCallback
         }
 
         var url = command.ArgByIndex(1);
-        var authToken = command.ArgByIndex(2);
+        var authToken = command.ArgCount > 2 ? command.ArgByIndex(2) : string.Empty;
 
         SendMessage($"Loading Config from {url}");
         var result = _ConfigProvider.TryLoadConfigAsync(url, authToken).Result;
