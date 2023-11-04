@@ -2,7 +2,6 @@
 using CounterStrikeSharp.API.Core;
 using CounterStrikeSharp.API.Core.Attributes.Registration;
 using CounterStrikeSharp.API.Modules.Commands;
-using CounterStrikeSharp.API.Modules.Entities;
 using CounterStrikeSharp.API.Modules.Utils;
 using Microsoft.Extensions.Logging;
 using PugSharp.Config;
@@ -56,6 +55,7 @@ public class PugSharp : BasePlugin, IMatchCallback
         RegisterEventHandler<EventRoundPrestart>(OnRoundStart);
         RegisterEventHandler<EventServerCvar>(OnCvarChanged, HookMode.Pre);
         RegisterEventHandler<EventPlayerTeam>(OnPlayerTeam);
+        RegisterEventHandler<EventSwitchTeam>(OnSwitchTeam, HookMode.Pre);
 
         RegisterListener<CounterStrikeSharp.API.Core.Listeners.OnMapStart>(OnMapStartHandler);
 
@@ -293,7 +293,13 @@ public class PugSharp : BasePlugin, IMatchCallback
 
         return HookResult.Continue;
     }
-   
+
+    private HookResult OnSwitchTeam(EventSwitchTeam @event, GameEventInfo info)
+    {
+        _Match.SwitchTeam();
+        return HookResult.Continue;
+    }
+
     private HookResult OnCvarChanged(EventServerCvar eventCvarChanged, GameEventInfo info)
     {
         if (_Match != null && _Match.CurrentState != MatchState.None)

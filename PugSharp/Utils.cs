@@ -2,6 +2,7 @@
 using CounterStrikeSharp.API.Core;
 using CounterStrikeSharp.API.Modules.Memory;
 using PugSharp.Config;
+using PugSharp.Match;
 using PugSharp.Match.Contract;
 using System;
 using System.Collections.Generic;
@@ -54,6 +55,5 @@ namespace PugSharp
 
             return (PlayerConnectedState)statusRef;
         }
-
     }
 }

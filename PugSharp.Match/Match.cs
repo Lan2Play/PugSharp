@@ -158,7 +158,7 @@ public class Match : IDisposable
         _MatchCallback.SetupRoundBackup();
         _MatchCallback.StartDemoRecording();
 
-        _MatchCallback.SendMessage($" {ChatColors.Default}Starting Match. {ChatColors.Highlight}{MatchTeam1.TeamConfig.Name} {ChatColors.Default}as {ChatColors.Highlight}{MatchTeam1.StartTeam}{ChatColors.Default}. {ChatColors.Highlight}{MatchTeam2.TeamConfig.Name}{ChatColors.Default} as {ChatColors.Highlight}{MatchTeam2.StartTeam}");
+        _MatchCallback.SendMessage($" {ChatColors.Default}Starting Match. {ChatColors.Highlight}{MatchTeam1.TeamConfig.Name} {ChatColors.Default}as {ChatColors.Highlight}{MatchTeam1.CurrentTeamSite}{ChatColors.Default}. {ChatColors.Highlight}{MatchTeam2.TeamConfig.Name}{ChatColors.Default} as {ChatColors.Highlight}{MatchTeam2.CurrentTeamSite}");
 
         _ = _ApiStats?.SendGoingLiveAsync(new GoingLiveParams(_MatchInfo.CurrentMap.MapName, _MatchInfo.CurrentMap.MapNumber), CancellationToken.None);
 
@@ -310,14 +310,14 @@ public class Match : IDisposable
         var startTeam = _TeamVotes.MaxBy(m => m.Votes.Count)!.Name.Equals("T") ? Team.Terrorist : Team.CounterTerrorist;
         _Logger.LogInformation("Set selected teamsite to {startTeam}. Voted by {team}", startTeam, _CurrentMatchTeamToVote!.TeamConfig.Name);
 
-        if (_CurrentMatchTeamToVote!.StartTeam != startTeam)
+        if (_CurrentMatchTeamToVote!.CurrentTeamSite != startTeam)
         {
-            _CurrentMatchTeamToVote.StartTeam = startTeam;
+            _CurrentMatchTeamToVote.CurrentTeamSite = startTeam;
             var otherTeam = _CurrentMatchTeamToVote == MatchTeam1 ? MatchTeam2 : MatchTeam1;
-            otherTeam.StartTeam = startTeam == Team.Terrorist ? Team.CounterTerrorist : Team.Terrorist;
+            otherTeam.CurrentTeamSite = startTeam == Team.Terrorist ? Team.CounterTerrorist : Team.Terrorist;
 
-            _Logger.LogInformation("{team} starts as Team {startTeam}", _CurrentMatchTeamToVote.TeamConfig.Name, _CurrentMatchTeamToVote!.StartTeam.ToString());
-            _Logger.LogInformation("{team} starts as Team {startTeam}", otherTeam.TeamConfig.Name, otherTeam!.StartTeam.ToString());
+            _Logger.LogInformation("{team} starts as Team {startTeam}", _CurrentMatchTeamToVote.TeamConfig.Name, _CurrentMatchTeamToVote!.CurrentTeamSite.ToString());
+            _Logger.LogInformation("{team} starts as Team {startTeam}", otherTeam.TeamConfig.Name, otherTeam!.CurrentTeamSite.ToString());
         }
 
         _MatchCallback.SendMessage($"{_CurrentMatchTeamToVote!.TeamConfig.Name} selected {startTeam} as startside!");
@@ -445,7 +445,7 @@ public class Match : IDisposable
 
     private MatchTeam? GetMatchTeam(Team team)
     {
-        return MatchTeam1.StartTeam == team ? MatchTeam1 : MatchTeam2;
+        return MatchTeam1.CurrentTeamSite == team ? MatchTeam1 : MatchTeam2;
     }
 
     private MatchPlayer GetMatchPlayer(ulong steamID)
@@ -465,7 +465,7 @@ public class Match : IDisposable
 
         var isTeam1 = Config.Team1.Players.ContainsKey(player.SteamID);
         var team = isTeam1 ? MatchTeam1 : MatchTeam2;
-        var startSite = team.StartTeam;
+        var startSite = team.CurrentTeamSite;
         if (startSite == Team.None)
         {
             startSite = isTeam1 ? Team.Terrorist : Team.CounterTerrorist;
@@ -557,7 +557,7 @@ public class Match : IDisposable
 
         if (matchTeam != null)
         {
-            return matchTeam.StartTeam;
+            return matchTeam.CurrentTeamSite;
         }
 
         _Logger.LogInformation("No matchTeam found. Fallback to Config Team!");
@@ -689,6 +689,12 @@ public class Match : IDisposable
 
         team.IsPaused = false;
         TryFireState(MatchCommand.Unpause);
+    }
+
+    public void SwitchTeam()
+    {
+        MatchTeam1.ToggleTeamSite();
+        MatchTeam2.ToggleTeamSite();
     }
 
     //public void RoundCompleted()
