@@ -29,7 +29,12 @@ If you want to help developing or translating, join our discord:
 ## Working features
 
 - [x] Configuration via http(s) json (example below)
+- [x] Configuration via json file
 - [ ] api reporting to a http(s) server
+  - [x] Report start of match
+  - [x] Report round results
+  - [x] Report map ended
+  - [ ] Report series ended (for bo3, ...)
 - [x] automatic team assignment
 - [x] map and starting team vote
 - [x] automatic pause if player disconnects
@@ -38,6 +43,7 @@ If you want to help developing or translating, join our discord:
 - [ ] demo upload
 - [ ] hltv support
 - [ ] i18n
+- [ ] Text customization?
 
 ## Usage
 
