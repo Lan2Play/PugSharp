@@ -4,9 +4,6 @@ namespace PugSharp.Match.Contract;
 
 public interface IPlayer
 {
-    [JsonIgnore]
-    nint Handle { get; }
-
     ulong SteamID { get; }
 
     int? UserId { get; }

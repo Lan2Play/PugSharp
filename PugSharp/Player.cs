@@ -11,7 +11,7 @@ namespace PugSharp;
 public class Player : IPlayer
 {
     private static readonly ILogger<Player> _Logger = LogManager.CreateLogger<Player>();
-    private uint _EntityIndex;
+    private int _UserId;
     private CCSPlayerController _PlayerController;
 
     public Player(CCSPlayerController playerController)
@@ -21,7 +21,7 @@ public class Player : IPlayer
             _Logger.LogError("PlayerController is invalid!");
         }
 
-        _EntityIndex = playerController.EntityIndex!.Value.Value;
+        _UserId = playerController.UserId!.Value;
         _PlayerController = playerController;
         if (_PlayerController.ActionTrackingServices != null)
         {
@@ -31,37 +31,30 @@ public class Player : IPlayer
 
     private T DefaultIfInvalid<T>(Func<T> loadValue) where T : struct
     {
-        if (_PlayerController == null || !_PlayerController.IsValid)
-        {
-            _PlayerController = Utilities.GetPlayerFromIndex((int)_EntityIndex);
-        }
-
+        ReloadPlayerController();
         return _PlayerController != null && _PlayerController.IsValid ? loadValue() : default;
     }
 
     private T DefaultIfInvalid<T>(Func<T> loadValue, T defaultValue)
     {
-        if (_PlayerController == null || !_PlayerController.IsValid)
-        {
-            _PlayerController = Utilities.GetPlayerFromIndex((int)_EntityIndex);
-        }
-
+        ReloadPlayerController();
         return _PlayerController != null && _PlayerController.IsValid ? loadValue() : defaultValue;
     }
 
-
     private T? NullIfInvalid<T>(Func<T?> loadValue)
     {
-        if (_PlayerController == null || !_PlayerController.IsValid)
-        {
-            _PlayerController = Utilities.GetPlayerFromIndex((int)_EntityIndex);
-        }
-
+        ReloadPlayerController();
         return _PlayerController != null && _PlayerController.IsValid ? loadValue() : default;
     }
 
-    [JsonIgnore]
-    public nint Handle => DefaultIfInvalid(() => _PlayerController.Handle);
+    private void ReloadPlayerController()
+    {
+        if (_PlayerController == null || !_PlayerController.IsValid)
+        {
+            _PlayerController = Utilities.GetPlayerFromUserid(_UserId);
+        }
+    }
+
 
     public ulong SteamID => DefaultIfInvalid(() => _PlayerController.SteamID);
 
