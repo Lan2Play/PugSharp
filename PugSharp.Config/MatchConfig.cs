@@ -17,16 +17,16 @@ namespace PugSharp.Config
         public string MatchId { get; set; }
 
         [JsonPropertyName("num_maps")]
-        public int NumMaps { get; set; }
+        public int NumMaps { get; set; } = 1;
 
         [JsonPropertyName("players_per_team")]
-        public int PlayersPerTeam { get; set; }
+        public int PlayersPerTeam { get; set; } = 5;
 
         [JsonPropertyName("min_players_to_ready")]
-        public int MinPlayersToReady { get; set; }
+        public int MinPlayersToReady { get; set; } = 5;
 
         [JsonPropertyName("max_rounds")]
-        public int MaxRounds { get; set; } = 6;
+        public int MaxRounds { get; set; } = 24;
 
         [JsonPropertyName("max_overtime_rounds")]
         public int MaxOvertimeRounds { get; set; } = 6;

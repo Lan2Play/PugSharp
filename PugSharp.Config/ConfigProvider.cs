@@ -11,6 +11,31 @@ namespace PugSharp.Config
         private readonly HttpClient _HttpClient = new();
         private bool disposedValue;
 
+        public async Task<(bool Successful, MatchConfig? Config)> TryLoadConfigFromFileAsync(string fileName)
+        {
+            _Logger.LogInformation("Loading match from \"{fileName}\"", fileName);
+
+            try
+            {
+                var configFileStream = File.OpenRead(fileName);
+                await using (configFileStream.ConfigureAwait(false))
+                {
+                    var config = await JsonSerializer.DeserializeAsync<MatchConfig>(configFileStream).ConfigureAwait(false);
+                    if (config != null)
+                    {
+                        _Logger.LogInformation("Successfully loaded config for match {matchId}", config.MatchId);
+                        return (true, config);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                _Logger.LogError(ex, "Failed loading config from \"{fileName}\".", fileName);
+            }
+
+            return (false, null);
+        }
+
         public async Task<(bool Successful, MatchConfig? Config)> TryLoadConfigAsync(string url, string authToken)
         {
             _Logger.LogInformation("Loading match from \"{url}\"", url);

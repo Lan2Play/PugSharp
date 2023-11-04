@@ -175,6 +175,39 @@ public class PugSharp : BasePlugin, IMatchCallback
         }
     }
 
+    [ConsoleCommand("css_loadconfigfile", "Load a match config from a file")]
+    [ConsoleCommand("ps_loadconfigfile", "Load a match config from a file")]
+    public void OnCommandLoadConfigFromFile(CCSPlayerController? player, CommandInfo command)
+    {
+        if (player != null && !player.IsAdmin(_ServerConfig))
+        {
+            player.PrintToCenter("Command is only allowed for admins!");
+            return;
+        }
+
+        _Logger.LogInformation("Start loading match config!");
+        if (command.ArgCount != 2)
+        {
+            _Logger.LogInformation("FileName is required as Argument! Path have to be put in \"pathToConfig\"");
+            player?.PrintToCenter("FileName is required as Argument! Path have to be put in \"pathToConfig\"");
+
+            return;
+        }
+
+        var fileName = command.ArgByIndex(1);
+
+        // TODO should it be relative to GameDirectory?
+        var fullFilePath = Path.GetFullPath(fileName);
+
+        SendMessage($"Loading Config from file {fullFilePath}");
+        var result = _ConfigProvider.TryLoadConfigFromFileAsync(fullFilePath).Result;
+        if (result.Successful)
+        {
+            Server.PrintToConsole("Matchconfig loaded!");
+            InitializeMatch(result.Config!);
+        }
+    }
+
     [ConsoleCommand("css_dumpmatch", "Serialize match to JSON on console")]
     [ConsoleCommand("ps_dumpmatch", "Load a match config")]
     public void OnCommandDumpMatch(CCSPlayerController? player, CommandInfo command)
