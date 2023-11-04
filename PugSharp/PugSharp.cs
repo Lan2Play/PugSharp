@@ -401,21 +401,6 @@ public class PugSharp : BasePlugin, IMatchCallback
                 // TODO read mp_maxmoney cvar
                 player.Money = 16000;
             });
-
-            var configTeam = _Match.GetPlayerTeam(@event.Userid.SteamID);
-
-            if ((int)configTeam != @event.Userid.TeamNum)
-            {
-                _Logger.LogInformation("Player {playerName} tried to join {team} but is not allowed!", @event.Userid.PlayerName, @event.Userid.TeamNum);
-                var player = new Player(@event.Userid);
-
-                Server.NextFrame(() =>
-                {
-                    _Logger.LogInformation("Switch {playerName} to team {team}!", player.PlayerName, configTeam);
-                    player.SwitchTeam(configTeam);
-                    player.MatchStats?.ResetStats();
-                });
-            }
         }
 
         return HookResult.Continue;
