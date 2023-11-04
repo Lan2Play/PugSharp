@@ -56,7 +56,18 @@ public class Player : IPlayer
     }
 
 
-    public ulong SteamID => DefaultIfInvalid(() => _PlayerController.SteamID);
+    public ulong SteamID
+    {
+        get
+        {
+            return DefaultIfInvalid(() =>
+            {
+                var steamId = _PlayerController.SteamID;
+                _Logger.LogInformation("SteamId for {playerName}: {steamId}", PlayerName, steamId);
+                return steamId;
+            });
+        }
+    }
 
     public int? UserId => NullIfInvalid(() => _PlayerController.UserId);
 
