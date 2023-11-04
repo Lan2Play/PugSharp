@@ -7,6 +7,7 @@ using Microsoft.Extensions.Logging;
 using PugSharp.Config;
 using PugSharp.Logging;
 using PugSharp.Match.Contract;
+using System.Globalization;
 using System.Text.Json;
 
 namespace PugSharp;
@@ -108,8 +109,8 @@ public class PugSharp : BasePlugin, IMatchCallback
         Server.ExecuteCommand("mp_warmuptime 6000");
 
         Server.ExecuteCommand("mp_overtime_enable true");
-        Server.ExecuteCommand("mp_overtime_maxrounds 6");
-        Server.ExecuteCommand("mp_maxrounds 24");
+        ExecuteServerCommand("mp_overtime_maxrounds", matchConfig.MaxOvertimeRounds.ToString(CultureInfo.InvariantCulture));
+        ExecuteServerCommand("mp_maxrounds", matchConfig.MaxRounds.ToString(CultureInfo.InvariantCulture));
         Server.ExecuteCommand("mp_tournament 1");
         Server.ExecuteCommand("mp_autokick 0");
 

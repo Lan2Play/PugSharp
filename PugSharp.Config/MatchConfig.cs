@@ -25,6 +25,12 @@ namespace PugSharp.Config
         [JsonPropertyName("min_players_to_ready")]
         public int MinPlayersToReady { get; set; }
 
+        [JsonPropertyName("max_rounds")]
+        public int MaxRounds { get; set; } = 6;
+
+        [JsonPropertyName("max_overtime_rounds")]
+        public int MaxOvertimeRounds { get; set; } = 6;
+
         [JsonPropertyName("vote_timeout")]
         public long VoteTimeout { get; set; } = 60000;
 
