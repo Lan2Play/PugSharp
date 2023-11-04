@@ -56,16 +56,15 @@ public class PugSharp : BasePlugin, IMatchCallback
         RegisterEventHandler<EventRoundPrestart>(OnRoundStart);
         RegisterEventHandler<EventServerCvar>(OnCvarChanged, HookMode.Pre);
         RegisterEventHandler<EventPlayerTeam>(OnPlayerTeam);
-        //RegisterEventHandler<EventSwitchTeam>(OnSwitchTeam, HookMode.Pre);
 
         RegisterListener<CounterStrikeSharp.API.Core.Listeners.OnMapStart>(OnMapStartHandler);
 
-        //AddCommandListener("jointeam", OnClientCommandJoinTeam);
+        AddCommandListener("jointeam", OnClientCommandJoinTeam);
 
         _Logger.LogInformation("End RegisterEventHandlers");
     }
 
-    private void ExecuteServerCommand(string command, string value)
+    private static void ExecuteServerCommand(string command, string value)
     {
         if (!string.IsNullOrEmpty(value))
         {
@@ -302,13 +301,6 @@ public class PugSharp : BasePlugin, IMatchCallback
             @event.Userid.Kick();
         }
 
-        return HookResult.Continue;
-    }
-
-    private HookResult OnSwitchTeam(EventSwitchTeam @event, GameEventInfo info)
-    {
-        _Logger.LogInformation("OnSwitchTeam called");
-        _Match?.SwitchTeam();
         return HookResult.Continue;
     }
 
@@ -606,7 +598,7 @@ public class PugSharp : BasePlugin, IMatchCallback
         return Match.Contract.Team.None;
     }
 
-    private (int CtScore, int TScore) LoadTeamsScore()
+    private static (int CtScore, int TScore) LoadTeamsScore()
     {
         var teamEntities = Utilities.FindAllEntitiesByDesignerName<CCSTeam>("cs_team_manager");
         int ctScore = 0;

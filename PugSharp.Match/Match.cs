@@ -457,13 +457,13 @@ public class Match : IDisposable
 
     public bool TryAddPlayer(IPlayer player)
     {
-        //var playerTeam = GetConfigTeam(player.SteamID);
-        //if (playerTeam == Team.None)
-        //{
-        //    return false;
-        //}
-
         var isTeam1 = Config.Team1.Players.ContainsKey(player.SteamID);
+        var isTeam2 = !isTeam1 && Config.Team2.Players.ContainsKey(player.SteamID);
+        if (!isTeam1 && !isTeam2)
+        {
+            return false;
+        }
+
         var team = isTeam1 ? MatchTeam1 : MatchTeam2;
         var startSite = team.CurrentTeamSite;
         if (startSite == Team.None)
