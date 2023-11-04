@@ -46,6 +46,8 @@ public class PugSharp : BasePlugin, IMatchCallback
 
         RegisterEventHandler<EventCsWinPanelRound>(OnRoundWinPanel, HookMode.Pre);
         RegisterEventHandler<EventCsWinPanelMatch>(OnMatchOver);
+        RegisterEventHandler<EventStartHalftime>(OnMatchHalfTime);
+        RegisterEventHandler<EventRoundAnnounceLastRoundHalf>(OnEventRoundAnnounceLastRoundHalf);
         RegisterEventHandler<EventPlayerConnectFull>(OnPlayerConnectFull);
         RegisterEventHandler<EventPlayerDisconnect>(OnPlayerDisconnect);
         RegisterEventHandler<EventPlayerSpawn>(OnPlayerSpawn);
@@ -55,7 +57,7 @@ public class PugSharp : BasePlugin, IMatchCallback
         RegisterEventHandler<EventRoundPrestart>(OnRoundStart);
         RegisterEventHandler<EventServerCvar>(OnCvarChanged, HookMode.Pre);
         RegisterEventHandler<EventPlayerTeam>(OnPlayerTeam);
-        RegisterEventHandler<EventSwitchTeam>(OnSwitchTeam, HookMode.Pre);
+        //RegisterEventHandler<EventSwitchTeam>(OnSwitchTeam, HookMode.Pre);
 
         RegisterListener<CounterStrikeSharp.API.Core.Listeners.OnMapStart>(OnMapStartHandler);
 
@@ -450,10 +452,22 @@ public class PugSharp : BasePlugin, IMatchCallback
     private HookResult OnRoundWinPanel(EventCsWinPanelRound eventCsWinPanelRound, GameEventInfo info)
     {
         _Logger.LogInformation("On Round win panel");
-
         return HookResult.Continue;
     }
 
+    private HookResult OnMatchHalfTime(EventStartHalftime @event, GameEventInfo info)
+    {
+        _Logger.LogInformation("OnMatchHalfTime");
+        _Match?.SwitchTeam();
+        return HookResult.Continue;
+    }
+
+    private HookResult OnEventRoundAnnounceLastRoundHalf(EventRoundAnnounceLastRoundHalf @event, GameEventInfo info)
+    {
+        _Logger.LogInformation("OnEventRoundAnnounceLastRoundHalf");
+        _Match?.SwitchTeam();
+        return HookResult.Continue;
+    }
 
     #endregion
 
