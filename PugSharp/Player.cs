@@ -21,7 +21,8 @@ public class Player : IPlayer
             _Logger.LogError("PlayerController is invalid!");
         }
 
-        _UserId = playerController.UserId!.Value;
+        _UserId = playerController.UserId.Value;
+        SteamID = playerController.SteamID;
         _PlayerController = playerController;
         if (_PlayerController.ActionTrackingServices != null)
         {
@@ -51,23 +52,13 @@ public class Player : IPlayer
     {
         if (_PlayerController == null || !_PlayerController.IsValid)
         {
+            _Logger.LogInformation("_PlayerController for SteamId {steamId} is Invalid. Reload with {userId} ", SteamID, _UserId);
             _PlayerController = Utilities.GetPlayerFromUserid(_UserId);
+            _Logger.LogInformation("_PlayerController for SteamId {steamId} reloaded. UserID: {userId}; PlayerName: {playerName}", SteamID, UserId, PlayerName);
         }
     }
 
-
-    public ulong SteamID
-    {
-        get
-        {
-            return DefaultIfInvalid(() =>
-            {
-                var steamId = _PlayerController.SteamID;
-                _Logger.LogInformation("SteamId for {playerName}: {steamId}", PlayerName, steamId);
-                return steamId;
-            });
-        }
-    }
+    public ulong SteamID { get; }
 
     public int? UserId => NullIfInvalid(() => _PlayerController.UserId);
 
