@@ -120,5 +120,10 @@ public class Player : IPlayer
         }
     }
 
+    public void Kick()
+    {
+        Server.ExecuteCommand($"kickid {UserId!.Value} \"You are not part of the current match!\"");
+    }
+
     public IPlayerMatchStats? MatchStats { get; }
 }

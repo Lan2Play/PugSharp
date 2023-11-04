@@ -34,16 +34,6 @@ namespace PugSharp
             Server.ExecuteCommand($"kickid {playerController.UserId.Value} \"You are not part of the current match!\"");
         }
 
-        internal static void Kick(this IPlayer? player)
-        {
-            if (player?.UserId == null)
-            {
-                return;
-            }
-
-            Server.ExecuteCommand($"kickid {player.UserId.Value} \"You are not part of the current match!\"");
-        }
-
         internal static PlayerConnectedState PlayerState(this CCSPlayerController player)
         {
             if (player == null || !player.IsValid)

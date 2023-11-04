@@ -104,27 +104,30 @@ public class PugSharp : BasePlugin, IMatchCallback
     {
         _Logger.LogInformation("Start set match variables");
 
-        Server.ExecuteCommand("sv_disable_teamselect_menu true");
-        Server.ExecuteCommand("sv_human_autojoin_team 2");
-        Server.ExecuteCommand("mp_warmuptime 6000");
+        ExecuteServerCommand("sv_disable_teamselect_menu", "true");
+        ExecuteServerCommand("sv_human_autojoin_team", "2");
+        ExecuteServerCommand("mp_warmuptime", "6000");
 
-        Server.ExecuteCommand("mp_overtime_enable true");
+        ExecuteServerCommand("mp_overtime_enable", "true");
         ExecuteServerCommand("mp_overtime_maxrounds", matchConfig.MaxOvertimeRounds.ToString(CultureInfo.InvariantCulture));
         ExecuteServerCommand("mp_maxrounds", matchConfig.MaxRounds.ToString(CultureInfo.InvariantCulture));
-        Server.ExecuteCommand("mp_tournament 1");
-        Server.ExecuteCommand("mp_autokick 0");
+        ExecuteServerCommand("mp_tournament", "1");
+        ExecuteServerCommand("mp_autokick", "0");
 
-        Server.ExecuteCommand("mp_team_timeout_time 30");
-        Server.ExecuteCommand("mp_team_timeout_max 3");
+        ExecuteServerCommand("mp_team_timeout_time", "30");
+        ExecuteServerCommand("mp_team_timeout_max", "3");
 
-        ExecuteServerCommand($"mp_endmatch_votenextmap", "false");
+        ExecuteServerCommand("mp_competitive_endofmatch_extra_time", "120");
+        ExecuteServerCommand("mp_chattime", "120");
 
-        ExecuteServerCommand($"mp_teamname_1", matchConfig.Team1.Name);
-        ExecuteServerCommand($"mp_teamflag_1", matchConfig.Team1.Flag);
-        ExecuteServerCommand($"mp_teamname_2", matchConfig.Team2.Name);
-        ExecuteServerCommand($"mp_teamflag_2", matchConfig.Team2.Flag);
+        ExecuteServerCommand("mp_endmatch_votenextmap", "false");
 
-        Server.ExecuteCommand("tv_autorecord 0");
+        ExecuteServerCommand("mp_teamname_1", matchConfig.Team1.Name);
+        ExecuteServerCommand("mp_teamflag_1", matchConfig.Team1.Flag);
+        ExecuteServerCommand("mp_teamname_2", matchConfig.Team2.Name);
+        ExecuteServerCommand("mp_teamflag_2", matchConfig.Team2.Flag);
+
+        ExecuteServerCommand("tv_autorecord", "0");
 
         _Logger.LogInformation("Set match variables done");
     }
@@ -161,6 +164,8 @@ public class PugSharp : BasePlugin, IMatchCallback
             {
                 result.Config!.EventulaApistatsToken = authToken;
             }
+
+            Server.PrintToConsole("Matchconfig loaded!");
 
             InitializeMatch(result.Config!);
         }

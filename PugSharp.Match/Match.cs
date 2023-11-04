@@ -108,7 +108,8 @@ public class Match : IDisposable
             .OnEntry(TryCompleteMatch);
 
         _MatchStateMachine.Configure(MatchState.MatchCompleted)
-            .OnEntry(CompleteMatch);
+            .OnEntry(CompleteMatch)
+            .OnEntryAsync(KickPlayersAsync);
 
         _MatchStateMachine.OnTransitioned(OnMatchStateChanged);
 
@@ -178,14 +179,25 @@ public class Match : IDisposable
 
     private void TryCompleteMatch()
     {
-        TryFireState(MatchCommand.CompleteMatch);
+        _ = TryFireStateAsync(MatchCommand.CompleteMatch);
     }
 
     private void CompleteMatch()
     {
         _MatchCallback.StopDemoRecording();
+
         //_ApiStats?.SendSeriesResultAsync(new SeriesResultParams(_Match))
     }
+
+    private async Task KickPlayersAsync()
+    {
+        await Task.Delay(TimeSpan.FromMinutes(2)).ConfigureAwait(false);
+        foreach(var player in _MatchCallback.GetAllPlayers())
+        {
+            player.Kick();
+        }
+    }
+
 
     private async Task MatchLiveAsync()
     {

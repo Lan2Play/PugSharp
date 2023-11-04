@@ -20,4 +20,6 @@ public interface IPlayer
     void SwitchTeam(Team team);
 
     void ShowMenu(string title, IEnumerable<MenuOption> menuOptions);
+    
+    void Kick();
 }
