@@ -296,6 +296,7 @@ public class PugSharp : BasePlugin, IMatchCallback
 
     private HookResult OnSwitchTeam(EventSwitchTeam @event, GameEventInfo info)
     {
+        _Logger.LogInformation("OnSwitchTeam called");
         _Match?.SwitchTeam();
         return HookResult.Continue;
     }
