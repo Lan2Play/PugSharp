@@ -465,7 +465,11 @@ public class Match : IDisposable
 
         var isTeam1 = Config.Team1.Players.ContainsKey(player.SteamID);
         var team = isTeam1 ? MatchTeam1 : MatchTeam2;
-        var startSite = isTeam1 ? Team.Terrorist : Team.CounterTerrorist;
+        var startSite = team.StartTeam;
+        if (startSite == Team.None)
+        {
+            startSite = isTeam1 ? Team.Terrorist : Team.CounterTerrorist;
+        }
 
         _Logger.LogInformation("Player {playerName} belongs to {teamName}", player.PlayerName, team.TeamConfig.Name);
 
