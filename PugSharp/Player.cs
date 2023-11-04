@@ -64,7 +64,7 @@ public class Player : IPlayer
 
     public string PlayerName => DefaultIfInvalid(() => _PlayerController.PlayerName, string.Empty);
 
-    public Team Team => (Team)_PlayerController.TeamNum;
+    public Team Team => DefaultIfInvalid(() => (Team)_PlayerController.TeamNum, Team.None);
 
     public IPlayerPawn PlayerPawn => new PlayerPawn(_PlayerController.PlayerPawn.Value);
 

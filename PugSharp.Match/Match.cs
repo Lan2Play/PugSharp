@@ -475,6 +475,8 @@ public class Match : IDisposable
 
         if (player.Team != startSite)
         {
+            _Logger.LogInformation("Player {playerName} should be on {startSite} but is {currentTeam}", player.PlayerName, startSite, player.Team);
+
             player.SwitchTeam(startSite);
         }
 

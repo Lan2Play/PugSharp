@@ -12,8 +12,4 @@ public class PlayerPawn : IPlayerPawn
         _PlayerPawnHandle = playerPawnHandle;
     }
 
-    public void CommitSuicide()
-    {
-        _PlayerPawnHandle.CommitSuicide(true, true);
-    }
 }
