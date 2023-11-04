@@ -3,6 +3,8 @@ using Microsoft.Extensions.Logging;
 using PugSharp.Logging;
 using System.Globalization;
 using System.Net.Http.Headers;
+using System.Text.Json;
+using System.Text.RegularExpressions;
 
 namespace PugSharp.ApiStats
 {
@@ -11,8 +13,9 @@ namespace PugSharp.ApiStats
         private static readonly ILogger<ApiStats> _Logger = LogManager.CreateLogger<ApiStats>();
 
         private readonly HttpClient _HttpClient;
+        private readonly string? _ApiStatsDirectory;
 
-        public ApiStats(string apiStatsUrl, string apiStatsKey)
+        public ApiStats(string apiStatsUrl, string apiStatsKey, string? apiStatsDirectory)
         {
             _Logger.LogInformation("Create Api Stats with BaseUrl: {url}", apiStatsUrl);
 
@@ -27,41 +30,60 @@ namespace PugSharp.ApiStats
             };
 
             _HttpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", apiStatsKey);
+            _ApiStatsDirectory = apiStatsDirectory;
         }
 
-        public async Task SendGoingLiveAsync(GoingLiveParams goingLiveParams, CancellationToken cancellationToken)
+        public async Task SendGoingLiveAsync(string matchId, GoingLiveParams goingLiveParams, CancellationToken cancellationToken)
         {
             var queryParams = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
             {
-                {ApiStatsConstants.StatsMapName, goingLiveParams.MapName}
+                {ApiStatsConstants.StatsMapName, goingLiveParams.MapName},
             };
 
+            // TODO müsste da nicht die match id stehen
             var uri = QueryHelpers.AddQueryString($"golive/{goingLiveParams.MapNumber}", queryParams);
 
             var response = await _HttpClient.PostAsync(uri, null, cancellationToken).ConfigureAwait(false);
 
             await HandleResponseAsync(response, cancellationToken).ConfigureAwait(false);
 
-
+            if (_ApiStatsDirectory != null)
+            {
+                var fileStream = File.OpenWrite(Path.Combine(_ApiStatsDirectory, $"Match_{matchId}_golive.json"));
+                await using (fileStream.ConfigureAwait(false))
+                {
+                    await JsonSerializer.SerializeAsync(fileStream, goingLiveParams, cancellationToken: cancellationToken).ConfigureAwait(false);
+                }
+            }
         }
 
-        public async Task SendMapResultAsync(MapResultParams mapResultParams, CancellationToken cancellationToken)
+        public async Task SendMapResultAsync(string matchId, MapResultParams mapResultParams, CancellationToken cancellationToken)
         {
             var queryParams = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
             {
                 {"team1score", CreateIntParam(mapResultParams.Team1Score)},
                 {"team2score", CreateIntParam(mapResultParams.Team2Score)},
-                {ApiStatsConstants.StatsMapWinner, mapResultParams.WinnerTeamName}
+                {ApiStatsConstants.StatsMapWinner, mapResultParams.WinnerTeamName},
             };
 
+            // TODO müsste da nicht die match id stehen
             var uri = QueryHelpers.AddQueryString($"finalize/{mapResultParams.MapNumber}", queryParams);
 
             var response = await _HttpClient.PostAsync(uri, null, cancellationToken).ConfigureAwait(false);
 
             await HandleResponseAsync(response, cancellationToken).ConfigureAwait(false);
+
+            if (_ApiStatsDirectory != null)
+            {
+                var fileStream = File.OpenWrite(Path.Combine(_ApiStatsDirectory, $"Match_{matchId}_mapresult.json"));
+                await using (fileStream.ConfigureAwait(false))
+                {
+                    await JsonSerializer.SerializeAsync(fileStream, mapResultParams, cancellationToken: cancellationToken).ConfigureAwait(false);
+                }
+            }
         }
 
-        public async Task SendRoundStatsUpdateAsync(RoundStatusUpdateParams roundStatusUpdateParams, CancellationToken cancellationToken)
+        public async Task SendRoundStatsUpdateAsync(string matchId, RoundStatusUpdateParams roundStatusUpdateParams, CancellationToken cancellationToken)
         {
             var queryParams = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
             {
@@ -69,6 +91,7 @@ namespace PugSharp.ApiStats
                 {"team2score", CreateIntParam(roundStatusUpdateParams.CurrentMap.Team2.Score)},
             };
 
+            // TODO müsste da nicht die match id stehen
             var uri = QueryHelpers.AddQueryString($"updateround/{roundStatusUpdateParams.MapNumber}", queryParams);
 
             var response = await _HttpClient.PostAsync(uri, null, cancellationToken).ConfigureAwait(false);
@@ -76,6 +99,16 @@ namespace PugSharp.ApiStats
             await HandleResponseAsync(response, cancellationToken).ConfigureAwait(false);
 
             await UpdatePlayerStatsInternalAsync(roundStatusUpdateParams.MapNumber, roundStatusUpdateParams.TeamInfo1, roundStatusUpdateParams.TeamInfo2, roundStatusUpdateParams.CurrentMap, cancellationToken).ConfigureAwait(false);
+
+            if (_ApiStatsDirectory != null)
+            {
+                var round = roundStatusUpdateParams.CurrentMap.Team1.Score + roundStatusUpdateParams.CurrentMap.Team2.Score;
+                var fileStream = File.OpenWrite(Path.Combine(_ApiStatsDirectory, string.Create(CultureInfo.InvariantCulture, $"Match_{matchId}_roundresult_{round}.json")));
+                await using (fileStream.ConfigureAwait(false))
+                {
+                    await JsonSerializer.SerializeAsync(fileStream, roundStatusUpdateParams, cancellationToken: cancellationToken).ConfigureAwait(false);
+                }
+            }
         }
 
         private async Task UpdatePlayerStatsInternalAsync(int mapNumber, TeamInfo teamInfo1, TeamInfo teamInfo2, Map currentMap, CancellationToken cancellationToken)

@@ -34,7 +34,7 @@ public class Match : IDisposable
 
     public IEnumerable<MatchPlayer> AllMatchPlayers => MatchTeam1.Players.Concat(MatchTeam2.Players);
 
-    public Match(IMatchCallback matchCallback, Config.MatchConfig matchConfig)
+    public Match(IMatchCallback matchCallback, Config.MatchConfig matchConfig, string? pluginDirectory = null)
     {
         _MatchCallback = matchCallback;
         Config = matchConfig;
@@ -48,7 +48,7 @@ public class Match : IDisposable
 
         if (!string.IsNullOrEmpty(Config.EventulaApistatsUrl) && !string.IsNullOrEmpty(Config.EventulaApistatsToken))
         {
-            _ApiStats = new ApiStats.ApiStats(Config.EventulaApistatsUrl, Config.EventulaApistatsToken);
+            _ApiStats = new ApiStats.ApiStats(Config.EventulaApistatsUrl, Config.EventulaApistatsToken, pluginDirectory == null ? null : Path.Combine(pluginDirectory, "Stats"));
         }
 
         _MapsToSelect = matchConfig.Maplist.Select(x => new Vote(x)).ToList();
@@ -161,7 +161,7 @@ public class Match : IDisposable
 
         _MatchCallback.SendMessage($" {ChatColors.Default}Starting Match. {ChatColors.Highlight}{MatchTeam1.TeamConfig.Name} {ChatColors.Default}as {ChatColors.Highlight}{MatchTeam1.CurrentTeamSite}{ChatColors.Default}. {ChatColors.Highlight}{MatchTeam2.TeamConfig.Name}{ChatColors.Default} as {ChatColors.Highlight}{MatchTeam2.CurrentTeamSite}");
 
-        _ = _ApiStats?.SendGoingLiveAsync(new GoingLiveParams(_MatchInfo.CurrentMap.MapName, _MatchInfo.CurrentMap.MapNumber), CancellationToken.None);
+        _ = _ApiStats?.SendGoingLiveAsync(Config.MatchId, new GoingLiveParams(_MatchInfo.CurrentMap.MapName, _MatchInfo.CurrentMap.MapNumber), CancellationToken.None);
 
         TryFireState(MatchCommand.StartMatch);
     }
@@ -174,7 +174,7 @@ public class Match : IDisposable
         }
 
         var mapResultParams = new MapResultParams(_MatchInfo.CurrentMap.Winner.TeamConfig.Name, _MatchInfo.CurrentMap.Team1Points, _MatchInfo.CurrentMap.Team2Points, _MatchInfo.CurrentMap.MapNumber);
-        _ = _ApiStats?.SendMapResultAsync(mapResultParams, CancellationToken.None);
+        _ = _ApiStats?.SendMapResultAsync(Config.MatchId, mapResultParams, CancellationToken.None);
     }
 
     public void SendRoundResults(IRoundResults roundResults)
@@ -211,7 +211,7 @@ public class Match : IDisposable
         };
 
         var roundStats = new RoundStatusUpdateParams(_MatchInfo.CurrentMap.MapNumber, teamInfo1, teamInfo2, new Map { Name = _MatchInfo.CurrentMap.MapName, Team1 = mapTeamInfo1, Team2 = mapTeamInfo2, });
-        _ = _ApiStats?.SendRoundStatsUpdateAsync(roundStats, CancellationToken.None);
+        _ = _ApiStats?.SendRoundStatsUpdateAsync(Config.MatchId, roundStats, CancellationToken.None);
     }
 
     private PlayerStatistics CreatePlayerStatistics(IPlayerRoundResults value)

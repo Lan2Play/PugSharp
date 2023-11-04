@@ -33,7 +33,7 @@ public class PugSharp : BasePlugin, IMatchCallback
         RegisterEventHandlers();
         _ = Task.Run(async () =>
         {
-            var configPath = Path.Join(Server.GameDirectory, "PugSharp", "Config", "server.json");
+            var configPath = Path.Join(Server.GameDirectory, "csgo", "PugSharp", "Config", "server.json");
             var serverConfigResult = await _ConfigProvider.LoadServerConfigAsync(configPath).ConfigureAwait(false);
             if (serverConfigResult.Successful)
             {
@@ -79,7 +79,7 @@ public class PugSharp : BasePlugin, IMatchCallback
         SetMatchVariable(matchConfig);
 
         _Match?.Dispose();
-        _Match = new Match.Match(this, matchConfig);
+        _Match = new Match.Match(this, matchConfig, Path.Combine(Server.GameDirectory, "csgo", "PugSharp"));
 
         var players = GetAllPlayers();
         foreach (var player in players.Where(x => x.UserId.HasValue && x.UserId >= 0))
