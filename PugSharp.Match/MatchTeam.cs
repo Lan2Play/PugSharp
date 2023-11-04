@@ -15,6 +15,8 @@ public class MatchTeam
 
     public List<MatchPlayer> Players { get; } = new List<MatchPlayer>();
 
+    public Team StartingTeamSite { get; set; }
+
     public Team CurrentTeamSite { get; set; }
 
     public Config.Team TeamConfig { get; }

@@ -177,6 +177,85 @@ public class Match : IDisposable
         _ = _ApiStats?.SendMapResultAsync(mapResultParams, CancellationToken.None);
     }
 
+    public void SendRoundResults(IRoundResults roundResults)
+    {
+        var teamInfo1 = new TeamInfo
+        {
+            TeamName = Config.Team1.Name,
+        };
+
+        var teamInfo2 = new TeamInfo
+        {
+            TeamName = Config.Team2.Name,
+        };
+
+        var team1Results = MatchTeam1.CurrentTeamSite == Team.CounterTerrorist ? roundResults.TRoundResult : roundResults.CTRoundResult;
+        var team2Results = MatchTeam2.CurrentTeamSite == Team.CounterTerrorist ? roundResults.TRoundResult : roundResults.CTRoundResult;
+
+        var mapTeamInfo1 = new MapTeamInfo
+        {
+            StartingSide = MatchTeam1.StartingTeamSite == Team.Terrorist ? StartingSide.T : StartingSide.CT,
+            Score = team1Results.Score,
+            ScoreT = team1Results.ScoreT,
+            ScoreCT = team1Results.ScoreCT,
+            Players = team1Results.PlayerResults.ToDictionary(p => new SteamId(p.Key.ToString()), p => CreatePlayerStatistics(p.Value)),
+        };
+
+        var mapTeamInfo2 = new MapTeamInfo
+        {
+            StartingSide = MatchTeam2.StartingTeamSite == Team.Terrorist ? StartingSide.T : StartingSide.CT,
+            Score = team2Results.Score,
+            ScoreT = team2Results.ScoreT,
+            ScoreCT = team2Results.ScoreCT,
+            Players = team1Results.PlayerResults.ToDictionary(p => new SteamId(p.Key.ToString()), p => CreatePlayerStatistics(p.Value)),
+        };
+
+        var roundStats = new RoundStatusUpdateParams(_MatchInfo.CurrentMap.MapNumber, teamInfo1, teamInfo2, new Map { Name = _MatchInfo.CurrentMap.MapName, Team1 = mapTeamInfo1, Team2 = mapTeamInfo2, });
+        _ = _ApiStats?.SendRoundStatsUpdateAsync(roundStats, CancellationToken.None);
+    }
+
+    private PlayerStatistics CreatePlayerStatistics(IPlayerRoundResults value)
+    {
+        return new PlayerStatistics
+        {
+            Assists = value.Assists,
+            BombDefuses = value.BombDefuses,
+            BombPlants = value.BombPlants,
+            Coaching = value.Coaching,
+            ContributionScore = value.ContributionScore,
+            Count1K = value.Count1K,
+            Count2K = value.Count2K,
+            Count3K = value.Count3K,
+            Count4K = value.Count4K,
+            Count5K = value.Count5K,
+            Damage = value.Damage,
+            Deaths = value.Deaths,
+            EnemiesFlashed = value.EnemiesFlashed,
+            FirstDeathCt = value.FirstDeathCt,
+            FirstDeathT = value.FirstDeathT,
+            FirstKillCt = value.FirstKillCt,
+            FirstKillT = value.FirstKillT,
+            FlashbangAssists = value.FlashbangAssists,
+            FriendliesFlashed = value.FriendliesFlashed,
+            HeadshotKills = value.HeadshotKills,
+            Kast = value.Kast,
+            Kills = value.Kills,
+            KnifeKills = value.KnifeKills,
+            Mvp = value.Mvp,
+            Name = value.Name,
+            RoundsPlayed = value.RoundsPlayed,
+            Suicides = value.Suicides,
+            TeamKills = value.TeamKills,
+            TradeKill = value.TradeKill,
+            UtilityDamage = value.UtilityDamage,
+            V1 = value.V1,
+            V2 = value.V2,
+            V3 = value.V3,
+            V4 = value.V4,
+            V5 = value.V5,
+        };
+    }
+
     private void TryCompleteMatch()
     {
         _ = TryFireStateAsync(MatchCommand.CompleteMatch);
@@ -192,7 +271,7 @@ public class Match : IDisposable
     private async Task KickPlayersAsync()
     {
         await Task.Delay(TimeSpan.FromMinutes(2)).ConfigureAwait(false);
-        foreach(var player in _MatchCallback.GetAllPlayers())
+        foreach (var player in _MatchCallback.GetAllPlayers())
         {
             player.Kick();
         }
@@ -324,9 +403,11 @@ public class Match : IDisposable
 
         if (_CurrentMatchTeamToVote!.CurrentTeamSite != startTeam)
         {
+            _CurrentMatchTeamToVote.StartingTeamSite = startTeam;
             _CurrentMatchTeamToVote.CurrentTeamSite = startTeam;
             var otherTeam = _CurrentMatchTeamToVote == MatchTeam1 ? MatchTeam2 : MatchTeam1;
-            otherTeam.CurrentTeamSite = startTeam == Team.Terrorist ? Team.CounterTerrorist : Team.Terrorist;
+            otherTeam.StartingTeamSite = startTeam == Team.Terrorist ? Team.CounterTerrorist : Team.Terrorist;
+            otherTeam.CurrentTeamSite = otherTeam.StartingTeamSite;
 
             _Logger.LogInformation("{team} starts as Team {startTeam}", _CurrentMatchTeamToVote.TeamConfig.Name, _CurrentMatchTeamToVote!.CurrentTeamSite.ToString());
             _Logger.LogInformation("{team} starts as Team {startTeam}", otherTeam.TeamConfig.Name, otherTeam!.CurrentTeamSite.ToString());
@@ -709,17 +790,7 @@ public class Match : IDisposable
         MatchTeam2.ToggleTeamSite();
     }
 
-    //public void RoundCompleted()
-    //{
-    //    var teamInfo1 = new TeamInfo
-    //    {
-    //        //Id = Config.Team1.Name,
-    //        TeamName = Config.Team1.Name
-    //    };
 
-    //    var roundStats = new RoundStatusUpdateParams(_MatchInfo.CurrentMap.MapNumber, teamInfo1, teamInfo2, new Map { });
-    //    _ApiStats?.SendRoundStatsUpdateAsync(roundStats, CancellationToken.None);
-    //}
 
     protected virtual void Dispose(bool disposing)
     {

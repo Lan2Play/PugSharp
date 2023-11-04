@@ -7,6 +7,7 @@ using Microsoft.Extensions.Logging;
 using PugSharp.Config;
 using PugSharp.Logging;
 using PugSharp.Match.Contract;
+using PugSharp.Models;
 using System.Globalization;
 using System.Text.Json;
 
@@ -125,7 +126,7 @@ public class PugSharp : BasePlugin, IMatchCallback
         // Set T Name
         ExecuteServerCommand("mp_teamname_1", matchConfig.Team2.Name);
         ExecuteServerCommand("mp_teamflag_1", matchConfig.Team2.Flag);
-        
+
         // Set CT Name
         ExecuteServerCommand("mp_teamname_2", matchConfig.Team1.Name);
         ExecuteServerCommand("mp_teamflag_2", matchConfig.Team1.Flag);
@@ -373,12 +374,101 @@ public class PugSharp : BasePlugin, IMatchCallback
 
         if (_Match.CurrentState == MatchState.MatchRunning)
         {
-            // TODO Update stats
+            var teamEntities = Utilities.FindAllEntitiesByDesignerName<CCSTeam>("cs_team_manager");
+
+            var teamT = teamEntities.First(x => x.TeamNum == (int)Match.Contract.Team.Terrorist);
+            var teamCT = teamEntities.First(x => x.TeamNum == (int)Match.Contract.Team.CounterTerrorist);
+
+            var isFirstHalf = (teamT.Score + teamCT.Score) <= _Match.Config.MaxRounds / 2;
+            _Match.SendRoundResults(new RoundResult
+            {
+                TRoundResult = new TeamRoundResults
+                {
+                    Score = teamT.Score,
+                    ScoreT = isFirstHalf ? teamT.ScoreFirstHalf : teamT.ScoreSecondHalf,
+                    ScoreCT = isFirstHalf ? teamT.ScoreSecondHalf : teamT.ScoreFirstHalf,
+                    PlayerResults = CreatePlayerResults(teamT),
+                },
+                CTRoundResult = new TeamRoundResults
+                {
+                    Score = teamCT.Score,
+                    ScoreT = isFirstHalf ? teamCT.ScoreSecondHalf : teamCT.ScoreFirstHalf,
+                    ScoreCT = isFirstHalf ? teamCT.ScoreFirstHalf : teamCT.ScoreSecondHalf,
+                    PlayerResults = CreatePlayerResults(teamCT),
+                },
+            });
 
             // TODO OT handling
         }
 
         return HookResult.Continue;
+    }
+
+    private IReadOnlyDictionary<ulong, IPlayerRoundResults> CreatePlayerResults(CCSTeam team)
+    {
+        var result = new Dictionary<ulong, IPlayerRoundResults>();
+
+        var allPlayers = Utilities.FindAllEntitiesByDesignerName<CCSPlayerController>("cs_player_controller");
+        foreach (var playerController in team.PlayerControllers)
+        {
+            if (!playerController.IsValid)
+            {
+                _Logger.LogError("Can not create PlayerStatistics because controller is invalid!");
+                continue;
+            }
+
+            var ccsPlayerController = allPlayers.First(x => x.SteamID.Equals(playerController.Value.SteamID));
+
+            if (!ccsPlayerController.IsValid || ccsPlayerController.ActionTrackingServices == null)
+            {
+                _Logger.LogError("Can not create PlayerStatistics because controller is invalid!");
+                continue;
+            }
+
+            var playerMatchStats = ccsPlayerController.ActionTrackingServices.MatchStats;
+
+            // TODO Add Missing StatisticValues
+            result.Add(playerController.Value.SteamID, new PlayerRoundResults
+            {
+                Assists = playerMatchStats.Assists,
+                BombDefuses = 0,
+                BombPlants = 0,
+                Coaching = false,
+                ContributionScore = 0,
+                Count1K = 0,
+                Count2K = 0,
+                Count3K = playerMatchStats.Enemy3Ks,
+                Count4K = playerMatchStats.Enemy4Ks,
+                Count5K = playerMatchStats.Enemy5Ks,
+                Damage = playerMatchStats.Damage,
+                Deaths = playerMatchStats.Deaths,
+                EnemiesFlashed = playerMatchStats.EnemiesFlashed,
+                FirstDeathCt = 0,
+                FirstDeathT = 0,
+                FirstKillCt = 0,
+                FirstKillT = 0,
+                FlashbangAssists = 0,
+                FriendliesFlashed = 0,
+                HeadshotKills = playerMatchStats.HeadShotKills,
+                Kast = 0,
+                Kills = playerMatchStats.Kills,
+                KnifeKills = 0,
+                Mvp = 0,
+                Name = playerController.Value.PlayerName,
+                RoundsPlayed = 0,
+                Suicides = 0,
+                TeamKills = 0,
+                TradeKill = 0,
+                UtilityDamage = playerMatchStats.UtilityDamage,
+                V1 = 0,
+                V2 = 0,
+                V3 = 0,
+                V4 = 0,
+                V5 = 0,
+            });
+        }
+
+        return result;
     }
 
     private HookResult OnPlayerSpawn(EventPlayerSpawn @event, GameEventInfo info)
