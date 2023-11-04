@@ -87,6 +87,16 @@ public class PugSharp : BasePlugin, IMatchCallback
                 player.Kick();
             }
         }
+
+        ResetServer();
+    }
+
+    private void ResetServer()
+    {
+        StopDemoRecording();
+
+        // TODO Configure VoteMap/or reload current map
+        Server.ExecuteCommand("changelevel de_dust2");
     }
 
     private void SetMatchVariable(MatchConfig matchConfig)
