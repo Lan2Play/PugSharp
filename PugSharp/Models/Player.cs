@@ -4,14 +4,13 @@ using CounterStrikeSharp.API.Modules.Menu;
 using Microsoft.Extensions.Logging;
 using PugSharp.Logging;
 using PugSharp.Match.Contract;
-using System.Text.Json.Serialization;
 
-namespace PugSharp;
+namespace PugSharp.Models;
 
 public class Player : IPlayer
 {
     private static readonly ILogger<Player> _Logger = LogManager.CreateLogger<Player>();
-    private int _UserId;
+    private readonly int _UserId;
     private CCSPlayerController _PlayerController;
 
     public Player(CCSPlayerController playerController)
@@ -21,19 +20,13 @@ public class Player : IPlayer
             _Logger.LogError("PlayerController is invalid!");
         }
 
-        _UserId = playerController.UserId.Value;
+        _UserId = playerController.UserId!.Value;
         SteamID = playerController.SteamID;
         _PlayerController = playerController;
         if (_PlayerController.ActionTrackingServices != null)
         {
             MatchStats = new PlayerMatchStats(_PlayerController.ActionTrackingServices.MatchStats, this);
         }
-    }
-
-    private T DefaultIfInvalid<T>(Func<T> loadValue) where T : struct
-    {
-        ReloadPlayerController();
-        return _PlayerController != null && _PlayerController.IsValid ? loadValue() : default;
     }
 
     private T DefaultIfInvalid<T>(Func<T> loadValue, T defaultValue)
@@ -66,8 +59,6 @@ public class Player : IPlayer
 
     public Team Team => DefaultIfInvalid(() => (Team)_PlayerController.TeamNum, Team.None);
 
-    public IPlayerPawn PlayerPawn => new PlayerPawn(_PlayerController.PlayerPawn.Value);
-
     public int? Money
     {
         get
@@ -84,8 +75,12 @@ public class Player : IPlayer
         {
             if (_PlayerController.IsValid)
             {
+#pragma warning disable S1854 // Unused assignments should be removed
+#pragma warning disable IDE0059 // Unnecessary assignment of a value
                 var money = _PlayerController.InGameMoneyServices?.Account;
                 money = value;
+#pragma warning restore IDE0059 // Unnecessary assignment of a value
+#pragma warning restore S1854 // Unused assignments should be removed
             }
         }
     }

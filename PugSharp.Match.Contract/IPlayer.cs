@@ -1,6 +1,4 @@
-﻿using System.Text.Json.Serialization;
-
-namespace PugSharp.Match.Contract;
+﻿namespace PugSharp.Match.Contract;
 
 public interface IPlayer
 {
@@ -8,11 +6,10 @@ public interface IPlayer
 
     int? UserId { get; }
 
-    IPlayerPawn PlayerPawn { get; }
-
     string PlayerName { get; }
 
     IPlayerMatchStats? MatchStats { get; }
+
     Team Team { get; }
 
     void PrintToChat(string message);

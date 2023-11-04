@@ -3,7 +3,7 @@ using Microsoft.Extensions.Logging;
 using PugSharp.Logging;
 using PugSharp.Match.Contract;
 
-namespace PugSharp;
+namespace PugSharp.Models;
 
 public class PlayerMatchStats : IPlayerMatchStats
 {

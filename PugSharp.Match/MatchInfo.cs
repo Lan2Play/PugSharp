@@ -1,6 +1,4 @@
-﻿using PugSharp.Match.Contract;
-
-namespace PugSharp.Match;
+﻿namespace PugSharp.Match;
 
 public class MatchInfo
 {
