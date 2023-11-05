@@ -5,11 +5,11 @@ public interface IMatchCallback
     void EndWarmup();
     IReadOnlyList<IPlayer> GetAllPlayers();
     IReadOnlyCollection<string> GetAvailableMaps();
-    void PauseServer();
+    void PauseMatch();
     void SendMessage(string message);
     void SwitchMap(string selectedMap);
     void SwapTeams();
-    void UnpauseServer();
+    void UnpauseMatch();
 
     void DisableCheats();
     void StartDemoRecording();

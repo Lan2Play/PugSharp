@@ -34,10 +34,14 @@ public class Match : IDisposable
 
     public IEnumerable<MatchPlayer> AllMatchPlayers => MatchTeam1.Players.Concat(MatchTeam2.Players);
 
+    public RoundInfo CurrentRound { get; } = new RoundInfo();
+
     public Match(IMatchCallback matchCallback, Config.MatchConfig matchConfig, string? pluginDirectory = null)
     {
-        _MatchCallback = matchCallback;
         Config = matchConfig;
+
+        _MatchCallback = matchCallback;
+        
         _MatchInfo = new MatchInfo(matchConfig.NumMaps);
         MatchTeam1 = new MatchTeam(Config.Team1);
         MatchTeam2 = new MatchTeam(Config.Team2);
@@ -114,6 +118,13 @@ public class Match : IDisposable
         _MatchStateMachine.OnTransitioned(OnMatchStateChanged);
 
         _MatchStateMachine.Fire(MatchCommand.LoadMatch);
+
+        SetMatchTeamCvars();
+    }
+
+    private void SetMatchTeamCvars()
+    {
+        
     }
 
     private void StartReadyReminder()
@@ -136,7 +147,7 @@ public class Match : IDisposable
 
     private void UnpauseMatch()
     {
-        _MatchCallback.UnpauseServer();
+        _MatchCallback.UnpauseMatch();
     }
 
     private void PauseMatch()
@@ -144,7 +155,7 @@ public class Match : IDisposable
         MatchTeam1.IsPaused = true;
         MatchTeam2.IsPaused = true;
 
-        _MatchCallback.PauseServer();
+        _MatchCallback.PauseMatch();
     }
 
     private void StartMatch()

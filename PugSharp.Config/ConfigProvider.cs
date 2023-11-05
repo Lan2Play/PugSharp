@@ -1,5 +1,8 @@
 ﻿using Microsoft.Extensions.Logging;
+using OneOf;
+using OneOf.Types;
 using PugSharp.Logging;
+using System.Net;
 using System.Text.Json;
 
 namespace PugSharp.Config
@@ -11,7 +14,7 @@ namespace PugSharp.Config
         private readonly HttpClient _HttpClient = new();
         private bool disposedValue;
 
-        public async Task<(bool Successful, MatchConfig? Config)> TryLoadConfigFromFileAsync(string fileName)
+        public static async Task<OneOf<Error<string>, MatchConfig>> LoadMatchConfigFromFileAsync(string fileName)
         {
             _Logger.LogInformation("Loading match from \"{fileName}\"", fileName);
 
@@ -21,45 +24,70 @@ namespace PugSharp.Config
                 await using (configFileStream.ConfigureAwait(false))
                 {
                     var config = await JsonSerializer.DeserializeAsync<MatchConfig>(configFileStream).ConfigureAwait(false);
-                    if (config != null)
+
+                    if (config == null)
                     {
-                        _Logger.LogInformation("Successfully loaded config for match {matchId}", config.MatchId);
-                        return (true, config);
+                        _Logger.LogError("MatchConfig was deserialized to null");
+
+                        return new Error<string>("Config couldn't be deserialized");
                     }
+
+                    _Logger.LogInformation("Successfully loaded config for match {matchId}", config.MatchId);
+                    return config;
                 }
             }
             catch (Exception ex)
             {
-                _Logger.LogError(ex, "Failed loading config from \"{fileName}\".", fileName);
-            }
+                _Logger.LogError(ex, "Failed loading config from {fileName}.", fileName);
 
-            return (false, null);
+                return new Error<string>($"Failed loading config from {fileName}.");
+            }
         }
 
-        public async Task<(bool Successful, MatchConfig? Config)> TryLoadConfigAsync(string url, string authToken)
+        public async Task<OneOf<Error<string>, MatchConfig>> LoadMatchConfigFromUrlAsync(string url, string authToken)
         {
             _Logger.LogInformation("Loading match from \"{url}\"", url);
 
             try
             {
-                _HttpClient.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", authToken);
-                var configJsonStream = await _HttpClient.GetStreamAsync(url).ConfigureAwait(false);
-                var config = await JsonSerializer.DeserializeAsync<MatchConfig>(configJsonStream).ConfigureAwait(false);
-                if (config != null)
+                var httpRequestMessage = new HttpRequestMessage
                 {
-                    _Logger.LogInformation("Successfully loaded config for match {matchId}", config.MatchId);
-                    return (true, config);
+                    Method = HttpMethod.Get,
+                    RequestUri = new Uri(url),
+                    Headers = {
+                        {
+                            nameof(HttpRequestHeader.Authorization),
+                            new List<string>{ new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", authToken).ToString() }
+                        },
+                    },
+                };
+
+                var response = await _HttpClient.SendAsync(httpRequestMessage).ConfigureAwait(false);
+
+                response.EnsureSuccessStatusCode();
+
+                var configJsonStream = await response.Content.ReadAsStreamAsync().ConfigureAwait(false);
+
+                var config = await JsonSerializer.DeserializeAsync<MatchConfig>(configJsonStream).ConfigureAwait(false);
+                if (config == null)
+                {
+                    _Logger.LogError("MatchConfig was deserialized to null");
+
+                    return new Error<string>("Config couldn't be deserialized");
                 }
+
+                _Logger.LogInformation("Successfully loaded config for match {matchId}", config.MatchId);
+                return config;
             }
             catch (Exception ex)
             {
-                _Logger.LogError(ex, "Failed loading config from \"{url}\".", url);
-            }
+                _Logger.LogError(ex, "Failed loading config from {url}.", url);
 
-            return (false, null);
+                return new Error<string>($"Failed loading config from {url}.");
+            }
         }
 
-        public async Task<(bool Successful, ServerConfig? Config)> LoadServerConfigAsync(string configPath)
+        public static OneOf<Error<string>, ServerConfig> LoadServerConfig(string configPath)
         {
             try
             {
@@ -71,21 +99,29 @@ namespace PugSharp.Config
                         Directory.CreateDirectory(directoryName);
                     }
 
+                    // Create default config
                     var config = new ServerConfig();
                     using FileStream createStream = File.Create(configPath);
-                    await JsonSerializer.SerializeAsync(createStream, config).ConfigureAwait(false);
-                    return (true, config);
+                    JsonSerializer.Serialize(createStream, config);
+                    return config;
                 }
 
                 using var loadingStream = File.OpenRead(configPath);
-                var loadedConfig = await JsonSerializer.DeserializeAsync<ServerConfig>(loadingStream).ConfigureAwait(false);
-                return (true, loadedConfig);
+                var loadedConfig = JsonSerializer.Deserialize<ServerConfig>(loadingStream);
+
+                if (loadedConfig == null)
+                {
+                    _Logger.LogError("ServerConfig was deserialized to null");
+                    return new Error<string>("ServerConfig couldn't be deserialized");
+                }
+
+                return loadedConfig;
             }
             catch (Exception ex)
             {
-                _Logger.LogError(ex, "Error Loading Server Config");
+                _Logger.LogError(ex, "Error loading server config");
+                return new Error<string>("Error loading server config");
             }
-            return (false, null);
         }
 
         #region IDisposable
