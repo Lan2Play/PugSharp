@@ -119,4 +119,3 @@ we do our code analysis on `sonarcloud`_
 
 
 .. _sonarcloud: https://sonarcloud.io/project/overview?id=Lan2Play_PugSharp
-
