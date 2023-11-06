@@ -11,6 +11,7 @@ using PugSharp.Match.Contract;
 using PugSharp.Models;
 using System.Globalization;
 using System.Text.Json;
+using static System.Net.WebRequestMethods;
 
 namespace PugSharp;
 
@@ -178,7 +179,7 @@ public class PugSharp : BasePlugin, IMatchCallback
         loadMatchConfigFromUrlResult.Switch(
             error =>
             {
-                command.ReplyToCommand($"Loading config was not possible. Error: {error}");
+                command.ReplyToCommand($"Loading config was not possible. Error: {error.Value}");
             },
             matchConfig =>
             {
@@ -225,7 +226,7 @@ public class PugSharp : BasePlugin, IMatchCallback
         loadMatchConfigFromFileResult.Switch(
             error =>
             {
-                command.ReplyToCommand($"Loading config was not possible. Error: {error}");
+                command.ReplyToCommand($"Loading config was not possible. Error: {error.Value}");
             },
             matchConfig =>
             {
@@ -309,6 +310,7 @@ public class PugSharp : BasePlugin, IMatchCallback
                 if (_Match.CurrentState == MatchState.WaitingForPlayersConnectedReady)
                 {
                     userId.PrintToChat($" {ChatColors.Default}Hello {ChatColors.Green}{userId.PlayerName}{ChatColors.Default}, welcome to match {_Match.Config.MatchId}");
+                    userId.PrintToChat($" {ChatColors.Default}powered by {ChatColors.Green}PugSharp{ChatColors.Default} (https://github.com/Lan2Play/PugSharp/)");
                     userId.PrintToChat($" {ChatColors.Default}type {ChatColors.BlueGrey}!ready {ChatColors.Default}to be marked as ready for the match");
                 }
                 else if (_Match.CurrentState == MatchState.MatchPaused)
