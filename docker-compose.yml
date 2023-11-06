@@ -10,5 +10,3 @@ services:
       - "27015:27015/tcp"           # TCP
       - "27015:27015/udp"           # UDP
       - "27020:27020/udp"           # UDP
-    stdin_open: true 
-    tty: true

@@ -61,11 +61,10 @@ To get started, clone our repository, change your directory into it and run the 
     
     make init-all
 
-This will prompt you for a Steam User, a Steam Password and a Steam Guard key in order to download cs2.
 
 It will take some time to install the server, please leave the console open as long as this runs.
 
-As soon as the server has started and loaded ``de_dust2``, press ``STRG+C`` on your keyboard.
+As soon as the server has started and loaded ``de_dust2``, and shut down the server with  ``quit``.
 
 
 To fix the MetaMod installation afterwards, run:
@@ -79,7 +78,7 @@ Now you can run your server again with the following command that should be used
 
 .. code-block:: bash
     
-    make start-csserver
+    make start-attach
 
 
 To build and copy the published realease into the Server you can run one of the two following two commands:

@@ -60,10 +60,7 @@ Prepares the gameserver folder, initializes the .env file for the cs2 server, co
 
 **Parameters:**
 
-- ``STEAMUSER`` - Steam username for CS2 server download
-- ``STEAMPASS`` - Steam password for CS2 server download
-- ``STEAMGUARD`` - Steamguard key for the above user if required
-- ``SKIPSTEAMGUARD`` - set to anything to disable the prompt for ``STEAMGUARD`` if it should be empty
+No Parameters
 
 clean-all
 ........................
@@ -74,6 +71,19 @@ Cleans the CS2 server including all plugins, the build folders and the local .en
 - :ref:`develop/makefile:clean-csserver` 
 - :ref:`develop/makefile:clean-env` 
 - :ref:`develop/makefile:clean-build` 
+
+**Parameters:**
+
+No Parameters
+
+start-attach
+.......................
+starts a local deattached cs2 server and attaches to it
+
+**Group Command**
+
+- :ref:`develop/makefile:start-csserver` 
+- :ref:`develop/makefile:attach-csserver` 
 
 **Parameters:**
 
@@ -94,10 +104,7 @@ copies the .env.example to .env and replaces the parameters in that file.
 
 **Parameters:**
 
-- ``STEAMUSER`` - Steam username for CS2 server download
-- ``STEAMPASS`` - Steam password for CS2 server download
-- ``STEAMGUARD`` - Steamguard key for the above user if required
-- ``SKIPSTEAMGUARD`` - set to anything to disable the prompt for ``STEAMGUARD`` if it should be empty
+No Parameters
 
 copy-counterstrikesharp
 ........................
@@ -126,7 +133,15 @@ No Parameters
 
 start-csserver
 ........................
-starts the local cs2 server
+starts the local deattached cs2 server
+
+**Parameters:**
+
+No Parameters
+
+attach-csserver
+........................
+attaches the local cs2 server
 
 **Parameters:**
 

@@ -25,8 +25,9 @@ endif
 ## group commands
 build-and-copy: build-debug copy-pugsharp
 build-and-copy-docker: build-debug-docker copy-pugsharp
-init-all: prepare-folders init-env copy-counterstrikesharp install-metamod start-csserver
+init-all: prepare-folders init-env copy-counterstrikesharp install-metamod start-csserver attach-csserver
 clean-all: clean-csserver clean-env clean-build
+start-attach: stat-csserver attach-csserver
 
 
 
@@ -35,29 +36,7 @@ prepare-folders:
 	mkdir -p $(currentDir)/cs2 && chmod 777 $(currentDir)/cs2
 
 init-env:
-	export STEAMUSER=$(STEAMUSER);\
-	export STEAMPASS=$(STEAMPASS);\
-	export STEAMGUARD=$(STEAMGUARD);\
-	export SKIPSTEAMGUARD=$(SKIPSTEAMGUARD);\
-
-	if [ -z "$$STEAMUSER" ]; then \
-		read -r -p "You dont't set the steamuser, you can enter it now (later change it in .env file) " STEAMUSER; \
-	fi; \
-	echo "using $$STEAMUSER"; \
-	if [ -z "$$STEAMPASS" ]; then \
-		read -r -p "You dont't set the steampass, you can enter it now (later change it in .env file) " STEAMPASS; \
-	fi; \
-	echo "using $$STEAMPASS"; \
-	if [ -z "$$SKIPSTEAMGUARD" ]; then \
-		if [ -z "$$STEAMGUARD" ]; then \
-			read -r -p "You dont't set the steamguard, you can enter it now (later change it in .env file) " STEAMGUARD; \
-		fi; \
-	fi; \
-	echo "using $$STEAMGUARD"; \
-	cp $(currentDir)/.env.example $(currentDir)/.env ; \
-	sed -i "s#STEAMUSER=#STEAMUSER=$$STEAMUSER#g" $(currentDir)/.env ; \
-	sed -i "s#STEAMPASS=#STEAMPASS=$$STEAMPASS#g" $(currentDir)/.env ; \
-	sed -i "s#STEAMGUARD=#STEAMGUARD=$$STEAMGUARD#g" $(currentDir)/.env; 
+	cp $(currentDir)/.env.example $(currentDir)/.env ; 
 
 copy-counterstrikesharp:
 	mkdir -p $(currentDir)/cs2/game/csgo/addons/
@@ -78,7 +57,10 @@ fix-metamod:
 ## base commands
 
 start-csserver:
-	$(DOCKER_COMPOSE) up 
+	$(DOCKER_COMPOSE) up -d
+
+attach-csserver:
+	docker attach pugsharp-cs2-server-1
 
 stop-csserver:
 	$(DOCKER_COMPOSE) down
