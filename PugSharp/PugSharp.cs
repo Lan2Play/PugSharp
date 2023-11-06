@@ -279,10 +279,13 @@ public class PugSharp : BasePlugin, IMatchCallback
             }
 
             var matchPlayer = new Player(player);
-            if(!_Match.TryAddPlayer(matchPlayer))
+            if (!_Match.TryAddPlayer(matchPlayer))
             {
-
+                _Logger.LogError("Can not toggle ready state. Player is not part of this match!");
+                player.Kick();
+                return;
             }
+
             // TODO Async Handling?
             _Match.TogglePlayerIsReadyAsync(matchPlayer).Wait();
         },
@@ -353,6 +356,12 @@ public class PugSharp : BasePlugin, IMatchCallback
             {
                 if (_Match.CurrentState == MatchState.WaitingForPlayersConnectedReady)
                 {
+                    if (!_Match.PlayerBelongsToMatch(eventPlayerConnectFull.Userid.SteamID))
+                    {
+                        eventPlayerConnectFull.Userid.Kick();
+                        return HookResult.Continue;
+                    }
+
                     userId.PrintToChat($" {ChatColors.Default}Hello {ChatColors.Green}{userId.PlayerName}{ChatColors.Default}, welcome to match {_Match.Config.MatchId}");
                     userId.PrintToChat($" {ChatColors.Default}powered by {ChatColors.Green}PugSharp{ChatColors.Default} (https://github.com/Lan2Play/PugSharp/)");
                     userId.PrintToChat($" {ChatColors.Default}type {ChatColors.BlueGrey}!ready {ChatColors.Default}to be marked as ready for the match");

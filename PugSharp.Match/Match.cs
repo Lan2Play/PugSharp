@@ -858,5 +858,11 @@ public class Match : IDisposable
         TryFireState(MatchCommand.CompleteMap);
     }
 
+    public bool PlayerBelongsToMatch(ulong steamId)
+    {
+        return Config.Team1.Players.Any(x => x.Key.Equals(steamId))
+                || Config.Team2.Players.Any(x => x.Key.Equals(steamId));
+    }
+
     #endregion
 }
