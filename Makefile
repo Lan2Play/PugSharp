@@ -11,6 +11,9 @@ groupId = $(shell id -g)
 user = $(userId):$(groupId)
 dockeruser = --user $(user)
 
+dotnet_runtime_url = "https://download.visualstudio.microsoft.com/download/pr/dc2c0a53-85a8-4fda-a283-fa28adb5fbe2/8ccade5bc400a5bb40cd9240f003b45c/aspnetcore-runtime-7.0.11-linux-x64.tar.gz"
+dotnet_runtime_version = "7.0.11"
+
 ## Docker Compose detection
 ifeq ($(OS),Windows_NT)
   DOCKER_COMPOSE=docker compose
@@ -25,7 +28,7 @@ endif
 ## group commands
 build-and-copy: build-debug copy-pugsharp
 build-and-copy-docker: build-debug-docker copy-pugsharp
-init-all: prepare-folders init-env copy-counterstrikesharp install-metamod start-csserver attach-csserver
+init-all: prepare-folders init-env copy-counterstrikesharp install-netruntime install-metamod start-csserver attach-csserver
 clean-all: clean-csserver clean-env clean-build
 start-attach: start-csserver attach-csserver
 
@@ -47,6 +50,11 @@ install-metamod:
 	mkdir -p $(currentDir)/cs2/game/csgo/
 	export LATESTMM=$(shell wget -qO- https://mms.alliedmods.net/mmsdrop/2.0/mmsource-latest-linux); \
 	wget -qO- https://mms.alliedmods.net/mmsdrop/2.0/$$LATESTMM | tar xvzf - -C $(currentDir)/cs2/game/csgo
+
+install-netruntime:
+	mkdir -p $(currentDir)/cs2/game/csgo/addons/counterstrikesharp/dotnet
+	curl -s -L $(dotnet_runtime_url) | tar xvz -C $(currentDir)/cs2/game/csgo/addons/counterstrikesharp/dotnet
+	mv $(currentDir)/cs2/game/csgo/addons/counterstrikesharp/dotnet/shared/Microsoft.NETCore.App/$(dotnet_runtime_version)/* $(currentDir)/cs2/game/csgo/addons/counterstrikesharp/dotnet/shared/Microsoft.NETCore.App/
 
 #TODO!!!
 fix-metamod:

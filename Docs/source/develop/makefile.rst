@@ -55,6 +55,7 @@ Prepares the gameserver folder, initializes the .env file for the cs2 server, co
 - :ref:`develop/makefile:prepare-folders` 
 - :ref:`develop/makefile:init-env` 
 - :ref:`develop/makefile:copy-counterstrikesharp` 
+- :ref:`develop/makefile:install-netruntime` 
 - :ref:`develop/makefile:install-metamod` 
 - :ref:`develop/makefile:start-csserver` 
 
@@ -122,6 +123,13 @@ downloads and installs the latest metamod 2.0 dev release into the cs2 server
 
 No Parameters
 
+install-netruntime
+........................
+downloads and installs the nessecary dotnet runtime into the cs2 server
+
+**Parameters:**
+
+No Parameters
 
 fix-metamod
 ........................
