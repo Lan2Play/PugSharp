@@ -1,7 +1,10 @@
 version: '3.7'
 services:
   cs2-server:
-    image: joedwards32/cs2
+    build:
+      context: ./resources
+      dockerfile: Dockerfile
+    # image: joedwards32/cs2
     env_file:
       - .env
     volumes:
@@ -10,5 +13,6 @@ services:
       - "27015:27015/tcp"           # TCP
       - "27015:27015/udp"           # UDP
       - "27020:27020/udp"           # UDP
+      - "27022:22/tcp"              # SSH
     stdin_open: true
     tty: true
