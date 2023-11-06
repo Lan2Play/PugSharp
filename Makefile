@@ -27,7 +27,7 @@ build-and-copy: build-debug copy-pugsharp
 build-and-copy-docker: build-debug-docker copy-pugsharp
 init-all: prepare-folders init-env copy-counterstrikesharp install-metamod start-csserver attach-csserver
 clean-all: clean-csserver clean-env clean-build
-start-attach: stat-csserver attach-csserver
+start-attach: start-csserver attach-csserver
 
 
 
