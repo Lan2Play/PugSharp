@@ -50,7 +50,7 @@ No Parameters
 
 init-all
 ........................
-Prepares the gameserver folder, initializes the .env file for the cs2 server, copies CounterStrikeSharp into the server, installs metamod and starts the server.
+Prepares the gameserver folder, initializes the .env file for the cs2 server, copies CounterStrikeSharp into the server, installs metamod , the dotnet runtime, builds the container image and starts the server.
 
 **Group Command**
 
@@ -59,6 +59,7 @@ Prepares the gameserver folder, initializes the .env file for the cs2 server, co
 - :ref:`develop/makefile:copy-counterstrikesharp` 
 - :ref:`develop/makefile:install-netruntime` 
 - :ref:`develop/makefile:install-metamod` 
+- :ref:`develop/makefile:build-csserver` 
 - :ref:`develop/makefile:start-csserver` 
 
 **Parameters:**
@@ -136,6 +137,14 @@ No Parameters
 fix-metamod
 ........................
 inserts the ``Game	csgo/addons/metamod`` command into ./cs2/game/csgo/gameinfo.gi
+
+**Parameters:**
+
+No Parameters
+
+build-csserver
+........................
+builds the docker image for development
 
 **Parameters:**
 
