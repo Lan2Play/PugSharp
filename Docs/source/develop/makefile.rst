@@ -8,14 +8,15 @@ Introduction
 You can find the ``Makefile`` in the root of the Repository where all available commands are defined.
 On this page every single make command will be documented with its purpose, so you can use them as intended.
 
+There are 2 types of commands, the group commands and the other commands. Group commands are essentially calling multiple other make Commands here.
+
 A few of the Commands have optional parameters that can be set via either a prompt after calling the commands or with writing them after the make command.
-So for example when you have the available parameter ``STEAMUSER`` on the make command ``init-all``, that you want to set to ``username`` your finalized Make command would look like:
+So for example if you had the available parameter ``STEAMUSER`` on the make command ``init-all``, that you want to set to ``username`` your finalized Make command would look like:
 
 .. code-block:: bash
     
     make init-all STEAMUSER="username"
 
-There are 2 types of commands, the group commands and the other commands. Group commands are essentially calling multiple other make Commands here.
 
 Commands
 ----------------------------------------
