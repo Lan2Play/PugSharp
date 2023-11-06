@@ -358,6 +358,8 @@ public class PugSharp : BasePlugin, IMatchCallback
                 {
                     if (!_Match.PlayerBelongsToMatch(eventPlayerConnectFull.Userid.SteamID))
                     {
+                        _Logger.LogInformation("Player {playerName} does not belong to the match!", userId.PlayerName);
+
                         eventPlayerConnectFull.Userid.Kick();
                         return HookResult.Continue;
                     }
