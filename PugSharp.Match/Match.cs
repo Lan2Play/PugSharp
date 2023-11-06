@@ -41,7 +41,7 @@ public class Match : IDisposable
         Config = matchConfig;
 
         _MatchCallback = matchCallback;
-        
+
         _MatchInfo = new MatchInfo(matchConfig.NumMaps);
         MatchTeam1 = new MatchTeam(Config.Team1);
         MatchTeam2 = new MatchTeam(Config.Team2);
@@ -124,7 +124,7 @@ public class Match : IDisposable
 
     private void SetMatchTeamCvars()
     {
-        
+
     }
 
     private void StartReadyReminder()

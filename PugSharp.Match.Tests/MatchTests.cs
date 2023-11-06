@@ -91,9 +91,9 @@ namespace PugSharp.Match.Tests
             matchCallback.Received().SwitchMap(config.Maplist[^1]);
 
             Assert.Equal(MatchState.WaitingForPlayersReady, match.CurrentState);
-            await match.TogglePlayerIsReadyAsync(player1).ConfigureAwait(false);
+            match.TogglePlayerIsReadyAsync(player1).ConfigureAwait(false);
             Assert.Equal(MatchState.WaitingForPlayersReady, match.CurrentState);
-            await match.TogglePlayerIsReadyAsync(player2).ConfigureAwait(false);
+            match.TogglePlayerIsReadyAsync(player2).ConfigureAwait(false);
 
             Assert.Equal(MatchState.MatchRunning, match.CurrentState);
         }

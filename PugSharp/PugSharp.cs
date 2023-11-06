@@ -10,6 +10,7 @@ using PugSharp.Logging;
 using PugSharp.Match.Contract;
 using PugSharp.Models;
 using System.Globalization;
+using System.Runtime.CompilerServices;
 using System.Text.Json;
 using static System.Net.WebRequestMethods;
 
@@ -162,138 +163,174 @@ public class PugSharp : BasePlugin, IMatchCallback
     [ConsoleCommand("ps_loadconfig", "Load a match config")]
     public void OnCommandLoadConfig(CCSPlayerController? player, CommandInfo command)
     {
-        if (player != null && !player.IsAdmin(_ServerConfig))
+        HandleCommand(() =>
         {
-            player.PrintToCenter("Command is only allowed for admins!");
-            return;
-        }
-
-        _Logger.LogInformation("Start loading match config!");
-        if (command.ArgCount < 2)
-        {
-            _Logger.LogInformation("Url is required as Argument!");
-            player?.PrintToCenter("Url is required as Argument!");
-
-            return;
-        }
-
-        var url = command.ArgByIndex(1);
-        var authToken = command.ArgCount > 2 ? command.ArgByIndex(2) : string.Empty;
-
-        SendMessage($"Loading Config from {url}");
-        var loadMatchConfigFromUrlResult = _ConfigProvider.LoadMatchConfigFromUrlAsync(url, authToken).Result;
-
-        loadMatchConfigFromUrlResult.Switch(
-            error =>
+            if (player != null && !player.IsAdmin(_ServerConfig))
             {
-                command.ReplyToCommand($"Loading config was not possible. Error: {error.Value}");
-            },
-            matchConfig =>
-            {
-                // Use same token for APIstats if theres no token set in the matchconfig
-                if (string.IsNullOrEmpty(matchConfig.EventulaApistatsToken))
-                {
-                    matchConfig.EventulaApistatsToken = authToken;
-                }
-
-                command.ReplyToCommand("Matchconfig loaded!");
-
-                InitializeMatch(matchConfig);
+                player.PrintToCenter("Command is only allowed for admins!");
+                return;
             }
-        );
+
+            _Logger.LogInformation("Start loading match config!");
+            if (command.ArgCount < 2)
+            {
+                _Logger.LogInformation("Url is required as Argument!");
+                player?.PrintToCenter("Url is required as Argument!");
+
+                return;
+            }
+
+            var url = command.ArgByIndex(1);
+            var authToken = command.ArgCount > 2 ? command.ArgByIndex(2) : string.Empty;
+
+            SendMessage($"Loading Config from {url}");
+            var loadMatchConfigFromUrlResult = _ConfigProvider.LoadMatchConfigFromUrlAsync(url, authToken).Result;
+
+            loadMatchConfigFromUrlResult.Switch(
+                error =>
+                {
+                    command.ReplyToCommand($"Loading config was not possible. Error: {error.Value}");
+                },
+                matchConfig =>
+                {
+                    // Use same token for APIstats if theres no token set in the matchconfig
+                    if (string.IsNullOrEmpty(matchConfig.EventulaApistatsToken))
+                    {
+                        matchConfig.EventulaApistatsToken = authToken;
+                    }
+
+                    command.ReplyToCommand("Matchconfig loaded!");
+
+                    InitializeMatch(matchConfig);
+                }
+            );
+        },
+        command);
     }
 
     [ConsoleCommand("css_loadconfigfile", "Load a match config from a file")]
     [ConsoleCommand("ps_loadconfigfile", "Load a match config from a file")]
     public void OnCommandLoadConfigFromFile(CCSPlayerController? player, CommandInfo command)
     {
-        if (player != null && !player.IsAdmin(_ServerConfig))
+        HandleCommand(() =>
         {
-            player.PrintToCenter("Command is only allowed for admins!");
-            return;
-        }
-
-        _Logger.LogInformation("Start loading match config!");
-        if (command.ArgCount != 2)
-        {
-            _Logger.LogInformation("FileName is required as Argument! Path have to be put in \"pathToConfig\"");
-            player?.PrintToCenter("FileName is required as Argument! Path have to be put in \"pathToConfig\"");
-
-            return;
-        }
-
-        var fileName = command.ArgByIndex(1);
-
-        SendMessage($"Loading Config from file {fileName}");
-        var loadMatchConfigFromFileResult = _ConfigProvider.LoadMatchConfigFromFileAsync(fileName).Result;
-
-        loadMatchConfigFromFileResult.Switch(
-            error =>
+            if (player != null && !player.IsAdmin(_ServerConfig))
             {
-                command.ReplyToCommand($"Loading config was not possible. Error: {error.Value}");
-            },
-            matchConfig =>
-            {
-                command.ReplyToCommand("Matchconfig loaded!");
-                InitializeMatch(matchConfig);
+                player.PrintToCenter("Command is only allowed for admins!");
+                return;
             }
-        );
+
+            _Logger.LogInformation("Start loading match config!");
+            if (command.ArgCount != 2)
+            {
+                _Logger.LogInformation("FileName is required as Argument! Path have to be put in \"pathToConfig\"");
+                player?.PrintToCenter("FileName is required as Argument! Path have to be put in \"pathToConfig\"");
+
+                return;
+            }
+
+            var fileName = command.ArgByIndex(1);
+
+            SendMessage($"Loading Config from file {fileName}");
+            var loadMatchConfigFromFileResult = _ConfigProvider.LoadMatchConfigFromFileAsync(fileName).Result;
+
+            loadMatchConfigFromFileResult.Switch(
+                error =>
+                {
+                    command.ReplyToCommand($"Loading config was not possible. Error: {error.Value}");
+                },
+                matchConfig =>
+                {
+                    command.ReplyToCommand("Matchconfig loaded!");
+                    InitializeMatch(matchConfig);
+                }
+            );
+        },
+        command);
     }
 
     [ConsoleCommand("css_dumpmatch", "Serialize match to JSON on console")]
     [ConsoleCommand("ps_dumpmatch", "Load a match config")]
     public void OnCommandDumpMatch(CCSPlayerController? player, CommandInfo command)
     {
-        _Logger.LogInformation("################ dump match ################");
-        _Logger.LogInformation(JsonSerializer.Serialize(_Match));
-        _Logger.LogInformation("################ dump match ################");
+        HandleCommand(() =>
+        {
+            _Logger.LogInformation("################ dump match ################");
+            _Logger.LogInformation(JsonSerializer.Serialize(_Match));
+            _Logger.LogInformation("################ dump match ################");
+        },
+        command);
     }
 
     [ConsoleCommand("css_ready", "Mark player as ready")]
     public void OnCommandReady(CCSPlayerController? player, CommandInfo command)
     {
-        if (player == null)
+        HandleCommand(() =>
         {
-            _Logger.LogInformation("Command Start has been called by the server. Player is required to be marked as ready");
-            return;
-        }
+            if (player == null)
+            {
+                _Logger.LogInformation("Command Start has been called by the server. Player is required to be marked as ready");
+                return;
+            }
 
-        if (_Match == null)
-        {
-            return;
-        }
+            if (_Match == null)
+            {
+                return;
+            }
 
-        var matchPlayer = new Player(player);
-        _Match.TryAddPlayer(matchPlayer);
-        _ = _Match.TogglePlayerIsReadyAsync(matchPlayer);
-
-        _Logger.LogInformation("Command ready called.");
+            var matchPlayer = new Player(player);
+            _Match.TryAddPlayer(matchPlayer);
+            // TODO Async Handling?
+            _Match.TogglePlayerIsReadyAsync(matchPlayer).Wait();
+        },
+        command);
     }
 
     [ConsoleCommand("css_unpause", "Starts a match")]
     public void OnCommandUnpause(CCSPlayerController? player, CommandInfo command)
     {
-        if (player == null)
+        HandleCommand(() =>
         {
-            _Logger.LogInformation("Command unpause has been called by the server.");
-            return;
-        }
+            if (player == null)
+            {
+                _Logger.LogInformation("Command unpause has been called by the server.");
+                return;
+            }
 
-        _Logger.LogInformation("Unpause Command called.");
-        _Match?.Unpause(new Player(player));
+            _Match?.Unpause(new Player(player));
+        },
+        command);
     }
 
     [ConsoleCommand("css_pause", "Pauses the current match")]
     public void OnCommandPause(CCSPlayerController? player, CommandInfo command)
     {
-        if (player == null)
+        HandleCommand(() =>
         {
-            _Logger.LogInformation("Command Pause has been called by the server.");
-            return;
-        }
+            if (player == null)
+            {
+                _Logger.LogInformation("Command Pause has been called by the server.");
+                return;
+            }
 
-        _Logger.LogInformation("Pause Command called.");
-        _Match?.Pause(new Player(player));
+            _Match?.Pause(new Player(player));
+        },
+        command);
+    }
+
+    private static void HandleCommand(Action commandAction, CommandInfo command, [CallerMemberName] string commandMethod = null)
+    {
+        var commandName = commandMethod.Replace("OnCommand", "", StringComparison.OrdinalIgnoreCase);
+        try
+        {
+            _Logger.LogInformation("Command \"{commandName}\" called.", commandName);
+            commandAction();
+        }
+        catch (Exception e)
+        {
+            _Logger.LogError(e, "Error executing command {command}", commandName);
+            command.ReplyToCommand($"Error executing command \"{command}\"!");
+        }
     }
 
     #endregion
