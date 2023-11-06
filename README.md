@@ -144,3 +144,12 @@ If you want to know how to use PugSharp, hop over to our [Documentation](https:/
 ## Tanslation
 
 [![Translation status](https://translate.lan2play.de/widgets/eventula-manager/-/multi-auto.svg)](https://translate.lan2play.de/engage/eventula-manager/) -->
+
+
+
+## Credits
+
+* Plugin Framework: [CounterStrikeSharp by roflmuffin](https://github.com/roflmuffin/CounterStrikeSharp) 
+* Docker test setup: [joedwards32/cs2](https://github.com/joedwards32/CS2)
+* Metamod fix script: [ghostcap-gaming/cs2-metamod-re-enable-script](https://github.com/ghostcap-gaming/cs2-metamod-re-enable-script)
+* Metamod: https://www.sourcemm.net/

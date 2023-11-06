@@ -2,7 +2,9 @@
 ######## and a detailed documentation on https://pugsharp.lan2play.de/develop/makefile.html
 
 ## Silent functions
-.SILENT: init-env
+.SILENT: init-env fix-metamod
+
+
 
 ## Variables
 currentDir = $(shell dirname $(realpath $(lastword $(MAKEFILE_LIST))))
@@ -56,10 +58,8 @@ install-netruntime:
 	curl -s -L $(dotnet_runtime_url) | tar xvz -C $(currentDir)/cs2/game/csgo/addons/counterstrikesharp/dotnet
 	mv $(currentDir)/cs2/game/csgo/addons/counterstrikesharp/dotnet/shared/Microsoft.NETCore.App/$(dotnet_runtime_version)/* $(currentDir)/cs2/game/csgo/addons/counterstrikesharp/dotnet/shared/Microsoft.NETCore.App/
 
-#TODO!!!
 fix-metamod:
-	sed -i '/^			Game	csgo$/i			Game	csgo/addons/metamod' /home/volza/temp/cs2/cs2-data/game/csgo/gameinfo.gi
-
+	./resources/acmrs.sh
 
 
 ## base commands
