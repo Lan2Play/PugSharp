@@ -131,8 +131,8 @@ public class PugSharp : BasePlugin, IMatchCallback
         UpdateConvar("mp_team_timeout_time", 30);
         UpdateConvar("mp_team_timeout_max", 3);
 
-        UpdateConvar("mp_competitive_endofmatch_extra_time", 120);
-        UpdateConvar("mp_chattime", 120);
+        UpdateConvar("mp_competitive_endofmatch_extra_time", (float)120);
+        UpdateConvar("mp_chattime", (float)120);
 
         UpdateConvar("mp_endmatch_votenextmap", false);
 
