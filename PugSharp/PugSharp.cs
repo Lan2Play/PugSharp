@@ -279,7 +279,10 @@ public class PugSharp : BasePlugin, IMatchCallback
             }
 
             var matchPlayer = new Player(player);
-            _Match.TryAddPlayer(matchPlayer);
+            if(!_Match.TryAddPlayer(matchPlayer))
+            {
+
+            }
             // TODO Async Handling?
             _Match.TogglePlayerIsReadyAsync(matchPlayer).Wait();
         },
@@ -329,7 +332,7 @@ public class PugSharp : BasePlugin, IMatchCallback
         catch (Exception e)
         {
             _Logger.LogError(e, "Error executing command {command}", commandName);
-            command.ReplyToCommand($"Error executing command \"{command}\"!");
+            command.ReplyToCommand($"Error executing command \"{commandName}\"!");
         }
     }
 

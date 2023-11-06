@@ -565,6 +565,7 @@ public class Match : IDisposable
         var isTeam2 = !isTeam1 && Config.Team2.Players.ContainsKey(player.SteamID);
         if (!isTeam1 && !isTeam2)
         {
+            _Logger.LogInformation("Player with steam id {steamId} is no member of this match!", player.SteamID);
             return false;
         }
 
