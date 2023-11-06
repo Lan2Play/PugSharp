@@ -120,7 +120,7 @@ public class PugSharp : BasePlugin, IMatchCallback
 
         UpdateConvar("sv_disable_teamselect_menu", true);
         UpdateConvar("sv_human_autojoin_team", 2);
-        UpdateConvar("mp_warmuptime", 6000);
+        UpdateConvar("mp_warmuptime", (float)6000);
 
         UpdateConvar("mp_overtime_enable", true);
         UpdateConvar("mp_overtime_maxrounds", matchConfig.MaxOvertimeRounds);
