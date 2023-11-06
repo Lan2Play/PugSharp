@@ -103,7 +103,14 @@ public class PugSharp : BasePlugin, IMatchCallback
             return;
         }
 
-        convar.SetValue(value);
+        if(value is string stringValue)
+        {
+            convar.StringValue = stringValue;
+        }
+        else
+        {
+            convar.SetValue(value);
+        }
     }
 
     private void ResetServer()
