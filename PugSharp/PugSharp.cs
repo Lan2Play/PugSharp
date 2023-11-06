@@ -125,7 +125,7 @@ public class PugSharp : BasePlugin, IMatchCallback
         UpdateConvar("mp_overtime_enable", true);
         UpdateConvar("mp_overtime_maxrounds", matchConfig.MaxOvertimeRounds);
         UpdateConvar("mp_maxrounds", matchConfig.MaxRounds);
-        UpdateConvar("mp_tournament", true);
+        //UpdateConvar("mp_tournament", true);
         UpdateConvar("mp_autokick", false);
 
         UpdateConvar("mp_team_timeout_time", 30);
