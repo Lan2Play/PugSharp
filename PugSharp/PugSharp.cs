@@ -184,6 +184,7 @@ public class PugSharp : BasePlugin, IMatchCallback
             matchConfig =>
             {
                 var configPath = Path.Join(Server.GameDirectory, "csgo", "PugSharp", "Config", "match.json");
+                _Logger.LogInformation($"MatchConfig: {configPath}");
                 var matchJson = JsonSerializer.Serialize(matchConfig);
                 System.IO.File.WriteAllText(configPath, matchJson);
 
