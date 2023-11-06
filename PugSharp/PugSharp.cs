@@ -88,21 +88,28 @@ public class PugSharp : BasePlugin, IMatchCallback
 
     public static void UpdateConvar<T>(string name, T value)
     {
-        var convar = ConVar.Find(name);
+        try
+        {
+            var convar = ConVar.Find(name);
 
-        if (convar == null)
-        {
-            _Logger.LogError("ConVar {name} couldn't be found", name);
-            return;
-        }
+            if (convar == null)
+            {
+                _Logger.LogError("ConVar {name} couldn't be found", name);
+                return;
+            }
 
-        if (value is string stringValue)
-        {
-            convar.StringValue = stringValue;
+            if (value is string stringValue)
+            {
+                convar.StringValue = stringValue;
+            }
+            else
+            {
+                convar.SetValue(value);
+            }
         }
-        else
+        catch (Exception e)
         {
-            convar.SetValue(value);
+            _Logger.LogError(e, "Could not set cvar \"{name}\" to value \"{value}\" of type \"{type}\"", name, value, typeof(T).Name);
         }
     }
 
