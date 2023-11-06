@@ -36,7 +36,7 @@ public class PugSharp : BasePlugin, IMatchCallback
         var serverConfigResult = ConfigProvider.LoadServerConfig(configPath);
 
         serverConfigResult.Switch(
-            error => { }, // TODO what should we do if the config has an error?
+            error => { }, // Do nothing - Error already logged
             serverConfig => _ServerConfig = serverConfig
         );
     }
@@ -64,14 +64,6 @@ public class PugSharp : BasePlugin, IMatchCallback
         AddCommandListener("jointeam", OnClientCommandJoinTeam);
 
         _Logger.LogInformation("End RegisterEventHandlers");
-    }
-
-    private static void ExecuteServerCommand(string command, string value)
-    {
-        if (!string.IsNullOrEmpty(value))
-        {
-            Server.ExecuteCommand($"{command} {value}");
-        }
     }
 
     private void InitializeMatch(MatchConfig matchConfig)
@@ -103,7 +95,7 @@ public class PugSharp : BasePlugin, IMatchCallback
             return;
         }
 
-        if(value is string stringValue)
+        if (value is string stringValue)
         {
             convar.StringValue = stringValue;
         }
@@ -186,7 +178,7 @@ public class PugSharp : BasePlugin, IMatchCallback
         loadMatchConfigFromUrlResult.Switch(
             error =>
             {
-                // TODO what should we do if the config has an error?
+                player?.PrintToChat($"Loading config was not possible. Error: {error}");
             },
             matchConfig =>
             {
@@ -233,7 +225,7 @@ public class PugSharp : BasePlugin, IMatchCallback
         loadMatchConfigFromFileResult.Switch(
             error =>
             {
-                // TODO what should we do if the config has an error?
+                player?.PrintToChat($"Loading config was not possible. Error: {error}");
             },
             matchConfig =>
             {
@@ -241,7 +233,6 @@ public class PugSharp : BasePlugin, IMatchCallback
                 InitializeMatch(matchConfig);
             }
         );
-
     }
 
     [ConsoleCommand("css_dumpmatch", "Serialize match to JSON on console")]
@@ -382,13 +373,11 @@ public class PugSharp : BasePlugin, IMatchCallback
 
     private HookResult OnCvarChanged(EventServerCvar eventCvarChanged, GameEventInfo info)
     {
-        if (_Match != null && _Match.CurrentState != MatchState.None)
+        if (_Match != null 
+            && _Match.CurrentState != MatchState.None 
+            && !eventCvarChanged.Cvarname.Equals("sv_cheats", StringComparison.OrdinalIgnoreCase))
         {
-            // Silences cvar changes when executing live/knife/warmup configs, *unless* it's sv_cheats.
-            if (!eventCvarChanged.Cvarname.Equals("sv_cheats"))
-            {
-                info.DontBroadcast = true;
-            }
+            info.DontBroadcast = true;
         }
 
         return HookResult.Continue;
@@ -958,6 +947,7 @@ public class PugSharp : BasePlugin, IMatchCallback
 
         return (ctScore, tScore);
     }
+
     #endregion
 
     protected override void Dispose(bool disposing)
@@ -970,6 +960,4 @@ public class PugSharp : BasePlugin, IMatchCallback
             _ConfigProvider.Dispose();
         }
     }
-
-
 }
