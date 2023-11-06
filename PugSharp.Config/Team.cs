@@ -8,10 +8,10 @@ namespace PugSharp.Config
         public string Name { get; set; }
 
         [JsonPropertyName("tag")]
-        public string Tag { get; set; }
+        public string Tag { get; set; } = string.Empty;
 
         [JsonPropertyName("flag")]
-        public string Flag { get; set; }
+        public string Flag { get; set; } = string.Empty;
 
         [JsonPropertyName("players")]
         public Dictionary<ulong, string> Players { get; set; }
