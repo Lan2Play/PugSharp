@@ -2,6 +2,7 @@
 using CounterStrikeSharp.API.Core;
 using CounterStrikeSharp.API.Core.Attributes.Registration;
 using CounterStrikeSharp.API.Modules.Commands;
+using CounterStrikeSharp.API.Modules.Cvars;
 using CounterStrikeSharp.API.Modules.Utils;
 using Microsoft.Extensions.Logging;
 using PugSharp.Config;
@@ -26,20 +27,18 @@ public class PugSharp : BasePlugin, IMatchCallback
 
     public override string ModuleVersion => "0.0.1";
 
-
     public override void Load(bool hotReload)
     {
         _Logger.LogInformation("Loading PugSharp!");
         RegisterEventHandlers();
-        _ = Task.Run(async () =>
-        {
-            var configPath = Path.Join(Server.GameDirectory, "csgo", "PugSharp", "Config", "server.json");
-            var serverConfigResult = await _ConfigProvider.LoadServerConfigAsync(configPath).ConfigureAwait(false);
-            if (serverConfigResult.Successful)
-            {
-                _ServerConfig = serverConfigResult.Config;
-            }
-        });
+
+        var configPath = Path.Join(Server.GameDirectory, "csgo", "PugSharp", "Config", "server.json");
+        var serverConfigResult = ConfigProvider.LoadServerConfig(configPath);
+
+        serverConfigResult.Switch(
+            error => { }, // Do nothing - Error already logged
+            serverConfig => _ServerConfig = serverConfig
+        );
     }
 
     private void RegisterEventHandlers()
@@ -55,23 +54,16 @@ public class PugSharp : BasePlugin, IMatchCallback
         RegisterEventHandler<EventRoundEnd>(OnRoundEnd, HookMode.Pre);
         RegisterEventHandler<EventRoundFreezeEnd>(OnRoundFreezeEnd);
         RegisterEventHandler<EventRoundPrestart>(OnRoundPreStart);
-        RegisterEventHandler<EventRoundPrestart>(OnRoundStart);
+        RegisterEventHandler<EventRoundStart>(OnRoundStart);
         RegisterEventHandler<EventServerCvar>(OnCvarChanged, HookMode.Pre);
         RegisterEventHandler<EventPlayerTeam>(OnPlayerTeam);
+        RegisterEventHandler<EventPlayerDeath>(OnPlayerDeath);
 
-        RegisterListener<CounterStrikeSharp.API.Core.Listeners.OnMapStart>(OnMapStartHandler);
+        RegisterListener<Listeners.OnMapStart>(OnMapStartHandler);
 
         AddCommandListener("jointeam", OnClientCommandJoinTeam);
 
         _Logger.LogInformation("End RegisterEventHandlers");
-    }
-
-    private static void ExecuteServerCommand(string command, string value)
-    {
-        if (!string.IsNullOrEmpty(value))
-        {
-            Server.ExecuteCommand($"{command} {value}");
-        }
     }
 
     private void InitializeMatch(MatchConfig matchConfig)
@@ -93,6 +85,26 @@ public class PugSharp : BasePlugin, IMatchCallback
         ResetServer();
     }
 
+    public static void UpdateConvar<T>(string name, T value)
+    {
+        var convar = ConVar.Find(name);
+
+        if (convar == null)
+        {
+            _Logger.LogError("ConVar {name} couldn't be found", name);
+            return;
+        }
+
+        if (value is string stringValue)
+        {
+            convar.StringValue = stringValue;
+        }
+        else
+        {
+            convar.SetValue(value);
+        }
+    }
+
     private void ResetServer()
     {
         StopDemoRecording();
@@ -105,33 +117,33 @@ public class PugSharp : BasePlugin, IMatchCallback
     {
         _Logger.LogInformation("Start set match variables");
 
-        ExecuteServerCommand("sv_disable_teamselect_menu", "true");
-        ExecuteServerCommand("sv_human_autojoin_team", "2");
-        ExecuteServerCommand("mp_warmuptime", "6000");
+        UpdateConvar("sv_disable_teamselect_menu", true);
+        UpdateConvar("sv_human_autojoin_team", 2);
+        UpdateConvar("mp_warmuptime", (float)6000);
 
-        ExecuteServerCommand("mp_overtime_enable", "true");
-        ExecuteServerCommand("mp_overtime_maxrounds", matchConfig.MaxOvertimeRounds.ToString(CultureInfo.InvariantCulture));
-        ExecuteServerCommand("mp_maxrounds", matchConfig.MaxRounds.ToString(CultureInfo.InvariantCulture));
-        ExecuteServerCommand("mp_tournament", "1");
-        ExecuteServerCommand("mp_autokick", "0");
+        UpdateConvar("mp_overtime_enable", true);
+        UpdateConvar("mp_overtime_maxrounds", matchConfig.MaxOvertimeRounds);
+        UpdateConvar("mp_maxrounds", matchConfig.MaxRounds);
+        //UpdateConvar("mp_tournament", true);
+        UpdateConvar("mp_autokick", false);
 
-        ExecuteServerCommand("mp_team_timeout_time", "30");
-        ExecuteServerCommand("mp_team_timeout_max", "3");
+        UpdateConvar("mp_team_timeout_time", 30);
+        UpdateConvar("mp_team_timeout_max", 3);
 
-        ExecuteServerCommand("mp_competitive_endofmatch_extra_time", "120");
-        ExecuteServerCommand("mp_chattime", "120");
+        UpdateConvar("mp_competitive_endofmatch_extra_time", (float)120);
+        //UpdateConvar("mp_chattime", (float)120);
 
-        ExecuteServerCommand("mp_endmatch_votenextmap", "false");
+        UpdateConvar("mp_endmatch_votenextmap", false);
 
         // Set T Name
-        ExecuteServerCommand("mp_teamname_1", matchConfig.Team2.Name);
-        ExecuteServerCommand("mp_teamflag_1", matchConfig.Team2.Flag);
+        UpdateConvar("mp_teamname_1", matchConfig.Team2.Name);
+        UpdateConvar("mp_teamflag_1", matchConfig.Team2.Flag);
 
         // Set CT Name
-        ExecuteServerCommand("mp_teamname_2", matchConfig.Team1.Name);
-        ExecuteServerCommand("mp_teamflag_2", matchConfig.Team1.Flag);
+        UpdateConvar("mp_teamname_2", matchConfig.Team1.Name);
+        UpdateConvar("mp_teamflag_2", matchConfig.Team1.Flag);
 
-        ExecuteServerCommand("tv_autorecord", "0");
+        UpdateConvar("tv_autorecord", false);
 
         _Logger.LogInformation("Set match variables done");
     }
@@ -161,18 +173,26 @@ public class PugSharp : BasePlugin, IMatchCallback
         var authToken = command.ArgCount > 2 ? command.ArgByIndex(2) : string.Empty;
 
         SendMessage($"Loading Config from {url}");
-        var result = _ConfigProvider.TryLoadConfigAsync(url, authToken).Result;
-        if (result.Successful)
-        {
-            if (string.IsNullOrEmpty(result.Config!.EventulaApistatsToken))
+        var loadMatchConfigFromUrlResult = _ConfigProvider.LoadMatchConfigFromUrlAsync(url, authToken).Result;
+
+        loadMatchConfigFromUrlResult.Switch(
+            error =>
             {
-                result.Config!.EventulaApistatsToken = authToken;
+                player?.PrintToChat($"Loading config was not possible. Error: {error}");
+            },
+            matchConfig =>
+            {
+                // Use same token for APIstats if theres no token set in the matchconfig
+                if (string.IsNullOrEmpty(matchConfig.EventulaApistatsToken))
+                {
+                    matchConfig.EventulaApistatsToken = authToken;
+                }
+
+                Server.PrintToConsole("Matchconfig loaded!");
+
+                InitializeMatch(matchConfig);
             }
-
-            Server.PrintToConsole("Matchconfig loaded!");
-
-            InitializeMatch(result.Config!);
-        }
+        );
     }
 
     [ConsoleCommand("css_loadconfigfile", "Load a match config from a file")]
@@ -200,12 +220,19 @@ public class PugSharp : BasePlugin, IMatchCallback
         var fullFilePath = Path.GetFullPath(fileName);
 
         SendMessage($"Loading Config from file {fullFilePath}");
-        var result = _ConfigProvider.TryLoadConfigFromFileAsync(fullFilePath).Result;
-        if (result.Successful)
-        {
-            Server.PrintToConsole("Matchconfig loaded!");
-            InitializeMatch(result.Config!);
-        }
+        var loadMatchConfigFromFileResult = ConfigProvider.LoadMatchConfigFromFileAsync(fullFilePath).Result;
+
+        loadMatchConfigFromFileResult.Switch(
+            error =>
+            {
+                player?.PrintToChat($"Loading config was not possible. Error: {error}");
+            },
+            matchConfig =>
+            {
+                Server.PrintToConsole("Matchconfig loaded!");
+                InitializeMatch(matchConfig);
+            }
+        );
     }
 
     [ConsoleCommand("css_dumpmatch", "Serialize match to JSON on console")]
@@ -268,9 +295,9 @@ public class PugSharp : BasePlugin, IMatchCallback
 
     #region EventHandlers
 
-    private HookResult OnPlayerConnectFull(EventPlayerConnectFull @event, GameEventInfo info)
+    private HookResult OnPlayerConnectFull(EventPlayerConnectFull eventPlayerConnectFull, GameEventInfo info)
     {
-        var userId = @event.Userid;
+        var userId = eventPlayerConnectFull.Userid;
 
         if (userId != null && userId.IsValid)
         {
@@ -303,11 +330,11 @@ public class PugSharp : BasePlugin, IMatchCallback
         return HookResult.Continue;
     }
 
-    public HookResult OnPlayerDisconnect(EventPlayerDisconnect @event, GameEventInfo info)
+    public HookResult OnPlayerDisconnect(EventPlayerDisconnect eventPlayerDisconnect, GameEventInfo info)
     {
-        var userId = @event.Userid;
+        var userId = eventPlayerDisconnect.Userid;
 
-        // // Userid will give you a reference to a CCSPlayerController class
+        // Userid will give you a reference to a CCSPlayerController class
         _Logger.LogInformation("Player {playerName} has disconnected!", userId.PlayerName);
 
         _Match?.SetPlayerDisconnected(new Player(userId));
@@ -346,19 +373,17 @@ public class PugSharp : BasePlugin, IMatchCallback
 
     private HookResult OnCvarChanged(EventServerCvar eventCvarChanged, GameEventInfo info)
     {
-        if (_Match != null && _Match.CurrentState != MatchState.None)
+        if (_Match != null 
+            && _Match.CurrentState != MatchState.None 
+            && !eventCvarChanged.Cvarname.Equals("sv_cheats", StringComparison.OrdinalIgnoreCase))
         {
-            // Silences cvar changes when executing live/knife/warmup configs, *unless* it's sv_cheats.
-            if (!eventCvarChanged.Cvarname.Equals("sv_cheats"))
-            {
-                info.DontBroadcast = true;
-            }
+            info.DontBroadcast = true;
         }
 
         return HookResult.Continue;
     }
 
-    private HookResult OnRoundStart(EventRoundPrestart @event, GameEventInfo info)
+    private HookResult OnRoundStart(EventRoundStart eventRoundStart, GameEventInfo info)
     {
         _Logger.LogInformation("OnRoundStart called");
 
@@ -377,14 +402,14 @@ public class PugSharp : BasePlugin, IMatchCallback
         return HookResult.Continue;
     }
 
-    private HookResult OnRoundPreStart(EventRoundPrestart @event, GameEventInfo info)
+    private HookResult OnRoundPreStart(EventRoundPrestart eventRoundPrestart, GameEventInfo info)
     {
         _Logger.LogInformation("OnRoundPreStart called");
 
         return HookResult.Continue;
     }
 
-    private HookResult OnRoundFreezeEnd(EventRoundFreezeEnd @event, GameEventInfo info)
+    private HookResult OnRoundFreezeEnd(EventRoundFreezeEnd eventRoundFreezeEnd, GameEventInfo info)
     {
         _Logger.LogInformation("OnRoundFreezeEnd called");
 
@@ -431,6 +456,8 @@ public class PugSharp : BasePlugin, IMatchCallback
                 },
             });
 
+            // TODO Reset round stats
+
             // TODO OT handling
         }
 
@@ -460,10 +487,16 @@ public class PugSharp : BasePlugin, IMatchCallback
 
             var playerMatchStats = ccsPlayerController.ActionTrackingServices.MatchStats;
 
+            // TODO should we store overall match stats in the PugSharp object or in the map object?
+            // I think we should pass per round statistics (which are tracked in PugSharp class) to the Match object which holds the match wide statistics
+            var internalPlayer = _Match?.AllMatchPlayers.FirstOrDefault(a => a.Player.UserId.Equals(ccsPlayerController.UserId));
+
+            var stats = internalPlayer?.Player.MatchStats;
+
             // TODO Add Missing StatisticValues
             result.Add(playerController.Value.SteamID, new PlayerRoundResults
             {
-                Assists = playerMatchStats.Assists,
+                Assists = stats?.Assists ?? 0,
                 BombDefuses = 0,
                 BombPlants = 0,
                 Coaching = false,
@@ -476,21 +509,21 @@ public class PugSharp : BasePlugin, IMatchCallback
                 Damage = playerMatchStats.Damage,
                 Deaths = playerMatchStats.Deaths,
                 EnemiesFlashed = playerMatchStats.EnemiesFlashed,
-                FirstDeathCt = 0,
-                FirstDeathT = 0,
-                FirstKillCt = 0,
-                FirstKillT = 0,
-                FlashbangAssists = 0,
+                FirstDeathCt = stats?.FirstDeathCt ?? 0,
+                FirstDeathT = stats?.FirstDeathT ?? 0,
+                FirstKillCt = stats?.FirstKillCt ?? 0,
+                FirstKillT = stats?.FirstKillT ?? 0,
+                FlashbangAssists = stats?.FlashbangAssists ?? 0,
                 FriendliesFlashed = 0,
-                HeadshotKills = playerMatchStats.HeadShotKills,
+                HeadshotKills = stats?.HeadshotKills ?? 0,
                 Kast = 0,
                 Kills = playerMatchStats.Kills,
-                KnifeKills = 0,
+                KnifeKills = stats?.KnifeKills ?? 0,
                 Mvp = 0,
                 Name = playerController.Value.PlayerName,
                 RoundsPlayed = 0,
-                Suicides = 0,
-                TeamKills = 0,
+                Suicides = stats?.Suicides ?? 0,
+                TeamKills = stats?.TeamKills ?? 0,
                 TradeKill = 0,
                 UtilityDamage = playerMatchStats.UtilityDamage,
                 V1 = 0,
@@ -504,7 +537,7 @@ public class PugSharp : BasePlugin, IMatchCallback
         return result;
     }
 
-    private HookResult OnPlayerSpawn(EventPlayerSpawn @event, GameEventInfo info)
+    private HookResult OnPlayerSpawn(EventPlayerSpawn eventPlayerSpawn, GameEventInfo info)
     {
         if (_Match == null)
         {
@@ -516,7 +549,7 @@ public class PugSharp : BasePlugin, IMatchCallback
             return HookResult.Continue;
         }
 
-        var userId = @event.Userid;
+        var userId = eventPlayerSpawn.Userid;
         if (_Match.CurrentState < MatchState.MatchRunning && userId != null && userId.IsValid)
         {
             // Give players max money if no match is running
@@ -524,15 +557,24 @@ public class PugSharp : BasePlugin, IMatchCallback
             {
                 var player = new Player(userId);
 
-                // TODO read mp_maxmoney cvar
-                player.Money = 16000;
+                int maxMoneyValue = 16000;
+
+                // Use value from server if possible
+                var maxMoneyCvar = ConVar.Find("mp_maxmoney");
+                if (maxMoneyCvar != null)
+                {
+
+                    maxMoneyValue = maxMoneyCvar.GetPrimitiveValue<int>();
+                }
+
+                player.Money = maxMoneyValue;
             });
         }
 
         return HookResult.Continue;
     }
 
-    private HookResult OnMatchOver(EventCsWinPanelMatch @event, GameEventInfo info)
+    private HookResult OnMatchOver(EventCsWinPanelMatch eventCsWinPanelMatch, GameEventInfo info)
     {
         _Logger.LogInformation("OnMatchOver called");
 
@@ -575,10 +617,164 @@ public class PugSharp : BasePlugin, IMatchCallback
         return HookResult.Continue;
     }
 
-    private HookResult OnEventRoundAnnounceLastRoundHalf(EventRoundAnnounceLastRoundHalf @event, GameEventInfo info)
+    private HookResult OnEventRoundAnnounceLastRoundHalf(EventRoundAnnounceLastRoundHalf eventRoundAnnounceLastRoundHalf, GameEventInfo info)
     {
         _Logger.LogInformation("OnEventRoundAnnounceLastRoundHalf");
         _Match?.SwitchTeam();
+        return HookResult.Continue;
+    }
+
+    private HookResult OnPlayerDeath(EventPlayerDeath eventPlayerDeath, GameEventInfo info)
+    {
+        if (_Match == null)
+        {
+            return HookResult.Continue;
+        }
+
+        if (_Match.CurrentState == MatchState.None)
+        {
+            return HookResult.Continue;
+        }
+
+        if (_Match.CurrentState == MatchState.MatchRunning)
+        {
+            var victim = _Match.AllMatchPlayers.FirstOrDefault(a => a.Player.UserId.Equals(eventPlayerDeath.Userid.UserId));
+
+            var victimSide = eventPlayerDeath.Userid.TeamNum;
+
+            var attacker = _Match.AllMatchPlayers.FirstOrDefault(a => a.Player.UserId.Equals(eventPlayerDeath.Attacker.UserId));
+
+            var attackerSide = eventPlayerDeath.Attacker.TeamNum;
+
+            Match.MatchPlayer? assister = null;
+
+            if (eventPlayerDeath.Assister != null)
+            {
+                assister = _Match.AllMatchPlayers.FirstOrDefault(a => a.Player.UserId.Equals(eventPlayerDeath.Assister.UserId));
+            }
+
+            // TODO Update "clutch" (1vx) to check if the clutcher wins the round, this has to be stored somewhere per round
+
+            var killedByBomb = eventPlayerDeath.Weapon.Equals("planted_c4");
+            var isSuicide = (attacker == victim) && !killedByBomb;
+            var isHeadshot = eventPlayerDeath.Headshot;
+
+            var victimStats = victim.Player.MatchStats;
+
+            var attackerStats = attacker?.Player.MatchStats;
+
+            var assisterStats = assister?.Player.MatchStats;
+
+            if (victimStats != null)
+            {
+                victimStats.Deaths++;
+            }
+
+            var isRoundFirstKillDone = false; // TODO this has to be stored somewhere per round
+
+            var isRoundFirstDeathDone = false; // TODO this has to be stored somewhere per round
+
+            if (!isRoundFirstDeathDone)
+            {
+                isRoundFirstDeathDone = true;
+
+                if (victimStats != null)
+                {
+                    switch (victimSide)
+                    {
+                        // TODO Unknown values
+                        case 1:
+                            victimStats.FirstDeathCt++;
+                            break;
+                        case 2:
+                            victimStats.FirstDeathT++;
+                            break;
+                    }
+                }
+            }
+
+            if (isSuicide)
+            {
+                if (victimStats != null)
+                {
+                    victimStats.Suicides++;
+                }
+            }
+            else if (!killedByBomb)
+            {
+                if (attackerSide == victimSide && attackerStats != null)
+                {
+                    attackerStats.TeamKills++;
+                }
+                else
+                {
+                    if (!isRoundFirstKillDone)
+                    {
+                        isRoundFirstKillDone = true;
+
+                        if (attackerStats != null)
+                        {
+                            switch (attackerSide)
+                            {
+                                // TODO Unknown values
+                                case 1:
+                                    attackerStats.FirstKillCt++;
+                                    break;
+                                case 2:
+                                    attackerStats.FirstKillT++;
+                                    break;
+                            }
+                        }
+                    }
+
+                    if (attackerStats != null)
+                    {
+                        attackerStats.Kills++;
+
+                        if (isHeadshot)
+                        {
+                            attackerStats.HeadshotKills++;
+                        }
+                        var weaponId = Enum.Parse<CSWeaponID>(eventPlayerDeath.WeaponItemid);
+
+                        // Other than these constants, all knives can be found after CSWeapon_MAX_WEAPONS_NO_KNIFES.
+                        // See https://sourcemod.dev/#/cstrike/enumeration.CSWeaponID
+                        if (weaponId == CSWeaponID.KNIFE || weaponId == CSWeaponID.KNIFE_GG || weaponId == CSWeaponID.KNIFE_T ||
+                            weaponId == CSWeaponID.KNIFE_GHOST || weaponId > CSWeaponID.MAX_WEAPONS_NO_KNIFES)
+                        {
+                            attackerStats.KnifeKills++;
+                        }
+                    }
+
+                    if (assister != null)
+                    {
+                        bool friendlyFire = attackerSide == victimSide;
+                        bool assistedFlash = eventPlayerDeath.Assistedflash;
+
+                        // Assists should only count towards opposite team
+                        if (!friendlyFire)
+                        {
+                            // You cannot flash-assist and regular-assist for the same kill.
+                            if (assistedFlash)
+                            {
+                                if (assisterStats != null)
+                                {
+                                    assisterStats.FlashbangAssists++;
+                                }
+                            }
+                            else
+                            {
+                                if (assisterStats != null)
+                                {
+                                    assisterStats.Assists++;
+                                }
+                            }
+
+                        }
+                    }
+                }
+            }
+        }
         return HookResult.Continue;
     }
 
@@ -653,30 +849,33 @@ public class PugSharp : BasePlugin, IMatchCallback
 
     public void EndWarmup()
     {
+        _Logger.LogInformation("Ending warmup immediately");
         Server.ExecuteCommand("mp_warmup_end");
     }
 
-    public void PauseServer()
+    public void PauseMatch()
     {
+        _Logger.LogInformation("Pausing the match in the next freeze time");
         Server.ExecuteCommand("mp_pause_match");
     }
 
-    public void UnpauseServer()
+    public void UnpauseMatch()
     {
+        _Logger.LogInformation("Resuming the match");
         Server.ExecuteCommand("mp_unpause_match");
     }
 
     public void DisableCheats()
     {
-        _Logger.LogInformation("Disable cheats");
-        Server.ExecuteCommand("sv_cheats 0");
+        _Logger.LogInformation("Disabling cheats");
+        UpdateConvar("sv_cheats", false);
     }
 
     public void SetupRoundBackup()
     {
         var prefix = $"PugSharp_{_Match?.Config.MatchId}_";
         _Logger.LogInformation("Create round backup files: {prefix}", prefix);
-        Server.ExecuteCommand($"mp_backup_round_file {prefix}");
+        UpdateConvar("mp_backup_round_file", prefix);
     }
 
     public void StartDemoRecording()
@@ -686,7 +885,8 @@ public class PugSharp : BasePlugin, IMatchCallback
             return;
         }
 
-        var demoFileName = $"PugSharp_Match_{_Match.Config.MatchId}_{DateTime.UtcNow:yyyyMMddHHmmss}.dem";
+        var formattedDateTime = DateTime.UtcNow.ToString("yyyyMMddHHmmss", CultureInfo.InvariantCulture);
+        var demoFileName = $"PugSharp_Match_{_Match.Config.MatchId}_{formattedDateTime}.dem";
         try
         {
             string directoryPath = Path.Join(Server.GameDirectory, "csgo", "Demo");
@@ -708,6 +908,7 @@ public class PugSharp : BasePlugin, IMatchCallback
 
     public void StopDemoRecording()
     {
+        _Logger.LogInformation("Stopping SourceTV demo recording");
         Server.ExecuteCommand("tv_stoprecord");
     }
 
@@ -759,5 +960,4 @@ public class PugSharp : BasePlugin, IMatchCallback
             _ConfigProvider.Dispose();
         }
     }
-
 }

@@ -75,11 +75,11 @@ namespace PugSharp.Match.Tests
         {
             match.SetPlayerDisconnected(player1);
             Assert.Equal(MatchState.MatchPaused, match.CurrentState);
-            matchCallback.Received().PauseServer();
+            matchCallback.Received().PauseMatch();
 
             match.TryAddPlayer(player1);
             Assert.Equal(MatchState.MatchRunning, match.CurrentState);
-            matchCallback.Received().UnpauseServer();
+            matchCallback.Received().UnpauseMatch();
         }
 
         private static async Task VoteTeam(IMatchCallback matchCallback, MatchConfig config, Match match, IPlayer player1, IPlayer player2, IPlayer votePlayer)
