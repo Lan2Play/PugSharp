@@ -19,7 +19,7 @@ public class PugSharp : BasePlugin, IMatchCallback
 {
     private static readonly ILogger<PugSharp> _Logger = LogManager.CreateLogger<PugSharp>();
 
-    private readonly ConfigProvider _ConfigProvider = new();
+    private readonly ConfigProvider _ConfigProvider = new(Path.Join(Server.GameDirectory, "csgo", "PugSharp", "Config"));
 
     private Match.Match? _Match;
     private ServerConfig? _ServerConfig;
@@ -190,11 +190,6 @@ public class PugSharp : BasePlugin, IMatchCallback
             },
             matchConfig =>
             {
-                var configPath = Path.Join(Server.GameDirectory, "csgo", "PugSharp", "Config", "match.json");
-                _Logger.LogInformation($"MatchConfig: {configPath}");
-                var matchJson = JsonSerializer.Serialize(matchConfig);
-                System.IO.File.WriteAllText(configPath, matchJson);
-
                 // Use same token for APIstats if theres no token set in the matchconfig
                 if (string.IsNullOrEmpty(matchConfig.EventulaApistatsToken))
                 {
@@ -229,11 +224,8 @@ public class PugSharp : BasePlugin, IMatchCallback
 
         var fileName = command.ArgByIndex(1);
 
-        // TODO should it be relative to GameDirectory?
-        var fullFilePath = Path.GetFullPath(fileName);
-
-        SendMessage($"Loading Config from file {fullFilePath}");
-        var loadMatchConfigFromFileResult = ConfigProvider.LoadMatchConfigFromFileAsync(fullFilePath).Result;
+        SendMessage($"Loading Config from file {fileName}");
+        var loadMatchConfigFromFileResult = _ConfigProvider.LoadMatchConfigFromFileAsync(fileName).Result;
 
         loadMatchConfigFromFileResult.Switch(
             error =>

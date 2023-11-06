@@ -12,15 +12,23 @@ namespace PugSharp.Config
         private static readonly ILogger<ConfigProvider> _Logger = LogManager.CreateLogger<ConfigProvider>();
 
         private readonly HttpClient _HttpClient = new();
+        private readonly string _ConfigDirectory;
         private bool disposedValue;
 
-        public static async Task<OneOf<Error<string>, MatchConfig>> LoadMatchConfigFromFileAsync(string fileName)
+
+        public ConfigProvider(string configDirectory)
         {
-            _Logger.LogInformation("Loading match from \"{fileName}\"", fileName);
+            _ConfigDirectory = configDirectory;
+        }
+
+        public async Task<OneOf<Error<string>, MatchConfig>> LoadMatchConfigFromFileAsync(string fileName)
+        {
+            var fullFileName = Path.IsPathRooted(fileName) ? fileName : Path.Combine(_ConfigDirectory, fileName);
+            _Logger.LogInformation("Loading match from \"{fileName}\"", fullFileName);
 
             try
             {
-                var configFileStream = File.OpenRead(fileName);
+                var configFileStream = File.OpenRead(fullFileName);
                 await using (configFileStream.ConfigureAwait(false))
                 {
                     var config = await JsonSerializer.DeserializeAsync<MatchConfig>(configFileStream).ConfigureAwait(false);
@@ -38,9 +46,9 @@ namespace PugSharp.Config
             }
             catch (Exception ex)
             {
-                _Logger.LogError(ex, "Failed loading config from {fileName}.", fileName);
+                _Logger.LogError(ex, "Failed loading config from {fileName}.", fullFileName);
 
-                return new Error<string>($"Failed loading config from {fileName}.");
+                return new Error<string>($"Failed loading config from {fullFileName}.");
             }
         }
 
@@ -67,13 +75,21 @@ namespace PugSharp.Config
                 response.EnsureSuccessStatusCode();
 
                 var configJsonStream = await response.Content.ReadAsStreamAsync().ConfigureAwait(false);
-
                 var config = await JsonSerializer.DeserializeAsync<MatchConfig>(configJsonStream).ConfigureAwait(false);
                 if (config == null)
                 {
                     _Logger.LogError("MatchConfig was deserialized to null");
 
                     return new Error<string>("Config couldn't be deserialized");
+                }
+
+                configJsonStream.Seek(0, SeekOrigin.Begin);
+                var matchConfigPath = Path.Combine(_ConfigDirectory, "match.json");
+                var fileWriteStream = File.OpenWrite(matchConfigPath);
+                await using (fileWriteStream.ConfigureAwait(false))
+                {
+                    await configJsonStream.CopyToAsync(fileWriteStream).ConfigureAwait(false);
+                    configJsonStream.Close();
                 }
 
                 _Logger.LogInformation("Successfully loaded config for match {matchId}", config.MatchId);
