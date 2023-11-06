@@ -178,7 +178,7 @@ public class PugSharp : BasePlugin, IMatchCallback
         loadMatchConfigFromUrlResult.Switch(
             error =>
             {
-                player?.PrintToChat($"Loading config was not possible. Error: {error}");
+                command.ReplyToCommand($"Loading config was not possible. Error: {error}");
             },
             matchConfig =>
             {
@@ -188,7 +188,7 @@ public class PugSharp : BasePlugin, IMatchCallback
                     matchConfig.EventulaApistatsToken = authToken;
                 }
 
-                Server.PrintToConsole("Matchconfig loaded!");
+                command.ReplyToCommand("Matchconfig loaded!");
 
                 InitializeMatch(matchConfig);
             }
@@ -225,11 +225,11 @@ public class PugSharp : BasePlugin, IMatchCallback
         loadMatchConfigFromFileResult.Switch(
             error =>
             {
-                player?.PrintToChat($"Loading config was not possible. Error: {error}");
+                command.ReplyToCommand($"Loading config was not possible. Error: {error}");
             },
             matchConfig =>
             {
-                Server.PrintToConsole("Matchconfig loaded!");
+                command.ReplyToCommand("Matchconfig loaded!");
                 InitializeMatch(matchConfig);
             }
         );
@@ -373,8 +373,8 @@ public class PugSharp : BasePlugin, IMatchCallback
 
     private HookResult OnCvarChanged(EventServerCvar eventCvarChanged, GameEventInfo info)
     {
-        if (_Match != null 
-            && _Match.CurrentState != MatchState.None 
+        if (_Match != null
+            && _Match.CurrentState != MatchState.None
             && !eventCvarChanged.Cvarname.Equals("sv_cheats", StringComparison.OrdinalIgnoreCase))
         {
             info.DontBroadcast = true;
