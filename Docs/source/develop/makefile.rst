@@ -26,6 +26,7 @@ Publishes a debug build of Pugsharp with the locally installed .Net SDK and copi
 
 **Group Command**
 
+- :ref:`develop/makefile:git-pull` 
 - :ref:`develop/makefile:build-debug` 
 - :ref:`develop/makefile:copy-pugsharp` 
 
@@ -39,6 +40,7 @@ Publishes a debug build of Pugsharp with .Net SDK inside of docker and copies it
 
 **Group Command**
 
+- :ref:`develop/makefile:git-pull` 
 - :ref:`develop/makefile:build-debug-docker` 
 - :ref:`develop/makefile:copy-pugsharp` 
 
@@ -198,6 +200,14 @@ No Parameters
 copy-pugsharp
 ........................
 copies pugsharp debug build in to the local cs2 server
+
+**Parameters:**
+
+No Parameters
+
+git-pull
+........................
+pulls the repository
 
 **Parameters:**
 

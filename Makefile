@@ -28,8 +28,8 @@ endif
 endif
 
 ## group commands
-build-and-copy: build-debug copy-pugsharp
-build-and-copy-docker: build-debug-docker copy-pugsharp
+build-and-copy: git-pull build-debug copy-pugsharp
+build-and-copy-docker: git-pull build-debug-docker copy-pugsharp
 init-all: prepare-folders init-env copy-counterstrikesharp install-netruntime install-metamod start-csserver attach-csserver
 clean-all: clean-csserver clean-env clean-build
 start-attach: start-csserver attach-csserver
@@ -96,6 +96,8 @@ copy-pugsharp:
 	mkdir -p $(currentDir)/cs2/game/csgo/addons/counterstrikesharp/plugins/PugSharp
 	cp -rf $(currentDir)/PugSharp/bin/Debug/net7.0/publish/* $(currentDir)/cs2/game/csgo/addons/counterstrikesharp/plugins/PugSharp
 
+git-pull:
+	git pull || true
 
 
 
