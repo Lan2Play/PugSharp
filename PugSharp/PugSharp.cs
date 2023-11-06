@@ -183,6 +183,10 @@ public class PugSharp : BasePlugin, IMatchCallback
             },
             matchConfig =>
             {
+                var configPath = Path.Join(Server.GameDirectory, "csgo", "PugSharp", "Config", "match.json");
+                var matchJson = JsonSerializer.Serialize(matchConfig);
+                System.IO.File.WriteAllText(configPath, matchJson);
+
                 // Use same token for APIstats if theres no token set in the matchconfig
                 if (string.IsNullOrEmpty(matchConfig.EventulaApistatsToken))
                 {
