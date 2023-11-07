@@ -62,6 +62,7 @@ public class PugSharp : BasePlugin, IMatchCallback
         RegisterEventHandler<EventPlayerTeam>(OnPlayerTeam);
         RegisterEventHandler<EventPlayerDeath>(OnPlayerDeath);
         RegisterEventHandler<EventPlayerBlind>(OnPlayerBlind);
+        RegisterEventHandler<EventRoundMvp>(OnRoundMvp);
 
         RegisterListener<Listeners.OnMapStart>(OnMapStartHandler);
 
@@ -69,6 +70,8 @@ public class PugSharp : BasePlugin, IMatchCallback
 
         _Logger.LogInformation("End RegisterEventHandlers");
     }
+
+
 
     private void InitializeMatch(MatchConfig matchConfig)
     {
@@ -523,7 +526,7 @@ public class PugSharp : BasePlugin, IMatchCallback
 
     private IReadOnlyDictionary<ulong, IPlayerRoundResults> CreatePlayerResults()
     {
-       var dict = new Dictionary<ulong, IPlayerRoundResults>();
+        var dict = new Dictionary<ulong, IPlayerRoundResults>();
 
         foreach (var kvp in _CurrentRountState.PlayerStats)
         {
@@ -649,7 +652,7 @@ public class PugSharp : BasePlugin, IMatchCallback
             var isHeadshot = eventPlayerDeath.Headshot;
             var isClutcher = false;
 
-            
+
             var victimStats = _CurrentRountState.GetPlayerRoundStats(victim.SteamID, victim.PlayerName);
 
             victimStats.Dead = true;
@@ -826,6 +829,29 @@ public class PugSharp : BasePlugin, IMatchCallback
                 }
 
             }
+        }
+
+        return HookResult.Continue;
+    }
+
+    private HookResult OnRoundMvp(EventRoundMvp eventRoundMvp, GameEventInfo info)
+    {
+        if (_Match == null)
+        {
+            return HookResult.Continue;
+        }
+
+        if (_Match.CurrentState == MatchState.None)
+        {
+            return HookResult.Continue;
+        }
+
+        if (_Match.CurrentState == MatchState.MatchRunning)
+        {
+            var mvp = eventRoundMvp.Userid;
+            var mvpStats = _CurrentRountState.GetPlayerRoundStats(mvp.SteamID, mvp.PlayerName);
+
+            mvpStats.Mvp = true;
         }
 
         return HookResult.Continue;
