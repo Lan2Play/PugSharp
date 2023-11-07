@@ -185,7 +185,13 @@ public class Match : IDisposable
         }
 
         var mapResultParams = new MapResultParams(_MatchInfo.CurrentMap.Winner.TeamConfig.Name, _MatchInfo.CurrentMap.Team1Points, _MatchInfo.CurrentMap.Team2Points, _MatchInfo.CurrentMap.MapNumber);
-        _ = _ApiStats?.SendMapResultAsync(Config.MatchId, mapResultParams, CancellationToken.None);
+        _ = _ApiStats?.FinalizeMapAsync(Config.MatchId, mapResultParams, CancellationToken.None);
+
+        if (_MatchInfo.MatchMaps[_MatchInfo.MatchMaps.Count - 1] == _MatchInfo.CurrentMap)
+        {
+            var seriesResultParams = new SeriesResultParams(_MatchInfo.MatchMaps.GroupBy(x => x.Winner).MaxBy(x => x.Count())!.Key!.TeamConfig.Name, true, 120000);
+            _ = _ApiStats?.FinalizeAsync(seriesResultParams, CancellationToken.None);
+        }
     }
 
     public void SendRoundResults(IRoundResults roundResults)
@@ -209,7 +215,7 @@ public class Match : IDisposable
             Score = team1Results.Score,
             ScoreT = team1Results.ScoreT,
             ScoreCT = team1Results.ScoreCT,
-            Players = team1Results.PlayerResults.ToDictionary(p => new SteamId(p.Key.ToString()), p => CreatePlayerStatistics(p.Value)),
+            Players = team1Results.PlayerResults.ToDictionary(p => p.Key.ToString(), p => CreatePlayerStatistics(p.Value), StringComparer.OrdinalIgnoreCase),
         };
 
         var mapTeamInfo2 = new MapTeamInfo
@@ -218,7 +224,7 @@ public class Match : IDisposable
             Score = team2Results.Score,
             ScoreT = team2Results.ScoreT,
             ScoreCT = team2Results.ScoreCT,
-            Players = team1Results.PlayerResults.ToDictionary(p => new SteamId(p.Key.ToString()), p => CreatePlayerStatistics(p.Value)),
+            Players = team1Results.PlayerResults.ToDictionary(p => p.Key.ToString(), p => CreatePlayerStatistics(p.Value), StringComparer.OrdinalIgnoreCase),
         };
 
         var roundStats = new RoundStatusUpdateParams(_MatchInfo.CurrentMap.MapNumber, teamInfo1, teamInfo2, new Map { Name = _MatchInfo.CurrentMap.MapName, Team1 = mapTeamInfo1, Team2 = mapTeamInfo2, });
@@ -619,7 +625,10 @@ public class Match : IDisposable
             case MatchState.SwitchMap:
             case MatchState.WaitingForPlayersReady:
             case MatchState.MatchStarting:
+                break;
             case MatchState.MatchRunning:
+                Pause(player);
+                break;
             case MatchState.MatchPaused:
             case MatchState.MatchCompleted:
                 break;
@@ -855,7 +864,7 @@ public class Match : IDisposable
         }
 
         _Logger.LogInformation("The winner is: {winner}", winnerTeam!.TeamConfig.Name);
-        TryFireState(MatchCommand.CompleteMap);
+        _ = TryFireStateAsync(MatchCommand.CompleteMap);
     }
 
     public bool PlayerBelongsToMatch(ulong steamId)

@@ -80,7 +80,7 @@ namespace PugSharp.ApiStats
             }
         }
 
-        public async Task SendMapResultAsync(string matchId, MapResultParams mapResultParams, CancellationToken cancellationToken)
+        public async Task FinalizeMapAsync(string matchId, MapResultParams mapResultParams, CancellationToken cancellationToken)
         {
             try
             {
@@ -239,7 +239,7 @@ namespace PugSharp.ApiStats
             return param.ToString(CultureInfo.InvariantCulture);
         }
 
-        public async Task SendSeriesResultAsync(SeriesResultParams seriesResultParams, CancellationToken cancellationToken)
+        public async Task FinalizeAsync(SeriesResultParams seriesResultParams, CancellationToken cancellationToken)
         {
             var queryParams = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
             {

@@ -2,7 +2,7 @@
 {
     public class MapTeamInfo
     {
-        public Dictionary<SteamId, PlayerStatistics> Players { get; set; }
+        public Dictionary<string  , PlayerStatistics> Players { get; set; }
 
         public int Score { get; set; }
 
