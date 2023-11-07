@@ -23,10 +23,7 @@ public class Player : IPlayer
         _UserId = playerController.UserId!.Value;
         SteamID = playerController.SteamID;
         _PlayerController = playerController;
-        if (_PlayerController.ActionTrackingServices != null)
-        {
-            MatchStats = new PlayerMatchStats(_PlayerController.ActionTrackingServices.MatchStats, this);
-        }
+        
     }
 
     private T DefaultIfInvalid<T>(Func<T> loadValue, T defaultValue)
@@ -110,7 +107,7 @@ public class Player : IPlayer
             Server.NextFrame(() =>
             {
                 _PlayerController.PlayerPawn.Value.CommitSuicide(true, true);
-                MatchStats?.ResetStats();
+                ResetScoreboard();
             });
         }
     }
@@ -120,5 +117,14 @@ public class Player : IPlayer
         Server.ExecuteCommand($"kickid {UserId!.Value} \"You are not part of the current match!\"");
     }
 
-    public IPlayerMatchStats? MatchStats { get; }
+    private void ResetScoreboard()
+    {
+        var matchStats = _PlayerController.ActionTrackingServices?.MatchStats;
+
+        if (matchStats != null)
+        {
+            matchStats.Kills = 0;
+            matchStats.Deaths = 0;
+        }
+    }
 }

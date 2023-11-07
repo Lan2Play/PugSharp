@@ -1,8 +1,8 @@
 ﻿using PugSharp.Match.Contract;
 
-namespace PugSharp.Models
+namespace PugSharp.ApiStats
 {
-    internal class PlayerRoundResults : IPlayerMatchStatistics
+    internal class PlayerMatchStatistics : IPlayerMatchStatistics
     {
         public bool Coaching { get; set; }
 

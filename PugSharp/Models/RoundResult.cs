@@ -7,5 +7,7 @@ namespace PugSharp.Models
         public ITeamRoundResults TRoundResult { get; set; }
 
         public ITeamRoundResults CTRoundResult { get; set; }
+
+        public IReadOnlyDictionary<ulong, IPlayerRoundResults> PlayerResults { get; set; }
     }
 }

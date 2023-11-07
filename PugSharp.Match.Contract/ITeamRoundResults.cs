@@ -2,7 +2,7 @@
 
 public interface ITeamRoundResults
 {
-    public IReadOnlyDictionary<ulong, IPlayerRoundResults> PlayerResults { get; }
+    
 
     public int Score { get; }
 
