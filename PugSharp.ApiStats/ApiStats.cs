@@ -57,6 +57,7 @@ namespace PugSharp.ApiStats
                 if (_ApiStatsDirectory != null)
                 {
                     var goingLiveFileName = Path.GetFullPath(Path.Combine(_ApiStatsDirectory, $"Match_{matchId}_golive.json"));
+                    CreateStatsDirectoryIfNotExists();
                     var fileStream = File.OpenWrite(goingLiveFileName);
                     await using (fileStream.ConfigureAwait(false))
                     {
@@ -68,6 +69,14 @@ namespace PugSharp.ApiStats
             catch (Exception ex)
             {
                 _Logger.LogError(ex, "Error storing going live!");
+            }
+        }
+
+        private void CreateStatsDirectoryIfNotExists()
+        {
+            if (_ApiStatsDirectory != null && !Directory.Exists(_ApiStatsDirectory))
+            {
+                Directory.CreateDirectory(_ApiStatsDirectory);
             }
         }
 
@@ -98,6 +107,7 @@ namespace PugSharp.ApiStats
                 if (_ApiStatsDirectory != null)
                 {
                     var mapFesultFileName = Path.GetFullPath(Path.Combine(_ApiStatsDirectory, $"Match_{matchId}_mapresult.json"));
+                    CreateStatsDirectoryIfNotExists();
                     var fileStream = File.OpenWrite(mapFesultFileName);
                     await using (fileStream.ConfigureAwait(false))
                     {
@@ -142,6 +152,7 @@ namespace PugSharp.ApiStats
                 {
                     var round = roundStatusUpdateParams.CurrentMap.Team1.Score + roundStatusUpdateParams.CurrentMap.Team2.Score;
                     var roundFileName = Path.GetFullPath(Path.Combine(_ApiStatsDirectory, string.Create(CultureInfo.InvariantCulture, $"Match_{matchId}_roundresult_{round}.json")));
+                    CreateStatsDirectoryIfNotExists();
                     var fileStream = File.OpenWrite(roundFileName);
                     await using (fileStream.ConfigureAwait(false))
                     {
