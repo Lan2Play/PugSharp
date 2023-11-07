@@ -61,6 +61,7 @@ public class PugSharp : BasePlugin, IMatchCallback
         RegisterEventHandler<EventServerCvar>(OnCvarChanged, HookMode.Pre);
         RegisterEventHandler<EventPlayerTeam>(OnPlayerTeam);
         RegisterEventHandler<EventPlayerDeath>(OnPlayerDeath);
+        RegisterEventHandler<EventPlayerBlind>(OnPlayerBlind);
 
         RegisterListener<Listeners.OnMapStart>(OnMapStartHandler);
 
@@ -776,6 +777,57 @@ public class PugSharp : BasePlugin, IMatchCallback
                 }
             }
         }
+        return HookResult.Continue;
+    }
+
+    private HookResult OnPlayerBlind(EventPlayerBlind eventPlayerBlind, GameEventInfo info)
+    {
+        if (_Match == null)
+        {
+            return HookResult.Continue;
+        }
+
+        if (_Match.CurrentState == MatchState.None)
+        {
+            return HookResult.Continue;
+        }
+
+        if (_Match.CurrentState == MatchState.MatchRunning)
+        {
+
+            var victim = eventPlayerBlind.Userid;
+
+            var victimSide = eventPlayerBlind.Userid.TeamNum;
+
+            var attacker = eventPlayerBlind.Attacker;
+
+            var attackerSide = eventPlayerBlind.Attacker.TeamNum;
+
+            if (attacker == victim)
+            {
+                return HookResult.Continue;
+            }
+
+            bool isFriendlyFire = victimSide == attackerSide;
+
+            // 2.5 is an arbitrary value that closely matches the "enemies flashed" column of the in-game
+            // scoreboard.
+            if (eventPlayerBlind.BlindDuration >= 2.5)
+            {
+                var attackerStats = _CurrentRountState.GetPlayerRoundStats(attacker.SteamID, attacker.PlayerName);
+
+                if (isFriendlyFire)
+                {
+                    attackerStats.FriendliesFlashed++;
+                }
+                else
+                {
+                    attackerStats.EnemiesFlashed++;
+                }
+
+            }
+        }
+
         return HookResult.Continue;
     }
 
