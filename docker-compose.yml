@@ -1,10 +1,7 @@
 version: '3.7'
 services:
   cs2-server:
-    build:
-      context: ./resources
-      dockerfile: Dockerfile
-    # image: joedwards32/cs2
+    image: joedwards32/cs2
     env_file:
       - .env
     volumes:
