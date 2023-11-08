@@ -30,20 +30,17 @@ If you want to help developing or translating, join our discord:
 
 - [x] Configuration via http(s) json (example below)
 - [x] Configuration via json file
-- [ ] api reporting to a http(s) server
+- [x] api reporting to a http(s) server
   - [x] Report start of match
   - [x] Report round results
   - [x] Report map ended
-  - [ ] Report series ended (for bo3, ...)
+  - [x] Report series ended (for bo3, ...)
 - [x] automatic team assignment
 - [x] map and starting team vote
 - [x] automatic pause if player disconnects
 - [x] pause / unpause feature
-- [ ] demo recording
-- [ ] demo upload
-- [ ] hltv support
-- [ ] i18n
-- [ ] Text customization?
+- [x] demo recording
+
 
 ## Usage
 

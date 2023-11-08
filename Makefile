@@ -30,7 +30,7 @@ endif
 ## group commands
 build-and-copy: git-pull build-debug copy-pugsharp
 build-and-copy-docker: git-pull build-debug-docker copy-pugsharp
-init-all: prepare-folders init-env copy-counterstrikesharp install-netruntime install-metamod build-csserver start-csserver attach-csserver
+init-all: prepare-folders init-env copy-counterstrikesharp install-netruntime install-metamod pull-csserver start-csserver attach-csserver
 clean-all: clean-csserver clean-env clean-build
 start-attach: start-csserver attach-csserver
 
@@ -63,8 +63,8 @@ fix-metamod:
 
 
 ## base commands
-build-csserver:
-	docker pull joedwards32/cs2 ; $(DOCKER_COMPOSE) build
+pull-csserver:
+	docker pull joedwards32/cs2
 
 start-csserver:
 	$(DOCKER_COMPOSE) up -d

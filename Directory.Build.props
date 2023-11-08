@@ -1,0 +1,14 @@
+<Project>
+	<PropertyGroup Condition="'$(Configuration)'=='Debug'">
+		<GenerateSerializationAssemblies>Off</GenerateSerializationAssemblies>
+		<DebugType>full</DebugType>
+		<DebugSymbols>true</DebugSymbols>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<PackageReference Include="Meziantou.Analyzer" Version="2.0.104">
+			<PrivateAssets>all</PrivateAssets>
+			<IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
+		</PackageReference>
+	</ItemGroup>
+</Project>

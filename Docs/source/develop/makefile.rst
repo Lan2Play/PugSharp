@@ -60,7 +60,7 @@ Prepares the gameserver folder, initializes the .env file for the cs2 server, co
 - :ref:`develop/makefile:copy-counterstrikesharp` 
 - :ref:`develop/makefile:install-netruntime` 
 - :ref:`develop/makefile:install-metamod` 
-- :ref:`develop/makefile:build-csserver` 
+- :ref:`develop/makefile:pull-csserver` 
 - :ref:`develop/makefile:start-csserver` 
 
 **Parameters:**
@@ -143,9 +143,9 @@ inserts the ``Game	csgo/addons/metamod`` command into ./cs2/game/csgo/gameinfo.g
 
 No Parameters
 
-build-csserver
+pull-csserver
 ........................
-builds the docker image for development
+pulls the current docker image for development
 
 **Parameters:**
 
