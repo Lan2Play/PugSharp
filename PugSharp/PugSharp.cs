@@ -640,11 +640,11 @@ public class PugSharp : BasePlugin, IMatchCallback
         {
             var victim = eventPlayerDeath.Userid;
 
-            var victimSide = eventPlayerDeath.Userid.TeamNum;
+            var victimSide = (TeamConstants)eventPlayerDeath.Userid.TeamNum;
 
             var attacker = eventPlayerDeath.Attacker;
 
-            var attackerSide = eventPlayerDeath.Attacker.TeamNum;
+            var attackerSide = eventPlayerDeath.Attacker?.TeamNum == null ? TeamConstants.TEAM_INVALID : (TeamConstants)eventPlayerDeath.Attacker.TeamNum;
 
             CCSPlayerController? assister = eventPlayerDeath.Assister;
 
@@ -652,7 +652,6 @@ public class PugSharp : BasePlugin, IMatchCallback
             var isSuicide = (attacker == victim) && !killedByBomb;
             var isHeadshot = eventPlayerDeath.Headshot;
             var isClutcher = false;
-
 
             var victimStats = _CurrentRountState.GetPlayerRoundStats(victim.SteamID, victim.PlayerName);
 
@@ -664,11 +663,10 @@ public class PugSharp : BasePlugin, IMatchCallback
 
                 switch (victimSide)
                 {
-                    // TODO Unknown values
-                    case 1:
+                    case TeamConstants.TEAM_CT:
                         victimStats.FirstDeathCt = true;
                         break;
-                    case 2:
+                    case TeamConstants.TEAM_T:
                         victimStats.FirstDeathT = true;
                         break;
                 }
@@ -697,11 +695,10 @@ public class PugSharp : BasePlugin, IMatchCallback
 
                             switch (attackerSide)
                             {
-                                // TODO Unknown values
-                                case 1:
+                                case TeamConstants.TEAM_CT:
                                     attackerStats.FirstKillCt = true;
                                     break;
-                                case 2:
+                                case TeamConstants.TEAM_T:
                                     attackerStats.FirstKillT = true;
                                     break;
                             }
@@ -720,11 +717,10 @@ public class PugSharp : BasePlugin, IMatchCallback
 
                             switch (attackerSide)
                             {
-                                // TODO Unknown values
-                                case 1:
+                                case TeamConstants.TEAM_CT:
                                     _CurrentRountState.CounterTerroristsClutching = true;
                                     break;
-                                case 2:
+                                case TeamConstants.TEAM_T:
                                     _CurrentRountState.TerroristsClutching = true;
                                     break;
                             }
@@ -753,8 +749,8 @@ public class PugSharp : BasePlugin, IMatchCallback
 
                 if (assister != null)
                 {
-                    bool friendlyFire = attackerSide == victimSide;
-                    bool assistedFlash = eventPlayerDeath.Assistedflash;
+                    var friendlyFire = attackerSide == victimSide;
+                    var assistedFlash = eventPlayerDeath.Assistedflash;
 
                     // Assists should only count towards opposite team
                     if (!friendlyFire)
@@ -897,7 +893,14 @@ public class PugSharp : BasePlugin, IMatchCallback
         {
             var attacker = eventPlayerHurt.Attacker;
 
+            if (attacker == null)
+            {
+                return HookResult.Continue;
+            }
+
             var attackerSide = eventPlayerHurt.Attacker.TeamNum;
+
+            var victim = eventPlayerHurt.Userid;
 
             var victimSide = eventPlayerHurt.Userid.TeamNum;
 
@@ -907,16 +910,18 @@ public class PugSharp : BasePlugin, IMatchCallback
 
             var attackerStats = _CurrentRountState.GetPlayerRoundStats(attacker.SteamID, attacker.PlayerName);
 
-            var damageSum = eventPlayerHurt.DmgArmor + eventPlayerHurt.DmgHealth;
+            var victimHealth = victim.Health;
+
+            var damageCapped = eventPlayerHurt.DmgHealth > victimHealth ? victimHealth : eventPlayerHurt.DmgHealth;
 
             // Don't count friendlydamage
-            if(attackerSide != victimSide)
+            if (attackerSide != victimSide)
             {
-                attackerStats.Damage += damageSum;
+                attackerStats.Damage += damageCapped;
 
                 if (isUtility)
                 {
-                    attackerStats.UtilityDamage += damageSum;
+                    attackerStats.UtilityDamage += damageCapped;
                 }
             }
         }

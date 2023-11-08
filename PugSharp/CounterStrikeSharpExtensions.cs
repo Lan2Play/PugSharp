@@ -41,9 +41,22 @@ namespace PugSharp
 
         internal static bool IsUtility(string weapon)
         {
-            Console.WriteLine($"IsUtility: Unknown weapong {weapon}");
+            switch (weapon)
+            {
+                case "flashbang":
+                case "hegrenade":
+                case "inferno":
+                case "smoke":
 
-            return false;
+                    {
+                        return true;
+                    }
+
+                default:
+                    {
+                        return false;
+                    }
+            }
         }
     }
 }
