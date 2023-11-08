@@ -330,9 +330,9 @@ public class PugSharp : BasePlugin, IMatchCallback
         command);
     }
 
-    private static void HandleCommand(Action commandAction, CommandInfo command, [CallerMemberName] string commandMethod = null)
+    private static void HandleCommand(Action commandAction, CommandInfo command, [CallerMemberName] string? commandMethod = null)
     {
-        var commandName = commandMethod.Replace("OnCommand", "", StringComparison.OrdinalIgnoreCase);
+        var commandName = commandMethod?.Replace("OnCommand", "", StringComparison.OrdinalIgnoreCase);
         try
         {
             _Logger.LogInformation("Command \"{commandName}\" called.", commandName);
@@ -651,7 +651,7 @@ public class PugSharp : BasePlugin, IMatchCallback
             var killedByBomb = eventPlayerDeath.Weapon.Equals("planted_c4", StringComparison.OrdinalIgnoreCase);
             var isSuicide = (attacker == victim) && !killedByBomb;
             var isHeadshot = eventPlayerDeath.Headshot;
-            var isClutcher = false;
+            var isClutcher = false; // TODO
 
             var victimStats = _CurrentRountState.GetPlayerRoundStats(victim.SteamID, victim.PlayerName);
 
