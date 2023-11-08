@@ -146,6 +146,7 @@ If you want to know how to use PugSharp, hop over to our [Documentation](https:/
 
 ## Credits
 
+* Awesome match plugin for CS:GO and inspiration: [Get5](https://github.com/splewis/get5)
 * Plugin Framework: [CounterStrikeSharp by roflmuffin](https://github.com/roflmuffin/CounterStrikeSharp)
 * Docker test setup: [joedwards32/cs2](https://github.com/joedwards32/CS2)
 * Metamod fix script: [ghostcap-gaming/cs2-metamod-re-enable-script](https://github.com/ghostcap-gaming/cs2-metamod-re-enable-script)
