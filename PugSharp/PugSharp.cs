@@ -63,6 +63,9 @@ public class PugSharp : BasePlugin, IMatchCallback
         RegisterEventHandler<EventPlayerDeath>(OnPlayerDeath);
         RegisterEventHandler<EventPlayerBlind>(OnPlayerBlind);
         RegisterEventHandler<EventRoundMvp>(OnRoundMvp);
+        RegisterEventHandler<EventBombDefused>(OnBombDefused);
+        RegisterEventHandler<EventBombPlanted>(OnBombPlanted);
+        RegisterEventHandler<EventPlayerHurt>(OnPlayerHurt);
 
         RegisterListener<Listeners.OnMapStart>(OnMapStartHandler);
 
@@ -70,8 +73,6 @@ public class PugSharp : BasePlugin, IMatchCallback
 
         _Logger.LogInformation("End RegisterEventHandlers");
     }
-
-
 
     private void InitializeMatch(MatchConfig matchConfig)
     {
@@ -647,7 +648,7 @@ public class PugSharp : BasePlugin, IMatchCallback
 
             CCSPlayerController? assister = eventPlayerDeath.Assister;
 
-            var killedByBomb = eventPlayerDeath.Weapon.Equals("planted_c4");
+            var killedByBomb = eventPlayerDeath.Weapon.Equals("planted_c4", StringComparison.OrdinalIgnoreCase);
             var isSuicide = (attacker == victim) && !killedByBomb;
             var isHeadshot = eventPlayerDeath.Headshot;
             var isClutcher = false;
@@ -856,6 +857,96 @@ public class PugSharp : BasePlugin, IMatchCallback
 
         return HookResult.Continue;
     }
+
+    private HookResult OnBombPlanted(EventBombPlanted eventBombPlanted, GameEventInfo info)
+    {
+        if (_Match == null)
+        {
+            return HookResult.Continue;
+        }
+
+        if (_Match.CurrentState == MatchState.None)
+        {
+            return HookResult.Continue;
+        }
+
+        if (_Match.CurrentState == MatchState.MatchRunning)
+        {
+            var planter = eventBombPlanted.Userid;
+            var planterStats = _CurrentRountState.GetPlayerRoundStats(planter.SteamID, planter.PlayerName);
+
+            planterStats.BombPlanted = true;
+        }
+
+        return HookResult.Continue;
+    }
+
+    private HookResult OnPlayerHurt(EventPlayerHurt eventPlayerHurt, GameEventInfo info)
+    {
+        if (_Match == null)
+        {
+            return HookResult.Continue;
+        }
+
+        if (_Match.CurrentState == MatchState.None)
+        {
+            return HookResult.Continue;
+        }
+
+        if (_Match.CurrentState == MatchState.MatchRunning)
+        {
+            var attacker = eventPlayerHurt.Attacker;
+
+            var attackerSide = eventPlayerHurt.Attacker.TeamNum;
+
+            var victimSide = eventPlayerHurt.Userid.TeamNum;
+
+            var weapon = eventPlayerHurt.Weapon;
+
+            var isUtility = CounterStrikeSharpExtensions.IsUtility(weapon);
+
+            var attackerStats = _CurrentRountState.GetPlayerRoundStats(attacker.SteamID, attacker.PlayerName);
+
+            var damageSum = eventPlayerHurt.DmgArmor + eventPlayerHurt.DmgHealth;
+
+            // Don't count friendlydamage
+            if(attackerSide != victimSide)
+            {
+                attackerStats.Damage += damageSum;
+
+                if (isUtility)
+                {
+                    attackerStats.UtilityDamage += damageSum;
+                }
+            }
+        }
+
+        return HookResult.Continue;
+    }
+
+    private HookResult OnBombDefused(EventBombDefused eventBombDefused, GameEventInfo info)
+    {
+        if (_Match == null)
+        {
+            return HookResult.Continue;
+        }
+
+        if (_Match.CurrentState == MatchState.None)
+        {
+            return HookResult.Continue;
+        }
+
+        if (_Match.CurrentState == MatchState.MatchRunning)
+        {
+            var defuser = eventBombDefused.Userid;
+            var defuserStats = _CurrentRountState.GetPlayerRoundStats(defuser.SteamID, defuser.PlayerName);
+
+            defuserStats.BombDefused = true;
+        }
+
+        return HookResult.Continue;
+    }
+
 
     #endregion
 

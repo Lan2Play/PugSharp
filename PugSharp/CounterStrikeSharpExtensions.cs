@@ -38,5 +38,12 @@ namespace PugSharp
 
             return (PlayerConnectedState)statusRef;
         }
+
+        internal static bool IsUtility(string weapon)
+        {
+            Console.WriteLine($"IsUtility: Unknown weapong {weapon}");
+
+            return false;
+        }
     }
 }
