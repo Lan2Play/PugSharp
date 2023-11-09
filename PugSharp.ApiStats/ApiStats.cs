@@ -7,29 +7,125 @@ using System.Text.Json;
 
 namespace PugSharp.ApiStats
 {
-    public class ApiStats : IDisposable
+    public class BaseApi : IDisposable
+    {
+        private static readonly ILogger<BaseApi> _Logger = LogManager.CreateLogger<BaseApi>();
+
+        private bool _DisposedValue;
+
+        protected HttpClient HttpClient { get; }
+
+        protected BaseApi(string baseUrl, string authKey)
+        {
+            if (!baseUrl.EndsWith('/'))
+            {
+                baseUrl += "/";
+            }
+
+            HttpClient = new HttpClient()
+            {
+                BaseAddress = new Uri(baseUrl),
+            };
+
+            HttpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", authKey);
+        }
+
+        protected static async Task HandleResponseAsync(HttpResponseMessage? httpResponseMessage, CancellationToken cancellationToken)
+        {
+
+            if (httpResponseMessage == null)
+            {
+                return;
+            }
+
+            try
+            {
+                if (httpResponseMessage.IsSuccessStatusCode)
+                {
+                    _Logger.LogInformation("API request was succesful, HTTP status code = {statusCode}", httpResponseMessage.StatusCode);
+
+                    var responseContent = await httpResponseMessage.Content.ReadAsStringAsync(cancellationToken).ConfigureAwait(false);
+
+                    _Logger.LogInformation("ResponseContent: {responseContent}", responseContent);
+
+                }
+                else
+                {
+                    _Logger.LogError("API request failed, HTTP status code = {statusCode}", httpResponseMessage.StatusCode);
+
+                    var responseContent = await httpResponseMessage.Content.ReadAsStringAsync(cancellationToken).ConfigureAwait(false);
+
+                    _Logger.LogError("ResponseContent: {responseContent}", responseContent);
+
+                }
+            }
+            catch (Exception e)
+            {
+                _Logger.LogError(e, "Error handling response");
+            }
+        }
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (!_DisposedValue)
+            {
+                if (disposing)
+                {
+                    HttpClient?.Dispose();
+                }
+
+                _DisposedValue = true;
+            }
+        }
+
+        void IDisposable.Dispose()
+        {
+            // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
+            Dispose(disposing: true);
+            GC.SuppressFinalize(this);
+        }
+    }
+
+    public class DemoUploader : BaseApi
     {
         private static readonly ILogger<ApiStats> _Logger = LogManager.CreateLogger<ApiStats>();
 
-        private readonly HttpClient _HttpClient;
-        private readonly string? _ApiStatsDirectory;
-        private bool _DisposedValue;
+        public DemoUploader(string demoUploadUrl, string demoUploadKey) : base(demoUploadUrl, demoUploadKey)
+        {
+            _Logger.LogInformation("Create Api Stats with BaseUrl: {url}", demoUploadUrl);
+        }
 
-        public ApiStats(string apiStatsUrl, string apiStatsKey, string? apiStatsDirectory)
+        public async Task UploadDemoAsync(string demoFile, CancellationToken cancellationToken)
+        {
+            var queryParams = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+
+            var uri = QueryHelpers.AddQueryString($"demo", queryParams);
+
+            var demoFileStream = File.OpenRead(demoFile);
+            await using (demoFileStream.ConfigureAwait(false))
+            {
+                using var fileStreamContent = new StreamContent(demoFileStream);
+                using var formData = new MultipartFormDataContent
+                {
+                    fileStreamContent,
+                };
+
+                var response = await HttpClient.PostAsync(uri, formData, cancellationToken).ConfigureAwait(false);
+
+                await HandleResponseAsync(response, cancellationToken).ConfigureAwait(false);
+            }
+        }
+    }
+
+    public class ApiStats : BaseApi
+    {
+        private static readonly ILogger<ApiStats> _Logger = LogManager.CreateLogger<ApiStats>();
+
+        private readonly string? _ApiStatsDirectory;
+
+        public ApiStats(string apiStatsUrl, string apiStatsKey, string? apiStatsDirectory) : base(apiStatsUrl, apiStatsKey)
         {
             _Logger.LogInformation("Create Api Stats with BaseUrl: {url}", apiStatsUrl);
-
-            if (!apiStatsUrl.EndsWith('/'))
-            {
-                apiStatsUrl += "/";
-            }
-
-            _HttpClient = new HttpClient()
-            {
-                BaseAddress = new Uri(apiStatsUrl),
-            };
-
-            _HttpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", apiStatsKey);
             _ApiStatsDirectory = apiStatsDirectory;
         }
 
@@ -44,7 +140,7 @@ namespace PugSharp.ApiStats
 
                 var uri = QueryHelpers.AddQueryString($"golive/{goingLiveParams.MapNumber}", queryParams);
 
-                var response = await _HttpClient.PostAsync(uri, content: null, cancellationToken).ConfigureAwait(false);
+                var response = await HttpClient.PostAsync(uri, content: null, cancellationToken).ConfigureAwait(false);
 
                 await HandleResponseAsync(response, cancellationToken).ConfigureAwait(false);
             }
@@ -94,7 +190,7 @@ namespace PugSharp.ApiStats
 
                 var uri = QueryHelpers.AddQueryString($"finalize/{mapResultParams.MapNumber}", queryParams);
 
-                var response = await _HttpClient.PostAsync(uri, content: null, cancellationToken).ConfigureAwait(false);
+                var response = await HttpClient.PostAsync(uri, content: null, cancellationToken).ConfigureAwait(false);
 
                 await HandleResponseAsync(response, cancellationToken).ConfigureAwait(false);
             }
@@ -135,7 +231,7 @@ namespace PugSharp.ApiStats
 
                 var uri = QueryHelpers.AddQueryString($"updateround/{roundStatusUpdateParams.MapNumber}", queryParams);
 
-                var response = await _HttpClient.PostAsync(uri, content: null, cancellationToken).ConfigureAwait(false);
+                var response = await HttpClient.PostAsync(uri, content: null, cancellationToken).ConfigureAwait(false);
 
                 await HandleResponseAsync(response, cancellationToken).ConfigureAwait(false);
 
@@ -191,7 +287,7 @@ namespace PugSharp.ApiStats
 
                     var uri = QueryHelpers.AddQueryString(string.Create(CultureInfo.InvariantCulture, $"updateplayer/{mapNumber}/{player.Key}"), queryParams);
 
-                    var response = await _HttpClient.PostAsync(uri, content: null, cancellationToken).ConfigureAwait(false);
+                    var response = await HttpClient.PostAsync(uri, content: null, cancellationToken).ConfigureAwait(false);
 
                     await HandleResponseAsync(response, cancellationToken).ConfigureAwait(false);
                 }
@@ -255,7 +351,7 @@ namespace PugSharp.ApiStats
 
             var uri = QueryHelpers.AddQueryString($"finalize", queryParams);
 
-            var response = await _HttpClient.PostAsync(uri, content: null, cancellationToken).ConfigureAwait(false);
+            var response = await HttpClient.PostAsync(uri, content: null, cancellationToken).ConfigureAwait(false);
 
             await HandleResponseAsync(response, cancellationToken).ConfigureAwait(false);
 
@@ -265,47 +361,14 @@ namespace PugSharp.ApiStats
             await SendFreeServerInternalAsync(cancellationToken).ConfigureAwait(false);
         }
 
+
         internal async Task SendFreeServerInternalAsync(CancellationToken cancellationToken)
         {
-            var response = await _HttpClient.PostAsync(new Uri("freeserver"), content: null, cancellationToken).ConfigureAwait(false);
+            var response = await HttpClient.PostAsync(new Uri("freeserver"), content: null, cancellationToken).ConfigureAwait(false);
 
             await HandleResponseAsync(response, cancellationToken).ConfigureAwait(false);
         }
 
-        internal static async Task HandleResponseAsync(HttpResponseMessage? httpResponseMessage, CancellationToken cancellationToken)
-        {
-
-            if (httpResponseMessage == null)
-            {
-                return;
-            }
-
-            try
-            {
-                if (httpResponseMessage.IsSuccessStatusCode)
-                {
-                    _Logger.LogInformation("API request was succesful, HTTP status code = {statusCode}", httpResponseMessage.StatusCode);
-
-                    var responseContent = await httpResponseMessage.Content.ReadAsStringAsync(cancellationToken).ConfigureAwait(false);
-
-                    _Logger.LogInformation("ResponseContent: {responseContent}", responseContent);
-
-                }
-                else
-                {
-                    _Logger.LogError("API request failed, HTTP status code = {statusCode}", httpResponseMessage.StatusCode);
-
-                    var responseContent = await httpResponseMessage.Content.ReadAsStringAsync(cancellationToken).ConfigureAwait(false);
-
-                    _Logger.LogError("ResponseContent: {responseContent}", responseContent);
-
-                }
-            }
-            catch (Exception e)
-            {
-                _Logger.LogError(e, "Error handling response");
-            }
-        }
 
         private static class ApiStatsConstants
         {
@@ -367,26 +430,6 @@ namespace PugSharp.ApiStats
             public const string StatsKast = "kast";
             public const string StatsContributionScore = "contribution_score";
             public const string StatsMvp = "mvp";
-        }
-
-        protected virtual void Dispose(bool disposing)
-        {
-            if (!_DisposedValue)
-            {
-                if (disposing)
-                {
-                    _HttpClient?.Dispose();
-                }
-
-                _DisposedValue = true;
-            }
-        }
-
-        public void Dispose()
-        {
-            // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
-            Dispose(disposing: true);
-            GC.SuppressFinalize(this);
         }
     }
 }

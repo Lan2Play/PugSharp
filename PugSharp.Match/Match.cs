@@ -23,6 +23,7 @@ public class Match : IDisposable
 
     private MatchTeam? _CurrentMatchTeamToVote;
     private bool disposedValue;
+    private DemoUploader _DemoUploader;
 
     public MatchState CurrentState => _MatchStateMachine.State;
 
@@ -53,6 +54,11 @@ public class Match : IDisposable
         if (!string.IsNullOrEmpty(Config.EventulaApistatsUrl) && !string.IsNullOrEmpty(Config.EventulaApistatsToken))
         {
             _ApiStats = new ApiStats.ApiStats(Config.EventulaApistatsUrl, Config.EventulaApistatsToken, pluginDirectory == null ? null : Path.Combine(pluginDirectory, "Stats"));
+        }
+
+        if (!string.IsNullOrEmpty(Config.EventulaDemoUploadUrl) && !string.IsNullOrEmpty(Config.EventulaApistatsToken))
+        {
+            _DemoUploader = new DemoUploader(Config.EventulaDemoUploadUrl, Config.EventulaApistatsToken);
         }
 
         _MapsToSelect = matchConfig.Maplist.Select(x => new Vote(x)).ToList();
@@ -168,7 +174,7 @@ public class Match : IDisposable
         _MatchCallback.EndWarmup();
         _MatchCallback.DisableCheats();
         _MatchCallback.SetupRoundBackup();
-        _MatchCallback.StartDemoRecording();
+        _MatchInfo.DemoFile = _MatchCallback.StartDemoRecording();
 
         _MatchCallback.SendMessage($" {ChatColors.Default}Starting Match. {ChatColors.Highlight}{MatchTeam1.TeamConfig.Name} {ChatColors.Default}as {ChatColors.Highlight}{MatchTeam1.CurrentTeamSite}{ChatColors.Default}. {ChatColors.Highlight}{MatchTeam2.TeamConfig.Name}{ChatColors.Default} as {ChatColors.Highlight}{MatchTeam2.CurrentTeamSite}");
 
@@ -187,11 +193,6 @@ public class Match : IDisposable
         var mapResultParams = new MapResultParams(_MatchInfo.CurrentMap.Winner.TeamConfig.Name, _MatchInfo.CurrentMap.Team1Points, _MatchInfo.CurrentMap.Team2Points, _MatchInfo.CurrentMap.MapNumber);
         _ = _ApiStats?.FinalizeMapAsync(Config.MatchId, mapResultParams, CancellationToken.None);
 
-        if (_MatchInfo.MatchMaps[_MatchInfo.MatchMaps.Count - 1] == _MatchInfo.CurrentMap)
-        {
-            var seriesResultParams = new SeriesResultParams(_MatchInfo.MatchMaps.GroupBy(x => x.Winner).MaxBy(x => x.Count())!.Key!.TeamConfig.Name, true, 120000);
-            _ = _ApiStats?.FinalizeAsync(seriesResultParams, CancellationToken.None);
-        }
     }
 
     public void SendRoundResults(IRoundResults roundResults)
@@ -281,8 +282,13 @@ public class Match : IDisposable
     private void CompleteMatch()
     {
         _MatchCallback.StopDemoRecording();
+        _ = _DemoUploader.UploadDemoAsync(_MatchInfo.DemoFile, CancellationToken.None);
 
-        //_ApiStats?.SendSeriesResultAsync(new SeriesResultParams(_Match))
+        if (_MatchInfo.MatchMaps[_MatchInfo.MatchMaps.Count - 1] == _MatchInfo.CurrentMap)
+        {
+            var seriesResultParams = new SeriesResultParams(_MatchInfo.MatchMaps.GroupBy(x => x.Winner).MaxBy(x => x.Count())!.Key!.TeamConfig.Name, true, 120000);
+            _ = _ApiStats?.FinalizeAsync(seriesResultParams, CancellationToken.None);
+        }
     }
 
     private async Task KickPlayersAsync()

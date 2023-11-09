@@ -11,7 +11,7 @@ public class MatchInfo
     public MatchMap CurrentMap { get; set; }
 
     public IReadOnlyList<MatchMap> MatchMaps { get; }
-
+    public string DemoFile { get; internal set; }
 }
 
 public class MatchMap

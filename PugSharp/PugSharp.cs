@@ -935,11 +935,11 @@ public class PugSharp : BasePlugin, IMatchCallback
         UpdateConvar("mp_backup_round_file", prefix);
     }
 
-    public void StartDemoRecording()
+    public string StartDemoRecording()
     {
         if (_Match == null)
         {
-            return;
+            return string.Empty;
         }
 
         var formattedDateTime = DateTime.UtcNow.ToString("yyyyMMddHHmmss", CultureInfo.InvariantCulture);
@@ -955,12 +955,15 @@ public class PugSharp : BasePlugin, IMatchCallback
             var fullDemoFileName = Path.Join(directoryPath, demoFileName);
             _Logger.LogInformation("Starting demo recording, path: {fullDemoFileName}", fullDemoFileName);
             Server.ExecuteCommand($"tv_record {fullDemoFileName}");
+            return fullDemoFileName;
         }
         catch (Exception e)
         {
             _Logger.LogError(e, "Error Starting DemoRecording. Fallback to tv_record. Fallback to {demoFileName}", demoFileName);
             Server.ExecuteCommand($"tv_record {demoFileName}");
         }
+
+        return string.Empty;
     }
 
     public void StopDemoRecording()

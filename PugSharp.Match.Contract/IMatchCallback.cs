@@ -12,7 +12,7 @@ public interface IMatchCallback
     void UnpauseMatch();
 
     void DisableCheats();
-    void StartDemoRecording();
+    string StartDemoRecording();
     void StopDemoRecording();
     void SetupRoundBackup();
     Team LoadMatchWinnerName();
