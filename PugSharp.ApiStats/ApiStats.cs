@@ -186,7 +186,20 @@ namespace PugSharp.ApiStats
                 {
                     var playerStatistics = player.Value;
 
-                    var queryParams = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+                    Dictionary<string, string> queryParams = CreateUpdatePlayerQueryParameters(teamName, playerStatistics);
+
+                    var uri = QueryHelpers.AddQueryString($"updateplayer/{mapNumber}/{player.Key}", queryParams);
+
+                    var response = await _HttpClient.PostAsync(uri, null, cancellationToken).ConfigureAwait(false);
+
+                    await HandleResponseAsync(response, cancellationToken).ConfigureAwait(false);
+                }
+            }
+        }
+
+        private static Dictionary<string, string> CreateUpdatePlayerQueryParameters(string teamName, PlayerStatistics playerStatistics)
+        {
+            return new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
                     {
                         {ApiStatsConstants.StatsTeamName, teamName},
                         {ApiStatsConstants.StatsName, playerStatistics.Name},
@@ -224,14 +237,6 @@ namespace PugSharp.ApiStats
                         {ApiStatsConstants.StatsContributionScore, CreateIntParam(playerStatistics.ContributionScore)},
                         {ApiStatsConstants.StatsMvp, CreateIntParam(playerStatistics.Mvp)},
                     };
-
-                    var uri = QueryHelpers.AddQueryString($"updateplayer/{mapNumber}", queryParams);
-
-                    var response = await _HttpClient.PostAsync(uri, null, cancellationToken).ConfigureAwait(false);
-
-                    await HandleResponseAsync(response, cancellationToken).ConfigureAwait(false);
-                }
-            }
         }
 
         internal static string CreateIntParam(int param)
