@@ -73,27 +73,36 @@ namespace PugSharp.Config
                 var response = await _HttpClient.SendAsync(httpRequestMessage).ConfigureAwait(false);
 
                 response.EnsureSuccessStatusCode();
-
-                var configJsonStream = await response.Content.ReadAsStreamAsync().ConfigureAwait(false);
-                var config = await JsonSerializer.DeserializeAsync<MatchConfig>(configJsonStream).ConfigureAwait(false);
-                if (config == null)
+                try
                 {
-                    _Logger.LogError("MatchConfig was deserialized to null");
+                    var configJsonStream = await response.Content.ReadAsStreamAsync().ConfigureAwait(false);
 
-                    return new Error<string>("Config couldn't be deserialized");
+                    var config = await JsonSerializer.DeserializeAsync<MatchConfig>(configJsonStream).ConfigureAwait(false);
+                    if (config == null)
+                    {
+                        _Logger.LogError("MatchConfig was deserialized to null");
+
+                        return new Error<string>("Config couldn't be deserialized");
+                    }
+
+                    configJsonStream.Seek(0, SeekOrigin.Begin);
+                    var matchConfigPath = Path.Combine(_ConfigDirectory, "match.json");
+                    var fileWriteStream = File.OpenWrite(matchConfigPath);
+                    await using (fileWriteStream.ConfigureAwait(false))
+                    {
+                        await configJsonStream.CopyToAsync(fileWriteStream).ConfigureAwait(false);
+                        configJsonStream.Close();
+                    }
+
+                    _Logger.LogInformation("Successfully loaded config for match {matchId}", config.MatchId);
+                    return config;
                 }
-
-                configJsonStream.Seek(0, SeekOrigin.Begin);
-                var matchConfigPath = Path.Combine(_ConfigDirectory, "match.json");
-                var fileWriteStream = File.OpenWrite(matchConfigPath);
-                await using (fileWriteStream.ConfigureAwait(false))
+                catch (JsonException ex)
                 {
-                    await configJsonStream.CopyToAsync(fileWriteStream).ConfigureAwait(false);
-                    configJsonStream.Close();
+                    var configJsonString = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
+                    _Logger.LogError(ex, configJsonString);
+                    return new Error<string>(configJsonString);
                 }
-
-                _Logger.LogInformation("Successfully loaded config for match {matchId}", config.MatchId);
-                return config;
             }
             catch (Exception ex)
             {
