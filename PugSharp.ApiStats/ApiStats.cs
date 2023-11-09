@@ -13,6 +13,7 @@ namespace PugSharp.ApiStats
 
         private readonly HttpClient _HttpClient;
         private readonly string? _ApiStatsDirectory;
+        private bool _DisposedValue;
 
         public ApiStats(string apiStatsUrl, string apiStatsKey, string? apiStatsDirectory)
         {
@@ -43,7 +44,7 @@ namespace PugSharp.ApiStats
 
                 var uri = QueryHelpers.AddQueryString($"golive/{goingLiveParams.MapNumber}", queryParams);
 
-                var response = await _HttpClient.PostAsync(uri, null, cancellationToken).ConfigureAwait(false);
+                var response = await _HttpClient.PostAsync(uri, content: null, cancellationToken).ConfigureAwait(false);
 
                 await HandleResponseAsync(response, cancellationToken).ConfigureAwait(false);
             }
@@ -93,7 +94,7 @@ namespace PugSharp.ApiStats
 
                 var uri = QueryHelpers.AddQueryString($"finalize/{mapResultParams.MapNumber}", queryParams);
 
-                var response = await _HttpClient.PostAsync(uri, null, cancellationToken).ConfigureAwait(false);
+                var response = await _HttpClient.PostAsync(uri, content: null, cancellationToken).ConfigureAwait(false);
 
                 await HandleResponseAsync(response, cancellationToken).ConfigureAwait(false);
             }
@@ -134,7 +135,7 @@ namespace PugSharp.ApiStats
 
                 var uri = QueryHelpers.AddQueryString($"updateround/{roundStatusUpdateParams.MapNumber}", queryParams);
 
-                var response = await _HttpClient.PostAsync(uri, null, cancellationToken).ConfigureAwait(false);
+                var response = await _HttpClient.PostAsync(uri, content: null, cancellationToken).ConfigureAwait(false);
 
                 await HandleResponseAsync(response, cancellationToken).ConfigureAwait(false);
 
@@ -188,9 +189,9 @@ namespace PugSharp.ApiStats
 
                     Dictionary<string, string> queryParams = CreateUpdatePlayerQueryParameters(teamName, playerStatistics);
 
-                    var uri = QueryHelpers.AddQueryString($"updateplayer/{mapNumber}/{player.Key}", queryParams);
+                    var uri = QueryHelpers.AddQueryString(string.Create(CultureInfo.InvariantCulture, $"updateplayer/{mapNumber}/{player.Key}"), queryParams);
 
-                    var response = await _HttpClient.PostAsync(uri, null, cancellationToken).ConfigureAwait(false);
+                    var response = await _HttpClient.PostAsync(uri, content: null, cancellationToken).ConfigureAwait(false);
 
                     await HandleResponseAsync(response, cancellationToken).ConfigureAwait(false);
                 }
@@ -254,7 +255,7 @@ namespace PugSharp.ApiStats
 
             var uri = QueryHelpers.AddQueryString($"finalize", queryParams);
 
-            var response = await _HttpClient.PostAsync(uri, null, cancellationToken).ConfigureAwait(false);
+            var response = await _HttpClient.PostAsync(uri, content: null, cancellationToken).ConfigureAwait(false);
 
             await HandleResponseAsync(response, cancellationToken).ConfigureAwait(false);
 
@@ -266,7 +267,7 @@ namespace PugSharp.ApiStats
 
         internal async Task SendFreeServerInternalAsync(CancellationToken cancellationToken)
         {
-            var response = await _HttpClient.PostAsync(new Uri("freeserver"), null, cancellationToken).ConfigureAwait(false);
+            var response = await _HttpClient.PostAsync(new Uri("freeserver"), content: null, cancellationToken).ConfigureAwait(false);
 
             await HandleResponseAsync(response, cancellationToken).ConfigureAwait(false);
         }
@@ -304,11 +305,6 @@ namespace PugSharp.ApiStats
             {
                 _Logger.LogError(e, "Error handling response");
             }
-        }
-
-        public void Dispose()
-        {
-            _HttpClient.Dispose();
         }
 
         private static class ApiStatsConstants
@@ -371,6 +367,26 @@ namespace PugSharp.ApiStats
             public const string StatsKast = "kast";
             public const string StatsContributionScore = "contribution_score";
             public const string StatsMvp = "mvp";
+        }
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (!_DisposedValue)
+            {
+                if (disposing)
+                {
+                    _HttpClient?.Dispose();
+                }
+
+                _DisposedValue = true;
+            }
+        }
+
+        public void Dispose()
+        {
+            // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
+            Dispose(disposing: true);
+            GC.SuppressFinalize(this);
         }
     }
 }
