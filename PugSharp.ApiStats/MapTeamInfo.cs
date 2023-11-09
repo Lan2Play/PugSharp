@@ -1,4 +1,5 @@
-﻿namespace PugSharp.ApiStats
+﻿
+namespace PugSharp.ApiStats
 {
     public class MapTeamInfo
     {

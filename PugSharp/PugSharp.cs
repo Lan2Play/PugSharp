@@ -12,7 +12,6 @@ using PugSharp.Models;
 using System.Globalization;
 using System.Runtime.CompilerServices;
 using System.Text.Json;
-using static System.Net.WebRequestMethods;
 
 namespace PugSharp;
 
@@ -21,6 +20,8 @@ public class PugSharp : BasePlugin, IMatchCallback
     private static readonly ILogger<PugSharp> _Logger = LogManager.CreateLogger<PugSharp>();
 
     private readonly ConfigProvider _ConfigProvider = new(Path.Join(Server.GameDirectory, "csgo", "PugSharp", "Config"));
+
+    private readonly CurrentRoundState _CurrentRountState = new CurrentRoundState();
 
     private Match.Match? _Match;
     private ServerConfig? _ServerConfig;
@@ -60,6 +61,11 @@ public class PugSharp : BasePlugin, IMatchCallback
         RegisterEventHandler<EventServerCvar>(OnCvarChanged, HookMode.Pre);
         RegisterEventHandler<EventPlayerTeam>(OnPlayerTeam);
         RegisterEventHandler<EventPlayerDeath>(OnPlayerDeath);
+        RegisterEventHandler<EventPlayerBlind>(OnPlayerBlind);
+        RegisterEventHandler<EventRoundMvp>(OnRoundMvp);
+        RegisterEventHandler<EventBombDefused>(OnBombDefused);
+        RegisterEventHandler<EventBombPlanted>(OnBombPlanted);
+        RegisterEventHandler<EventPlayerHurt>(OnPlayerHurt);
 
         RegisterListener<Listeners.OnMapStart>(OnMapStartHandler);
 
@@ -324,9 +330,9 @@ public class PugSharp : BasePlugin, IMatchCallback
         command);
     }
 
-    private static void HandleCommand(Action commandAction, CommandInfo command, [CallerMemberName] string commandMethod = null)
+    private static void HandleCommand(Action commandAction, CommandInfo command, [CallerMemberName] string? commandMethod = null)
     {
-        var commandName = commandMethod.Replace("OnCommand", "", StringComparison.OrdinalIgnoreCase);
+        var commandName = commandMethod?.Replace("OnCommand", "", StringComparison.OrdinalIgnoreCase);
         try
         {
             _Logger.LogInformation("Command \"{commandName}\" called.", commandName);
@@ -415,7 +421,6 @@ public class PugSharp : BasePlugin, IMatchCallback
                 {
                     _Logger.LogInformation("Switch {playerName} to team {team}!", player.PlayerName, configTeam);
                     player.SwitchTeam(configTeam);
-                    player.MatchStats?.ResetStats();
                 });
             }
         }
@@ -463,6 +468,8 @@ public class PugSharp : BasePlugin, IMatchCallback
     {
         _Logger.LogInformation("OnRoundPreStart called");
 
+        _CurrentRountState.Reset();
+
         return HookResult.Continue;
     }
 
@@ -502,18 +509,15 @@ public class PugSharp : BasePlugin, IMatchCallback
                     Score = teamT.Score,
                     ScoreT = isFirstHalf ? teamT.ScoreFirstHalf : teamT.ScoreSecondHalf,
                     ScoreCT = isFirstHalf ? teamT.ScoreSecondHalf : teamT.ScoreFirstHalf,
-                    PlayerResults = CreatePlayerResults(teamT),
                 },
                 CTRoundResult = new TeamRoundResults
                 {
                     Score = teamCT.Score,
                     ScoreT = isFirstHalf ? teamCT.ScoreSecondHalf : teamCT.ScoreFirstHalf,
                     ScoreCT = isFirstHalf ? teamCT.ScoreFirstHalf : teamCT.ScoreSecondHalf,
-                    PlayerResults = CreatePlayerResults(teamCT),
                 },
+                PlayerResults = CreatePlayerResults(),
             });
-
-            // TODO Reset round stats
 
             // TODO OT handling
         }
@@ -521,77 +525,16 @@ public class PugSharp : BasePlugin, IMatchCallback
         return HookResult.Continue;
     }
 
-    private IReadOnlyDictionary<ulong, IPlayerRoundResults> CreatePlayerResults(CCSTeam team)
+    private IReadOnlyDictionary<ulong, IPlayerRoundResults> CreatePlayerResults()
     {
-        var result = new Dictionary<ulong, IPlayerRoundResults>();
+        var dict = new Dictionary<ulong, IPlayerRoundResults>();
 
-        var allPlayers = Utilities.FindAllEntitiesByDesignerName<CCSPlayerController>("cs_player_controller");
-        foreach (var playerController in team.PlayerControllers)
+        foreach (var kvp in _CurrentRountState.PlayerStats)
         {
-            if (!playerController.IsValid)
-            {
-                _Logger.LogError("Can not create PlayerStatistics because controller is invalid!");
-                continue;
-            }
-
-            var ccsPlayerController = allPlayers.First(x => x.SteamID.Equals(playerController.Value.SteamID));
-
-            if (!ccsPlayerController.IsValid || ccsPlayerController.ActionTrackingServices == null)
-            {
-                _Logger.LogError("Can not create PlayerStatistics because controller is invalid!");
-                continue;
-            }
-
-            var playerMatchStats = ccsPlayerController.ActionTrackingServices.MatchStats;
-
-            // TODO should we store overall match stats in the PugSharp object or in the map object?
-            // I think we should pass per round statistics (which are tracked in PugSharp class) to the Match object which holds the match wide statistics
-            var internalPlayer = _Match?.AllMatchPlayers.FirstOrDefault(a => a.Player.UserId.Equals(ccsPlayerController.UserId));
-
-            var stats = internalPlayer?.Player.MatchStats;
-
-            // TODO Add Missing StatisticValues
-            result.Add(playerController.Value.SteamID, new PlayerRoundResults
-            {
-                Assists = stats?.Assists ?? 0,
-                BombDefuses = 0,
-                BombPlants = 0,
-                Coaching = false,
-                ContributionScore = 0,
-                Count1K = 0,
-                Count2K = 0,
-                Count3K = playerMatchStats.Enemy3Ks,
-                Count4K = playerMatchStats.Enemy4Ks,
-                Count5K = playerMatchStats.Enemy5Ks,
-                Damage = playerMatchStats.Damage,
-                Deaths = playerMatchStats.Deaths,
-                EnemiesFlashed = playerMatchStats.EnemiesFlashed,
-                FirstDeathCt = stats?.FirstDeathCt ?? 0,
-                FirstDeathT = stats?.FirstDeathT ?? 0,
-                FirstKillCt = stats?.FirstKillCt ?? 0,
-                FirstKillT = stats?.FirstKillT ?? 0,
-                FlashbangAssists = stats?.FlashbangAssists ?? 0,
-                FriendliesFlashed = 0,
-                HeadshotKills = stats?.HeadshotKills ?? 0,
-                Kast = 0,
-                Kills = playerMatchStats.Kills,
-                KnifeKills = stats?.KnifeKills ?? 0,
-                Mvp = 0,
-                Name = playerController.Value.PlayerName,
-                RoundsPlayed = 0,
-                Suicides = stats?.Suicides ?? 0,
-                TeamKills = stats?.TeamKills ?? 0,
-                TradeKill = 0,
-                UtilityDamage = playerMatchStats.UtilityDamage,
-                V1 = 0,
-                V2 = 0,
-                V3 = 0,
-                V4 = 0,
-                V5 = 0,
-            });
+            dict[kvp.Key] = kvp.Value;
         }
 
-        return result;
+        return dict;
     }
 
     private HookResult OnPlayerSpawn(EventPlayerSpawn eventPlayerSpawn, GameEventInfo info)
@@ -695,103 +638,103 @@ public class PugSharp : BasePlugin, IMatchCallback
 
         if (_Match.CurrentState == MatchState.MatchRunning)
         {
-            var victim = _Match.AllMatchPlayers.FirstOrDefault(a => a.Player.UserId.Equals(eventPlayerDeath.Userid.UserId));
+            var victim = eventPlayerDeath.Userid;
 
-            var victimSide = eventPlayerDeath.Userid.TeamNum;
+            var victimSide = (TeamConstants)eventPlayerDeath.Userid.TeamNum;
 
-            var attacker = _Match.AllMatchPlayers.FirstOrDefault(a => a.Player.UserId.Equals(eventPlayerDeath.Attacker.UserId));
+            var attacker = eventPlayerDeath.Attacker;
 
-            var attackerSide = eventPlayerDeath.Attacker.TeamNum;
+            var attackerSide = eventPlayerDeath.Attacker?.TeamNum == null ? TeamConstants.TEAM_INVALID : (TeamConstants)eventPlayerDeath.Attacker.TeamNum;
 
-            Match.MatchPlayer? assister = null;
+            CCSPlayerController? assister = eventPlayerDeath.Assister;
 
-            if (eventPlayerDeath.Assister != null)
-            {
-                assister = _Match.AllMatchPlayers.FirstOrDefault(a => a.Player.UserId.Equals(eventPlayerDeath.Assister.UserId));
-            }
-
-            // TODO Update "clutch" (1vx) to check if the clutcher wins the round, this has to be stored somewhere per round
-
-            var killedByBomb = eventPlayerDeath.Weapon.Equals("planted_c4");
+            var killedByBomb = eventPlayerDeath.Weapon.Equals("planted_c4", StringComparison.OrdinalIgnoreCase);
             var isSuicide = (attacker == victim) && !killedByBomb;
             var isHeadshot = eventPlayerDeath.Headshot;
+            var isClutcher = false; // TODO
 
-            var victimStats = victim.Player.MatchStats;
+            var victimStats = _CurrentRountState.GetPlayerRoundStats(victim.SteamID, victim.PlayerName);
 
-            var attackerStats = attacker?.Player.MatchStats;
+            victimStats.Dead = true;
 
-            var assisterStats = assister?.Player.MatchStats;
-
-            if (victimStats != null)
+            if (!_CurrentRountState.FirstDeathDone)
             {
-                victimStats.Deaths++;
-            }
+                _CurrentRountState.FirstDeathDone = true;
 
-            var isRoundFirstKillDone = false; // TODO this has to be stored somewhere per round
-
-            var isRoundFirstDeathDone = false; // TODO this has to be stored somewhere per round
-
-            if (!isRoundFirstDeathDone)
-            {
-                isRoundFirstDeathDone = true;
-
-                if (victimStats != null)
+                switch (victimSide)
                 {
-                    switch (victimSide)
-                    {
-                        // TODO Unknown values
-                        case 1:
-                            victimStats.FirstDeathCt++;
-                            break;
-                        case 2:
-                            victimStats.FirstDeathT++;
-                            break;
-                    }
+                    case TeamConstants.TEAM_CT:
+                        victimStats.FirstDeathCt = true;
+                        break;
+                    case TeamConstants.TEAM_T:
+                        victimStats.FirstDeathT = true;
+                        break;
                 }
             }
 
             if (isSuicide)
             {
-                if (victimStats != null)
-                {
-                    victimStats.Suicides++;
-                }
+                victimStats.Suicide = true;
             }
+
             else if (!killedByBomb)
             {
-                if (attackerSide == victimSide && attackerStats != null)
+                if (attacker != null)
                 {
-                    attackerStats.TeamKills++;
-                }
-                else
-                {
-                    if (!isRoundFirstKillDone)
-                    {
-                        isRoundFirstKillDone = true;
+                    var attackerStats = _CurrentRountState.GetPlayerRoundStats(attacker.SteamID, attacker.PlayerName);
 
-                        if (attackerStats != null)
+                    if (attackerSide == victimSide)
+                    {
+                        attackerStats.TeamKills++;
+                    }
+                    else
+                    {
+                        if (!_CurrentRountState.FirstKillDone)
                         {
+                            _CurrentRountState.FirstKillDone = true;
+
                             switch (attackerSide)
                             {
-                                // TODO Unknown values
-                                case 1:
-                                    attackerStats.FirstKillCt++;
+                                case TeamConstants.TEAM_CT:
+                                    attackerStats.FirstKillCt = true;
                                     break;
-                                case 2:
-                                    attackerStats.FirstKillT++;
+                                case TeamConstants.TEAM_T:
+                                    attackerStats.FirstKillT = true;
                                     break;
                             }
                         }
-                    }
 
-                    if (attackerStats != null)
-                    {
                         attackerStats.Kills++;
 
                         if (isHeadshot)
                         {
                             attackerStats.HeadshotKills++;
                         }
+
+                        if (isClutcher)
+                        {
+                            attackerStats.ClutchKills++;
+
+                            switch (attackerSide)
+                            {
+                                case TeamConstants.TEAM_CT:
+                                    _CurrentRountState.CounterTerroristsClutching = true;
+                                    break;
+                                case TeamConstants.TEAM_T:
+                                    _CurrentRountState.TerroristsClutching = true;
+                                    break;
+                            }
+
+                            var hasClutched = false; // TODO
+
+                            if (hasClutched)
+                            {
+                                attackerStats.Clutched = true;
+
+                                victimStats.ClutchKills = 0;
+                            }
+                        }
+
                         var weaponId = Enum.Parse<CSWeaponID>(eventPlayerDeath.WeaponItemid);
 
                         // Other than these constants, all knives can be found after CSWeapon_MAX_WEAPONS_NO_KNIFES.
@@ -802,38 +745,213 @@ public class PugSharp : BasePlugin, IMatchCallback
                             attackerStats.KnifeKills++;
                         }
                     }
+                }
 
-                    if (assister != null)
+                if (assister != null)
+                {
+                    var friendlyFire = attackerSide == victimSide;
+                    var assistedFlash = eventPlayerDeath.Assistedflash;
+
+                    // Assists should only count towards opposite team
+                    if (!friendlyFire)
                     {
-                        bool friendlyFire = attackerSide == victimSide;
-                        bool assistedFlash = eventPlayerDeath.Assistedflash;
+                        var assisterStats = _CurrentRountState.GetPlayerRoundStats(assister.SteamID, assister.PlayerName);
 
-                        // Assists should only count towards opposite team
-                        if (!friendlyFire)
+                        // You cannot flash-assist and regular-assist for the same kill.
+                        if (assistedFlash)
                         {
-                            // You cannot flash-assist and regular-assist for the same kill.
-                            if (assistedFlash)
+                            if (assisterStats != null)
                             {
-                                if (assisterStats != null)
-                                {
-                                    assisterStats.FlashbangAssists++;
-                                }
+                                assisterStats.FlashbangAssists++;
                             }
-                            else
-                            {
-                                if (assisterStats != null)
-                                {
-                                    assisterStats.Assists++;
-                                }
-                            }
-
                         }
+                        else
+                        {
+                            if (assisterStats != null)
+                            {
+                                assisterStats.Assists++;
+                            }
+                        }
+
                     }
                 }
             }
         }
         return HookResult.Continue;
     }
+
+    private HookResult OnPlayerBlind(EventPlayerBlind eventPlayerBlind, GameEventInfo info)
+    {
+        if (_Match == null)
+        {
+            return HookResult.Continue;
+        }
+
+        if (_Match.CurrentState == MatchState.None)
+        {
+            return HookResult.Continue;
+        }
+
+        if (_Match.CurrentState == MatchState.MatchRunning)
+        {
+
+            var victim = eventPlayerBlind.Userid;
+
+            var victimSide = eventPlayerBlind.Userid.TeamNum;
+
+            var attacker = eventPlayerBlind.Attacker;
+
+            var attackerSide = eventPlayerBlind.Attacker.TeamNum;
+
+            if (attacker == victim)
+            {
+                return HookResult.Continue;
+            }
+
+            bool isFriendlyFire = victimSide == attackerSide;
+
+            // 2.5 is an arbitrary value that closely matches the "enemies flashed" column of the in-game
+            // scoreboard.
+            if (eventPlayerBlind.BlindDuration >= 2.5)
+            {
+                var attackerStats = _CurrentRountState.GetPlayerRoundStats(attacker.SteamID, attacker.PlayerName);
+
+                if (isFriendlyFire)
+                {
+                    attackerStats.FriendliesFlashed++;
+                }
+                else
+                {
+                    attackerStats.EnemiesFlashed++;
+                }
+
+            }
+        }
+
+        return HookResult.Continue;
+    }
+
+    private HookResult OnRoundMvp(EventRoundMvp eventRoundMvp, GameEventInfo info)
+    {
+        if (_Match == null)
+        {
+            return HookResult.Continue;
+        }
+
+        if (_Match.CurrentState == MatchState.None)
+        {
+            return HookResult.Continue;
+        }
+
+        if (_Match.CurrentState == MatchState.MatchRunning)
+        {
+            var mvp = eventRoundMvp.Userid;
+            var mvpStats = _CurrentRountState.GetPlayerRoundStats(mvp.SteamID, mvp.PlayerName);
+
+            mvpStats.Mvp = true;
+        }
+
+        return HookResult.Continue;
+    }
+
+    private HookResult OnBombPlanted(EventBombPlanted eventBombPlanted, GameEventInfo info)
+    {
+        if (_Match == null)
+        {
+            return HookResult.Continue;
+        }
+
+        if (_Match.CurrentState == MatchState.None)
+        {
+            return HookResult.Continue;
+        }
+
+        if (_Match.CurrentState == MatchState.MatchRunning)
+        {
+            var planter = eventBombPlanted.Userid;
+            var planterStats = _CurrentRountState.GetPlayerRoundStats(planter.SteamID, planter.PlayerName);
+
+            planterStats.BombPlanted = true;
+        }
+
+        return HookResult.Continue;
+    }
+
+    private HookResult OnPlayerHurt(EventPlayerHurt eventPlayerHurt, GameEventInfo info)
+    {
+        if (_Match == null)
+        {
+            return HookResult.Continue;
+        }
+
+        if (_Match.CurrentState == MatchState.None)
+        {
+            return HookResult.Continue;
+        }
+
+        if (_Match.CurrentState == MatchState.MatchRunning)
+        {
+            var attacker = eventPlayerHurt.Attacker;
+
+            if (attacker == null)
+            {
+                return HookResult.Continue;
+            }
+
+            var attackerSide = eventPlayerHurt.Attacker.TeamNum;
+
+            var victim = eventPlayerHurt.Userid;
+
+            var victimSide = eventPlayerHurt.Userid.TeamNum;
+
+            var weapon = eventPlayerHurt.Weapon;
+
+            var isUtility = CounterStrikeSharpExtensions.IsUtility(weapon);
+
+            var attackerStats = _CurrentRountState.GetPlayerRoundStats(attacker.SteamID, attacker.PlayerName);
+
+            var victimHealth = victim.Health;
+
+            var damageCapped = eventPlayerHurt.DmgHealth > victimHealth ? victimHealth : eventPlayerHurt.DmgHealth;
+
+            // Don't count friendlydamage
+            if (attackerSide != victimSide)
+            {
+                attackerStats.Damage += damageCapped;
+
+                if (isUtility)
+                {
+                    attackerStats.UtilityDamage += damageCapped;
+                }
+            }
+        }
+
+        return HookResult.Continue;
+    }
+
+    private HookResult OnBombDefused(EventBombDefused eventBombDefused, GameEventInfo info)
+    {
+        if (_Match == null)
+        {
+            return HookResult.Continue;
+        }
+
+        if (_Match.CurrentState == MatchState.None)
+        {
+            return HookResult.Continue;
+        }
+
+        if (_Match.CurrentState == MatchState.MatchRunning)
+        {
+            var defuser = eventBombDefused.Userid;
+            var defuserStats = _CurrentRountState.GetPlayerRoundStats(defuser.SteamID, defuser.PlayerName);
+
+            defuserStats.BombDefused = true;
+        }
+
+        return HookResult.Continue;
+    }
+
 
     #endregion
 

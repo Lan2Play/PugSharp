@@ -4,7 +4,6 @@ namespace PugSharp.Models
 {
     internal class TeamRoundResults : ITeamRoundResults
     {
-        public IReadOnlyDictionary<ulong, IPlayerRoundResults> PlayerResults { get; set; }
 
         public int Score { get; set; }
 

@@ -38,5 +38,25 @@ namespace PugSharp
 
             return (PlayerConnectedState)statusRef;
         }
+
+        internal static bool IsUtility(string weapon)
+        {
+            switch (weapon)
+            {
+                case "flashbang":
+                case "hegrenade":
+                case "inferno":
+                case "smoke":
+
+                    {
+                        return true;
+                    }
+
+                default:
+                    {
+                        return false;
+                    }
+            }
+        }
     }
 }

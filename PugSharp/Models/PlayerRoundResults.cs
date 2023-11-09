@@ -2,7 +2,7 @@
 
 namespace PugSharp.Models
 {
-    internal class PlayerRoundResults : IPlayerRoundResults
+    internal class PlayerRoundResults : IPlayerMatchStatistics
     {
         public bool Coaching { get; set; }
 

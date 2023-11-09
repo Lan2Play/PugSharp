@@ -35,6 +35,8 @@ public class Match : IDisposable
 
     public IEnumerable<MatchPlayer> AllMatchPlayers => MatchTeam1.Players.Concat(MatchTeam2.Players);
 
+    private readonly Dictionary<ulong, PlayerMatchStatistics> _PlayerMatchStatistics = new Dictionary<ulong, PlayerMatchStatistics>();
+
     public RoundInfo CurrentRound { get; } = new RoundInfo();
 
     public Match(IMatchCallback matchCallback, Config.MatchConfig matchConfig, string? pluginDirectory = null)
@@ -166,10 +168,7 @@ public class Match : IDisposable
 
     private void StartMatch()
     {
-        foreach (var player in AllMatchPlayers.Where(x => x.Player.MatchStats != null))
-        {
-            player.Player.MatchStats!.ResetStats();
-        }
+        _PlayerMatchStatistics.Clear();
 
         _MatchCallback.EndWarmup();
         _MatchCallback.DisableCheats();
@@ -207,6 +206,8 @@ public class Match : IDisposable
             TeamName = Config.Team2.Name,
         };
 
+        UpdateStats(roundResults.PlayerResults);
+
         var team1Results = MatchTeam1.CurrentTeamSite == Team.CounterTerrorist ? roundResults.TRoundResult : roundResults.CTRoundResult;
         var team2Results = MatchTeam2.CurrentTeamSite == Team.CounterTerrorist ? roundResults.TRoundResult : roundResults.CTRoundResult;
 
@@ -216,7 +217,10 @@ public class Match : IDisposable
             Score = team1Results.Score,
             ScoreT = team1Results.ScoreT,
             ScoreCT = team1Results.ScoreCT,
-            Players = team1Results.PlayerResults.ToDictionary(p => p.Key.ToString(), p => CreatePlayerStatistics(p.Value), StringComparer.OrdinalIgnoreCase),
+            Players = _PlayerMatchStatistics
+                            .Where(a=> MatchTeam1.Players.Select(player=> player.Player.SteamID).Contains(a.Key))
+                            .ToDictionary(p => p.Key.ToString(), p => CreatePlayerStatistics(p.Value)),
+
         };
 
         var mapTeamInfo2 = new MapTeamInfo
@@ -225,14 +229,138 @@ public class Match : IDisposable
             Score = team2Results.Score,
             ScoreT = team2Results.ScoreT,
             ScoreCT = team2Results.ScoreCT,
-            Players = team1Results.PlayerResults.ToDictionary(p => p.Key.ToString(), p => CreatePlayerStatistics(p.Value), StringComparer.OrdinalIgnoreCase),
+
+            Players = _PlayerMatchStatistics
+                            .Where(a => MatchTeam2.Players.Select(player => player.Player.SteamID).Contains(a.Key))
+                            .ToDictionary(p => p.Key.ToString(), p => CreatePlayerStatistics(p.Value)),
         };
 
         var roundStats = new RoundStatusUpdateParams(_MatchInfo.CurrentMap.MapNumber, teamInfo1, teamInfo2, new Map { Name = _MatchInfo.CurrentMap.MapName, Team1 = mapTeamInfo1, Team2 = mapTeamInfo2, });
         _ = _ApiStats?.SendRoundStatsUpdateAsync(Config.MatchId, roundStats, CancellationToken.None);
     }
 
-    private PlayerStatistics CreatePlayerStatistics(IPlayerRoundResults value)
+    private void UpdateStats(IReadOnlyDictionary<ulong, IPlayerRoundResults> playerResults)
+    {
+        foreach (var kvp in playerResults)
+        {
+            var steamId = kvp.Key;
+            var playerResult = kvp.Value;
+
+            if (_PlayerMatchStatistics.ContainsKey(steamId))
+            {
+                _PlayerMatchStatistics[steamId] = new PlayerMatchStatistics();
+
+                // Set name once
+                _PlayerMatchStatistics[steamId].Name = playerResult.Name;
+            }
+
+            var matchStats = _PlayerMatchStatistics[steamId];
+
+            if(playerResult.Dead)
+            {
+                matchStats.Deaths++;
+            }
+
+            if (playerResult.Suicide)
+            {
+                matchStats.Suicides++;
+            }
+
+            if (playerResult.BombDefused)
+            {
+                matchStats.BombDefuses++;
+            }
+
+            if (playerResult.BombPlanted)
+            {
+                matchStats.BombPlants++;
+            }
+
+            if (playerResult.Mvp)
+            {
+                matchStats.Mvp++;
+            }
+
+            if (playerResult.FirstKillCt)
+            {
+                matchStats.FirstKillCt++;
+            }
+
+            if (playerResult.FirstKillT)
+            {
+                matchStats.FirstKillT++;
+            }
+
+            if (playerResult.FirstDeathT)
+            {
+                matchStats.FirstDeathT++;
+            }
+
+            if (playerResult.FirstDeathCt)
+            {
+                matchStats.FirstDeathCt++;
+            }
+
+            matchStats.Kills += playerResult.Kills;
+            matchStats.KnifeKills += playerResult.KnifeKills;
+            matchStats.TeamKills += playerResult.TeamKills;
+            matchStats.EnemiesFlashed += playerResult.EnemiesFlashed;
+            matchStats.FlashbangAssists += playerResult.FlashbangAssists;
+            matchStats.Assists += playerResult.Assists;
+            matchStats.Damage += playerResult.Damage;
+            matchStats.HeadshotKills += playerResult.HeadshotKills;
+            matchStats.UtilityDamage += playerResult.UtilityDamage;
+            matchStats.FriendliesFlashed += playerResult.FriendliesFlashed;
+            matchStats.TradeKill += playerResult.TradeKills;
+
+            switch(playerResult.Kills)
+            {
+                case 1:
+                    matchStats.Count1K++;
+                    break;
+                case 2:
+                    matchStats.Count2K++;
+                    break;
+                case 3:
+                    matchStats.Count3K++;
+                    break;
+                case 4:
+                    matchStats.Count4K++;
+                    break;
+                case 5:
+                    matchStats.Count5K++;
+                    break;
+            }
+
+            if (playerResult.Clutched)
+            {
+                switch (playerResult.ClutchKills)
+                {
+                    case 1:
+                        matchStats.V1++;
+                        break;
+                    case 2: 
+                        matchStats.V2++; 
+                        break;
+                    case 3: 
+                        matchStats.V3++; 
+                        break;
+                    case 4: 
+                        matchStats.V4++; 
+                        break;
+                    case 5: 
+                        matchStats.V5++; 
+                        break;
+                }
+            }
+
+            // TODO Kast
+            // TODO ContributionScore
+
+        }
+    }
+
+    private PlayerStatistics CreatePlayerStatistics(IPlayerMatchStatistics value)
     {
         return new PlayerStatistics
         {
