@@ -10,9 +10,9 @@ public class Winner
     [JsonPropertyName("team_int")]
     public int Team { get; set; }
 
-    public Winner(int side, int team)
+    public Winner(Side side, int team)
     {
-        Side = side;
+        Side = (int)side;
         Team = team;
     }
 }

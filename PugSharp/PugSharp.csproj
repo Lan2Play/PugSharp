@@ -12,6 +12,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
+	  <ProjectReference Include="..\PugSharp.G5Api\PugSharp.G5Api.csproj" />
 	  <ProjectReference Include="..\PugSharp.Logging\PugSharp.Logging.csproj" />
 	  <ProjectReference Include="..\PugSharp.Match\PugSharp.Match.csproj" />
 	</ItemGroup>

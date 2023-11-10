@@ -1,129 +1,19 @@
 ﻿using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.Extensions.Logging;
 using PugSharp.Logging;
+using PugSharp.Match.Contract;
 using System.Globalization;
-using System.Net.Http.Headers;
 using System.Text.Json;
 
 namespace PugSharp.ApiStats
 {
-    public class BaseApi : IDisposable
-    {
-        private static readonly ILogger<BaseApi> _Logger = LogManager.CreateLogger<BaseApi>();
-
-        private bool _DisposedValue;
-
-        protected HttpClient HttpClient { get; }
-
-        protected BaseApi(string baseUrl, string authKey)
-        {
-            if (!baseUrl.EndsWith('/'))
-            {
-                baseUrl += "/";
-            }
-
-            HttpClient = new HttpClient()
-            {
-                BaseAddress = new Uri(baseUrl),
-            };
-
-            HttpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", authKey);
-        }
-
-        protected static async Task HandleResponseAsync(HttpResponseMessage? httpResponseMessage, CancellationToken cancellationToken)
-        {
-
-            if (httpResponseMessage == null)
-            {
-                return;
-            }
-
-            try
-            {
-                if (httpResponseMessage.IsSuccessStatusCode)
-                {
-                    _Logger.LogInformation("API request was succesful, HTTP status code = {statusCode}", httpResponseMessage.StatusCode);
-
-                    var responseContent = await httpResponseMessage.Content.ReadAsStringAsync(cancellationToken).ConfigureAwait(false);
-
-                    _Logger.LogInformation("ResponseContent: {responseContent}", responseContent);
-
-                }
-                else
-                {
-                    _Logger.LogError("API request failed, HTTP status code = {statusCode}", httpResponseMessage.StatusCode);
-
-                    var responseContent = await httpResponseMessage.Content.ReadAsStringAsync(cancellationToken).ConfigureAwait(false);
-
-                    _Logger.LogError("ResponseContent: {responseContent}", responseContent);
-
-                }
-            }
-            catch (Exception e)
-            {
-                _Logger.LogError(e, "Error handling response");
-            }
-        }
-
-        protected virtual void Dispose(bool disposing)
-        {
-            if (!_DisposedValue)
-            {
-                if (disposing)
-                {
-                    HttpClient?.Dispose();
-                }
-
-                _DisposedValue = true;
-            }
-        }
-
-        void IDisposable.Dispose()
-        {
-            // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
-            Dispose(disposing: true);
-            GC.SuppressFinalize(this);
-        }
-    }
-
-    public class DemoUploader : BaseApi
-    {
-        private static readonly ILogger<ApiStats> _Logger = LogManager.CreateLogger<ApiStats>();
-
-        public DemoUploader(string demoUploadUrl, string demoUploadKey) : base(demoUploadUrl, demoUploadKey)
-        {
-            _Logger.LogInformation("Create Api Stats with BaseUrl: {url}", demoUploadUrl);
-        }
-
-        public async Task UploadDemoAsync(string demoFile, CancellationToken cancellationToken)
-        {
-            var queryParams = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
-
-            var uri = QueryHelpers.AddQueryString($"demo", queryParams);
-
-            var demoFileStream = File.OpenRead(demoFile);
-            await using (demoFileStream.ConfigureAwait(false))
-            {
-                using var fileStreamContent = new StreamContent(demoFileStream);
-                using var formData = new MultipartFormDataContent
-                {
-                    fileStreamContent,
-                };
-
-                var response = await HttpClient.PostAsync(uri, formData, cancellationToken).ConfigureAwait(false);
-
-                await HandleResponseAsync(response, cancellationToken).ConfigureAwait(false);
-            }
-        }
-    }
-
     public class ApiStats : BaseApi
     {
         private static readonly ILogger<ApiStats> _Logger = LogManager.CreateLogger<ApiStats>();
 
         private readonly string? _ApiStatsDirectory;
 
-        public ApiStats(string apiStatsUrl, string apiStatsKey, string? apiStatsDirectory) : base(apiStatsUrl, apiStatsKey)
+        public ApiStats(string? apiStatsUrl, string? apiStatsKey, string? apiStatsDirectory) : base(apiStatsUrl, apiStatsKey)
         {
             _Logger.LogInformation("Create Api Stats with BaseUrl: {url}", apiStatsUrl);
             _ApiStatsDirectory = apiStatsDirectory;
@@ -131,6 +21,11 @@ namespace PugSharp.ApiStats
 
         public async Task SendGoingLiveAsync(string matchId, GoingLiveParams goingLiveParams, CancellationToken cancellationToken)
         {
+            if (HttpClient == null)
+            {
+                return;
+            }
+
             try
             {
                 var queryParams = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
@@ -179,6 +74,11 @@ namespace PugSharp.ApiStats
 
         public async Task FinalizeMapAsync(string matchId, MapResultParams mapResultParams, CancellationToken cancellationToken)
         {
+            if (HttpClient == null)
+            {
+                return;
+            }
+
             try
             {
                 var queryParams = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
@@ -221,6 +121,11 @@ namespace PugSharp.ApiStats
 
         public async Task SendRoundStatsUpdateAsync(string matchId, RoundStatusUpdateParams roundStatusUpdateParams, CancellationToken cancellationToken)
         {
+            if (HttpClient == null)
+            {
+                return;
+            }
+
             try
             {
                 var queryParams = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
@@ -265,12 +170,17 @@ namespace PugSharp.ApiStats
             }
         }
 
-        private async Task UpdatePlayerStatsInternalAsync(int mapNumber, TeamInfo teamInfo1, TeamInfo teamInfo2, Map currentMap, CancellationToken cancellationToken)
+        private async Task UpdatePlayerStatsInternalAsync(int mapNumber, ITeamInfo teamInfo1, ITeamInfo teamInfo2, IMap currentMap, CancellationToken cancellationToken)
         {
+            if (HttpClient == null)
+            {
+                return;
+            }
+
             var dict = new Dictionary<string, MapTeamInfo>(StringComparer.OrdinalIgnoreCase)
             {
-                { teamInfo1.TeamName, currentMap.Team1 },
-                { teamInfo2.TeamName, currentMap.Team2 },
+                { teamInfo1.TeamName, currentMap.Team1 as  MapTeamInfo},
+                { teamInfo2.TeamName, currentMap.Team2 as  MapTeamInfo },
             };
 
             foreach (var team in dict)
@@ -281,7 +191,7 @@ namespace PugSharp.ApiStats
 
                 foreach (var player in players)
                 {
-                    var playerStatistics = player.Value;
+                    var playerStatistics = player.Value as PlayerStatistics;
 
                     Dictionary<string, string> queryParams = CreateUpdatePlayerQueryParameters(teamName, playerStatistics);
 
@@ -343,6 +253,16 @@ namespace PugSharp.ApiStats
 
         public async Task FinalizeAsync(SeriesResultParams seriesResultParams, CancellationToken cancellationToken)
         {
+            if (HttpClient == null)
+            {
+                return;
+            }
+
+            if (HttpClient == null)
+            {
+                return;
+            }
+
             var queryParams = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
             {
                 {ApiStatsConstants.StatsSeriesWinner, seriesResultParams.WinnerTeamName},
@@ -364,7 +284,7 @@ namespace PugSharp.ApiStats
 
         internal async Task SendFreeServerInternalAsync(CancellationToken cancellationToken)
         {
-            var response = await HttpClient.PostAsync(new Uri("freeserver"), content: null, cancellationToken).ConfigureAwait(false);
+            var response = await HttpClient.PostAsync("freeserver", content: null, cancellationToken).ConfigureAwait(false);
 
             await HandleResponseAsync(response, cancellationToken).ConfigureAwait(false);
         }

@@ -3,7 +3,6 @@
 public interface ITeamRoundResults
 {
     
-
     public int Score { get; }
 
     public int ScoreT { get; }

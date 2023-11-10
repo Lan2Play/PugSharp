@@ -1,6 +1,8 @@
-﻿namespace PugSharp.Match;
+﻿using PugSharp.ApiStats;
 
-public class MatchInfo
+namespace PugSharp.Match;
+
+internal class MatchInfo
 {
     public MatchInfo(int numberOfMaps)
     {
@@ -14,7 +16,7 @@ public class MatchInfo
     public string DemoFile { get; internal set; }
 }
 
-public class MatchMap
+internal class MatchMap
 {
     public MatchMap(int mapNumber)
     {
@@ -30,4 +32,6 @@ public class MatchMap
     public int Team1Points { get; set; }
 
     public int Team2Points { get; set; }
+
+    public Dictionary<ulong, PlayerMatchStatistics> PlayerMatchStatistics { get; } = new Dictionary<ulong, PlayerMatchStatistics>();
 }

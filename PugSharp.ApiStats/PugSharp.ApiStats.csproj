@@ -9,6 +9,7 @@
 	<ItemGroup>
 	  <ProjectReference Include="..\PugSharp.Config\PugSharp.Config.csproj" />
 	  <ProjectReference Include="..\PugSharp.Logging\PugSharp.Logging.csproj" />
+	  <ProjectReference Include="..\PugSharp.Match.Contract\PugSharp.Match.Contract.csproj" />
 	</ItemGroup>
 
 </Project>

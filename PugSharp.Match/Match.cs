@@ -15,7 +15,8 @@ public class Match : IDisposable
     private readonly System.Timers.Timer _ReadyReminderTimer = new(10000);
     private readonly IMatchCallback _MatchCallback;
     private readonly StateMachine<MatchState, MatchCommand> _MatchStateMachine;
-    private readonly ApiStats.ApiStats? _ApiStats;
+
+    private readonly DemoUploader? _DemoUploader;
     private readonly List<Vote> _MapsToSelect;
     private readonly List<Vote> _TeamVotes = new() { new("T"), new("CT") };
 
@@ -23,7 +24,6 @@ public class Match : IDisposable
 
     private MatchTeam? _CurrentMatchTeamToVote;
     private bool disposedValue;
-    private DemoUploader _DemoUploader;
 
     public MatchState CurrentState => _MatchStateMachine.State;
 
@@ -35,7 +35,6 @@ public class Match : IDisposable
 
     public IEnumerable<MatchPlayer> AllMatchPlayers => MatchTeam1.Players.Concat(MatchTeam2.Players);
 
-    private readonly Dictionary<ulong, PlayerMatchStatistics> _PlayerMatchStatistics = new Dictionary<ulong, PlayerMatchStatistics>();
 
     public RoundInfo CurrentRound { get; } = new RoundInfo();
 
@@ -53,10 +52,6 @@ public class Match : IDisposable
         _VoteTimer.Elapsed += VoteTimer_Elapsed;
         _ReadyReminderTimer.Elapsed += ReadyReminderTimer_Elapsed;
 
-        if (!string.IsNullOrEmpty(Config.EventulaApistatsUrl) && !string.IsNullOrEmpty(Config.EventulaApistatsToken))
-        {
-            _ApiStats = new ApiStats.ApiStats(Config.EventulaApistatsUrl, Config.EventulaApistatsToken, pluginDirectory == null ? null : Path.Combine(pluginDirectory, "Stats"));
-        }
 
         if (!string.IsNullOrEmpty(Config.EventulaDemoUploadUrl) && !string.IsNullOrEmpty(Config.EventulaApistatsToken))
         {
@@ -120,7 +115,7 @@ public class Match : IDisposable
             .OnEntry(TryCompleteMatch);
 
         _MatchStateMachine.Configure(MatchState.MatchCompleted)
-            .OnEntry(CompleteMatch)
+            .OnEntryAsync(CompleteMatchAsync)
             .OnEntryAsync(KickPlayersAsync);
 
         _MatchStateMachine.OnTransitioned(OnMatchStateChanged);
@@ -168,8 +163,6 @@ public class Match : IDisposable
 
     private void StartMatch()
     {
-        _PlayerMatchStatistics.Clear();
-
         _MatchCallback.EndWarmup();
         _MatchCallback.DisableCheats();
         _MatchCallback.SetupRoundBackup();
@@ -177,7 +170,8 @@ public class Match : IDisposable
 
         _MatchCallback.SendMessage($" {ChatColors.Default}Starting Match. {ChatColors.Highlight}{MatchTeam1.TeamConfig.Name} {ChatColors.Default}as {ChatColors.Highlight}{MatchTeam1.CurrentTeamSite}{ChatColors.Default}. {ChatColors.Highlight}{MatchTeam2.TeamConfig.Name}{ChatColors.Default} as {ChatColors.Highlight}{MatchTeam2.CurrentTeamSite}");
 
-        _ = _ApiStats?.SendGoingLiveAsync(Config.MatchId, new GoingLiveParams(_MatchInfo.CurrentMap.MapName, _MatchInfo.CurrentMap.MapNumber), CancellationToken.None);
+
+        _ = _MatchCallback.GoingLiveAsync(Config.MatchId, _MatchInfo.CurrentMap.MapName, _MatchInfo.CurrentMap.MapNumber, CancellationToken.None);
 
         TryFireState(MatchCommand.StartMatch);
     }
@@ -189,9 +183,7 @@ public class Match : IDisposable
             throw new NotSupportedException("Map Winner is not yet set. Can not send map results");
         }
 
-        var mapResultParams = new MapResultParams(_MatchInfo.CurrentMap.Winner.TeamConfig.Name, _MatchInfo.CurrentMap.Team1Points, _MatchInfo.CurrentMap.Team2Points, _MatchInfo.CurrentMap.MapNumber);
-        _ = _ApiStats?.FinalizeMapAsync(Config.MatchId, mapResultParams, CancellationToken.None);
-
+        _ = _MatchCallback.FinalizeMapAsync(Config.MatchId, _MatchInfo.CurrentMap.Winner.TeamConfig.Name, _MatchInfo.CurrentMap.Team1Points, _MatchInfo.CurrentMap.Team2Points, _MatchInfo.CurrentMap.MapNumber, CancellationToken.None);
     }
 
     public void SendRoundResults(IRoundResults roundResults)
@@ -208,8 +200,11 @@ public class Match : IDisposable
 
         UpdateStats(roundResults.PlayerResults);
 
-        var team1Results = MatchTeam1.CurrentTeamSite == Team.CounterTerrorist ? roundResults.TRoundResult : roundResults.CTRoundResult;
-        var team2Results = MatchTeam2.CurrentTeamSite == Team.CounterTerrorist ? roundResults.TRoundResult : roundResults.CTRoundResult;
+        var team1Results = MatchTeam1.CurrentTeamSite == Team.Terrorist ? roundResults.TRoundResult : roundResults.CTRoundResult;
+        var team2Results = MatchTeam2.CurrentTeamSite == Team.Terrorist ? roundResults.TRoundResult : roundResults.CTRoundResult;
+
+        _Logger.LogInformation($"Team 1: {MatchTeam1.CurrentTeamSite} : {team1Results.Score}");
+        _Logger.LogInformation($"Team 2: {MatchTeam2.CurrentTeamSite} : {team2Results.Score}");
 
         var mapTeamInfo1 = new MapTeamInfo
         {
@@ -217,10 +212,9 @@ public class Match : IDisposable
             Score = team1Results.Score,
             ScoreT = team1Results.ScoreT,
             ScoreCT = team1Results.ScoreCT,
-            Players = _PlayerMatchStatistics
-                            .Where(a=> MatchTeam1.Players.Select(player=> player.Player.SteamID).Contains(a.Key))
-                            .ToDictionary(p => p.Key.ToString(), p => CreatePlayerStatistics(p.Value)),
-
+            Players = _MatchInfo.CurrentMap.PlayerMatchStatistics
+                            .Where(a => MatchTeam1.Players.Select(player => player.Player.SteamID).Contains(a.Key))
+                            .ToDictionary(p => p.Key.ToString(), p => CreatePlayerStatistics(p.Value), StringComparer.OrdinalIgnoreCase),
         };
 
         var mapTeamInfo2 = new MapTeamInfo
@@ -230,13 +224,12 @@ public class Match : IDisposable
             ScoreT = team2Results.ScoreT,
             ScoreCT = team2Results.ScoreCT,
 
-            Players = _PlayerMatchStatistics
+            Players = _MatchInfo.CurrentMap.PlayerMatchStatistics
                             .Where(a => MatchTeam2.Players.Select(player => player.Player.SteamID).Contains(a.Key))
-                            .ToDictionary(p => p.Key.ToString(), p => CreatePlayerStatistics(p.Value)),
+                            .ToDictionary(p => p.Key.ToString(), p => CreatePlayerStatistics(p.Value), StringComparer.OrdinalIgnoreCase),
         };
 
-        var roundStats = new RoundStatusUpdateParams(_MatchInfo.CurrentMap.MapNumber, teamInfo1, teamInfo2, new Map { Name = _MatchInfo.CurrentMap.MapName, Team1 = mapTeamInfo1, Team2 = mapTeamInfo2, });
-        _ = _ApiStats?.SendRoundStatsUpdateAsync(Config.MatchId, roundStats, CancellationToken.None);
+        _ = _MatchCallback?.SendRoundStatsUpdateAsync(Config.MatchId, _MatchInfo.CurrentMap.MapNumber, teamInfo1, teamInfo2, new Map { Name = _MatchInfo.CurrentMap.MapName, Team1 = mapTeamInfo1, Team2 = mapTeamInfo2, }, CancellationToken.None);
     }
 
     private void UpdateStats(IReadOnlyDictionary<ulong, IPlayerRoundResults> playerResults)
@@ -246,17 +239,17 @@ public class Match : IDisposable
             var steamId = kvp.Key;
             var playerResult = kvp.Value;
 
-            if (_PlayerMatchStatistics.ContainsKey(steamId))
+            if (!_MatchInfo.CurrentMap.PlayerMatchStatistics.ContainsKey(steamId))
             {
-                _PlayerMatchStatistics[steamId] = new PlayerMatchStatistics();
+                _MatchInfo.CurrentMap.PlayerMatchStatistics[steamId] = new PlayerMatchStatistics();
 
                 // Set name once
-                _PlayerMatchStatistics[steamId].Name = playerResult.Name;
+                _MatchInfo.CurrentMap.PlayerMatchStatistics[steamId].Name = playerResult.Name;
             }
 
-            var matchStats = _PlayerMatchStatistics[steamId];
+            var matchStats = _MatchInfo.CurrentMap.PlayerMatchStatistics[steamId];
 
-            if(playerResult.Dead)
+            if (playerResult.Dead)
             {
                 matchStats.Deaths++;
             }
@@ -313,7 +306,7 @@ public class Match : IDisposable
             matchStats.FriendliesFlashed += playerResult.FriendliesFlashed;
             matchStats.TradeKill += playerResult.TradeKills;
 
-            switch(playerResult.Kills)
+            switch (playerResult.Kills)
             {
                 case 1:
                     matchStats.Count1K++;
@@ -339,17 +332,17 @@ public class Match : IDisposable
                     case 1:
                         matchStats.V1++;
                         break;
-                    case 2: 
-                        matchStats.V2++; 
+                    case 2:
+                        matchStats.V2++;
                         break;
-                    case 3: 
-                        matchStats.V3++; 
+                    case 3:
+                        matchStats.V3++;
                         break;
-                    case 4: 
-                        matchStats.V4++; 
+                    case 4:
+                        matchStats.V4++;
                         break;
-                    case 5: 
-                        matchStats.V5++; 
+                    case 5:
+                        matchStats.V5++;
                         break;
                 }
             }
@@ -360,7 +353,7 @@ public class Match : IDisposable
         }
     }
 
-    private PlayerStatistics CreatePlayerStatistics(IPlayerMatchStatistics value)
+    private IPlayerStatistics CreatePlayerStatistics(IPlayerMatchStatistics value)
     {
         return new PlayerStatistics
         {
@@ -407,15 +400,35 @@ public class Match : IDisposable
         _ = TryFireStateAsync(MatchCommand.CompleteMatch);
     }
 
-    private void CompleteMatch()
+    private async Task CompleteMatchAsync()
     {
         _MatchCallback.StopDemoRecording();
-        _ = _DemoUploader.UploadDemoAsync(_MatchInfo.DemoFile, CancellationToken.None);
+
+        var delay = 15;
+
+        if (_MatchCallback.GetConvar<bool>("tv_enable") || _MatchCallback.GetConvar<bool>("tv_enable1"))
+        {
+            // TV Delay in s
+            var tvDelaySeconds = Math.Max(_MatchCallback.GetConvar<int>("tv_delay"), _MatchCallback.GetConvar<int>("tv_delay1"));
+            _Logger.LogInformation("Waiting for sourceTV. Delay: {delay}s + 15s", tvDelaySeconds);
+            delay += tvDelaySeconds;
+        }
+
+        await Task.Delay(TimeSpan.FromSeconds(delay)).ConfigureAwait(false);
+
+        if (_DemoUploader != null)
+        {
+            await _DemoUploader.UploadDemoAsync(_MatchInfo.DemoFile, CancellationToken.None).ConfigureAwait(false);
+        }
 
         if (_MatchInfo.MatchMaps[_MatchInfo.MatchMaps.Count - 1] == _MatchInfo.CurrentMap)
         {
-            var seriesResultParams = new SeriesResultParams(_MatchInfo.MatchMaps.GroupBy(x => x.Winner).MaxBy(x => x.Count())!.Key!.TeamConfig.Name, true, 120000);
-            _ = _ApiStats?.FinalizeAsync(seriesResultParams, CancellationToken.None);
+            await _MatchCallback.FinalizeAsync(Config.MatchId, _MatchInfo.MatchMaps.GroupBy(x => x.Winner).MaxBy(x => x.Count())!.Key!.TeamConfig.Name, true, 120000, _MatchInfo.MatchMaps.Count(x => x.Team1Points > x.Team2Points), _MatchInfo.MatchMaps.Count(x => x.Team2Points > x.Team1Points), CancellationToken.None).ConfigureAwait(false);
+        }
+
+        foreach (var player in AllMatchPlayers)
+        {
+            player.Player.Kick();
         }
     }
 
@@ -660,14 +673,19 @@ public class Match : IDisposable
         return false;
     }
 
-    private Task TryFireStateAsync(MatchCommand command)
+    private async Task TryFireStateAsync(MatchCommand command)
     {
-        if (_MatchStateMachine.CanFire(command))
+        try
         {
-            return _MatchStateMachine.FireAsync(command);
+            if (_MatchStateMachine.CanFire(command))
+            {
+                await _MatchStateMachine.FireAsync(command).ConfigureAwait(false);
+            }
         }
-
-        return Task.CompletedTask;
+        catch (Exception exception)
+        {
+            _Logger.LogError(exception, "Error during fire state");
+        }
     }
 
     private MatchTeam? GetMatchTeam(ulong steamID)

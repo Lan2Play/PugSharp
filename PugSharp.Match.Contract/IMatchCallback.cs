@@ -1,4 +1,5 @@
-﻿namespace PugSharp.Match.Contract;
+﻿
+namespace PugSharp.Match.Contract;
 
 public interface IMatchCallback
 {
@@ -15,5 +16,10 @@ public interface IMatchCallback
     string StartDemoRecording();
     void StopDemoRecording();
     void SetupRoundBackup();
-    Team LoadMatchWinnerName();
+    Team LoadMatchWinner();
+    T? GetConvar<T>(string name);
+    Task GoingLiveAsync(string matchId, string mapName, int mapNumber, CancellationToken cancellationToken);
+    Task FinalizeMapAsync(string matchId, string winnerTeamName, int team1Score, int team2Score, int mapNumber, CancellationToken cancellationToken);
+    Task SendRoundStatsUpdateAsync(string matchId, int mapNumber, ITeamInfo team1Info, ITeamInfo team2Info, IMap currentMap, CancellationToken cancellationToken);
+    Task FinalizeAsync(string matchId, string winnerTeamName, bool forfeit, uint timeBeforeFreeingServerMs, int team1SeriesScore, int team2SeriesScore, CancellationToken cancellationToken);
 }

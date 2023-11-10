@@ -1,6 +1,8 @@
-﻿namespace PugSharp.ApiStats
+﻿using PugSharp.Match.Contract;
+
+namespace PugSharp.ApiStats
 {
-    public class PlayerStatistics
+    public class PlayerStatistics : IPlayerStatistics
     {
         public bool Coaching { get; set; }
 

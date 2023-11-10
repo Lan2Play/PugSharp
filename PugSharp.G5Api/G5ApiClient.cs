@@ -22,6 +22,11 @@ namespace PugSharp.G5Api
         {
             _Logger.LogInformation("Create G5Api with BaseUrl: {url}", g5ApiUrl);
 
+            if(string.IsNullOrEmpty(g5ApiUrl))
+            {
+                return;
+            }
+
             _ApiUrl = g5ApiUrl;
             _ApiHeader = g5ApiHeader;
             _ApiHeadeValue = g5ApiHeaderValue;
@@ -47,6 +52,11 @@ namespace PugSharp.G5Api
 
         public async Task SendEventAsync(EventBase eventToSend, CancellationToken cancellationToken)
         {
+            if(_HttpClient == null)
+            {
+                return;
+            }
+
             try
             {
                 using var jsonContent = new StringContent(

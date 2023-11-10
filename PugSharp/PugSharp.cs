@@ -3,15 +3,18 @@ using CounterStrikeSharp.API.Core;
 using CounterStrikeSharp.API.Core.Attributes.Registration;
 using CounterStrikeSharp.API.Modules.Commands;
 using CounterStrikeSharp.API.Modules.Cvars;
-using CounterStrikeSharp.API.Modules.Utils;
 using Microsoft.Extensions.Logging;
+using PugSharp.ApiStats;
 using PugSharp.Config;
+using PugSharp.G5Api;
 using PugSharp.Logging;
 using PugSharp.Match.Contract;
 using PugSharp.Models;
 using System.Globalization;
 using System.Runtime.CompilerServices;
 using System.Text.Json;
+using ChatColors = CounterStrikeSharp.API.Modules.Utils.ChatColors;
+using Player = PugSharp.Models.Player;
 
 namespace PugSharp;
 
@@ -22,7 +25,8 @@ public class PugSharp : BasePlugin, IMatchCallback
     private readonly ConfigProvider _ConfigProvider = new(Path.Join(Server.GameDirectory, "csgo", "PugSharp", "Config"));
 
     private readonly CurrentRoundState _CurrentRountState = new CurrentRoundState();
-
+    private ApiStats.ApiStats _ApiStats;
+    private G5ApiClient _G5Stats;
     private Match.Match? _Match;
     private ServerConfig? _ServerConfig;
 
@@ -76,10 +80,16 @@ public class PugSharp : BasePlugin, IMatchCallback
 
     private void InitializeMatch(MatchConfig matchConfig)
     {
+        var pluginDirectory = Path.Combine(Server.GameDirectory, "csgo", "PugSharp");
+
+        _ApiStats = new ApiStats.ApiStats(matchConfig.EventulaApistatsUrl ?? string.Empty, matchConfig.EventulaApistatsToken ?? string.Empty, pluginDirectory == null ? null : Path.Combine(pluginDirectory, "Stats"));
+        _G5Stats = new G5ApiClient(matchConfig.G5ApiUrl ?? string.Empty, matchConfig.G5ApiHeader ?? string.Empty, matchConfig.G5ApiHeaderValue ?? string.Empty);
+
+
         SetMatchVariable(matchConfig);
 
         _Match?.Dispose();
-        _Match = new Match.Match(this, matchConfig, Path.Combine(Server.GameDirectory, "csgo", "PugSharp"));
+        _Match = new Match.Match(this, matchConfig, pluginDirectory);
 
         var players = GetAllPlayers();
         foreach (var player in players.Where(x => x.UserId.HasValue && x.UserId >= 0))
@@ -120,6 +130,66 @@ public class PugSharp : BasePlugin, IMatchCallback
         }
     }
 
+    public T? GetConvar<T>(string name)
+    {
+        var convar = ConVar.Find(name);
+        if (convar == null)
+        {
+            _Logger.LogError("Convar {name} not found!", name);
+            return default;
+        }
+
+        if (typeof(string).Equals(typeof(T)))
+        {
+            return (T)(object)convar.StringValue;
+        }
+
+        return convar.GetPrimitiveValue<T>();
+    }
+
+    public Task GoingLiveAsync(string matchId, string mapName, int mapNumber, CancellationToken cancellationToken)
+    {
+        return Task.WhenAll(
+            _ApiStats.SendGoingLiveAsync(matchId, new GoingLiveParams(mapName, mapNumber), cancellationToken),
+            _G5Stats.SendEventAsync(new GoingLiveEvent(matchId, mapNumber), cancellationToken));
+    }
+
+
+    public Task FinalizeMapAsync(string matchId, string winnerTeamName, int team1Score, int team2Score, int mapNumber, CancellationToken cancellationToken)
+    {
+        if (_ApiStats == null)
+        {
+            return Task.CompletedTask;
+        }
+
+        return Task.WhenAll(
+            _ApiStats.FinalizeMapAsync(matchId, new MapResultParams(winnerTeamName, team1Score, team2Score, mapNumber), cancellationToken),
+            _G5Stats.SendEventAsync(new MapResultEvent(matchId, mapNumber, new Winner((Side)(int)LoadMatchWinner(), team1Score > team2Score ? 1 : 2), null, null), cancellationToken));
+    }
+
+    public Task SendRoundStatsUpdateAsync(string matchId, int mapNumber, ITeamInfo team1Info, ITeamInfo team2Info, IMap currentMap, CancellationToken cancellationToken)
+    {
+        if (_ApiStats == null)
+        {
+            return Task.CompletedTask;
+        }
+
+        return _ApiStats.SendRoundStatsUpdateAsync(matchId, new RoundStatusUpdateParams(mapNumber, team1Info, team2Info, currentMap), cancellationToken);
+    }
+
+    public Task FinalizeAsync(string matchId, string winnerTeamName, bool forfeit, uint timeBeforeFreeingServerMs, int team1SeriesScore, int team2SeriesScore, CancellationToken cancellationToken)
+    {
+        if (_ApiStats == null)
+        {
+            return Task.CompletedTask;
+        }
+
+        return Task.WhenAll(
+                 _ApiStats.FinalizeAsync(new SeriesResultParams(winnerTeamName, forfeit, timeBeforeFreeingServerMs), cancellationToken),
+                 _G5Stats.SendEventAsync(new SeriesResultEvent(matchId, new Winner((Side)(int)LoadMatchWinner(), 0), team1SeriesScore, team2SeriesScore, (int)timeBeforeFreeingServerMs), cancellationToken));
+    }
+
+
     private void ResetServer()
     {
         StopDemoRecording();
@@ -159,6 +229,8 @@ public class PugSharp : BasePlugin, IMatchCallback
         UpdateConvar("mp_teamflag_2", matchConfig.Team1.Flag);
 
         UpdateConvar("tv_autorecord", false);
+        //UpdateConvar("tv_delay", 30);
+        //UpdateConvar("tv_delay1", 30);
 
         _Logger.LogInformation("Set match variables done");
     }
@@ -519,11 +591,17 @@ public class PugSharp : BasePlugin, IMatchCallback
                 PlayerResults = CreatePlayerResults(),
             });
 
+            // Toggle after last round in half
+            if ((teamT.Score + teamCT.Score) == _Match.Config.MaxRounds / 2)
+            {
+                _Match.SwitchTeam();
+            }
             // TODO OT handling
         }
 
         return HookResult.Continue;
     }
+
 
     private IReadOnlyDictionary<ulong, IPlayerRoundResults> CreatePlayerResults()
     {
@@ -620,7 +698,7 @@ public class PugSharp : BasePlugin, IMatchCallback
     private HookResult OnEventRoundAnnounceLastRoundHalf(EventRoundAnnounceLastRoundHalf eventRoundAnnounceLastRoundHalf, GameEventInfo info)
     {
         _Logger.LogInformation("OnEventRoundAnnounceLastRoundHalf");
-        _Match?.SwitchTeam();
+        //_Match?.SwitchTeam();
         return HookResult.Continue;
     }
 
@@ -1090,7 +1168,7 @@ public class PugSharp : BasePlugin, IMatchCallback
         Server.ExecuteCommand("tv_stoprecord");
     }
 
-    public Match.Contract.Team LoadMatchWinnerName()
+    public Match.Contract.Team LoadMatchWinner()
     {
         var (CtScore, TScore) = LoadTeamsScore();
         if (CtScore > TScore)

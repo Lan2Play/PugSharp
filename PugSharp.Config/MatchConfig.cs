@@ -43,5 +43,14 @@ namespace PugSharp.Config
         [JsonPropertyName("eventula_demo_upload_url")]
         public string? EventulaDemoUploadUrl { get; set; }
 
+        [JsonPropertyName("g5_api_url")]
+        public string? G5ApiUrl { get; set; }
+
+        [JsonPropertyName("g5_api_header")]
+        public string? G5ApiHeader { get; set; }
+
+        [JsonPropertyName("g5_api_headervalue")]
+        public string? G5ApiHeaderValue { get; set; }
+
     }
 }

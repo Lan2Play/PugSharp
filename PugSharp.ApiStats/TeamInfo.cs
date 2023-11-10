@@ -1,6 +1,8 @@
-﻿namespace PugSharp.ApiStats
+﻿using PugSharp.Match.Contract;
+
+namespace PugSharp.ApiStats
 {
-    public class TeamInfo
+    public class TeamInfo : ITeamInfo
     {
         public string Id { get; set; }
 
