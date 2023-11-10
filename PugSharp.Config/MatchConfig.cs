@@ -52,5 +52,8 @@ namespace PugSharp.Config
         [JsonPropertyName("g5_api_headervalue")]
         public string? G5ApiHeaderValue { get; set; }
 
+        [JsonPropertyName("allow_suicide")]
+        public bool AllowSuicide { get; set; } = true;
+
     }
 }
