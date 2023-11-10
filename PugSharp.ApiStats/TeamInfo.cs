@@ -1,5 +1,4 @@
 ﻿using PugSharp.Api.Contract;
-using PugSharp.Match.Contract;
 
 namespace PugSharp.ApiStats
 {

@@ -1,6 +1,4 @@
-﻿
-
-namespace PugSharp.Api.Contract
+﻿namespace PugSharp.Api.Contract
 {
     public class MultiApiProvider : IApiProvider
     {

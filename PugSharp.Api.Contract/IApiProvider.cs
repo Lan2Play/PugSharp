@@ -1,5 +1,4 @@
-﻿
-namespace PugSharp.Api.Contract
+﻿namespace PugSharp.Api.Contract
 {
     public interface IApiProvider
     {
