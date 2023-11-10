@@ -54,6 +54,7 @@ If you want to know how to use PugSharp, hop over to our [Documentation](https:/
 - `!ready` Mark the player as ready
 - `!pause` Pause the match in the next freezetime
 - `!unpause` Unpause the match. To continue the match, both teams have to !unpause.
+- `!kill` or `!suicide` Kill the current player if allowed by [MatchConfig](#MatchConfig).
 
 ### Admin/Rcon Commands
 
@@ -83,7 +84,11 @@ If you want to know how to use PugSharp, hop over to our [Documentation](https:/
 | vote_timeout             | 60000 (60s)  | Timeout in milliseconds. If team does not complete vote within this timeout the map with the most votes gets banned. |
 | eventula_apistats_url    | (optional)   | Url where the Game State have to be send.                                                                            |
 | eventula_apistats_token  | (optional)   | Optional Authtoken that is used to authenticate on apistats upload.                                                  |
-| eventula_demo_upload_url | (optional)   | Url to upload the game demo to [Eventula](https://github.com/Lan2Play/eventula-manager)                              |
+| eventula_demo_upload_url | (optional)   | Url to upload the game demo to [Eventula](https://github.com/Lan2Play/eventula-manager).                             |
+| g5_api_url               | (optional)   | Url to send the g5 events to.                                                                                        |
+| g5_api_header            | (optional)   | Header that should be set to access the g5 events api.                                                               |
+| g5_api_headervalue       | (optional)   | Header value that should be set to access the g5 events api.                                                         |
+| allow_suicide            | true         | Flag to determine if players are allowed to suicide.                                                                 |
 
 #### Example Config
 

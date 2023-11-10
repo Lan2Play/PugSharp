@@ -24,7 +24,7 @@ public class PugSharp : BasePlugin, IMatchCallback
 
     private readonly ConfigProvider _ConfigProvider = new(Path.Join(Server.GameDirectory, "csgo", "PugSharp", "Config"));
 
-    private readonly CurrentRoundState _CurrentRountState = new CurrentRoundState();
+    private readonly CurrentRoundState _CurrentRountState = new();
     private ApiStats.ApiStats _ApiStats;
     private G5ApiClient _G5Stats;
     private Match.Match? _Match;
@@ -162,9 +162,11 @@ public class PugSharp : BasePlugin, IMatchCallback
             return Task.CompletedTask;
         }
 
+        var emptyStatsTeam = new StatsTeam(string.Empty, string.Empty, 0, 0, 0, 0, Enumerable.Empty<StatsPlayer>());
+
         return Task.WhenAll(
             _ApiStats.FinalizeMapAsync(matchId, new MapResultParams(winnerTeamName, team1Score, team2Score, mapNumber), cancellationToken),
-            _G5Stats.SendEventAsync(new MapResultEvent(matchId, mapNumber, new Winner((Side)(int)LoadMatchWinner(), team1Score > team2Score ? 1 : 2), null, null), cancellationToken));
+            _G5Stats.SendEventAsync(new MapResultEvent(matchId, mapNumber, new Winner((Side)(int)LoadMatchWinner(), team1Score > team2Score ? 1 : 2), emptyStatsTeam, emptyStatsTeam), cancellationToken));
     }
 
     public Task SendRoundStatsUpdateAsync(string matchId, int mapNumber, ITeamInfo team1Info, ITeamInfo team2Info, IMap currentMap, CancellationToken cancellationToken)
@@ -339,7 +341,7 @@ public class PugSharp : BasePlugin, IMatchCallback
         {
             if (player != null && !player.IsAdmin(_ServerConfig))
             {
-                player.PrintToCenter("Command is only allowed for admins!");
+                command.ReplyToCommand("Command is only allowed for admins!");
                 return;
             }
 
@@ -351,9 +353,7 @@ public class PugSharp : BasePlugin, IMatchCallback
 
             if (command.ArgCount != 2)
             {
-                _Logger.LogInformation("FileName is required as Argument! Path have to be put in \"pathToConfig\"");
-                player?.PrintToCenter("FileName is required as Argument! Path have to be put in \"pathToConfig\"");
-
+                command.ReplyToCommand("FileName is required as Argument! Path have to be put in \"pathToConfig\"");
                 return;
             }
 
@@ -384,6 +384,12 @@ public class PugSharp : BasePlugin, IMatchCallback
     {
         HandleCommand(() =>
         {
+            if (player != null && !player.IsAdmin(_ServerConfig))
+            {
+                command.ReplyToCommand("Command is only allowed for admins!");
+                return;
+            }
+
             _Logger.LogInformation("################ dump match ################");
             _Logger.LogInformation(JsonSerializer.Serialize(_Match));
             _Logger.LogInformation("################ dump match ################");
@@ -452,6 +458,31 @@ public class PugSharp : BasePlugin, IMatchCallback
         },
         command);
     }
+
+    [ConsoleCommand("css_kill", "Kills the calling player")]
+    [ConsoleCommand("ps_kill", "Kills the calling player")]
+    [ConsoleCommand("css_suicide", "Kills the calling player")]
+    [ConsoleCommand("ps_suicide", "Kills the calling player")]
+    public void OnCommandKillCalled(CCSPlayerController? player, CommandInfo command)
+    {
+        HandleCommand(() =>
+        {
+            if (player == null || !player.IsValid)
+            {
+                command.ReplyToCommand("Command is only possible for valid players!");
+                return;
+            }
+
+            if (_Match?.Config?.AllowSuicide != true)
+            {
+                command.ReplyToCommand("Suicide is not allowed during this match!");
+            }
+
+            player.Pawn.Value.CommitSuicide(true, true);
+        },
+        command);
+    }
+
 
     private static void HandleCommand(Action commandAction, CommandInfo command, [CallerMemberName] string? commandMethod = null)
     {
