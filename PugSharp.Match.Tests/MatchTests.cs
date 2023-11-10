@@ -145,6 +145,7 @@ namespace PugSharp.Match.Tests
         {
             return new MatchConfig
             {
+                MatchId = "1337",
                 PlayersPerTeam = 1,
                 MinPlayersToReady = 1,
                 NumMaps = 1,

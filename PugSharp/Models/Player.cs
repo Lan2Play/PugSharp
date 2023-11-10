@@ -4,6 +4,7 @@ using CounterStrikeSharp.API.Modules.Menu;
 using Microsoft.Extensions.Logging;
 using PugSharp.Logging;
 using PugSharp.Match.Contract;
+using System.Globalization;
 
 namespace PugSharp.Models;
 
@@ -23,7 +24,7 @@ public class Player : IPlayer
         _UserId = playerController.UserId!.Value;
         SteamID = playerController.SteamID;
         _PlayerController = playerController;
-        
+
     }
 
     private T DefaultIfInvalid<T>(Func<T> loadValue, T defaultValue)
@@ -106,7 +107,7 @@ public class Player : IPlayer
             _PlayerController.SwitchTeam((CounterStrikeSharp.API.Modules.Utils.CsTeam)(int)team);
             Server.NextFrame(() =>
             {
-                _PlayerController.PlayerPawn.Value.CommitSuicide(true, true);
+                _PlayerController.PlayerPawn.Value.CommitSuicide(explode: true, force: true);
                 ResetScoreboard();
             });
         }
@@ -114,7 +115,7 @@ public class Player : IPlayer
 
     public void Kick()
     {
-        Server.ExecuteCommand($"kickid {UserId!.Value} \"You are not part of the current match!\"");
+        Server.ExecuteCommand(string.Create(CultureInfo.InvariantCulture, $"kickid {UserId!.Value} \"You are not part of the current match!\""));
     }
 
     private void ResetScoreboard()

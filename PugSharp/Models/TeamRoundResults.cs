@@ -2,7 +2,7 @@
 
 namespace PugSharp.Models
 {
-    internal class TeamRoundResults : ITeamRoundResults
+    internal sealed class TeamRoundResults : ITeamRoundResults
     {
 
         public int Score { get; set; }

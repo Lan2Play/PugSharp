@@ -100,7 +100,7 @@ namespace PugSharp.Config
                 catch (JsonException ex)
                 {
                     var configJsonString = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
-                    _Logger.LogError(ex, configJsonString);
+                    _Logger.LogError(ex, "{error}", configJsonString);
                     return new Error<string>(configJsonString);
                 }
             }

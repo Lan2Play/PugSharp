@@ -2,12 +2,12 @@
 
 namespace PugSharp.Models
 {
-    internal class RoundResult : IRoundResults
+    internal sealed class RoundResult : IRoundResults
     {
-        public ITeamRoundResults TRoundResult { get; set; }
+        public required ITeamRoundResults TRoundResult { get; set; }
 
-        public ITeamRoundResults CTRoundResult { get; set; }
+        public required ITeamRoundResults CTRoundResult { get; set; }
 
-        public IReadOnlyDictionary<ulong, IPlayerRoundResults> PlayerResults { get; set; }
+        public required IReadOnlyDictionary<ulong, IPlayerRoundResults> PlayerResults { get; set; }
     }
 }
