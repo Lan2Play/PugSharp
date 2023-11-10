@@ -164,7 +164,7 @@ namespace PugSharp.Match.Tests
                         { 1,"Def" },
                     },
                 },
-                Maplist = new string[] { "de_dust2", "de_overpass", "de_inferno" }
+                Maplist = new string[] { "de_dust2", "de_overpass", "de_inferno" },
             };
         }
 

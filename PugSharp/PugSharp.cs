@@ -473,7 +473,7 @@ public class PugSharp : BasePlugin, IMatchCallback
                 return;
             }
 
-            if (!_Match?.Config.AllowSuicide)
+            if (_Match?.Config?.AllowSuicide != true)
             {
                 command.ReplyToCommand("Suicide is not allowed during this match!");
             }
