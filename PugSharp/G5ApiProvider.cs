@@ -140,7 +140,7 @@ public partial class G5CommandProvider : ICommandProvider
         return new[] { "0.15.0" };
     }
 
-    [GeneratedRegex("PatchVersion=(.+)", RegexOptions.ExplicitCapture, 1000)]
+    [GeneratedRegex(@"PatchVersion=([0-9]+\.[0-9]+\.[0-9]+\.[0-9]+)", RegexOptions.ExplicitCapture, 1000)]
     private static partial Regex PatchVersion();
 
     private IEnumerable<string> CommandVersion(string[] args)

@@ -68,7 +68,7 @@ public class PugSharp : BasePlugin, IMatchCallback
                     {
                         c.ReplyToCommand(result);
                     }
-                }, c, command.Name);
+                }, c, c.ArgString);
             });
         }
     }
