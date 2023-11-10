@@ -21,8 +21,8 @@ public interface IMatchCallback
     Team LoadMatchWinner();
     T? GetConvar<T>(string name);
     Task GoingLiveAsync(GoingLiveParams goingLiveParams, CancellationToken cancellationToken);
-    Task FinalizeMapAsync(string matchId, string winnerTeamName, int team1Score, int team2Score, int mapNumber, CancellationToken cancellationToken);
-    Task SendRoundStatsUpdateAsync(string matchId, int mapNumber, ITeamInfo team1Info, ITeamInfo team2Info, IMap currentMap, CancellationToken cancellationToken);
-    Task FinalizeAsync(string matchId, string winnerTeamName, bool forfeit, uint timeBeforeFreeingServerMs, int team1SeriesScore, int team2SeriesScore, CancellationToken cancellationToken);
+    Task FinalizeMapAsync(MapResultParams finalizeMapParams, CancellationToken cancellationToken);
+    Task SendRoundStatsUpdateAsync(RoundStatusUpdateParams roundStatusUpdateParams, CancellationToken cancellationToken);
+    Task FinalizeAsync(SeriesResultParams seriesResultParams, CancellationToken cancellationToken);
     void CleanUpMatch();
 }

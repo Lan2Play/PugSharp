@@ -2,7 +2,6 @@
 using Microsoft.Extensions.Logging;
 using PugSharp.Api.Contract;
 using PugSharp.Logging;
-using PugSharp.Match.Contract;
 using System.Globalization;
 using System.Text.Json;
 
@@ -73,7 +72,7 @@ namespace PugSharp.ApiStats
             }
         }
 
-        public async Task FinalizeMapAsync(string matchId, MapResultParams mapResultParams, CancellationToken cancellationToken)
+        public async Task FinalizeMapAsync(MapResultParams mapResultParams, CancellationToken cancellationToken)
         {
             if (HttpClient == null)
             {
@@ -104,7 +103,7 @@ namespace PugSharp.ApiStats
             {
                 if (_ApiStatsDirectory != null)
                 {
-                    var mapFesultFileName = Path.GetFullPath(Path.Combine(_ApiStatsDirectory, $"Match_{matchId}_mapresult.json"));
+                    var mapFesultFileName = Path.GetFullPath(Path.Combine(_ApiStatsDirectory, $"Match_{mapResultParams.MatchId}_mapresult.json"));
                     CreateStatsDirectoryIfNotExists();
                     var fileStream = File.OpenWrite(mapFesultFileName);
                     await using (fileStream.ConfigureAwait(false))
@@ -120,7 +119,8 @@ namespace PugSharp.ApiStats
             }
         }
 
-        public async Task SendRoundStatsUpdateAsync(string matchId, RoundStatusUpdateParams roundStatusUpdateParams, CancellationToken cancellationToken)
+
+        public async Task SendRoundStatsUpdateAsync(RoundStatusUpdateParams roundStatusUpdateParams, CancellationToken cancellationToken)
         {
             if (HttpClient == null)
             {
@@ -154,7 +154,7 @@ namespace PugSharp.ApiStats
                 if (_ApiStatsDirectory != null)
                 {
                     var round = roundStatusUpdateParams.CurrentMap.Team1.Score + roundStatusUpdateParams.CurrentMap.Team2.Score;
-                    var roundFileName = Path.GetFullPath(Path.Combine(_ApiStatsDirectory, string.Create(CultureInfo.InvariantCulture, $"Match_{matchId}_roundresult_{round}.json")));
+                    var roundFileName = Path.GetFullPath(Path.Combine(_ApiStatsDirectory, string.Create(CultureInfo.InvariantCulture, $"Match_{roundStatusUpdateParams.MatchId}_roundresult_{round}.json")));
                     CreateStatsDirectoryIfNotExists();
                     var fileStream = File.OpenWrite(roundFileName);
                     await using (fileStream.ConfigureAwait(false))

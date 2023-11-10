@@ -186,7 +186,7 @@ public class Match : IDisposable
             throw new NotSupportedException("Map Winner is not yet set. Can not send map results");
         }
 
-        _ = _MatchCallback.FinalizeMapAsync(Config.MatchId, _MatchInfo.CurrentMap.Winner.TeamConfig.Name, _MatchInfo.CurrentMap.Team1Points, _MatchInfo.CurrentMap.Team2Points, _MatchInfo.CurrentMap.MapNumber, CancellationToken.None);
+        _ = _MatchCallback.FinalizeMapAsync(new MapResultParams(Config.MatchId, _MatchInfo.CurrentMap.Winner.TeamConfig.Name, _MatchInfo.CurrentMap.Team1Points, _MatchInfo.CurrentMap.Team2Points, _MatchInfo.CurrentMap.MapNumber), CancellationToken.None);
     }
 
     public void SendRoundResults(IRoundResults roundResults)
@@ -427,7 +427,8 @@ public class Match : IDisposable
 
         if (_MatchInfo.MatchMaps[_MatchInfo.MatchMaps.Count - 1] == _MatchInfo.CurrentMap)
         {
-            await _MatchCallback.FinalizeAsync(Config.MatchId, _MatchInfo.MatchMaps.GroupBy(x => x.Winner).MaxBy(x => x.Count())!.Key!.TeamConfig.Name, true, 120000, _MatchInfo.MatchMaps.Count(x => x.Team1Points > x.Team2Points), _MatchInfo.MatchMaps.Count(x => x.Team2Points > x.Team1Points), CancellationToken.None).ConfigureAwait(false);
+            var seriesResultParams = new SeriesResultParams(Config.MatchId, _MatchInfo.MatchMaps.GroupBy(x => x.Winner).MaxBy(x => x.Count())!.Key!.TeamConfig.Name, true, 120000, _MatchInfo.MatchMaps.Count(x => x.Team1Points > x.Team2Points), _MatchInfo.MatchMaps.Count(x => x.Team2Points > x.Team1Points));
+            await _MatchCallback.FinalizeAsync(seriesResultParams, CancellationToken.None).ConfigureAwait(false);
         }
 
         foreach (var player in AllMatchPlayers)
