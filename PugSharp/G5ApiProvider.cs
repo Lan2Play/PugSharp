@@ -1,7 +1,5 @@
-﻿using CounterStrikeSharp.API.Modules.Commands;
-using PugSharp.Api.Contract;
+﻿using PugSharp.Api.Contract;
 using PugSharp.Api.G5Api;
-using System.Runtime.CompilerServices;
 using Microsoft.Extensions.Logging;
 using PugSharp.Logging;
 using PugSharp.Server.Contract;
@@ -49,6 +47,20 @@ public partial class G5ApiProvider : IApiProvider
     #endregion
 
     #region Get5Api Commands
+
+
+    #endregion
+}
+
+public partial class G5CommandProvider : ICommandProvider
+{
+    private static readonly ILogger<G5ApiProvider> _Logger = LogManager.CreateLogger<G5ApiProvider>();
+    private readonly ICsServer _CsServer;
+
+    public G5CommandProvider(ICsServer csServer)
+    {
+        _CsServer = csServer;
+    }
 
     public IReadOnlyList<ProviderCommand> LoadProviderCommands()
     {
@@ -160,6 +172,4 @@ public partial class G5ApiProvider : IApiProvider
 
         return Enumerable.Empty<string>();
     }
-
-    #endregion
 }

@@ -28,7 +28,6 @@ public class PugSharp : BasePlugin, IMatchCallback
 
     private readonly CurrentRoundState _CurrentRountState = new();
     private readonly MultiApiProvider _ApiProvider = new();
-    private readonly Dictionary<string, CommandInfo.CommandCallback> _CurrentCommandsApiProviderCommnds = new(StringComparer.Ordinal);
 
     private Match.Match? _Match;
     private ServerConfig? _ServerConfig;
@@ -55,6 +54,23 @@ public class PugSharp : BasePlugin, IMatchCallback
             error => { }, // Do nothing - Error already logged
             serverConfig => _ServerConfig = serverConfig
         );
+
+        var commands = new G5CommandProvider(_CsServer).LoadProviderCommands();
+        foreach (var command in commands)
+        {
+            AddCommand(command.Name, command.Description, (p, c) =>
+            {
+                HandleCommand(() =>
+                {
+                    var args = Enumerable.Range(0, c.ArgCount).Select(i => c.GetArg(i)).ToArray();
+                    var results = command.commandCallBack(args);
+                    foreach (var result in results)
+                    {
+                        c.ReplyToCommand(result);
+                    }
+                }, c, command.Name);
+            });
+        }
     }
 
     private void RegisterEventHandlers()
@@ -106,25 +122,7 @@ public class PugSharp : BasePlugin, IMatchCallback
             _ApiProvider.AddApiProvider(g5ApiProvider);
         }
 
-        UnloadCurrentCommands();
-        var commands = _ApiProvider.LoadProviderCommands();
-        foreach (var command in commands)
-        {
-            CommandInfo.CommandCallback ProviderCommand = (p, c) =>
-            {
-                HandleCommand(() =>
-                {
-                    var args = Enumerable.Range(0, c.ArgCount).Select(i => c.GetArg(i)).ToArray();
-                    var results = command.commandCallBack(args);
-                    foreach (var result in results)
-                    {
-                        c.ReplyToCommand(result);
-                    }
-                }, c, command.Name);
-            };
-            AddCommand(command.Name, command.Description, ProviderCommand);
-            _CurrentCommandsApiProviderCommnds.Add(command.Name, ProviderCommand);
-        }
+
 
         SetMatchVariable(matchConfig);
 
@@ -141,16 +139,6 @@ public class PugSharp : BasePlugin, IMatchCallback
         }
 
         ResetServer();
-    }
-
-    private void UnloadCurrentCommands()
-    {
-        foreach (var currentCommand in _CurrentCommandsApiProviderCommnds)
-        {
-            RemoveCommand(currentCommand.Key, currentCommand.Value);
-        }
-
-        _CurrentCommandsApiProviderCommnds.Clear();
     }
 
     public static void UpdateConvar<T>(string name, T value)
@@ -199,8 +187,6 @@ public class PugSharp : BasePlugin, IMatchCallback
 
     public void CleanUpMatch()
     {
-        UnloadCurrentCommands();
-
         if (_Match != null)
         {
             _Match.Dispose();

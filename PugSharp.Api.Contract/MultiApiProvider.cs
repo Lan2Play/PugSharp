@@ -38,11 +38,6 @@ namespace PugSharp.Api.Contract
             return Task.WhenAll(_ApiProviders.Select(a => a.RoundStatsUpdateAsync(roundStatusUpdateParams, cancellationToken)));
         }
 
-        public IReadOnlyList<ProviderCommand> LoadProviderCommands()
-        {
-            return _ApiProviders.SelectMany(x => x.LoadProviderCommands()).ToList();
-        }
-
         #endregion
     }
 }
