@@ -117,7 +117,7 @@ jobs:
       - name: debug
         run: curl -s -L https://api.github.com/repos/roflmuffin/CounterStrikeSharp/releases/tags/$CSSHARPVER
       - name: get counterstrikesharp link
-        run: echo "CSSHARPlink=$(curl -s -L https://api.github.com/repos/roflmuffin/CounterStrikeSharp/releases/tags/$CSSHARPVER | jq -r '.assets.[] | select(.browser_download_url | test("with-runtime")) | .browser_download_url')" >> $GITHUB_ENV
+        run: echo "CSSHARPlink=$(curl -s -L https://api.github.com/repos/roflmuffin/CounterStrikeSharp/releases/tags/$CSSHARPVER | jq -r '.assets[] | select(.browser_download_url | test("with-runtime")) | .browser_download_url')" >> $GITHUB_ENV
       - name: echo counterstrikesharp link
         run: echo $CSSHARPlink
       - name: get counterstrikesharp
