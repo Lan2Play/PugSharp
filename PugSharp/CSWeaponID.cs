@@ -100,5 +100,5 @@ public enum CSWeaponID
     KNIFE_STILETTO = 522,
     KNIFE_WIDOWMAKER = 523,
     KNIFE_SKELETON = 525,
-    MAX_WEAPONS //THIS MUST BE LAST, EASY WAY TO CREATE LOOPS. When looping, do CS_IsValidWeaponID(i), to check.
+    MAX_WEAPONS, //THIS MUST BE LAST, EASY WAY TO CREATE LOOPS. When looping, do CS_IsValidWeaponID(i), to check.
 };

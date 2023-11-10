@@ -2,6 +2,7 @@
 using CounterStrikeSharp.API.Core;
 using CounterStrikeSharp.API.Modules.Memory;
 using PugSharp.Config;
+using System.Globalization;
 
 namespace PugSharp
 {
@@ -24,7 +25,7 @@ namespace PugSharp
                 return;
             }
 
-            Server.ExecuteCommand($"kickid {playerController.UserId.Value} \"You are not part of the current match!\"");
+            Server.ExecuteCommand(string.Create(CultureInfo.InvariantCulture, $"kickid {playerController.UserId.Value} \"You are not part of the current match!\""));
         }
 
         internal static PlayerConnectedState PlayerState(this CCSPlayerController player)

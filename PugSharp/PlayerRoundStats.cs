@@ -2,7 +2,7 @@
 
 namespace PugSharp
 {
-    internal class PlayerRoundStats : IPlayerRoundResults
+    internal sealed class PlayerRoundStats : IPlayerRoundResults
     {
         public int Kills { get; set; }
 
@@ -48,12 +48,11 @@ namespace PugSharp
 
         public int TradeKills { get; set; }
 
-        public string Name { get;  }
+        public string Name { get; }
 
         public PlayerRoundStats(string name)
         {
             Name = name;
         }
     }
-
 }

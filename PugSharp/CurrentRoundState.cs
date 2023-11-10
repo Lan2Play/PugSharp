@@ -1,9 +1,10 @@
-﻿using PugSharp.Match.Contract;
-
+﻿
 namespace PugSharp
 {
-    internal class CurrentRoundState
+    internal sealed class CurrentRoundState
     {
+        private readonly Dictionary<ulong, PlayerRoundStats> _PlayerStats = new();
+
         public bool FirstDeathDone { get; set; }
 
         public bool FirstKillDone { get; set; }
@@ -12,7 +13,6 @@ namespace PugSharp
 
         public bool CounterTerroristsClutching { get; set; }
 
-        private Dictionary<ulong, PlayerRoundStats> _PlayerStats = new Dictionary<ulong, PlayerRoundStats>();
 
         public IReadOnlyDictionary<ulong, PlayerRoundStats> PlayerStats => _PlayerStats;
 
@@ -26,13 +26,14 @@ namespace PugSharp
         }
 
         public PlayerRoundStats GetPlayerRoundStats(ulong steamId, string name)
-        { 
-            if(!_PlayerStats.ContainsKey(steamId))
+        {
+            if (!_PlayerStats.TryGetValue(steamId, out PlayerRoundStats? value))
             {
-                _PlayerStats[steamId] = new PlayerRoundStats(name);
+                value = new PlayerRoundStats(name);
+                _PlayerStats[steamId] = value;
             }
 
-            return _PlayerStats[steamId];
+            return value;
         }
     }
 }
