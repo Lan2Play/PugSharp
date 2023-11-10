@@ -1,6 +1,9 @@
 using NSubstitute;
+using PugSharp.Api.Contract;
+using PugSharp.Api.G5Api;
 using PugSharp.Config;
 using PugSharp.Match.Contract;
+using PugSharp.Server.Contract;
 
 namespace PugSharp.Match.Tests
 {
@@ -10,9 +13,10 @@ namespace PugSharp.Match.Tests
         public void CreateDotGraphTest()
         {
             var matchCallback = Substitute.For<IMatchCallback>();
+            var apiProvider = Substitute.For<IApiProvider>();
             MatchConfig config = CreateExampleConfig();
 
-            var match = new Match(matchCallback, config);
+            var match = new Match(matchCallback, apiProvider, config);
 
             var dotGraphString = match.CreateDotGraph();
             Assert.True(!string.IsNullOrEmpty(dotGraphString));
@@ -22,9 +26,10 @@ namespace PugSharp.Match.Tests
         public void WrongPlayerConnectTest()
         {
             var matchCallback = Substitute.For<IMatchCallback>();
+            var apiProvider = Substitute.For<IApiProvider>();
             MatchConfig config = CreateExampleConfig();
 
-            var match = new Match(matchCallback, config);
+            var match = new Match(matchCallback, apiProvider, config);
 
             Assert.Equal(MatchState.WaitingForPlayersConnectedReady, match.CurrentState);
 
@@ -37,9 +42,10 @@ namespace PugSharp.Match.Tests
         public void CorrectPlayerConnectTest()
         {
             var matchCallback = Substitute.For<IMatchCallback>();
+            var apiProvider = Substitute.For<IApiProvider>();
             MatchConfig config = CreateExampleConfig();
 
-            var match = new Match(matchCallback, config);
+            var match = new Match(matchCallback, apiProvider, config);
 
             Assert.Equal(MatchState.WaitingForPlayersConnectedReady, match.CurrentState);
 
@@ -52,12 +58,14 @@ namespace PugSharp.Match.Tests
         public async Task MatchTest()
         {
             var matchPlayers = new List<IPlayer>();
+            var apiProvider = Substitute.For<IApiProvider>();
             var matchCallback = Substitute.For<IMatchCallback>();
+
             matchCallback.GetAllPlayers().Returns(matchPlayers);
 
             MatchConfig config = CreateExampleConfig();
 
-            var match = new Match(matchCallback, config);
+            var match = new Match(matchCallback, apiProvider, config);
 
             Assert.Equal(MatchState.WaitingForPlayersConnectedReady, match.CurrentState);
 

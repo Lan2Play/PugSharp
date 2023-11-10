@@ -105,7 +105,7 @@ public class Player : IPlayer
         if (_PlayerController.IsValid)
         {
             _PlayerController.SwitchTeam((CounterStrikeSharp.API.Modules.Utils.CsTeam)(int)team);
-            Server.NextFrame(() =>
+            CounterStrikeSharp.API.Server.NextFrame(() =>
             {
                 _PlayerController.PlayerPawn.Value.CommitSuicide(explode: true, force: true);
                 ResetScoreboard();
@@ -115,7 +115,7 @@ public class Player : IPlayer
 
     public void Kick()
     {
-        Server.ExecuteCommand(string.Create(CultureInfo.InvariantCulture, $"kickid {UserId!.Value} \"You are not part of the current match!\""));
+        CounterStrikeSharp.API.Server.ExecuteCommand(string.Create(CultureInfo.InvariantCulture, $"kickid {UserId!.Value} \"You are not part of the current match!\""));
     }
 
     private void ResetScoreboard()

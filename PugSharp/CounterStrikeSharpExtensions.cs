@@ -25,7 +25,7 @@ namespace PugSharp
                 return;
             }
 
-            Server.ExecuteCommand(string.Create(CultureInfo.InvariantCulture, $"kickid {playerController.UserId.Value} \"You are not part of the current match!\""));
+            CounterStrikeSharp.API.Server.ExecuteCommand(string.Create(CultureInfo.InvariantCulture, $"kickid {playerController.UserId.Value} \"You are not part of the current match!\""));
         }
 
         internal static PlayerConnectedState PlayerState(this CCSPlayerController player)

@@ -6,6 +6,10 @@ namespace PugSharp.Api.Contract
         Task GoingLiveAsync(GoingLiveParams goingLiveParams, CancellationToken cancellationToken);
         Task FinalizeMapAsync(MapResultParams finalizeMapParams, CancellationToken cancellationToken);
         Task FinalizeAsync(SeriesResultParams seriesResultParams, CancellationToken cancellationToken);
-        Task SendRoundStatsUpdateAsync(RoundStatusUpdateParams roundStatusUpdateParams, CancellationToken cancellationToken);
+        Task RoundStatsUpdateAsync(RoundStatusUpdateParams roundStatusUpdateParams, CancellationToken cancellationToken);
+
+        IReadOnlyList<ProviderCommand> LoadProviderCommands();
     }
+
+    public record ProviderCommand(string Name, string Description, Func<string[], IEnumerable<string>> commandCallBack);
 }

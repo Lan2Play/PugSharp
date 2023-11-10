@@ -120,7 +120,7 @@ namespace PugSharp.ApiStats
         }
 
 
-        public async Task SendRoundStatsUpdateAsync(RoundStatusUpdateParams roundStatusUpdateParams, CancellationToken cancellationToken)
+        public async Task RoundStatsUpdateAsync(RoundStatusUpdateParams roundStatusUpdateParams, CancellationToken cancellationToken)
         {
             if (HttpClient == null)
             {
@@ -290,6 +290,10 @@ namespace PugSharp.ApiStats
             await HandleResponseAsync(response, cancellationToken).ConfigureAwait(false);
         }
 
+        public IReadOnlyList<ProviderCommand> LoadProviderCommands()
+        {
+            return Enumerable.Empty<ProviderCommand>().ToList();
+        }
 
         private static class ApiStatsConstants
         {

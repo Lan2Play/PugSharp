@@ -1,4 +1,5 @@
 ﻿
+
 namespace PugSharp.Api.Contract
 {
     public class MultiApiProvider : IApiProvider
@@ -32,9 +33,14 @@ namespace PugSharp.Api.Contract
             return Task.WhenAll(_ApiProviders.Select(a => a.FinalizeAsync(seriesResultParams, cancellationToken)));
         }
 
-        public Task SendRoundStatsUpdateAsync(RoundStatusUpdateParams roundStatusUpdateParams, CancellationToken cancellationToken)
+        public Task RoundStatsUpdateAsync(RoundStatusUpdateParams roundStatusUpdateParams, CancellationToken cancellationToken)
         {
-            return Task.WhenAll(_ApiProviders.Select(a => a.SendRoundStatsUpdateAsync(roundStatusUpdateParams, cancellationToken)));
+            return Task.WhenAll(_ApiProviders.Select(a => a.RoundStatsUpdateAsync(roundStatusUpdateParams, cancellationToken)));
+        }
+
+        public IReadOnlyList<ProviderCommand> LoadProviderCommands()
+        {
+            return _ApiProviders.SelectMany(x => x.LoadProviderCommands()).ToList();
         }
 
         #endregion

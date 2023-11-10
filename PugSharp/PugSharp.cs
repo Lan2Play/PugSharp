@@ -15,27 +15,20 @@ using System.Runtime.CompilerServices;
 using System.Text.Json;
 using ChatColors = CounterStrikeSharp.API.Modules.Utils.ChatColors;
 using Player = PugSharp.Models.Player;
+using PugSharp.Server.Contract;
 
 namespace PugSharp;
-
-public interface ICsServer
-{
-
-}
-
-public class CsServer : ICsServer
-{
-
-}
 
 public class PugSharp : BasePlugin, IMatchCallback
 {
     private static readonly ILogger<PugSharp> _Logger = LogManager.CreateLogger<PugSharp>();
 
-    private readonly ConfigProvider _ConfigProvider = new(Path.Join(Server.GameDirectory, "csgo", "PugSharp", "Config"));
+    private readonly ICsServer _CsServer;
+    private readonly ConfigProvider _ConfigProvider;
 
     private readonly CurrentRoundState _CurrentRountState = new();
     private readonly MultiApiProvider _ApiProvider = new();
+    private readonly Dictionary<string, CommandInfo.CommandCallback> _CurrentCommandsApiProviderCommnds = new(StringComparer.Ordinal);
 
     private Match.Match? _Match;
     private ServerConfig? _ServerConfig;
@@ -44,12 +37,18 @@ public class PugSharp : BasePlugin, IMatchCallback
 
     public override string ModuleVersion => "0.0.1";
 
+    public PugSharp()
+    {
+        _CsServer = new CsServer();
+        _ConfigProvider = new(Path.Join(_CsServer.GameDirectory, "csgo", "PugSharp", "Config"));
+    }
+
     public override void Load(bool hotReload)
     {
         _Logger.LogInformation("Loading PugSharp!");
         RegisterEventHandlers();
 
-        var configPath = Path.Join(Server.GameDirectory, "csgo", "PugSharp", "Config", "server.json");
+        var configPath = Path.Join(_CsServer.GameDirectory, "csgo", "PugSharp", "Config", "server.json");
         var serverConfigResult = ConfigProvider.LoadServerConfig(configPath);
 
         serverConfigResult.Switch(
@@ -90,19 +89,47 @@ public class PugSharp : BasePlugin, IMatchCallback
 
     private void InitializeMatch(MatchConfig matchConfig)
     {
-        var pluginDirectory = Path.Combine(Server.GameDirectory, "csgo", "PugSharp");
+        var pluginDirectory = Path.Combine(_CsServer.GameDirectory, "csgo", "PugSharp");
 
-        _ApiProvider.ClearApiProviders();
-        var apiStats = new ApiStats.ApiStats(matchConfig.EventulaApistatsUrl ?? string.Empty, matchConfig.EventulaApistatsToken ?? string.Empty, pluginDirectory == null ? null : Path.Combine(pluginDirectory, "Stats"));
-        var g5Stats = new G5ApiClient(matchConfig.G5ApiUrl ?? string.Empty, matchConfig.G5ApiHeader ?? string.Empty, matchConfig.G5ApiHeaderValue ?? string.Empty);
+        if (!string.IsNullOrEmpty(matchConfig.EventulaApistatsUrl))
+        {
+            _ApiProvider.ClearApiProviders();
+            var apiStats = new ApiStats.ApiStats(matchConfig.EventulaApistatsUrl, matchConfig.EventulaApistatsToken ?? string.Empty, pluginDirectory == null ? null : Path.Combine(pluginDirectory, "Stats"));
+            _ApiProvider.AddApiProvider(apiStats);
+        }
 
-        _ApiProvider.AddApiProvider(apiStats);
-        _ApiProvider.AddApiProvider(new G5ApiProvider(g5Stats));
+        if (!string.IsNullOrEmpty(matchConfig.G5ApiUrl))
+        {
+            var g5Stats = new G5ApiClient(matchConfig.G5ApiUrl, matchConfig.G5ApiHeader ?? string.Empty, matchConfig.G5ApiHeaderValue ?? string.Empty);
+            var g5ApiProvider = new G5ApiProvider(g5Stats, _CsServer);
+            RegisterConsoleCommandAttributeHandlers(g5ApiProvider);
+            _ApiProvider.AddApiProvider(g5ApiProvider);
+        }
+
+        UnloadCurrentCommands();
+        var commands = _ApiProvider.LoadProviderCommands();
+        foreach (var command in commands)
+        {
+            CommandInfo.CommandCallback ProviderCommand = (p, c) =>
+            {
+                HandleCommand(() =>
+                {
+                    var args = Enumerable.Range(0, c.ArgCount).Select(i => c.GetArg(i)).ToArray();
+                    var results = command.commandCallBack(args);
+                    foreach (var result in results)
+                    {
+                        c.ReplyToCommand(result);
+                    }
+                }, c, command.Name);
+            };
+            AddCommand(command.Name, command.Description, ProviderCommand);
+            _CurrentCommandsApiProviderCommnds.Add(command.Name, ProviderCommand);
+        }
 
         SetMatchVariable(matchConfig);
 
         _Match?.Dispose();
-        _Match = new Match.Match(this, matchConfig, pluginDirectory);
+        _Match = new Match.Match(this, _ApiProvider, matchConfig, pluginDirectory);
 
         var players = GetAllPlayers();
         foreach (var player in players.Where(x => x.UserId.HasValue && x.UserId >= 0))
@@ -114,6 +141,16 @@ public class PugSharp : BasePlugin, IMatchCallback
         }
 
         ResetServer();
+    }
+
+    private void UnloadCurrentCommands()
+    {
+        foreach (var currentCommand in _CurrentCommandsApiProviderCommnds)
+        {
+            RemoveCommand(currentCommand.Key, currentCommand.Value);
+        }
+
+        _CurrentCommandsApiProviderCommnds.Clear();
     }
 
     public static void UpdateConvar<T>(string name, T value)
@@ -160,29 +197,10 @@ public class PugSharp : BasePlugin, IMatchCallback
         return convar.GetPrimitiveValue<T>();
     }
 
-    public Task GoingLiveAsync(GoingLiveParams goingLiveParams, CancellationToken cancellationToken)
-    {
-        return _ApiProvider.GoingLiveAsync(goingLiveParams, cancellationToken);
-    }
-
-
-    public Task FinalizeMapAsync(MapResultParams finalizeMapParams, CancellationToken cancellationToken)
-    {
-        return _ApiProvider.FinalizeMapAsync(finalizeMapParams, cancellationToken);
-    }
-
-    public Task SendRoundStatsUpdateAsync(RoundStatusUpdateParams roundStatusUpdateParams, CancellationToken cancellationToken)
-    {
-        return _ApiProvider.SendRoundStatsUpdateAsync(roundStatusUpdateParams, cancellationToken);
-    }
-
-    public Task FinalizeAsync(SeriesResultParams seriesResultParams, CancellationToken cancellationToken)
-    {
-        return _ApiProvider.FinalizeAsync(seriesResultParams, cancellationToken);
-    }
-
     public void CleanUpMatch()
     {
+        UnloadCurrentCommands();
+
         if (_Match != null)
         {
             _Match.Dispose();
@@ -195,7 +213,7 @@ public class PugSharp : BasePlugin, IMatchCallback
         StopDemoRecording();
 
         // TODO Configure VoteMap/or reload current map
-        Server.ExecuteCommand("changelevel de_dust2");
+        _CsServer.ExecuteCommand("changelevel de_dust2");
     }
 
     private void SetMatchVariable(MatchConfig matchConfig)
@@ -237,8 +255,8 @@ public class PugSharp : BasePlugin, IMatchCallback
 
     #region Commands
 
-    [ConsoleCommand("css_stopmatch", "Load a match config")]
-    [ConsoleCommand("ps_stopmatch", "Load a match config")]
+    [ConsoleCommand("css_stopmatch", "Stop the current match")]
+    [ConsoleCommand("ps_stopmatch", "Stop the current match")]
     public void OnCommandStopMatch(CCSPlayerController? player, CommandInfo command)
     {
         HandleCommand(() =>
@@ -291,7 +309,6 @@ public class PugSharp : BasePlugin, IMatchCallback
                 command.ReplyToCommand("Url is required as Argument!");
                 return;
             }
-
 
             _Logger.LogInformation("Start loading match config!");
 
@@ -566,7 +583,7 @@ public class PugSharp : BasePlugin, IMatchCallback
                 _Logger.LogInformation("Player {playerName} tried to join {team} but is not allowed!", @event.Userid.PlayerName, @event.Team);
                 var player = new Player(@event.Userid);
 
-                Server.NextFrame(() =>
+                _CsServer.NextFrame(() =>
                 {
                     _Logger.LogInformation("Switch {playerName} to team {team}!", player.PlayerName, configTeam);
                     player.SwitchTeam(configTeam);
@@ -708,7 +725,7 @@ public class PugSharp : BasePlugin, IMatchCallback
         if (_Match.CurrentState < MatchState.MatchRunning && userId != null && userId.IsValid)
         {
             // Give players max money if no match is running
-            Server.NextFrame(() =>
+            _CsServer.NextFrame(() =>
             {
                 var player = new Player(userId);
 
@@ -747,7 +764,7 @@ public class PugSharp : BasePlugin, IMatchCallback
 
         if (_Match.CurrentState == MatchState.MatchRunning)
         {
-            var scores = Utils.LoadTeamsScore();
+            var scores = _CsServer.LoadTeamsScore();
             _Match?.CompleteMap(scores.TScore, scores.CtScore);
 
 
@@ -1116,7 +1133,7 @@ public class PugSharp : BasePlugin, IMatchCallback
     {
         if (_Match != null)
         {
-            Server.NextFrame(() =>
+            _CsServer.NextFrame(() =>
             {
                 SetMatchVariable(_Match.Config);
             });
@@ -1144,20 +1161,20 @@ public class PugSharp : BasePlugin, IMatchCallback
 
     public void SwitchMap(string selectedMap)
     {
-        if (!Server.IsMapValid(selectedMap))
+        if (!_CsServer.IsMapValid(selectedMap))
         {
             _Logger.LogInformation("The selected map is not valid: \"{selectedMap}\"!", selectedMap);
             return;
         }
 
         _Logger.LogInformation("Switch map to: \"{selectedMap}\"!", selectedMap);
-        Server.ExecuteCommand($"changelevel {selectedMap}");
+        _CsServer.ExecuteCommand($"changelevel {selectedMap}");
     }
 
     public void SwapTeams()
     {
         _Logger.LogInformation("Swap Teams");
-        Server.ExecuteCommand("mp_swapteams");
+        _CsServer.ExecuteCommand("mp_swapteams");
     }
 
     public IReadOnlyList<IPlayer> GetAllPlayers()
@@ -1167,32 +1184,27 @@ public class PugSharp : BasePlugin, IMatchCallback
         return playerEntities.Where(x => x.PlayerState() == PlayerConnectedState.PlayerConnected).Select(p => new Player(p)).ToArray();
     }
 
-    public IReadOnlyCollection<string> GetAvailableMaps()
-    {
-        return Server.GetMapList().ToList();
-    }
-
     public void SendMessage(string message)
     {
-        Server.PrintToChatAll(message);
+        _CsServer.PrintToChatAll(message);
     }
 
     public void EndWarmup()
     {
         _Logger.LogInformation("Ending warmup immediately");
-        Server.ExecuteCommand("mp_warmup_end");
+        _CsServer.ExecuteCommand("mp_warmup_end");
     }
 
     public void PauseMatch()
     {
         _Logger.LogInformation("Pausing the match in the next freeze time");
-        Server.ExecuteCommand("mp_pause_match");
+        _CsServer.ExecuteCommand("mp_pause_match");
     }
 
     public void UnpauseMatch()
     {
         _Logger.LogInformation("Resuming the match");
-        Server.ExecuteCommand("mp_unpause_match");
+        _CsServer.ExecuteCommand("mp_unpause_match");
     }
 
     public void DisableCheats()
@@ -1219,7 +1231,7 @@ public class PugSharp : BasePlugin, IMatchCallback
         var demoFileName = $"PugSharp_Match_{_Match.Config.MatchId}_{formattedDateTime}.dem";
         try
         {
-            string directoryPath = Path.Join(Server.GameDirectory, "csgo", "Demo");
+            string directoryPath = Path.Join(_CsServer.GameDirectory, "csgo", "Demo");
             if (!Directory.Exists(directoryPath))
             {
                 Directory.CreateDirectory(directoryPath);
@@ -1227,13 +1239,13 @@ public class PugSharp : BasePlugin, IMatchCallback
 
             var fullDemoFileName = Path.Join(directoryPath, demoFileName);
             _Logger.LogInformation("Starting demo recording, path: {fullDemoFileName}", fullDemoFileName);
-            Server.ExecuteCommand($"tv_record {fullDemoFileName}");
+            _CsServer.ExecuteCommand($"tv_record {fullDemoFileName}");
             return fullDemoFileName;
         }
         catch (Exception e)
         {
             _Logger.LogError(e, "Error Starting DemoRecording. Fallback to tv_record. Fallback to {demoFileName}", demoFileName);
-            Server.ExecuteCommand($"tv_record {demoFileName}");
+            _CsServer.ExecuteCommand($"tv_record {demoFileName}");
         }
 
         return string.Empty;
@@ -1242,10 +1254,24 @@ public class PugSharp : BasePlugin, IMatchCallback
     public void StopDemoRecording()
     {
         _Logger.LogInformation("Stopping SourceTV demo recording");
-        Server.ExecuteCommand("tv_stoprecord");
+        _CsServer.ExecuteCommand("tv_stoprecord");
     }
 
+    public Match.Contract.Team LoadMatchWinner()
+    {
+        var (CtScore, TScore) = _CsServer.LoadTeamsScore();
+        if (CtScore > TScore)
+        {
+            return Match.Contract.Team.CounterTerrorist;
+        }
 
+        if (TScore > CtScore)
+        {
+            return Match.Contract.Team.Terrorist;
+        }
+
+        return Match.Contract.Team.None;
+    }
 
     #endregion
 
@@ -1258,10 +1284,5 @@ public class PugSharp : BasePlugin, IMatchCallback
             _Match?.Dispose();
             _ConfigProvider.Dispose();
         }
-    }
-
-    public Match.Contract.Team LoadMatchWinner()
-    {
-        return Utils.LoadMatchWinner();
     }
 }

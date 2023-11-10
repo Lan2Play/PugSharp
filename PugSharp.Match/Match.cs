@@ -15,6 +15,7 @@ public class Match : IDisposable
     private readonly System.Timers.Timer _VoteTimer = new();
     private readonly System.Timers.Timer _ReadyReminderTimer = new(10000);
     private readonly IMatchCallback _MatchCallback;
+    private readonly IApiProvider _ApiProvider;
     private readonly StateMachine<MatchState, MatchCommand> _MatchStateMachine;
 
     private readonly DemoUploader? _DemoUploader;
@@ -36,12 +37,12 @@ public class Match : IDisposable
 
     public IEnumerable<MatchPlayer> AllMatchPlayers => MatchTeam1.Players.Concat(MatchTeam2.Players);
 
-    public Match(IMatchCallback matchCallback, Config.MatchConfig matchConfig, string? pluginDirectory = null)
+    public Match(IMatchCallback matchCallback, IApiProvider apiProvider, Config.MatchConfig matchConfig, string? pluginDirectory = null)
     {
         Config = matchConfig;
 
         _MatchCallback = matchCallback;
-
+        _ApiProvider = apiProvider;
         _MatchInfo = new MatchInfo(matchConfig.NumMaps);
         MatchTeam1 = new MatchTeam(Config.Team1);
         MatchTeam2 = new MatchTeam(Config.Team2);
@@ -174,7 +175,7 @@ public class Match : IDisposable
         _MatchCallback.SendMessage($" {ChatColors.Default}Starting Match. {ChatColors.Highlight}{MatchTeam1.TeamConfig.Name} {ChatColors.Default}as {ChatColors.Highlight}{MatchTeam1.CurrentTeamSite}{ChatColors.Default}. {ChatColors.Highlight}{MatchTeam2.TeamConfig.Name}{ChatColors.Default} as {ChatColors.Highlight}{MatchTeam2.CurrentTeamSite}");
 
 
-        _ = _MatchCallback.GoingLiveAsync(new GoingLiveParams(Config.MatchId, _MatchInfo.CurrentMap.MapName, _MatchInfo.CurrentMap.MapNumber), CancellationToken.None);
+        _ = _ApiProvider.GoingLiveAsync(new GoingLiveParams(Config.MatchId, _MatchInfo.CurrentMap.MapName, _MatchInfo.CurrentMap.MapNumber), CancellationToken.None);
 
         TryFireState(MatchCommand.StartMatch);
     }
@@ -186,7 +187,7 @@ public class Match : IDisposable
             throw new NotSupportedException("Map Winner is not yet set. Can not send map results");
         }
 
-        _ = _MatchCallback.FinalizeMapAsync(new MapResultParams(Config.MatchId, _MatchInfo.CurrentMap.Winner.TeamConfig.Name, _MatchInfo.CurrentMap.Team1Points, _MatchInfo.CurrentMap.Team2Points, _MatchInfo.CurrentMap.MapNumber), CancellationToken.None);
+        _ = _ApiProvider.FinalizeMapAsync(new MapResultParams(Config.MatchId, _MatchInfo.CurrentMap.Winner.TeamConfig.Name, _MatchInfo.CurrentMap.Team1Points, _MatchInfo.CurrentMap.Team2Points, _MatchInfo.CurrentMap.MapNumber), CancellationToken.None);
     }
 
     public void SendRoundResults(IRoundResults roundResults)
@@ -232,7 +233,7 @@ public class Match : IDisposable
                             .ToDictionary(p => p.Key.ToString(), p => CreatePlayerStatistics(p.Value), StringComparer.OrdinalIgnoreCase),
         };
 
-        _ = _MatchCallback?.SendRoundStatsUpdateAsync(new RoundStatusUpdateParams(Config.MatchId, _MatchInfo.CurrentMap.MapNumber, teamInfo1, teamInfo2, new Map { Name = _MatchInfo.CurrentMap.MapName, Team1 = mapTeamInfo1, Team2 = mapTeamInfo2, }), CancellationToken.None);
+        _ = _ApiProvider?.RoundStatsUpdateAsync(new RoundStatusUpdateParams(Config.MatchId, _MatchInfo.CurrentMap.MapNumber, teamInfo1, teamInfo2, new Map { Name = _MatchInfo.CurrentMap.MapName, Team1 = mapTeamInfo1, Team2 = mapTeamInfo2, }), CancellationToken.None);
     }
 
     private void UpdateStats(IReadOnlyDictionary<ulong, IPlayerRoundResults> playerResults)
@@ -428,7 +429,7 @@ public class Match : IDisposable
         if (_MatchInfo.MatchMaps[_MatchInfo.MatchMaps.Count - 1] == _MatchInfo.CurrentMap)
         {
             var seriesResultParams = new SeriesResultParams(Config.MatchId, _MatchInfo.MatchMaps.GroupBy(x => x.Winner).MaxBy(x => x.Count())!.Key!.TeamConfig.Name, true, 120000, _MatchInfo.MatchMaps.Count(x => x.Team1Points > x.Team2Points), _MatchInfo.MatchMaps.Count(x => x.Team2Points > x.Team1Points));
-            await _MatchCallback.FinalizeAsync(seriesResultParams, CancellationToken.None).ConfigureAwait(false);
+            await _ApiProvider.FinalizeAsync(seriesResultParams, CancellationToken.None).ConfigureAwait(false);
         }
 
         foreach (var player in AllMatchPlayers)
