@@ -525,11 +525,6 @@ public class PugSharp : BasePlugin, IMatchCallback
                 {
                     _Match.TryAddPlayer(new Player(userId));
                 }
-                else
-                {
-                    _Logger.LogInformation("Match is is in state {state}. Connecting new players is not possible! Kick Player {player}!", _Match.CurrentState, userId.PlayerName);
-                    userId.Kick();
-                }
             }
             else if (!userId.IsAdmin(_ServerConfig))
             {
