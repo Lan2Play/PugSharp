@@ -45,7 +45,10 @@ Prerequisites
 - `Make <https://www.gnu.org/software/make>`_ installed (use your os packagemanager)
 - Install your IDE of choise (Visual Studio or VSCode works best)
 - a Steam User that has started cs2 at least one time (we recommended a seperate account with Steamguard disabled)
-- (optional) Download and install `.Net7 SDK <https://dotnet.microsoft.com/download/dotnet/7.0>`_ (highly recommended)
+- (optional) `.Net7 SDK <https://dotnet.microsoft.com/download/dotnet/7.0>`_ (highly recommended - otherwhise use the -docker suffixed commands, see :doc:`/develop/makefile` )
+- (optional) ``jq`` installed on your machine. If you are running debian/ubuntu, you can simply use ``make install-jq-and-unzip`` when you cloned the repo, otherwhise refer to the `jq download page <https://jqlang.github.io/jq/download/>`_ (highly recommended - otherwhise use the -docker suffixed commands, see :doc:`/develop/makefile` )
+- (optional) ``unzip`` installed on your machine. If you are running debian/ubuntu, you can simply use ``make install-jq-and-unzip`` when you cloned the repo, otherwhise look up your distros packagemanager (highly recommended - otherwhise use the -docker suffixed commands, see :doc:`/develop/makefile` )
+
 
 Run / Develop PugSharp locally with the make file
 --------------------------------------------------------
@@ -55,11 +58,15 @@ To make setting up a dev and testing environment easy, we have added a Makefile 
     For local testing, we use the `joedwards32/cs2 <https://github.com/joedwards32/CS2>`_ docker Image  which gets downloaded automatically in this process. This setup will need around 40GB of free space!
 
 
-To get started, clone our repository, change your directory into it and run the following command:
+To get started, clone our repository, change your directory into it and run one of the following commands:
 
 .. code-block:: bash
     
     make init-all
+
+.. code-block:: bash
+    
+    make init-all-docker
 
 
 It will take some time to install the server, please leave the console open as long as this runs.

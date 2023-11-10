@@ -13,9 +13,6 @@ groupId = $(shell id -g)
 user = $(userId):$(groupId)
 dockeruser = --user $(user)
 
-dotnet_runtime_url = "https://download.visualstudio.microsoft.com/download/pr/dc2c0a53-85a8-4fda-a283-fa28adb5fbe2/8ccade5bc400a5bb40cd9240f003b45c/aspnetcore-runtime-7.0.11-linux-x64.tar.gz"
-dotnet_runtime_version = "7.0.11"
-
 ## Docker Compose detection
 ifeq ($(OS),Windows_NT)
   DOCKER_COMPOSE=docker compose
@@ -30,7 +27,10 @@ endif
 ## group commands
 build-and-copy: git-pull build-debug copy-pugsharp
 build-and-copy-docker: git-pull build-debug-docker copy-pugsharp
-init-all: prepare-folders init-env copy-counterstrikesharp install-netruntime install-metamod pull-csserver start-csserver attach-csserver
+init-all: prepare-folders init-env install-deps pull-csserver start-csserver attach-csserver
+init-all-docker: prepare-folders init-env install-deps-docker pull-csserver start-csserver attach-csserver
+install-deps: install-counterstrikesharp install-metamod
+install-deps-docker: install-counterstrikesharp-docker install-metamod
 clean-all: clean-csserver clean-env clean-build
 start-attach: start-csserver attach-csserver
 
@@ -43,24 +43,33 @@ prepare-folders:
 init-env:
 	cp $(currentDir)/.env.example $(currentDir)/.env ; 
 
-copy-counterstrikesharp:
+install-counterstrikesharp:
 	mkdir -p $(currentDir)/cs2/game/csgo/addons/
-	cp -rf $(currentDir)/PugSharp/counterstrikesharp $(currentDir)/cs2/game/csgo/addons/
-	cp -rf $(currentDir)/PugSharp/metamod $(currentDir)/cs2/game/csgo/addons/
+	wget -q -O $(currentDir)/counterstrikesharp.zip $(shell curl -s -L -H "Accept: application/vnd.github+json" https://api.github.com/repos/roflmuffin/CounterStrikeSharp/releases/tags/$(shell dotnet list PugSharp/PugSharp.csproj package --format json | jq -r '.projects[].frameworks[].topLevelPackages[] | select(.id == "CounterStrikeSharp.API") | .resolvedVersion' | sed 's|1.0.|v|g') | jq -r '.assets.[] | select(.browser_download_url | test("with-runtime")) | .browser_download_url') 
+	unzip -o $(currentDir)/counterstrikesharp.zip -d $(currentDir)/cs2/game/csgo
+	rm -rf $(currentDir)/counterstrikesharp.zip
+
+install-counterstrikesharp-docker:
+	docker run --rm --interactive \
+	-v $(currentDir):/app \
+	mcr.microsoft.com/dotnet/sdk:7.0 /bin/sh -c " \
+	apt-get update && apt-get install jq unzip -y; \
+	mkdir -p /app/cs2/game/csgo/addons/; \
+	wget -q -O /app/counterstrikesharp.zip $(shell curl -s -L -H "Accept: application/vnd.github+json" https://api.github.com/repos/roflmuffin/CounterStrikeSharp/releases/tags/$(shell dotnet list PugSharp/PugSharp.csproj package --format json | jq -r '.projects[].frameworks[].topLevelPackages[] | select(.id == "CounterStrikeSharp.API") | .resolvedVersion' | sed 's|1.0.|v|g') | jq -r '.assets.[] | select(.browser_download_url | test("with-runtime")) | .browser_download_url'); \
+	unzip -o /app/counterstrikesharp.zip -d /app/cs2/game/csgo; \
+	rm -rf /app/counterstrikesharp.zip; \
+	chown -R $(user) /app/cs2/game/csgo/addons;"	
 
 install-metamod:
 	mkdir -p $(currentDir)/cs2/game/csgo/
 	export LATESTMM=$(shell wget -qO- https://mms.alliedmods.net/mmsdrop/2.0/mmsource-latest-linux); \
 	wget -qO- https://mms.alliedmods.net/mmsdrop/2.0/$$LATESTMM | tar xvzf - -C $(currentDir)/cs2/game/csgo
 
-install-netruntime:
-	mkdir -p $(currentDir)/cs2/game/csgo/addons/counterstrikesharp/dotnet
-	curl -s -L $(dotnet_runtime_url) | tar xvz -C $(currentDir)/cs2/game/csgo/addons/counterstrikesharp/dotnet
-	mv $(currentDir)/cs2/game/csgo/addons/counterstrikesharp/dotnet/shared/Microsoft.NETCore.App/$(dotnet_runtime_version)/* $(currentDir)/cs2/game/csgo/addons/counterstrikesharp/dotnet/shared/Microsoft.NETCore.App/
-
 fix-metamod:
 	./resources/acmrs.sh
-
+	
+install-jq-and-unzip:
+	apt-get update && apt-get install jq unzip -y
 
 ## base commands
 pull-csserver:
@@ -90,7 +99,7 @@ build-debug-docker:
 build-release-docker:
 	docker run --rm --interactive \
 	-v $(currentDir):/app \
-	$(user) mcr.microsoft.com/dotnet/sdk:7.0 /bin/sh -c " \
+	mcr.microsoft.com/dotnet/sdk:7.0 /bin/sh -c " \
 	cd /app && dotnet publish -c release; chown -R $(user) /app"
 
 copy-pugsharp:

@@ -8,6 +8,8 @@
 	
 	<ItemGroup>
 	
+	  <PackageReference Include="CounterStrikeSharp.API" Version="1.0.27" />
+	
 	  <PackageReference Include="OneOf" Version="3.0.263" />
 	</ItemGroup>
 
@@ -17,10 +19,4 @@
 	  <ProjectReference Include="..\PugSharp.Match\PugSharp.Match.csproj" />
 	</ItemGroup>
 
-	<ItemGroup>
-
-		<Reference Include="CounterStrikeSharp.API">
-			<HintPath>../counterstrikesharp/api/CounterStrikeSharp.API.dll</HintPath>
-		</Reference>
-	</ItemGroup>
 </Project>

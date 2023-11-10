@@ -21,11 +21,6 @@ on:
     - '!README.md'
     - '!Makefile'
 
-env:
-  DOTNET_RUNTIME_URL: https://download.visualstudio.microsoft.com/download/pr/dc2c0a53-85a8-4fda-a283-fa28adb5fbe2/8ccade5bc400a5bb40cd9240f003b45c/aspnetcore-runtime-7.0.11-linux-x64.tar.gz
-  DOTNET_RUNTIME_VERSION: 7.0.11
-
-
 jobs:
 
   test_linux_x64:
@@ -113,18 +108,14 @@ jobs:
         run: rm -rf PugSharp/bin/Debug/net7.0/publish/CounterStrikeSharp.API.dll      
       - name: prepare package structure
         run: mkdir -p packagebuild/addons/counterstrikesharp/plugins/PugSharp
-      - name: copy included counterstrikesharp
-        run: cp -rf PugSharp/counterstrikesharp packagebuild/addons/
-      - name: copy included counterstrikesharp vdf
-        run: cp -rf PugSharp/metamod packagebuild/addons/metamod
+      - name: install deps
+        run: apt-get update && apt-get install jq unzip -y
+      - name: get counterstrikesharp
+        run: "wget -q -O counterstrikesharp.zip $(curl -s -L -H \"Accept: application/vnd.github+json\" https://api.github.com/repos/roflmuffin/CounterStrikeSharp/releases/tags/$(dotnet list PugSharp/PugSharp.csproj package --format json | jq -r '.projects[].frameworks[].topLevelPackages[] | select(.id == \"CounterStrikeSharp.API\") | .resolvedVersion' | sed 's|1.0.|v|g') | jq -r '.assets.[] | select(.browser_download_url | test(\"with-runtime\")) | .browser_download_url') "
+      - name: extract counterstrikesharp
+        run: unzip -o $(currentDir)/counterstrikesharp.zip -d  packagebuild/
       - name: copy package content
         run: cp -rf PugSharp/bin/Debug/net7.0/publish/* packagebuild/addons/counterstrikesharp/plugins/PugSharp
-      - name: Add dotnet runtime
-        run: |
-          mkdir -p packagebuild/addons/counterstrikesharp/dotnet
-          curl -s -L $DOTNET_RUNTIME_URL \
-          | tar xvz -C packagebuild/addons/counterstrikesharp/dotnet
-          mv packagebuild/addons/counterstrikesharp/dotnet/shared/Microsoft.NETCore.App/$DOTNET_RUNTIME_VERSION/* packagebuild/addons/counterstrikesharp/dotnet/shared/Microsoft.NETCore.App/
       - name: build package
         run: zip -r PugSharp_$PUGSHARPNETVER.zip addons
         working-directory: ./packagebuild

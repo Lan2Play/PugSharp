@@ -10,6 +10,8 @@ On this page every single make command will be documented with its purpose, so y
 
 There are 2 types of commands, the group commands and the other commands. Group commands are essentially calling multiple other make Commands here.
 
+Some of the Commands require the software ``jq`` and ``unzip`` installed on your machine or you have to use the -docker suffixed commands. If you are running debian/ubuntu, you can simply use ``make install-jq-and-unzip`` , otherwhise refer to the `jq download page <https://jqlang.github.io/jq/download/>`_
+
 A few of the Commands have optional parameters that can be set via either a prompt after calling the commands or with writing them after the make command.
 So for example if you had the available parameter ``STEAMUSER`` on the make command ``init-all``, that you want to set to ``username`` your finalized Make command would look like:
 
@@ -57,11 +59,51 @@ Prepares the gameserver folder, initializes the .env file for the cs2 server, co
 
 - :ref:`develop/makefile:prepare-folders` 
 - :ref:`develop/makefile:init-env` 
-- :ref:`develop/makefile:copy-counterstrikesharp` 
-- :ref:`develop/makefile:install-netruntime` 
-- :ref:`develop/makefile:install-metamod` 
+- :ref:`develop/makefile:install-deps` 
 - :ref:`develop/makefile:pull-csserver` 
 - :ref:`develop/makefile:start-csserver` 
+
+**Parameters:**
+
+No Parameters
+
+init-all-docker
+........................
+Prepares the gameserver folder, initializes the .env file for the cs2 server, copies CounterStrikeSharp into the server, installs metamod , the dotnet runtime, builds the container image and starts the server.
+
+**Group Command**
+
+- :ref:`develop/makefile:prepare-folders` 
+- :ref:`develop/makefile:init-env` 
+- :ref:`develop/makefile:install-deps-docker` 
+- :ref:`develop/makefile:pull-csserver` 
+- :ref:`develop/makefile:start-csserver` 
+
+**Parameters:**
+
+No Parameters
+
+install-deps
+........................
+Installs counterstrikesharp and metamod to your local cs2 server
+
+**Group Command**
+
+- :ref:`develop/makefile:install-counterstrikesharp` 
+- :ref:`develop/makefile:install-metamod`
+
+**Parameters:**
+
+No Parameters
+
+install-deps-docker
+........................
+Installs counterstrikesharp and metamod to your local cs2 server
+
+**Group Command**
+
+- :ref:`develop/makefile:install-counterstrikesharp-docker` 
+- :ref:`develop/makefile:install-metamod`
 
 **Parameters:**
 
@@ -111,9 +153,17 @@ copies the .env.example to .env and replaces the parameters in that file.
 
 No Parameters
 
-copy-counterstrikesharp
-........................
-copies the CounterStrikeSharp version that is included in our repo to the cs2 server
+install-counterstrikesharp
+....................................
+installs the CounterStrikeSharp version that is configured in the PugSharp Project to the cs2 server
+
+**Parameters:**
+
+No Parameters
+
+install-counterstrikesharp-docker
+....................................
+installs the CounterStrikeSharp version that is configured in the PugSharp Project to the cs2 server
 
 **Parameters:**
 
@@ -127,9 +177,9 @@ downloads and installs the latest metamod 2.0 dev release into the cs2 server
 
 No Parameters
 
-install-netruntime
+install-jq-and-unzip
 ........................
-downloads and installs the nessecary dotnet runtime into the cs2 server
+installs jq and unzip on your debian/ubuntu system via apt
 
 **Parameters:**
 
