@@ -4,7 +4,7 @@ using CounterStrikeSharp.API.Core.Attributes.Registration;
 using CounterStrikeSharp.API.Modules.Commands;
 using CounterStrikeSharp.API.Modules.Cvars;
 using Microsoft.Extensions.Logging;
-using PugSharp.ApiStats;
+using PugSharp.Api.Contract;
 using PugSharp.Config;
 using PugSharp.G5Api;
 using PugSharp.Logging;
@@ -18,6 +18,21 @@ using Player = PugSharp.Models.Player;
 
 namespace PugSharp;
 
+public class G5ApiProvider : IApiProvider
+{
+    private G5ApiClient _G5Stats;
+
+    public G5ApiProvider(G5ApiClient apiClient)
+    {
+        _G5Stats = apiClient;
+    }
+
+    public Task GoingLiveAsync(GoingLiveParams goingLiveParams, CancellationToken cancellationToken)
+    {
+        return _G5Stats.SendEventAsync(new GoingLiveEvent(goingLiveParams.MatchId, goingLiveParams.MapNumber), cancellationToken);
+    }
+}
+
 public class PugSharp : BasePlugin, IMatchCallback
 {
     private static readonly ILogger<PugSharp> _Logger = LogManager.CreateLogger<PugSharp>();
@@ -27,6 +42,7 @@ public class PugSharp : BasePlugin, IMatchCallback
     private readonly CurrentRoundState _CurrentRountState = new();
     private ApiStats.ApiStats _ApiStats;
     private G5ApiClient _G5Stats;
+    private MultiApiProvider _ApiProvider = new();
     private Match.Match? _Match;
     private ServerConfig? _ServerConfig;
 
@@ -82,9 +98,12 @@ public class PugSharp : BasePlugin, IMatchCallback
     {
         var pluginDirectory = Path.Combine(Server.GameDirectory, "csgo", "PugSharp");
 
+        _ApiProvider.ClearApiProviders();
         _ApiStats = new ApiStats.ApiStats(matchConfig.EventulaApistatsUrl ?? string.Empty, matchConfig.EventulaApistatsToken ?? string.Empty, pluginDirectory == null ? null : Path.Combine(pluginDirectory, "Stats"));
         _G5Stats = new G5ApiClient(matchConfig.G5ApiUrl ?? string.Empty, matchConfig.G5ApiHeader ?? string.Empty, matchConfig.G5ApiHeaderValue ?? string.Empty);
 
+        _ApiProvider.AddApiProvider(_ApiStats);
+        _ApiProvider.AddApiProvider(new G5ApiProvider(_G5Stats));
 
         SetMatchVariable(matchConfig);
 
@@ -147,11 +166,9 @@ public class PugSharp : BasePlugin, IMatchCallback
         return convar.GetPrimitiveValue<T>();
     }
 
-    public Task GoingLiveAsync(string matchId, string mapName, int mapNumber, CancellationToken cancellationToken)
+    public Task GoingLiveAsync(GoingLiveParams goingLiveParams, CancellationToken cancellationToken)
     {
-        return Task.WhenAll(
-            _ApiStats.SendGoingLiveAsync(matchId, new GoingLiveParams(mapName, mapNumber), cancellationToken),
-            _G5Stats.SendEventAsync(new GoingLiveEvent(matchId, mapNumber), cancellationToken));
+        return _ApiProvider.GoingLiveAsync(goingLiveParams, cancellationToken);
     }
 
 

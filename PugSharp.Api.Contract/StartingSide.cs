@@ -1,4 +1,4 @@
-﻿namespace PugSharp.Match.Contract
+﻿namespace PugSharp.Api.Contract
 {
     public enum StartingSide
     {

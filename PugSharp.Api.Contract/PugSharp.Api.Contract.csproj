@@ -6,8 +6,4 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\PugSharp.Api.Contract\PugSharp.Api.Contract.csproj" />
-  </ItemGroup>
-
 </Project>

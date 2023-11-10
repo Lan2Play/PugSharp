@@ -1,4 +1,5 @@
 ﻿using Microsoft.Extensions.Logging;
+using PugSharp.Api.Contract;
 using PugSharp.ApiStats;
 using PugSharp.Logging;
 using PugSharp.Match.Contract;
@@ -173,7 +174,7 @@ public class Match : IDisposable
         _MatchCallback.SendMessage($" {ChatColors.Default}Starting Match. {ChatColors.Highlight}{MatchTeam1.TeamConfig.Name} {ChatColors.Default}as {ChatColors.Highlight}{MatchTeam1.CurrentTeamSite}{ChatColors.Default}. {ChatColors.Highlight}{MatchTeam2.TeamConfig.Name}{ChatColors.Default} as {ChatColors.Highlight}{MatchTeam2.CurrentTeamSite}");
 
 
-        _ = _MatchCallback.GoingLiveAsync(Config.MatchId, _MatchInfo.CurrentMap.MapName, _MatchInfo.CurrentMap.MapNumber, CancellationToken.None);
+        _ = _MatchCallback.GoingLiveAsync(new GoingLiveParams(Config.MatchId, _MatchInfo.CurrentMap.MapName, _MatchInfo.CurrentMap.MapNumber), CancellationToken.None);
 
         TryFireState(MatchCommand.StartMatch);
     }
@@ -439,7 +440,7 @@ public class Match : IDisposable
 
     private void CleanUpMatch()
     {
-       _MatchCallback.CleanUpMatch();
+        _MatchCallback.CleanUpMatch();
     }
 
     private async Task MatchLiveAsync()

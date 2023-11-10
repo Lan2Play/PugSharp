@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.Extensions.Logging;
+using PugSharp.Api.Contract;
 using PugSharp.Logging;
 using PugSharp.Match.Contract;
 using System.Globalization;
@@ -7,7 +8,7 @@ using System.Text.Json;
 
 namespace PugSharp.ApiStats
 {
-    public class ApiStats : BaseApi
+    public class ApiStats : BaseApi, IApiProvider
     {
         private static readonly ILogger<ApiStats> _Logger = LogManager.CreateLogger<ApiStats>();
 
@@ -19,7 +20,7 @@ namespace PugSharp.ApiStats
             _ApiStatsDirectory = apiStatsDirectory;
         }
 
-        public async Task SendGoingLiveAsync(string matchId, GoingLiveParams goingLiveParams, CancellationToken cancellationToken)
+        public async Task GoingLiveAsync(GoingLiveParams goingLiveParams, CancellationToken cancellationToken)
         {
             if (HttpClient == null)
             {
@@ -48,7 +49,7 @@ namespace PugSharp.ApiStats
             {
                 if (_ApiStatsDirectory != null)
                 {
-                    var goingLiveFileName = Path.GetFullPath(Path.Combine(_ApiStatsDirectory, $"Match_{matchId}_golive.json"));
+                    var goingLiveFileName = Path.GetFullPath(Path.Combine(_ApiStatsDirectory, $"Match_{goingLiveParams.MatchId}_golive.json"));
                     CreateStatsDirectoryIfNotExists();
                     var fileStream = File.OpenWrite(goingLiveFileName);
                     await using (fileStream.ConfigureAwait(false))

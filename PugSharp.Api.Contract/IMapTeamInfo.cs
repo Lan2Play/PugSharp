@@ -1,5 +1,5 @@
 ﻿
-namespace PugSharp.Match.Contract
+namespace PugSharp.Api.Contract
 {
     public interface IMapTeamInfo
     {
