@@ -35,9 +35,6 @@ public class Match : IDisposable
 
     public IEnumerable<MatchPlayer> AllMatchPlayers => MatchTeam1.Players.Concat(MatchTeam2.Players);
 
-
-    public RoundInfo CurrentRound { get; } = new RoundInfo();
-
     public Match(IMatchCallback matchCallback, Config.MatchConfig matchConfig, string? pluginDirectory = null)
     {
         Config = matchConfig;
@@ -99,7 +96,7 @@ public class Match : IDisposable
         _MatchStateMachine.Configure(MatchState.MatchRunning)
             .Permit(MatchCommand.DisconnectPlayer, MatchState.MatchPaused)
             .Permit(MatchCommand.Pause, MatchState.MatchPaused)
-            .PermitIf(MatchCommand.CompleteMap, MatchState.MapCompleted, IsMatchReady)
+            .PermitIf(MatchCommand.CompleteMap, MatchState.MapCompleted)
             .OnEntryAsync(MatchLiveAsync);
 
         _MatchStateMachine.Configure(MatchState.MatchPaused)
@@ -115,8 +112,12 @@ public class Match : IDisposable
             .OnEntry(TryCompleteMatch);
 
         _MatchStateMachine.Configure(MatchState.MatchCompleted)
-            .OnEntryAsync(CompleteMatchAsync)
-            .OnEntryAsync(KickPlayersAsync);
+            .PermitIf(MatchCommand.CleanUpMatch, MatchState.CleanUpMatch)
+            .OnEntry(CleanUpMatch);
+
+
+        _MatchStateMachine.Configure(MatchState.CleanUpMatch)
+            .OnEntryAsync(CompleteMatchAsync);
 
         _MatchStateMachine.OnTransitioned(OnMatchStateChanged);
 
@@ -124,6 +125,7 @@ public class Match : IDisposable
 
         SetMatchTeamCvars();
     }
+
 
     private void SetMatchTeamCvars()
     {
@@ -400,6 +402,7 @@ public class Match : IDisposable
         _ = TryFireStateAsync(MatchCommand.CompleteMatch);
     }
 
+
     private async Task CompleteMatchAsync()
     {
         _MatchCallback.StopDemoRecording();
@@ -430,17 +433,14 @@ public class Match : IDisposable
         {
             player.Player.Kick();
         }
+
+        await TryFireStateAsync(MatchCommand.CleanUpMatch).ConfigureAwait(false);
     }
 
-    private async Task KickPlayersAsync()
+    private void CleanUpMatch()
     {
-        await Task.Delay(TimeSpan.FromMinutes(2)).ConfigureAwait(false);
-        foreach (var player in _MatchCallback.GetAllPlayers())
-        {
-            player.Kick();
-        }
+       _MatchCallback.CleanUpMatch();
     }
-
 
     private async Task MatchLiveAsync()
     {

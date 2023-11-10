@@ -189,6 +189,14 @@ public class PugSharp : BasePlugin, IMatchCallback
                  _G5Stats.SendEventAsync(new SeriesResultEvent(matchId, new Winner((Side)(int)LoadMatchWinner(), 0), team1SeriesScore, team2SeriesScore, (int)timeBeforeFreeingServerMs), cancellationToken));
     }
 
+    public void CleanUpMatch()
+    {
+        if (_Match != null)
+        {
+            _Match.Dispose();
+            _Match = null;
+        }
+    }
 
     private void ResetServer()
     {
@@ -237,6 +245,37 @@ public class PugSharp : BasePlugin, IMatchCallback
 
     #region Commands
 
+    [ConsoleCommand("css_stopmatch", "Load a match config")]
+    [ConsoleCommand("ps_stopmatch", "Load a match config")]
+    public void OnCommandStopMatch(CCSPlayerController? player, CommandInfo command)
+    {
+        HandleCommand(() =>
+        {
+            if (player != null && !player.IsAdmin(_ServerConfig))
+            {
+                command.ReplyToCommand("Command is only allowed for admins!");
+                return;
+            }
+
+            if (_Match == null)
+            {
+                command.ReplyToCommand("Currently no Match is running. ");
+                return;
+            }
+
+            if (command.ArgCount < 2)
+            {
+                command.ReplyToCommand("Url is required as Argument!");
+                return;
+            }
+
+            _Match.Dispose();
+            _Match = null;
+            ResetServer();
+        },
+        command);
+    }
+
     [ConsoleCommand("css_loadconfig", "Load a match config")]
     [ConsoleCommand("ps_loadconfig", "Load a match config")]
     public void OnCommandLoadConfig(CCSPlayerController? player, CommandInfo command)
@@ -245,23 +284,29 @@ public class PugSharp : BasePlugin, IMatchCallback
         {
             if (player != null && !player.IsAdmin(_ServerConfig))
             {
-                player.PrintToCenter("Command is only allowed for admins!");
+                command.ReplyToCommand("Command is only allowed for admins!");
                 return;
             }
 
-            _Logger.LogInformation("Start loading match config!");
+            if (_Match != null)
+            {
+                command.ReplyToCommand("Currently Match {match} is running. To stop it call ps_stopmatch");
+                return;
+            }
+
             if (command.ArgCount < 2)
             {
-                _Logger.LogInformation("Url is required as Argument!");
-                player?.PrintToCenter("Url is required as Argument!");
-
+                command.ReplyToCommand("Url is required as Argument!");
                 return;
             }
+
+
+            _Logger.LogInformation("Start loading match config!");
 
             var url = command.ArgByIndex(1);
             var authToken = command.ArgCount > 2 ? command.ArgByIndex(2) : string.Empty;
 
-            SendMessage($"Loading Config from {url}");
+            command.ReplyToCommand($"Loading Config from {url}");
             var loadMatchConfigFromUrlResult = _ConfigProvider.LoadMatchConfigFromUrlAsync(url, authToken).Result;
 
             loadMatchConfigFromUrlResult.Switch(
@@ -298,7 +343,12 @@ public class PugSharp : BasePlugin, IMatchCallback
                 return;
             }
 
-            _Logger.LogInformation("Start loading match config!");
+            if (_Match != null)
+            {
+                command.ReplyToCommand("Currently Match {match} is running. To stop it call ps_stopmatch");
+                return;
+            }
+
             if (command.ArgCount != 2)
             {
                 _Logger.LogInformation("FileName is required as Argument! Path have to be put in \"pathToConfig\"");
@@ -307,9 +357,10 @@ public class PugSharp : BasePlugin, IMatchCallback
                 return;
             }
 
+            _Logger.LogInformation("Start loading match config!");
             var fileName = command.ArgByIndex(1);
 
-            SendMessage($"Loading Config from file {fileName}");
+            command.ReplyToCommand($"Loading Config from file {fileName}");
             var loadMatchConfigFromFileResult = _ConfigProvider.LoadMatchConfigFromFileAsync(fileName).Result;
 
             loadMatchConfigFromFileResult.Switch(
@@ -432,16 +483,16 @@ public class PugSharp : BasePlugin, IMatchCallback
 
             if (_Match != null)
             {
+                if (!_Match.PlayerBelongsToMatch(eventPlayerConnectFull.Userid.SteamID))
+                {
+                    _Logger.LogInformation("Player {playerName} does not belong to the match!", userId.PlayerName);
+
+                    eventPlayerConnectFull.Userid.Kick();
+                    return HookResult.Continue;
+                }
+
                 if (_Match.CurrentState == MatchState.WaitingForPlayersConnectedReady)
                 {
-                    if (!_Match.PlayerBelongsToMatch(eventPlayerConnectFull.Userid.SteamID))
-                    {
-                        _Logger.LogInformation("Player {playerName} does not belong to the match!", userId.PlayerName);
-
-                        eventPlayerConnectFull.Userid.Kick();
-                        return HookResult.Continue;
-                    }
-
                     userId.PrintToChat($" {ChatColors.Default}Hello {ChatColors.Green}{userId.PlayerName}{ChatColors.Default}, welcome to match {_Match.Config.MatchId}");
                     userId.PrintToChat($" {ChatColors.Default}powered by {ChatColors.Green}PugSharp{ChatColors.Default} (https://github.com/Lan2Play/PugSharp/)");
                     userId.PrintToChat($" {ChatColors.Default}type {ChatColors.BlueGrey}!ready {ChatColors.Default}to be marked as ready for the match");
@@ -449,6 +500,11 @@ public class PugSharp : BasePlugin, IMatchCallback
                 else if (_Match.CurrentState == MatchState.MatchPaused)
                 {
                     _Match.TryAddPlayer(new Player(userId));
+                }
+                else
+                {
+                    _Logger.LogInformation("Match is is in state {state}. Connecting new players is not possible! Kick Player {player}!", _Match.CurrentState, userId.PlayerName);
+                    userId.Kick();
                 }
             }
             else if (!userId.IsAdmin(_ServerConfig))
