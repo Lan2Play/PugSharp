@@ -3,9 +3,17 @@ updates:
   # Enable version updates for GitHub Actions
   - package-ecosystem: "github-actions"
     directory: "/"
+    schedule:
+      interval: "daily"
+      time: "18:00"  
+      timezone: "Europe/Berlin"
     open-pull-requests-limit: 20
       
   # Enable version updates for nuget
   - package-ecosystem: "nuget"
     directory: "/"
+    schedule:
+      interval: "daily"
+      time: "18:00"
+      timezone: "Europe/Berlin"
     open-pull-requests-limit: 20
