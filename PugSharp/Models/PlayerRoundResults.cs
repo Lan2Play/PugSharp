@@ -6,7 +6,7 @@ namespace PugSharp.Models
     {
         public bool Coaching { get; set; }
 
-        public string Name { get; set; }
+        public required string Name { get; init; }
 
         public int Kills { get; set; }
 
