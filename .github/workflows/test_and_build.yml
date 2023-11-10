@@ -114,6 +114,8 @@ jobs:
         run: echo "CSSHARPVER=$(dotnet list PugSharp/PugSharp.csproj package --format json | jq -r '.projects[].frameworks[].topLevelPackages[] | select(.id == "CounterStrikeSharp.API") | .resolvedVersion' | sed 's|1.0.|v|g')"  >> $GITHUB_ENV
       - name: echo counterstrikesharp version
         run: echo $CSSHARPVER
+      - name: debug
+        run: curl -s -L https://api.github.com/repos/roflmuffin/CounterStrikeSharp/releases/tags/$CSSHARPVER
       - name: get counterstrikesharp link
         run: echo "CSSHARPlink=$(curl -s -L https://api.github.com/repos/roflmuffin/CounterStrikeSharp/releases/tags/$CSSHARPVER | jq -r '.assets.[] | select(.browser_download_url | test("with-runtime")) | .browser_download_url')" >> $GITHUB_ENV
       - name: echo counterstrikesharp link
