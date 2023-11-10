@@ -1,12 +1,11 @@
 ﻿using PugSharp.Api.Contract;
-using PugSharp.G5Api;
-using static PugSharp.PugSharp;
+using PugSharp.Api.G5Api;
 
 namespace PugSharp;
 
 public class G5ApiProvider : IApiProvider
 {
-    private G5ApiClient _G5Stats;
+    private readonly G5ApiClient _G5Stats;
 
     public G5ApiProvider(G5ApiClient apiClient)
     {

@@ -232,7 +232,7 @@ public class Match : IDisposable
                             .ToDictionary(p => p.Key.ToString(), p => CreatePlayerStatistics(p.Value), StringComparer.OrdinalIgnoreCase),
         };
 
-        _ = _MatchCallback?.SendRoundStatsUpdateAsync(Config.MatchId, _MatchInfo.CurrentMap.MapNumber, teamInfo1, teamInfo2, new Map { Name = _MatchInfo.CurrentMap.MapName, Team1 = mapTeamInfo1, Team2 = mapTeamInfo2, }, CancellationToken.None);
+        _ = _MatchCallback?.SendRoundStatsUpdateAsync(new RoundStatusUpdateParams(Config.MatchId, _MatchInfo.CurrentMap.MapNumber, teamInfo1, teamInfo2, new Map { Name = _MatchInfo.CurrentMap.MapName, Team1 = mapTeamInfo1, Team2 = mapTeamInfo2, }), CancellationToken.None);
     }
 
     private void UpdateStats(IReadOnlyDictionary<ulong, IPlayerRoundResults> playerResults)

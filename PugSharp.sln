@@ -25,7 +25,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PugSharp.ApiStats", "PugSharp.ApiStats\PugSharp.ApiStats.csproj", "{526B2B39-FD72-41E0-8831-965FF37AC236}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PugSharp.G5Api", "PugSharp.G5Api\PugSharp.G5Api.csproj", "{8C629D93-2050-4F31-8604-C16533BF726E}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PugSharp.Api.G5Api", "PugSharp.Api.G5Api\PugSharp.Api.G5Api.csproj", "{8C629D93-2050-4F31-8604-C16533BF726E}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PugSharp.Api.Contract", "PugSharp.Api.Contract\PugSharp.Api.Contract.csproj", "{3128A314-F59A-44A1-8A6C-5B042159A441}"
 EndProject

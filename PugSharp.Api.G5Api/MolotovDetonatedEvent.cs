@@ -1,0 +1,20 @@
+﻿using System.Text.Json.Serialization;
+
+namespace PugSharp.Api.G5Api;
+
+// This event fires when the molotov ends, but its RoundTime parameter is when it started burning.
+// Note that this event does *not* fire if the molotov was thrown directly at a smoke and did not start burning.
+public sealed class MolotovDetonatedEvent : VictimWithDamageGrenadeEvent
+{
+    [JsonPropertyName("round_time_ended")]
+    public int EndTime { get; set; }
+
+    [JsonPropertyName("duration")]
+    public int Duration { get; set; }
+
+    public MolotovDetonatedEvent(string matchId, int mapNumber, int roundNumber, int roundTime, Player player, IEnumerable<GrenadeVictim> victims, int damageEnemies, int damageFriendlies, int endTime) : base(matchId, mapNumber, roundNumber, roundTime, player, new Weapon("molotov", CsWeaponId.MOLOTOV), victims, damageEnemies, damageFriendlies, "molotov_detonated")
+    {
+        EndTime = endTime;
+        Duration = endTime - roundTime;
+    }
+}

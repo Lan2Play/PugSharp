@@ -6,7 +6,7 @@ using CounterStrikeSharp.API.Modules.Cvars;
 using Microsoft.Extensions.Logging;
 using PugSharp.Api.Contract;
 using PugSharp.Config;
-using PugSharp.G5Api;
+using PugSharp.Api.G5Api;
 using PugSharp.Logging;
 using PugSharp.Match.Contract;
 using PugSharp.Models;
@@ -17,6 +17,16 @@ using ChatColors = CounterStrikeSharp.API.Modules.Utils.ChatColors;
 using Player = PugSharp.Models.Player;
 
 namespace PugSharp;
+
+public interface ICsServer
+{
+
+}
+
+public class CsServer : ICsServer
+{
+
+}
 
 public class PugSharp : BasePlugin, IMatchCallback
 {
