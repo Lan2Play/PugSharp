@@ -28,7 +28,7 @@ namespace PugSharp.ApiStats
                     {ApiStatsConstants.StatsMapName, goingLiveParams.MapName},
                 };
 
-                var uri = QueryHelpers.AddQueryString($"golive/{goingLiveParams.MapNumber}", queryParams);
+                var uri = QueryHelpers.AddQueryString(string.Create(CultureInfo.InvariantCulture, $"golive/{goingLiveParams.MapNumber}"), queryParams);
 
                 var response = await HttpClient.PostAsync(uri, content: null, cancellationToken).ConfigureAwait(false);
 
@@ -56,7 +56,7 @@ namespace PugSharp.ApiStats
                     {ApiStatsConstants.StatsMapWinner, finalizeMapParams.WinnerTeamName},
                 };
 
-                var uri = QueryHelpers.AddQueryString($"finalize/{finalizeMapParams.MapNumber}", queryParams);
+                var uri = QueryHelpers.AddQueryString(string.Create(CultureInfo.InvariantCulture, $"finalize/{finalizeMapParams.MapNumber}"), queryParams);
 
                 var response = await HttpClient.PostAsync(uri, content: null, cancellationToken).ConfigureAwait(false);
 
@@ -84,7 +84,7 @@ namespace PugSharp.ApiStats
                     {"team2score", CreateIntParam(roundStatusUpdateParams.CurrentMap.Team2.Score)},
                 };
 
-                var uri = QueryHelpers.AddQueryString($"updateround/{roundStatusUpdateParams.MapNumber}", queryParams);
+                var uri = QueryHelpers.AddQueryString(string.Create(CultureInfo.InvariantCulture, $"updateround/{roundStatusUpdateParams.MapNumber}"), queryParams);
 
                 var response = await HttpClient.PostAsync(uri, content: null, cancellationToken).ConfigureAwait(false);
 
@@ -106,10 +106,10 @@ namespace PugSharp.ApiStats
                 return;
             }
 
-            var dict = new Dictionary<string, MapTeamInfo>(StringComparer.OrdinalIgnoreCase)
+            var dict = new Dictionary<string, IMapTeamInfo>(StringComparer.OrdinalIgnoreCase)
             {
-                { teamInfo1.TeamName, currentMap.Team1 as  MapTeamInfo},
-                { teamInfo2.TeamName, currentMap.Team2 as  MapTeamInfo },
+                { teamInfo1.TeamName, currentMap.Team1},
+                { teamInfo2.TeamName, currentMap.Team2 },
             };
 
             foreach (var team in dict)
@@ -120,7 +120,7 @@ namespace PugSharp.ApiStats
 
                 foreach (var player in players)
                 {
-                    var playerStatistics = player.Value as PlayerStatistics;
+                    var playerStatistics = player.Value;
 
                     Dictionary<string, string> queryParams = CreateUpdatePlayerQueryParameters(teamName, playerStatistics);
 
@@ -133,7 +133,7 @@ namespace PugSharp.ApiStats
             }
         }
 
-        private static Dictionary<string, string> CreateUpdatePlayerQueryParameters(string teamName, PlayerStatistics playerStatistics)
+        private static Dictionary<string, string> CreateUpdatePlayerQueryParameters(string teamName, IPlayerStatistics playerStatistics)
         {
             return new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
                     {
@@ -213,23 +213,25 @@ namespace PugSharp.ApiStats
 
         internal async Task SendFreeServerInternalAsync(CancellationToken cancellationToken)
         {
+            if (HttpClient == null)
+            {
+                return;
+            }
+
             var response = await HttpClient.PostAsync("freeserver", content: null, cancellationToken).ConfigureAwait(false);
 
             await HandleResponseAsync(response, cancellationToken).ConfigureAwait(false);
         }
 
-        public IReadOnlyList<ProviderCommand> LoadProviderCommands()
-        {
-            return Enumerable.Empty<ProviderCommand>().ToList();
-        }
-
         private static class ApiStatsConstants
         {
+#pragma warning disable S125 // Sections of code should not be commented out
             // Series stats(root section)
             public const string StatsSeriesWinner = "winner";
-            //public const string StatsSeriesType = "series_type";
-            //public const string StatsSeriesTeamId = "id";
-            //public const string StatsSeriesTeamName = "name";
+
+                            //public const string StatsSeriesType = "series_type";
+                            //public const string StatsSeriesTeamId = "id";
+                            //public const string StatsSeriesTeamName = "name";
             public const string StatsSeriesForfeit = "forfeit";
 
             // Map stats (under "map0", "map1", etc.)
@@ -248,7 +250,7 @@ namespace PugSharp.ApiStats
             // Player stats (under map section, then team section, then player's steam64)
             // If adding stuff here, also add to the InitPlayerStats function!
             //public const string StatsInit = "init"; // used to zero-fill stats only. Not a real stat.
-            public const string StatsCoaching = "coaching"; // indicates if the player is a coach.
+            //public const string StatsCoaching = "coaching"; // indicates if the player is a coach.
             public const string StatsName = "name";
             public const string StatsKills = "kills";
             public const string StatsDeaths = "deaths";
@@ -283,6 +285,7 @@ namespace PugSharp.ApiStats
             public const string StatsKast = "kast";
             public const string StatsContributionScore = "contribution_score";
             public const string StatsMvp = "mvp";
+#pragma warning restore S125 // Sections of code should not be commented out
         }
     }
 }

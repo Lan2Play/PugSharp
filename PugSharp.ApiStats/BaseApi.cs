@@ -12,7 +12,7 @@ namespace PugSharp.ApiStats
 
         protected HttpClient? HttpClient { get; }
 
-        protected BaseApi(string baseUrl, string authKey)
+        protected BaseApi(string? baseUrl, string? authKey)
         {
             if (string.IsNullOrEmpty(baseUrl))
             {
@@ -34,7 +34,6 @@ namespace PugSharp.ApiStats
 
         protected static async Task HandleResponseAsync(HttpResponseMessage? httpResponseMessage, CancellationToken cancellationToken)
         {
-
             if (httpResponseMessage == null)
             {
                 return;
@@ -49,7 +48,6 @@ namespace PugSharp.ApiStats
                     var responseContent = await httpResponseMessage.Content.ReadAsStringAsync(cancellationToken).ConfigureAwait(false);
 
                     _Logger.LogInformation("ResponseContent: {responseContent}", responseContent);
-
                 }
                 else
                 {
@@ -58,7 +56,6 @@ namespace PugSharp.ApiStats
                     var responseContent = await httpResponseMessage.Content.ReadAsStringAsync(cancellationToken).ConfigureAwait(false);
 
                     _Logger.LogError("ResponseContent: {responseContent}", responseContent);
-
                 }
             }
             catch (Exception e)
@@ -80,7 +77,7 @@ namespace PugSharp.ApiStats
             }
         }
 
-        void IDisposable.Dispose()
+        public void Dispose()
         {
             // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
             Dispose(disposing: true);
