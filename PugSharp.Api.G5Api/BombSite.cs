@@ -4,5 +4,5 @@ public enum BombSite
 {
     Unknown = 0,
     A = 1,
-    B = 2
+    B = 2,
 };

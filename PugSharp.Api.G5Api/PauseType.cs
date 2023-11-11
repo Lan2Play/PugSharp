@@ -6,5 +6,5 @@ public enum PauseType
     Tech,      // Technical pause
     Tactical,  // Tactical Pause
     Admin,     // Admin/RCON Pause
-    Backup     // Special type for match pausing during backups.
+    Backup,     // Special type for match pausing during backups.
 };

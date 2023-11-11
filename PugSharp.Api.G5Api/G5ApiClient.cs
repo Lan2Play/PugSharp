@@ -7,29 +7,30 @@ using System.Text.Json;
 
 namespace PugSharp.Api.G5Api
 {
-    public class G5ApiClient : IDisposable
+    public sealed class G5ApiClient : IDisposable
     {
         private static readonly ILogger<G5ApiClient> _Logger = LogManager.CreateLogger<G5ApiClient>();
 
-        private readonly HttpClient _HttpClient;
-        private readonly IAsyncPolicy<HttpResponseMessage> _RetryPolicy;
+        private readonly HttpClient? _HttpClient;
+        private readonly IAsyncPolicy<HttpResponseMessage>? _RetryPolicy;
 
         private string _ApiUrl;
         private string _ApiHeader;
         private string _ApiHeadeValue;
+        private bool _DisposedValue;
 
         public G5ApiClient(string g5ApiUrl, string g5ApiHeader, string g5ApiHeaderValue)
         {
             _Logger.LogInformation("Create G5Api with BaseUrl: {url}", g5ApiUrl);
 
-            if(string.IsNullOrEmpty(g5ApiUrl))
-            {
-                return;
-            }
-
             _ApiUrl = g5ApiUrl;
             _ApiHeader = g5ApiHeader;
             _ApiHeadeValue = g5ApiHeaderValue;
+
+            if (string.IsNullOrEmpty(g5ApiUrl))
+            {
+                return;
+            }
 
             _HttpClient = new HttpClient();
 
@@ -52,7 +53,7 @@ namespace PugSharp.Api.G5Api
 
         public async Task SendEventAsync(EventBase eventToSend, CancellationToken cancellationToken)
         {
-            if(_HttpClient == null)
+            if (_HttpClient == null || _RetryPolicy == null)
             {
                 return;
             }
@@ -94,9 +95,24 @@ namespace PugSharp.Api.G5Api
             }
         }
 
+        private void Dispose(bool disposing)
+        {
+            if (!_DisposedValue)
+            {
+                if (disposing)
+                {
+                    _HttpClient?.Dispose();
+                }
+
+                _DisposedValue = true;
+            }
+        }
+
         public void Dispose()
         {
-            _HttpClient.Dispose();
+            // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
+            Dispose(disposing: true);
+            GC.SuppressFinalize(this);
         }
     }
 }
