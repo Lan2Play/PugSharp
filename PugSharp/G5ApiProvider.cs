@@ -4,6 +4,8 @@ using Microsoft.Extensions.Logging;
 using PugSharp.Logging;
 using PugSharp.Server.Contract;
 using System.Text.RegularExpressions;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 
 namespace PugSharp;
 
@@ -66,8 +68,8 @@ public partial class G5CommandProvider : ICommandProvider
     {
         return new List<ProviderCommand>()
         {
-            new("css_version","Return the cs server version", CommandVersion),
-            new("css_get5_status","Return the get 5 status", CommandGet5Status),
+            new("version","Return the cs server version", CommandVersion),
+            new("get5_status","Return the get 5 status", CommandGet5Status),
             new("get5_loadmatch_url","Load a match with the given URL and API key for a match", CommandLoadMatchUrl),
             new("get5_endmatch","Ends the match", CommandEndMatch),
             new("sm_pause","Pauses the match", CommandSmPause),
@@ -135,9 +137,18 @@ public partial class G5CommandProvider : ICommandProvider
         return Enumerable.Empty<string>();
     }
 
+    internal class Get5Status
+    {
+        [JsonPropertyName("plugin_version")]
+        public required string PluginVersion { get; set; }
+
+        [JsonPropertyName("gamestate")]
+        public int GameState { get; set; }
+    }
+
     private IEnumerable<string> CommandGet5Status(string[] args)
     {
-        return new[] { "0.15.0" };
+        return new[] { JsonSerializer.Serialize(new Get5Status { PluginVersion = "0.15.0", GameState = 0 }) };
     }
 
     [GeneratedRegex(@"PatchVersion=([0-9]+\.[0-9]+\.[0-9]+\.[0-9]+)", RegexOptions.ExplicitCapture, 1000)]
