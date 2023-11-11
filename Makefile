@@ -45,7 +45,7 @@ init-env:
 
 install-counterstrikesharp:
 	mkdir -p $(currentDir)/cs2/game/csgo/addons/
-	wget -q -O $(currentDir)/counterstrikesharp.zip $(shell curl -s -L -H "Accept: application/vnd.github+json" https://api.github.com/repos/roflmuffin/CounterStrikeSharp/releases/tags/$(shell dotnet list PugSharp/PugSharp.csproj package --format json | jq -r '.projects[].frameworks[].topLevelPackages[] | select(.id == "CounterStrikeSharp.API") | .resolvedVersion' | sed 's|1.0.|v|g') | jq -r '.assets.[] | select(.browser_download_url | test("with-runtime")) | .browser_download_url') 
+	wget -q -O $(currentDir)/counterstrikesharp.zip $(shell curl -s -L -H "Accept: application/vnd.github+json" https://api.github.com/repos/roflmuffin/CounterStrikeSharp/releases/tags/$(shell dotnet list PugSharp/PugSharp.csproj package --format json | jq -r '.projects[].frameworks[].topLevelPackages[] | select(.id == "CounterStrikeSharp.API") | .resolvedVersion' | sed 's|1.0.|v|g') | jq -r '.assets[] | select(.browser_download_url | test("with-runtime")) | .browser_download_url') 
 	unzip -o $(currentDir)/counterstrikesharp.zip -d $(currentDir)/cs2/game/csgo
 	rm -rf $(currentDir)/counterstrikesharp.zip
 

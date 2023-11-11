@@ -127,13 +127,13 @@ public partial class G5CommandProvider : ICommandProvider
 
     private IEnumerable<string> CommandEndMatch(string[] arg)
     {
-        _CsServer.ExecuteCommand("ps_loadmatch");
+        _CsServer.ExecuteCommand("ps_stopmatch");
         return Enumerable.Empty<string>();
     }
 
     private IEnumerable<string> CommandLoadMatchUrl(string[] args)
     {
-        _CsServer.ExecuteCommand($"ps_loadmatch {string.Join(' ', args.Skip(1))}");
+        _CsServer.ExecuteCommand($"ps_loadconfig {string.Join(' ', args.Skip(1).Where(x => !x.Contains("Authorization", StringComparison.OrdinalIgnoreCase)).Select(x => $"\"{x}\""))}");
         return Enumerable.Empty<string>();
     }
 
@@ -151,7 +151,7 @@ public partial class G5CommandProvider : ICommandProvider
         return new[] { JsonSerializer.Serialize(new Get5Status { PluginVersion = "0.15.0", GameState = 0 }) };
     }
 
-    [GeneratedRegex(@"PatchVersion=([0-9]+\.[0-9]+\.[0-9]+\.[0-9]+)", RegexOptions.ExplicitCapture, 1000)]
+    [GeneratedRegex(@"PatchVersion=(?<version>[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+)", RegexOptions.ExplicitCapture, 1000)]
     private static partial Regex PatchVersion();
 
     private IEnumerable<string> CommandVersion(string[] args)
@@ -166,7 +166,7 @@ public partial class G5CommandProvider : ICommandProvider
 
                 if (match.Success)
                 {
-                    return new[] { match.Groups[1].Value };
+                    return new[] { match.Groups["version"].Value };
                 }
 
                 _Logger.LogError("The 'PatchVersion' key could not be located in the steam.inf file.");
