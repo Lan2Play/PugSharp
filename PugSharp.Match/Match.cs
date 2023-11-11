@@ -27,11 +27,11 @@ public class Match : IDisposable
     private readonly StateMachine<MatchState, MatchCommand> _MatchStateMachine;
 
     private readonly DemoUploader? _DemoUploader;
-    private readonly List<Vote> _MapsToSelect;
     private readonly List<Vote> _TeamVotes = new() { new("T"), new("CT") };
 
     private readonly MatchInfo _MatchInfo;
 
+    private  List<Vote> _MapsToSelect;
     private MatchTeam? _CurrentMatchTeamToVote;
     private bool disposedValue;
 
@@ -576,6 +576,7 @@ public class Match : IDisposable
         if (_MapsToSelect.Count == 1)
         {
             _MatchInfo.CurrentMap.MapName = _MapsToSelect[0].Name;
+            _MapsToSelect = Config.Maplist.Select(x => new Vote(x)).ToList();
         }
     }
 
