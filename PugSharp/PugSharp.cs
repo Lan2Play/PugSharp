@@ -161,10 +161,12 @@ public class PugSharp : BasePlugin, IMatchCallback
 
             if (value is string stringValue)
             {
+                _Logger.LogInformation("Update ConVar {name} to stringvalue {value}", name, stringValue);
                 convar.StringValue = stringValue;
             }
             else
             {
+                _Logger.LogInformation("Update ConVar {name} to value {value}", name, value);
                 convar.SetValue(value);
             }
         }
@@ -1301,7 +1303,8 @@ public class PugSharp : BasePlugin, IMatchCallback
         {
             string prefix = $"PugSharp_Match_{_Match.MatchInfo.Config.MatchId}";
             _Logger.LogInformation("Create round backup files: {prefix}", prefix);
-            UpdateConvar("mp_backup_round_file", prefix);
+            //UpdateConvar("mp_backup_round_file", prefix);
+            _CsServer.ExecuteCommand($"mp_backup_round_file {prefix}");
         }
     }
 
