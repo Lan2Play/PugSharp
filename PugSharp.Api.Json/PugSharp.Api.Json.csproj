@@ -1,0 +1,14 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net7.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\PugSharp.Api.Contract\PugSharp.Api.Contract.csproj" />
+    <ProjectReference Include="..\PugSharp.Logging\PugSharp.Logging.csproj" />
+  </ItemGroup>
+
+</Project>

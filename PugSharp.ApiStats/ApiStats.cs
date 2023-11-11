@@ -3,20 +3,15 @@ using Microsoft.Extensions.Logging;
 using PugSharp.Api.Contract;
 using PugSharp.Logging;
 using System.Globalization;
-using System.Text.Json;
-
 namespace PugSharp.ApiStats
 {
     public class ApiStats : BaseApi, IApiProvider
     {
         private static readonly ILogger<ApiStats> _Logger = LogManager.CreateLogger<ApiStats>();
 
-        private readonly string? _ApiStatsDirectory;
-
-        public ApiStats(string? apiStatsUrl, string? apiStatsKey, string? apiStatsDirectory) : base(apiStatsUrl, apiStatsKey)
+        public ApiStats(string? apiStatsUrl, string? apiStatsKey) : base(apiStatsUrl, apiStatsKey)
         {
             _Logger.LogInformation("Create Api Stats with BaseUrl: {url}", apiStatsUrl);
-            _ApiStatsDirectory = apiStatsDirectory;
         }
 
         public async Task GoingLiveAsync(GoingLiveParams goingLiveParams, CancellationToken cancellationToken)
@@ -43,36 +38,9 @@ namespace PugSharp.ApiStats
             {
                 _Logger.LogError(ex, "Error sending going live!");
             }
-
-            try
-            {
-                if (_ApiStatsDirectory != null)
-                {
-                    var goingLiveFileName = Path.GetFullPath(Path.Combine(_ApiStatsDirectory, $"Match_{goingLiveParams.MatchId}_golive.json"));
-                    CreateStatsDirectoryIfNotExists();
-                    var fileStream = File.OpenWrite(goingLiveFileName);
-                    await using (fileStream.ConfigureAwait(false))
-                    {
-                        await JsonSerializer.SerializeAsync(fileStream, goingLiveParams, cancellationToken: cancellationToken).ConfigureAwait(false);
-                        _Logger.LogInformation("Stored MapResult: {mapFesultFileName}", goingLiveFileName);
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                _Logger.LogError(ex, "Error storing going live!");
-            }
         }
 
-        private void CreateStatsDirectoryIfNotExists()
-        {
-            if (_ApiStatsDirectory != null && !Directory.Exists(_ApiStatsDirectory))
-            {
-                Directory.CreateDirectory(_ApiStatsDirectory);
-            }
-        }
-
-        public async Task FinalizeMapAsync(MapResultParams mapResultParams, CancellationToken cancellationToken)
+        public async Task FinalizeMapAsync(MapResultParams finalizeMapParams, CancellationToken cancellationToken)
         {
             if (HttpClient == null)
             {
@@ -83,12 +51,12 @@ namespace PugSharp.ApiStats
             {
                 var queryParams = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
                 {
-                    {"team1score", CreateIntParam(mapResultParams.Team1Score)},
-                    {"team2score", CreateIntParam(mapResultParams.Team2Score)},
-                    {ApiStatsConstants.StatsMapWinner, mapResultParams.WinnerTeamName},
+                    {"team1score", CreateIntParam(finalizeMapParams.Team1Score)},
+                    {"team2score", CreateIntParam(finalizeMapParams.Team2Score)},
+                    {ApiStatsConstants.StatsMapWinner, finalizeMapParams.WinnerTeamName},
                 };
 
-                var uri = QueryHelpers.AddQueryString($"finalize/{mapResultParams.MapNumber}", queryParams);
+                var uri = QueryHelpers.AddQueryString($"finalize/{finalizeMapParams.MapNumber}", queryParams);
 
                 var response = await HttpClient.PostAsync(uri, content: null, cancellationToken).ConfigureAwait(false);
 
@@ -97,25 +65,6 @@ namespace PugSharp.ApiStats
             catch (Exception ex)
             {
                 _Logger.LogError(ex, "Error sending map result!");
-            }
-
-            try
-            {
-                if (_ApiStatsDirectory != null)
-                {
-                    var mapFesultFileName = Path.GetFullPath(Path.Combine(_ApiStatsDirectory, $"Match_{mapResultParams.MatchId}_mapresult.json"));
-                    CreateStatsDirectoryIfNotExists();
-                    var fileStream = File.OpenWrite(mapFesultFileName);
-                    await using (fileStream.ConfigureAwait(false))
-                    {
-                        await JsonSerializer.SerializeAsync(fileStream, mapResultParams, cancellationToken: cancellationToken).ConfigureAwait(false);
-                        _Logger.LogInformation("Stored MapResult: {mapFesultFileName}", mapFesultFileName);
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                _Logger.LogError(ex, "Error storing map result!");
             }
         }
 
@@ -147,27 +96,6 @@ namespace PugSharp.ApiStats
             catch (Exception ex)
             {
                 _Logger.LogError(ex, "Error sending round results!");
-            }
-
-            try
-            {
-                if (_ApiStatsDirectory != null)
-                {
-                    var round = roundStatusUpdateParams.CurrentMap.Team1.Score + roundStatusUpdateParams.CurrentMap.Team2.Score;
-                    var roundFileName = Path.GetFullPath(Path.Combine(_ApiStatsDirectory, string.Create(CultureInfo.InvariantCulture, $"Match_{roundStatusUpdateParams.MatchId}_roundresult_{round}.json")));
-                    CreateStatsDirectoryIfNotExists();
-                    var fileStream = File.OpenWrite(roundFileName);
-                    await using (fileStream.ConfigureAwait(false))
-                    {
-                        await JsonSerializer.SerializeAsync(fileStream, roundStatusUpdateParams, cancellationToken: cancellationToken).ConfigureAwait(false);
-                        _Logger.LogInformation("Stored Roundresults: {roundFileName}", roundFileName);
-
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                _Logger.LogError(ex, "Error storing round results!");
             }
         }
 

@@ -16,6 +16,7 @@ using System.Text.Json;
 using ChatColors = CounterStrikeSharp.API.Modules.Utils.ChatColors;
 using Player = PugSharp.Models.Player;
 using PugSharp.Server.Contract;
+using PugSharp.Api.Json;
 
 namespace PugSharp;
 
@@ -110,7 +111,7 @@ public class PugSharp : BasePlugin, IMatchCallback
         if (!string.IsNullOrEmpty(matchConfig.EventulaApistatsUrl))
         {
             _ApiProvider.ClearApiProviders();
-            var apiStats = new ApiStats.ApiStats(matchConfig.EventulaApistatsUrl, matchConfig.EventulaApistatsToken ?? string.Empty, pluginDirectory == null ? null : Path.Combine(pluginDirectory, "Stats"));
+            var apiStats = new ApiStats.ApiStats(matchConfig.EventulaApistatsUrl, matchConfig.EventulaApistatsToken ?? string.Empty);
             _ApiProvider.AddApiProvider(apiStats);
         }
 
@@ -122,6 +123,7 @@ public class PugSharp : BasePlugin, IMatchCallback
             _ApiProvider.AddApiProvider(g5ApiProvider);
         }
 
+        _ApiProvider.AddApiProvider(new JsonApiProvider(pluginDirectory == null ? null : Path.Combine(pluginDirectory, "Stats")));
 
 
         SetMatchVariable(matchConfig);
