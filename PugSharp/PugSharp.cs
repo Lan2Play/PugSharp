@@ -72,7 +72,7 @@ public class PugSharp : BasePlugin, IMatchCallback
                     {
                         c.ReplyToCommand(result);
                     }
-                }, c, c.ArgString);
+                }, c, c.GetCommandString, c.ArgString);
             });
         }
     }
@@ -544,12 +544,12 @@ public class PugSharp : BasePlugin, IMatchCallback
     }
 
 
-    private static void HandleCommand(Action commandAction, CommandInfo command, [CallerMemberName] string? commandMethod = null)
+    private static void HandleCommand(Action commandAction, CommandInfo command, [CallerMemberName] string? commandMethod = null, string? args = null)
     {
-        var commandName = commandMethod?.Replace("OnCommand", "", StringComparison.OrdinalIgnoreCase);
+        var commandName = commandMethod?.Replace("OnCommand", "", StringComparison.OrdinalIgnoreCase) ?? commandAction.Method.Name;
         try
         {
-            _Logger.LogInformation("Command \"{commandName}\" called.", commandName);
+            _Logger.LogInformation("Command \"{commandName} {args}\" called.", commandName, args ?? string.Empty);
             commandAction();
         }
         catch (Exception e)
