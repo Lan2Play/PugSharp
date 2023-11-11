@@ -64,6 +64,7 @@ public class StatsPlayer
     [JsonPropertyName("5k")]
     public int Kills5 { get; set; }
 
+#pragma warning disable S100 // Methods and properties should be named in PascalCase
     [JsonPropertyName("1v1")]
     public int OneV1s { get; set; }
 
@@ -78,6 +79,7 @@ public class StatsPlayer
 
     [JsonPropertyName("1v5")]
     public int OneV5s { get; set; }
+#pragma warning restore S100 // Methods and properties should be named in PascalCase
 
     [JsonPropertyName("first_kills_t")]
     public int FirstKillsT { get; set; }

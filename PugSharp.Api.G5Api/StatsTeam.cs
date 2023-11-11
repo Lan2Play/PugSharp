@@ -19,7 +19,7 @@ public class StatsTeam : TeamWrapper
     public int ScoreT { get; set; }
 
     [JsonPropertyName("players")]
-    public IEnumerable<StatsPlayer> Players { get; set; } = new List<StatsPlayer>();
+    public IEnumerable<StatsPlayer> Players { get; set; }
 
     public StatsTeam(string id, string name, int seriesScore, int score, int scoreCt, int scoreT, IEnumerable<StatsPlayer> players) : base(id, name)
     {

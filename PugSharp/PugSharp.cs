@@ -129,7 +129,7 @@ public class PugSharp : BasePlugin, IMatchCallback
         SetMatchVariable(matchConfig);
 
         _Match?.Dispose();
-        _Match = new Match.Match(this, _ApiProvider, matchConfig, pluginDirectory);
+        _Match = new Match.Match(this, _ApiProvider, matchConfig);
 
         var players = GetAllPlayers();
         foreach (var player in players.Where(x => x.UserId.HasValue && x.UserId >= 0))
@@ -653,6 +653,7 @@ public class PugSharp : BasePlugin, IMatchCallback
             var isFirstHalf = (teamT.Score + teamCT.Score) <= _Match.Config.MaxRounds / 2;
             _Match.SendRoundResults(new RoundResult
             {
+                RoundWinner = (Match.Contract.Team)eventRoundEnd.Winner,
                 TRoundResult = new TeamRoundResults
                 {
                     Score = teamT.Score,

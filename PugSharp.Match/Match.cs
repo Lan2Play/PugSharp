@@ -5,11 +5,19 @@ using PugSharp.Logging;
 using PugSharp.Match.Contract;
 using Stateless;
 using Stateless.Graph;
+using System.Globalization;
 
 namespace PugSharp.Match;
 
 public class Match : IDisposable
 {
+    private const int Kill1 = 1;
+    private const int Kill2 = 2;
+    private const int Kill3 = 3;
+    private const int Kill4 = 4;
+    private const int Kill5 = 5;
+    private const int NumOfMatchLiveMessages = 10;
+
     private static readonly ILogger<Match> _Logger = LogManager.CreateLogger<Match>();
 
     private readonly System.Timers.Timer _VoteTimer = new();
@@ -37,7 +45,7 @@ public class Match : IDisposable
 
     public IEnumerable<MatchPlayer> AllMatchPlayers => MatchTeam1.Players.Concat(MatchTeam2.Players);
 
-    public Match(IMatchCallback matchCallback, IApiProvider apiProvider, Config.MatchConfig matchConfig, string? pluginDirectory = null)
+    public Match(IMatchCallback matchCallback, IApiProvider apiProvider, Config.MatchConfig matchConfig)
     {
         Config = matchConfig;
 
@@ -51,7 +59,6 @@ public class Match : IDisposable
         _VoteTimer.Elapsed += VoteTimer_Elapsed;
         _ReadyReminderTimer.Elapsed += ReadyReminderTimer_Elapsed;
 
-
         if (!string.IsNullOrEmpty(Config.EventulaDemoUploadUrl) && !string.IsNullOrEmpty(Config.EventulaApistatsToken))
         {
             _DemoUploader = new DemoUploader(Config.EventulaDemoUploadUrl, Config.EventulaApistatsToken);
@@ -60,7 +67,15 @@ public class Match : IDisposable
         _MapsToSelect = matchConfig.Maplist.Select(x => new Vote(x)).ToList();
 
         _MatchStateMachine = new StateMachine<MatchState, MatchCommand>(MatchState.None);
+        InitializeStateMachine();
 
+        SetMatchTeamCvars();
+    }
+
+#pragma warning disable MA0051 // Method is too long
+    private void InitializeStateMachine()
+#pragma warning restore MA0051 // Method is too long
+    {
         _MatchStateMachine.Configure(MatchState.None)
             .Permit(MatchCommand.LoadMatch, MatchState.WaitingForPlayersConnectedReady);
 
@@ -124,10 +139,7 @@ public class Match : IDisposable
         _MatchStateMachine.OnTransitioned(OnMatchStateChanged);
 
         _MatchStateMachine.Fire(MatchCommand.LoadMatch);
-
-        SetMatchTeamCvars();
     }
-
 
     private void SetMatchTeamCvars()
     {
@@ -144,12 +156,6 @@ public class Match : IDisposable
     {
         _Logger.LogInformation("Stop ReadyReminder");
         _ReadyReminderTimer.Stop();
-    }
-
-    private bool IsMatchReady()
-    {
-        // TODO Check if one team has x rounds won or one team has given up?
-        return true;
     }
 
     private void UnpauseMatch()
@@ -172,7 +178,7 @@ public class Match : IDisposable
         _MatchCallback.SetupRoundBackup();
         _MatchInfo.DemoFile = _MatchCallback.StartDemoRecording();
 
-        _MatchCallback.SendMessage($" {ChatColors.Default}Starting Match. {ChatColors.Highlight}{MatchTeam1.TeamConfig.Name} {ChatColors.Default}as {ChatColors.Highlight}{MatchTeam1.CurrentTeamSite}{ChatColors.Default}. {ChatColors.Highlight}{MatchTeam2.TeamConfig.Name}{ChatColors.Default} as {ChatColors.Highlight}{MatchTeam2.CurrentTeamSite}");
+        _MatchCallback.SendMessage(string.Create(CultureInfo.InvariantCulture, $" {ChatColors.Default}Starting Match. {ChatColors.Highlight}{MatchTeam1.TeamConfig.Name} {ChatColors.Default}as {ChatColors.Highlight}{MatchTeam1.CurrentTeamSite}{ChatColors.Default}. {ChatColors.Highlight}{MatchTeam2.TeamConfig.Name}{ChatColors.Default} as {ChatColors.Highlight}{MatchTeam2.CurrentTeamSite}"));
 
 
         _ = _ApiProvider.GoingLiveAsync(new GoingLiveParams(Config.MatchId, _MatchInfo.CurrentMap.MapName, _MatchInfo.CurrentMap.MapNumber), CancellationToken.None);
@@ -207,8 +213,8 @@ public class Match : IDisposable
         var team1Results = MatchTeam1.CurrentTeamSite == Team.Terrorist ? roundResults.TRoundResult : roundResults.CTRoundResult;
         var team2Results = MatchTeam2.CurrentTeamSite == Team.Terrorist ? roundResults.TRoundResult : roundResults.CTRoundResult;
 
-        _Logger.LogInformation($"Team 1: {MatchTeam1.CurrentTeamSite} : {team1Results.Score}");
-        _Logger.LogInformation($"Team 2: {MatchTeam2.CurrentTeamSite} : {team2Results.Score}");
+        _Logger.LogInformation("Team 1: {teamSite} : {teamScore}", MatchTeam1.CurrentTeamSite, team1Results.Score);
+        _Logger.LogInformation("Team 2: {teamSite} : {teamScore}", MatchTeam2.CurrentTeamSite, team2Results.Score);
 
         var mapTeamInfo1 = new MapTeamInfo
         {
@@ -218,7 +224,7 @@ public class Match : IDisposable
             ScoreCT = team1Results.ScoreCT,
             Players = _MatchInfo.CurrentMap.PlayerMatchStatistics
                             .Where(a => MatchTeam1.Players.Select(player => player.Player.SteamID).Contains(a.Key))
-                            .ToDictionary(p => p.Key.ToString(), p => CreatePlayerStatistics(p.Value), StringComparer.OrdinalIgnoreCase),
+                            .ToDictionary(p => p.Key.ToString(CultureInfo.InvariantCulture), p => CreatePlayerStatistics(p.Value), StringComparer.OrdinalIgnoreCase),
         };
 
         var mapTeamInfo2 = new MapTeamInfo
@@ -230,28 +236,32 @@ public class Match : IDisposable
 
             Players = _MatchInfo.CurrentMap.PlayerMatchStatistics
                             .Where(a => MatchTeam2.Players.Select(player => player.Player.SteamID).Contains(a.Key))
-                            .ToDictionary(p => p.Key.ToString(), p => CreatePlayerStatistics(p.Value), StringComparer.OrdinalIgnoreCase),
+                            .ToDictionary(p => p.Key.ToString(CultureInfo.InvariantCulture), p => CreatePlayerStatistics(p.Value), StringComparer.OrdinalIgnoreCase),
         };
 
-        _ = _ApiProvider?.RoundStatsUpdateAsync(new RoundStatusUpdateParams(Config.MatchId, _MatchInfo.CurrentMap.MapNumber, teamInfo1, teamInfo2, new Map { Name = _MatchInfo.CurrentMap.MapName, Team1 = mapTeamInfo1, Team2 = mapTeamInfo2, }), CancellationToken.None);
+        var winnerTeam = GetMatchTeam(roundResults.RoundWinner);
+        if (winnerTeam == null)
+        {
+            _Logger.LogError("WinnerTeam {winner} could not be found.", roundResults.RoundWinner);
+            return;
+        }
+
+        var map = new Map { WinnerTeamName = winnerTeam.TeamConfig.Name, Name = _MatchInfo.CurrentMap.MapName, Team1 = mapTeamInfo1, Team2 = mapTeamInfo2, DemoFileName = Path.GetFileName(_MatchInfo.DemoFile) };
+        _ = _ApiProvider?.RoundStatsUpdateAsync(new RoundStatusUpdateParams(Config.MatchId, _MatchInfo.CurrentMap.MapNumber, teamInfo1, teamInfo2, map), CancellationToken.None);
     }
 
+#pragma warning disable MA0051 // Method is too long
     private void UpdateStats(IReadOnlyDictionary<ulong, IPlayerRoundResults> playerResults)
+#pragma warning restore MA0051 // Method is too long
     {
         foreach (var kvp in playerResults)
         {
             var steamId = kvp.Key;
             var playerResult = kvp.Value;
 
-            if (!_MatchInfo.CurrentMap.PlayerMatchStatistics.ContainsKey(steamId))
-            {
-                _MatchInfo.CurrentMap.PlayerMatchStatistics[steamId] = new PlayerMatchStatistics();
+            var value = GetOrAddPlayerMatchStatistics(steamId, playerResult);
 
-                // Set name once
-                _MatchInfo.CurrentMap.PlayerMatchStatistics[steamId].Name = playerResult.Name;
-            }
-
-            var matchStats = _MatchInfo.CurrentMap.PlayerMatchStatistics[steamId];
+            var matchStats = value;
 
             if (playerResult.Dead)
             {
@@ -312,20 +322,23 @@ public class Match : IDisposable
 
             switch (playerResult.Kills)
             {
-                case 1:
+                case Kill1:
                     matchStats.Count1K++;
                     break;
-                case 2:
+                case Kill2:
                     matchStats.Count2K++;
                     break;
-                case 3:
+                case Kill3:
                     matchStats.Count3K++;
                     break;
-                case 4:
+                case Kill4:
                     matchStats.Count4K++;
                     break;
-                case 5:
+                case Kill5:
                     matchStats.Count5K++;
+                    break;
+                default:
+                    // Do nothing
                     break;
             }
 
@@ -333,20 +346,23 @@ public class Match : IDisposable
             {
                 switch (playerResult.ClutchKills)
                 {
-                    case 1:
+                    case Kill1:
                         matchStats.V1++;
                         break;
-                    case 2:
+                    case Kill2:
                         matchStats.V2++;
                         break;
-                    case 3:
+                    case Kill3:
                         matchStats.V3++;
                         break;
-                    case 4:
+                    case Kill4:
                         matchStats.V4++;
                         break;
-                    case 5:
+                    case Kill5:
                         matchStats.V5++;
+                        break;
+                    default:
+                        // Do nothing
                         break;
                 }
             }
@@ -357,7 +373,21 @@ public class Match : IDisposable
         }
     }
 
-    private IPlayerStatistics CreatePlayerStatistics(IPlayerMatchStatistics value)
+    private PlayerMatchStatistics GetOrAddPlayerMatchStatistics(ulong steamId, IPlayerRoundResults playerResult)
+    {
+        if (!_MatchInfo.CurrentMap.PlayerMatchStatistics.TryGetValue(steamId, out PlayerMatchStatistics? value))
+        {
+            value = new PlayerMatchStatistics();
+            _MatchInfo.CurrentMap.PlayerMatchStatistics[steamId] = value;
+
+            // Set name once
+            _MatchInfo.CurrentMap.PlayerMatchStatistics[steamId].Name = playerResult.Name;
+        }
+
+        return value;
+    }
+
+    private static IPlayerStatistics CreatePlayerStatistics(IPlayerMatchStatistics value)
     {
         return new PlayerStatistics
         {
@@ -428,7 +458,7 @@ public class Match : IDisposable
 
         if (_MatchInfo.MatchMaps[_MatchInfo.MatchMaps.Count - 1] == _MatchInfo.CurrentMap)
         {
-            var seriesResultParams = new SeriesResultParams(Config.MatchId, _MatchInfo.MatchMaps.GroupBy(x => x.Winner).MaxBy(x => x.Count())!.Key!.TeamConfig.Name, true, 120000, _MatchInfo.MatchMaps.Count(x => x.Team1Points > x.Team2Points), _MatchInfo.MatchMaps.Count(x => x.Team2Points > x.Team1Points));
+            var seriesResultParams = new SeriesResultParams(Config.MatchId, _MatchInfo.MatchMaps.GroupBy(x => x.Winner).MaxBy(x => x.Count())!.Key!.TeamConfig.Name, Forfeit: true, 120000, _MatchInfo.MatchMaps.Count(x => x.Team1Points > x.Team2Points), _MatchInfo.MatchMaps.Count(x => x.Team2Points > x.Team1Points));
             await _ApiProvider.FinalizeAsync(seriesResultParams, CancellationToken.None).ConfigureAwait(false);
         }
 
@@ -447,9 +477,9 @@ public class Match : IDisposable
 
     private async Task MatchLiveAsync()
     {
-        for (int i = 0; i < 10; i++)
+        for (int i = 0; i < NumOfMatchLiveMessages; i++)
         {
-            _MatchCallback.SendMessage($" {ChatColors.Default}Match is {ChatColors.Green}LIVE");
+            _MatchCallback.SendMessage(string.Create(CultureInfo.InvariantCulture, $" {ChatColors.Default}Match is {ChatColors.Green}LIVE"));
 
             await Task.Delay(TimeSpan.FromSeconds(1)).ConfigureAwait(false);
         }
@@ -476,6 +506,9 @@ public class Match : IDisposable
                 break;
             case MatchState.TeamVote:
                 TryFireState(MatchCommand.VoteTeam);
+                break;
+            default:
+                // Do nothing
                 break;
         }
     }
@@ -525,7 +558,7 @@ public class Match : IDisposable
             mapOptions.Add(new MenuOption(map, (opt, player) => BanMap(player, mapNumber)));
         }
 
-        ShowMenuToTeam(_CurrentMatchTeamToVote!, $" {ChatColors.Default}Vote to ban map: type {ChatColors.Command}!<mapnumber>", mapOptions);
+        ShowMenuToTeam(_CurrentMatchTeamToVote!, string.Create(CultureInfo.InvariantCulture, $" {ChatColors.Default}Vote to ban map: type {ChatColors.Command}!<mapnumber>"), mapOptions);
 
         _VoteTimer.Start();
     }
@@ -538,7 +571,7 @@ public class Match : IDisposable
         _MapsToSelect.Remove(mapToBan!);
         _MapsToSelect.ForEach(x => x.Votes.Clear());
 
-        _MatchCallback.SendMessage($" {ChatColors.Default}Map {ChatColors.Highlight}{mapToBan!.Name} {ChatColors.Default}was banned by {_CurrentMatchTeamToVote?.TeamConfig.Name}!");
+        _MatchCallback.SendMessage(string.Create(CultureInfo.InvariantCulture, $" {ChatColors.Default}Map {ChatColors.Highlight}{mapToBan!.Name} {ChatColors.Default}was banned by {_CurrentMatchTeamToVote?.TeamConfig.Name}!"));
 
         if (_MapsToSelect.Count == 1)
         {
@@ -565,7 +598,7 @@ public class Match : IDisposable
     {
         _VoteTimer.Stop();
 
-        var startTeam = _TeamVotes.MaxBy(m => m.Votes.Count)!.Name.Equals("T") ? Team.Terrorist : Team.CounterTerrorist;
+        var startTeam = _TeamVotes.MaxBy(m => m.Votes.Count)!.Name.Equals("T", StringComparison.OrdinalIgnoreCase) ? Team.Terrorist : Team.CounterTerrorist;
         _Logger.LogInformation("Set selected teamsite to {startTeam}. Voted by {team}", startTeam, _CurrentMatchTeamToVote!.TeamConfig.Name);
 
         if (_CurrentMatchTeamToVote!.CurrentTeamSite != startTeam)
@@ -580,10 +613,10 @@ public class Match : IDisposable
             _Logger.LogInformation("{team} starts as Team {startTeam}", otherTeam.TeamConfig.Name, otherTeam!.CurrentTeamSite.ToString());
         }
 
-        _MatchCallback.SendMessage($"{_CurrentMatchTeamToVote!.TeamConfig.Name} selected {startTeam} as startside!");
+        _MatchCallback.SendMessage(string.Create(CultureInfo.InvariantCulture, $"{_CurrentMatchTeamToVote!.TeamConfig.Name} selected {startTeam} as startside!"));
     }
 
-    private void ShowMenuToTeam(MatchTeam team, string title, IEnumerable<MenuOption> options)
+    private static void ShowMenuToTeam(MatchTeam team, string title, IEnumerable<MenuOption> options)
     {
         team.Players.ForEach(p =>
         {
@@ -619,11 +652,11 @@ public class Match : IDisposable
     private bool AllPlayersAreReady()
     {
         var readyPlayers = AllMatchPlayers.Where(p => p.IsReady);
-        var rquiredPlayers = Config.PlayersPerTeam * 2;
+        var requiredPlayers = Config.PlayersPerTeam * 2;
 
-        _Logger.LogInformation($"Match has {readyPlayers.Count()} of {rquiredPlayers} ready players: {string.Join("; ", readyPlayers.Select(a => $"{a.Player.PlayerName}[{a.IsReady}]"))}");
+        _Logger.LogInformation("Match has {readyPlayers} of {rquiredPlayers} ready players: {readyPlayers}", readyPlayers.Count(), requiredPlayers, string.Join("; ", readyPlayers.Select(a => $"{a.Player.PlayerName}[{a.IsReady}]")));
 
-        return readyPlayers.Count() == rquiredPlayers;
+        return readyPlayers.Take(requiredPlayers + 1).Count() == requiredPlayers;
     }
 
     private bool AllTeamsUnpaused() => !MatchTeam1.IsPaused && !MatchTeam2.IsPaused;
@@ -651,7 +684,7 @@ public class Match : IDisposable
         }
 
         _MatchCallback.SendMessage($"Waiting for all players to be ready.");
-        _MatchCallback.SendMessage($" {ChatColors.Command}!ready {ChatColors.Default}to toggle your ready state.");
+        _MatchCallback.SendMessage(string.Create(CultureInfo.InvariantCulture, $" {ChatColors.Command}!ready {ChatColors.Default}to toggle your ready state."));
     }
 
     private bool MapIsSelected()
@@ -811,12 +844,12 @@ public class Match : IDisposable
 
         if (matchPlayer.IsReady)
         {
-            _MatchCallback.SendMessage($"{player.PlayerName} is ready! {readyPlayers} of {requiredPlayers} are ready.");
+            _MatchCallback.SendMessage(string.Create(CultureInfo.InvariantCulture, $"{player.PlayerName} is ready! {readyPlayers} of {requiredPlayers} are ready."));
             await TryFireStateAsync(MatchCommand.PlayerReady).ConfigureAwait(false);
         }
         else
         {
-            _MatchCallback.SendMessage($"{player.PlayerName} is not ready! {readyPlayers} of {requiredPlayers} are ready.");
+            _MatchCallback.SendMessage(string.Create(CultureInfo.InvariantCulture, $"{player.PlayerName} is not ready! {readyPlayers} of {requiredPlayers} are ready."));
         }
     }
 
@@ -871,14 +904,14 @@ public class Match : IDisposable
 
         if (_MapsToSelect.Count <= mapNumber || mapNumber < 0)
         {
-            player.PrintToChat($"Mapnumber {mapNumber} is not available!");
+            player.PrintToChat(string.Create(CultureInfo.InvariantCulture, $"Mapnumber {mapNumber} is not available!"));
             return false;
         }
 
         var bannedMap = _MapsToSelect.Find(x => x.Votes.Exists(x => x.UserId == player.UserId));
         if (bannedMap != null)
         {
-            player.PrintToChat($"You already banned mapnumber {_MapsToSelect.IndexOf(bannedMap)}: {bannedMap.Name} !");
+            player.PrintToChat(string.Create(CultureInfo.InvariantCulture, $"You already banned mapnumber {_MapsToSelect.IndexOf(bannedMap)}: {bannedMap.Name} !"));
             return false;
         }
 
@@ -916,20 +949,20 @@ public class Match : IDisposable
         var votedTeam = _TeamVotes.Find(x => x.Votes.Exists(x => x.UserId == player.UserId));
         if (votedTeam != null)
         {
-            player.PrintToChat($"You already voted for team {_MapsToSelect.IndexOf(votedTeam)}: {votedTeam.Name} !");
+            player.PrintToChat(string.Create(CultureInfo.InvariantCulture, $"You already voted for team {_MapsToSelect.IndexOf(votedTeam)}: {votedTeam.Name} !"));
             return false;
         }
 
         var teamToVote = _TeamVotes.Find(x => x.Name.Equals(teamName, StringComparison.OrdinalIgnoreCase));
         if (teamToVote == null)
         {
-            player.PrintToChat($"Team with name {teamName} is not available!");
+            player.PrintToChat(string.Create(CultureInfo.InvariantCulture, $"Team with name {teamName} is not available!"));
             return false;
         }
 
         teamToVote.Votes.Add(player);
 
-        player.PrintToChat($" {ChatColors.Default}You voted for {ChatColors.Highlight}{teamToVote.Name}");
+        player.PrintToChat(string.Create(CultureInfo.InvariantCulture, $" {ChatColors.Default}You voted for {ChatColors.Highlight}{teamToVote.Name}"));
 
         if (_TeamVotes.Sum(x => x.Votes.Count) >= Config.PlayersPerTeam)
         {
@@ -996,15 +1029,10 @@ public class Match : IDisposable
     {
         var winner = tPoints > ctPoints ? Team.Terrorist : Team.CounterTerrorist;
 
-        var winnerTeam = GetMatchTeam(winner);
-        if (winnerTeam == null)
-        {
-            throw new NotSupportedException("Winner Team could not be found!");
-        }
-
+        var winnerTeam = GetMatchTeam(winner) ?? throw new NotSupportedException("Winner Team could not be found!");
         _MatchInfo.CurrentMap.Winner = winnerTeam;
 
-        var configWinnerTeam = GetConfigTeam(winnerTeam.Players.First().Player.SteamID);
+        var configWinnerTeam = GetConfigTeam(winnerTeam.Players[0].Player.SteamID);
         if (configWinnerTeam == Team.Terrorist)
         {
             // Team 1 won

@@ -2,8 +2,11 @@
 
 public interface IRoundResults
 {
-    public ITeamRoundResults TRoundResult { get; }
-    public ITeamRoundResults CTRoundResult { get; }
+    Team RoundWinner { get; }
 
-    public IReadOnlyDictionary<ulong, IPlayerRoundResults> PlayerResults { get; }
+    ITeamRoundResults TRoundResult { get; }
+
+    ITeamRoundResults CTRoundResult { get; }
+
+    IReadOnlyDictionary<ulong, IPlayerRoundResults> PlayerResults { get; }
 }

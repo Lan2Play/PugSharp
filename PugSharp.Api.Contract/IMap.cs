@@ -2,13 +2,13 @@
 
 public interface IMap
 {
-    string DemoFileName { get; set; }
+    string DemoFileName { get; }
 
-    string Name { get; set; }
+    string Name { get; }
 
-    IMapTeamInfo Team1 { get; set; }
+    IMapTeamInfo Team1 { get;  }
 
-    IMapTeamInfo Team2 { get; set; }
+    IMapTeamInfo Team2 { get; }
 
-    public string WinnerTeamName { get; set; }
+    public string WinnerTeamName { get; }
 }

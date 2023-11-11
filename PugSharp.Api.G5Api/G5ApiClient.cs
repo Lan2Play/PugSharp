@@ -9,6 +9,8 @@ namespace PugSharp.Api.G5Api
 {
     public sealed class G5ApiClient : IDisposable
     {
+        private const int _RetryCount = 3;
+        private const int _RetryDelayFactor = 2;
         private static readonly ILogger<G5ApiClient> _Logger = LogManager.CreateLogger<G5ApiClient>();
 
         private readonly HttpClient? _HttpClient;
@@ -36,8 +38,8 @@ namespace PugSharp.Api.G5Api
 
             _RetryPolicy = HttpPolicyExtensions
              .HandleTransientHttpError()
-             .WaitAndRetryAsync(3,
-                retryAttempt => TimeSpan.FromSeconds(Math.Pow(2, retryAttempt)),
+             .WaitAndRetryAsync(_RetryCount,
+                retryAttempt => TimeSpan.FromSeconds(Math.Pow(_RetryDelayFactor, retryAttempt)),
                 onRetry: (response, calculatedWaitDuration) =>
                 {
                     _Logger.LogError(response.Exception, "G5Api failed attempt. Waited for {CalculatedWaitDuration}. Retrying.", calculatedWaitDuration);
@@ -112,7 +114,6 @@ namespace PugSharp.Api.G5Api
         {
             // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
             Dispose(disposing: true);
-            GC.SuppressFinalize(this);
         }
     }
 }
