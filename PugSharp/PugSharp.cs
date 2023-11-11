@@ -37,10 +37,13 @@ public class PugSharp : BasePlugin, IMatchCallback
 
     public override string ModuleVersion => "0.0.1";
 
+    public string PugSharpDirectory {get;}
+
     public PugSharp()
     {
         _CsServer = new CsServer();
-        _ConfigProvider = new(Path.Join(_CsServer.GameDirectory, "csgo", "PugSharp", "Config"));
+        PugSharpDirectory = Path.Combine(_CsServer.GameDirectory, "csgo", "PugSharp");
+        _ConfigProvider = new(Path.Join(PugSharpDirectory, "Config"));
     }
 
     public override void Load(bool hotReload)
@@ -106,8 +109,6 @@ public class PugSharp : BasePlugin, IMatchCallback
 
     private void InitializeMatch(MatchConfig matchConfig)
     {
-        var pluginDirectory = Path.Combine(_CsServer.GameDirectory, "csgo", "PugSharp");
-
         if (!string.IsNullOrEmpty(matchConfig.EventulaApistatsUrl))
         {
             _ApiProvider.ClearApiProviders();
@@ -123,7 +124,7 @@ public class PugSharp : BasePlugin, IMatchCallback
             _ApiProvider.AddApiProvider(g5ApiProvider);
         }
 
-        _ApiProvider.AddApiProvider(new JsonApiProvider(pluginDirectory == null ? null : Path.Combine(pluginDirectory, "Stats")));
+        _ApiProvider.AddApiProvider(new JsonApiProvider(Path.Combine(PugSharpDirectory, "Stats")));
 
 
         SetMatchVariable(matchConfig);
@@ -1199,7 +1200,7 @@ public class PugSharp : BasePlugin, IMatchCallback
 
     public void SetupRoundBackup()
     {
-        var prefix = $"PugSharp_{_Match?.Config.MatchId}_";
+        var prefix = $"PugSharp/Backup/Match_{_Match?.Config.MatchId}";
         _Logger.LogInformation("Create round backup files: {prefix}", prefix);
         UpdateConvar("mp_backup_round_file", prefix);
     }
@@ -1215,7 +1216,7 @@ public class PugSharp : BasePlugin, IMatchCallback
         var demoFileName = $"PugSharp_Match_{_Match.Config.MatchId}_{formattedDateTime}.dem";
         try
         {
-            string directoryPath = Path.Join(_CsServer.GameDirectory, "csgo", "Demo");
+            string directoryPath = Path.Join(PugSharpDirectory, "Demo");
             if (!Directory.Exists(directoryPath))
             {
                 Directory.CreateDirectory(directoryPath);
