@@ -322,7 +322,14 @@ public class PugSharp : BasePlugin, IMatchCallback
 
                     command.ReplyToCommand("Matchconfig loaded!");
 
-                    var configFileName = Path.Combine(PugSharpDirectory, "Backup", $"Match_{matchConfig.MatchId}_Config.json");
+                    var backupDir = Path.Combine(PugSharpDirectory, "Backup");
+                    if (!Directory.Exists(backupDir))
+                    {
+                        Directory.CreateDirectory(backupDir);
+                    }
+
+                    var configFileName = Path.Combine(backupDir, $"Match_{matchConfig.MatchId}_Config.json");
+
                     var configWriteStream = File.OpenWrite(configFileName);
                     await using (configWriteStream.ConfigureAwait(false))
                     {
