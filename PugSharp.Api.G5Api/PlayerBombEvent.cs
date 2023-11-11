@@ -5,10 +5,9 @@ namespace PugSharp.Api.G5Api;
 public class PlayerBombEvent : PlayerTimedRoundEvent
 {
     [JsonPropertyName("site_int")]
-    public int Site { get; set; }
+    public required int Site { get; init; }
 
-    protected PlayerBombEvent(string matchId, int mapNumber, int roundNumber, int roundTime, Player player, BombSite site, string eventName) : base(matchId, mapNumber, roundNumber, roundTime, player, eventName)
+    protected PlayerBombEvent(string eventName) : base(eventName)
     {
-        Site = (int)site;
     }
 }

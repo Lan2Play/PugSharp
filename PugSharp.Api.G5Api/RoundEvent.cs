@@ -5,11 +5,9 @@ namespace PugSharp.Api.G5Api;
 public class RoundEvent : MapEvent
 {
     [JsonPropertyName("round_number")]
-    public int RoundNumber { get; set; }
+    public required int RoundNumber { get; init; }
 
-
-    protected RoundEvent(string matchId, int mapNumber, int roundNumber, string eventName) : base(matchId, mapNumber, eventName)
+    protected RoundEvent(string eventName) : base(eventName)
     {
-        RoundNumber = roundNumber;
     }
 }

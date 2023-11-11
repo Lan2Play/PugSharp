@@ -2,7 +2,7 @@
 
 public sealed class KnifeRoundStartedEvent : MapEvent
 {
-    public KnifeRoundStartedEvent(string matchId, int mapNumber) : base(matchId, mapNumber, "knife_start")
+    public KnifeRoundStartedEvent() : base("knife_start")
     {
     }
 }

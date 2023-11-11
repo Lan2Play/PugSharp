@@ -5,14 +5,13 @@ namespace PugSharp.Api.G5Api;
 public sealed class KnifeRoundWonEvent : MapTeamEvent
 {
     [JsonPropertyName("side_int")]
-    public int Side { get; set; }
+    public required int Side { get; init; }
 
     [JsonPropertyName("swapped")]
-    public bool Swapped { get; set; }
+    public required bool Swapped { get; init; }
 
-    public KnifeRoundWonEvent(string matchId, int mapNumber, int teamNumber, Side side, bool swapped) : base(matchId, mapNumber, teamNumber, "knife_won")
+    public KnifeRoundWonEvent() : base("knife_won")
     {
-        Side = (int)side;
-        Swapped = swapped;
+       
     }
 }

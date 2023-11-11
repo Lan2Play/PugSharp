@@ -5,48 +5,36 @@ namespace PugSharp.Api.G5Api;
 public sealed class PlayerDeathEvent : PlayerWeaponEvent
 {
     [JsonPropertyName("bomb")]
-    public bool Bomb { get; set; }
+    public required bool Bomb { get; init; }
 
     [JsonPropertyName("headshot")]
-    public bool Headshot { get; set; }
+    public required bool Headshot { get; init; }
 
     [JsonPropertyName("thru_smoke")]
-    public bool ThruSmoke { get; set; }
+    public required bool ThruSmoke { get; init; }
 
     [JsonPropertyName("penetrated")]
-    public int Penetrated { get; set; }
+    public required int Penetrated { get; init; }
 
     [JsonPropertyName("attacker_blind")]
-    public bool AttackerBlind { get; set; }
+    public required bool AttackerBlind { get; init; }
 
     [JsonPropertyName("no_scope")]
-    public bool NoScope { get; set; }
+    public required bool NoScope { get; init; }
 
     [JsonPropertyName("suicide")]
-    public bool Suicide { get; set; }
+    public required bool Suicide { get; init; }
 
     [JsonPropertyName("friendly_fire")]
-    public bool FriendlyFire { get; set; }
+    public required bool FriendlyFire { get; init; }
 
     [JsonPropertyName("attacker")]
-    public Player Attacker { get; set; }
+    public required Player Attacker { get; init; }
 
     [JsonPropertyName("assist")]
-    public Assister Assist { get; set; }
+    public required Assister Assist { get; init; }
 
-    public PlayerDeathEvent(string matchId, int mapNumber, int roundNumber, int roundTime, Player player, Weapon weapon,
-        Player attacker, Assister assist, bool friendlyFire, bool suicide, bool noScope, bool attackerBlind, int penetrated, bool thruSmoke,
-        bool headshot, bool bomb) : base(matchId, mapNumber, roundNumber, roundTime, player, weapon, "player_death")
+    public PlayerDeathEvent(Weapon weapon) : base(weapon, "player_death")
     {
-        Attacker = attacker;
-        Assist = assist;
-        FriendlyFire = friendlyFire;
-        Suicide = suicide;
-        NoScope = noScope;
-        AttackerBlind = attackerBlind;
-        Penetrated = penetrated;
-        ThruSmoke = thruSmoke;
-        Headshot = headshot;
-        Bomb = bomb;
     }
 }

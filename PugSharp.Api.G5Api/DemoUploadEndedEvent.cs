@@ -5,10 +5,9 @@ namespace PugSharp.Api.G5Api;
 public sealed class DemoUploadEndedEvent : DemoFileEvent
 {
     [JsonPropertyName("success")]
-    public bool Success { get; set; }
+    public required bool Success { get; init; }
 
-    public DemoUploadEndedEvent(string matchId, int mapNumber, string fileName, bool success) : base(matchId, mapNumber, fileName, "demo_upload_ended")
+    public DemoUploadEndedEvent() : base("demo_upload_ended")
     {
-        Success = success;
     }
 }

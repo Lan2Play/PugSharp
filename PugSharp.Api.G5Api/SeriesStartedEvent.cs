@@ -5,18 +5,15 @@ namespace PugSharp.Api.G5Api;
 public sealed class SeriesStartedEvent : MatchEvent
 {
     [JsonPropertyName("num_maps")]
-    public int NumberOfMaps { get; set; }
+    public required int NumberOfMaps { get; init; }
 
     [JsonPropertyName("team1")]
-    public TeamWrapper Team1 { get; set; }
+    public required TeamWrapper Team1 { get; init; }
 
     [JsonPropertyName("team2")]
-    public TeamWrapper Team2 { get; set; }
+    public required TeamWrapper Team2 { get; init; }
 
-    public SeriesStartedEvent(string matchId, TeamWrapper team1, TeamWrapper team2, int numberOfMaps) : base(matchId, "series_start")
+    public SeriesStartedEvent() : base("series_start")
     {
-        Team1 = team1;
-        Team2 = team2;
-        NumberOfMaps = numberOfMaps;
     }
 }

@@ -5,14 +5,12 @@ namespace PugSharp.Api.G5Api;
 public sealed class SidePickedEvent : MapSelectionEvent
 {
     [JsonPropertyName("map_number")]
-    public int MapNumber { get; set; }
+    public required int MapNumber { get; init; }
 
     [JsonPropertyName("side_int")]
-    public int Side { get; set; }
+    public required int Side { get; init; }
 
-    public SidePickedEvent(string matchId, int teamNumber, string mapName, int mapNumber, Side side) : base(matchId, teamNumber, mapName, "side_picked")
+    public SidePickedEvent() : base("side_picked")
     {
-        MapNumber = mapNumber;
-        Side = (int)side;
     }
 }

@@ -2,7 +2,7 @@
 
 public sealed class RoundStatsUpdatedEvent : RoundEvent
 {
-    public RoundStatsUpdatedEvent(string matchId, int mapNumber, int roundNumber) : base(matchId, mapNumber, roundNumber, "stats_updated")
+    public RoundStatsUpdatedEvent() : base("stats_updated")
     {
     }
 }

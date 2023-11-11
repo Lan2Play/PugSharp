@@ -5,14 +5,12 @@ namespace PugSharp.Api.G5Api;
 public sealed class TeamReadyStatusChangedEvent : MatchTeamEvent
 {
     [JsonPropertyName("ready")]
-    public bool Ready { get; set; }
+    public required bool Ready { get; init; }
 
     [JsonPropertyName("game_state_int")]
-    public int GameState { get; set; }
+    public required int GameState { get; init; }
 
-    public TeamReadyStatusChangedEvent(string matchId, int teamNumber, GameState gameState, bool ready) : base(matchId, teamNumber, "team_ready_status_changed")
+    public TeamReadyStatusChangedEvent() : base("team_ready_status_changed")
     {
-        Ready = ready;
-        GameState = (int)gameState;
     }
 }

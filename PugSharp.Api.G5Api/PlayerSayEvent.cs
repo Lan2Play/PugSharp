@@ -5,14 +5,12 @@ namespace PugSharp.Api.G5Api;
 public sealed class PlayerSayEvent : PlayerTimedRoundEvent
 {
     [JsonPropertyName("command")]
-    public string Command { get; set; }
+    public required string Command { get; init; }
 
     [JsonPropertyName("message")]
-    public string Message { get; set; }
+    public required string Message { get; init; }
 
-    public PlayerSayEvent(string matchId, int mapNumber, int roundNumber, int roundTime, Player player, string message, string command) : base(matchId, mapNumber, roundNumber, roundTime, player, "player_say")
+    public PlayerSayEvent() : base( "player_say")
     {
-        Command = command;
-        Message = message;
     }
 }

@@ -5,10 +5,9 @@ namespace PugSharp.Api.G5Api;
 public class MatchEvent : EventBase
 {
     [JsonPropertyName("matchid")]
-    public string MatchId { get; set; }
+    public required string MatchId { get; init; }
 
-    protected MatchEvent(string matchId, string eventName) : base(eventName)
+    protected MatchEvent(string eventName) : base(eventName)
     {
-        MatchId = matchId;
     }
 }

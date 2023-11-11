@@ -5,22 +5,18 @@ namespace PugSharp.Api.G5Api;
 public sealed class SeriesResultEvent : MatchEvent
 {
     [JsonPropertyName("time_until_restore")]
-    public int TimeUntilRestore { get; set; }
+    public required int TimeUntilRestore { get; init; }
 
     [JsonPropertyName("winner")]
-    public Winner Winner { get; set; }
+    public required Winner Winner { get; init; }
 
     [JsonPropertyName("team1_series_score")]
-    public int Team1SeriesScore { get; set; }
+    public required int Team1SeriesScore { get; init; }
 
     [JsonPropertyName("team2_series_score")]
-    public int Team2SeriesScore { get; set; }
+    public required int Team2SeriesScore { get; init; }
 
-    public SeriesResultEvent(string matchId, Winner winner, int team1SeriesScore, int team2SeriesScore, int timeUntilRestore) : base(matchId, "series_end")
+    public SeriesResultEvent() : base( "series_end")
     {
-        TimeUntilRestore = timeUntilRestore;
-        Winner = winner;
-        Team1SeriesScore = team1SeriesScore;
-        Team2SeriesScore = team2SeriesScore;
     }
 }

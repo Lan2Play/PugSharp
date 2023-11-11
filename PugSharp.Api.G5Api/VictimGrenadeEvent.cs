@@ -5,10 +5,9 @@ namespace PugSharp.Api.G5Api;
 public class VictimGrenadeEvent : PlayerWeaponEvent
 {
     [JsonPropertyName("victims")]
-    public IEnumerable<GrenadeVictim> Victims { get; set; } = new List<GrenadeVictim>();
+    public required IEnumerable<GrenadeVictim> Victims { get; init; } = new List<GrenadeVictim>();
 
-    protected VictimGrenadeEvent(string matchId, int mapNumber, int roundNumber, int roundTime, Player player, Weapon weapon, IEnumerable<GrenadeVictim> victims, string eventName) : base(matchId, mapNumber, roundNumber, roundTime, player, weapon, eventName)
+    protected VictimGrenadeEvent(Weapon weapon, string eventName) : base(weapon, eventName)
     {
-        Victims = victims;
     }
 }

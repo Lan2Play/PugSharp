@@ -5,10 +5,9 @@ namespace PugSharp.Api.G5Api;
 public class DemoFileEvent : MapEvent
 {
     [JsonPropertyName("filename")]
-    public string FileName { get; set; }
+    public required string FileName { get; init; }
 
-    protected DemoFileEvent(string matchId, int mapNumber, string fileName, string eventName) : base(matchId, mapNumber, eventName)
+    protected DemoFileEvent(string eventName) : base(eventName)
     {
-        FileName = fileName;
     }
 }

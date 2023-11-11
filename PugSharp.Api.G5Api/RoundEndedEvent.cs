@@ -8,22 +8,18 @@ public sealed class RoundEndedEvent : TimedRoundEvent
     // CSGO increments these by 1 for some reason.
 
     [JsonPropertyName("reason")]
-    public int Reason { get; set; }
+    public required int Reason { get; init; }
 
     [JsonPropertyName("winner")]
-    public Winner Winner { get; set; }
+    public required Winner Winner { get; init; }
 
     [JsonPropertyName("team1")]
-    public StatsTeam StatsTeam1 { get; set; }
+    public required StatsTeam StatsTeam1 { get; init; }
 
     [JsonPropertyName("team2")]
-    public StatsTeam StatsTeam2 { get; set; }
+    public required StatsTeam StatsTeam2 { get; init; }
 
-    public RoundEndedEvent(string matchId, int mapNumber, int roundNumber, int roundTime, Winner winner, StatsTeam statsTeam1, StatsTeam statsTeam2, int reason) : base(matchId, mapNumber, roundNumber, roundTime, "round_end")
+    public RoundEndedEvent() : base("round_end")
     {
-        Reason = reason;
-        Winner = winner;
-        StatsTeam1 = statsTeam1;
-        StatsTeam2 = statsTeam2;
     }
 }

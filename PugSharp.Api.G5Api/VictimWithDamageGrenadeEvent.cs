@@ -5,15 +5,13 @@ namespace PugSharp.Api.G5Api;
 public class VictimWithDamageGrenadeEvent : VictimGrenadeEvent
 {
     [JsonPropertyName("damage_enemies")]
-    public int DamageEnemies { get; set; }
+    public required int DamageEnemies { get; init; }
 
     [JsonPropertyName("damage_friendlies")]
-    public int DamageFriendlies { get; set; }
+    public required int DamageFriendlies { get; init; }
 
-    protected VictimWithDamageGrenadeEvent(string matchId, int mapNumber, int roundNumber, int roundTime, Player player, Weapon weapon, IEnumerable<GrenadeVictim> victims, int damageEnemies, int damageFriendlies, string eventName) : base(matchId, mapNumber, roundNumber, roundTime, player, weapon, victims, eventName)
+    protected VictimWithDamageGrenadeEvent(Weapon weapon, string eventName) : base(weapon, eventName)
     {
-        DamageEnemies = damageEnemies;
-        DamageFriendlies = damageFriendlies;
     }
 
 }

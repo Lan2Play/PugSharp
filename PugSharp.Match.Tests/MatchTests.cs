@@ -1,7 +1,9 @@
 using NSubstitute;
 using PugSharp.Api.Contract;
+using PugSharp.Api.G5Api;
 using PugSharp.Config;
 using PugSharp.Match.Contract;
+using System.Text.Json;
 
 namespace PugSharp.Match.Tests
 {

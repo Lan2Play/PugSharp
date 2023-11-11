@@ -2,7 +2,7 @@
 
 public sealed class DemoFinishedEvent : DemoFileEvent
 {
-    public DemoFinishedEvent(string matchId, int mapNumber, string fileName) : base(matchId, mapNumber, fileName, "demo_finished")
+    public DemoFinishedEvent() : base("demo_finished")
     {
     }
 }

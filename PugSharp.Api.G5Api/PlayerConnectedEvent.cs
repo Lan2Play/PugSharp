@@ -6,14 +6,12 @@ public sealed class PlayerConnectedEvent : MatchEvent
 {
 
     [JsonPropertyName("ip_address")]
-    public string IpAddress { get; set; }
+    public required string IpAddress { get; init; }
 
     [JsonPropertyName("player")]
-    public Player Player { get; set; }
+    public required Player Player { get; init; }
 
-    public PlayerConnectedEvent(string matchId, Player player, string ipAddress) : base(matchId, "player_connect")
+    public PlayerConnectedEvent() : base("player_connect")
     {
-        Player = player;
-        IpAddress = ipAddress;
     }
 }

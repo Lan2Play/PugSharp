@@ -1,14 +1,14 @@
-﻿using System.Text.Json.Serialization;
+﻿
+using System.Text.Json.Serialization;
 
 namespace PugSharp.Api.G5Api;
 
 public sealed class SmokeDetonatedEvent : PlayerWeaponEvent
 {
     [JsonPropertyName("extinguished_molotov")]
-    public bool ExtinguishedMolotov { get; set; }
+    public required bool ExtinguishedMolotov { get; init; }
 
-    public SmokeDetonatedEvent(string matchId, int mapNumber, int roundNumber, int roundTime, Player player, bool extinguishedMolotov) : base(matchId, mapNumber, roundNumber, roundTime, player, new Weapon("smokegrenade", CsWeaponId.SMOKEGRENADE), "smokegrenade_detonated")
+    public SmokeDetonatedEvent() : base(new Weapon("smokegrenade", CsWeaponId.SMOKEGRENADE), "smokegrenade_detonated")
     {
-        ExtinguishedMolotov = extinguishedMolotov;
     }
 }

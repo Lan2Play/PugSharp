@@ -6,10 +6,9 @@ public class PlayerRoundEvent : RoundEvent
 {
 
     [JsonPropertyName("player")]
-    public Player Player { get; set; }
+    public required Player Player { get; init; }
 
-    protected PlayerRoundEvent(string matchId, int mapNumber, int roundNumber, Player player, string eventName) : base(matchId, mapNumber, roundNumber, eventName)
+    protected PlayerRoundEvent(string eventName) : base(eventName)
     {
-        Player = player;
     }
 }

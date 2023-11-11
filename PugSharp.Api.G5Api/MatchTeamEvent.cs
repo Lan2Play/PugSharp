@@ -5,10 +5,9 @@ namespace PugSharp.Api.G5Api;
 public class MatchTeamEvent : MatchEvent
 {
     [JsonPropertyName("team_int")]
-    public int TeamNumber { get; set; }
+    public required int TeamNumber { get; init; }
 
-    protected MatchTeamEvent(string matchId, int teamNumber, string eventName) : base(matchId, eventName)
+    protected MatchTeamEvent(string eventName) : base(eventName)
     {
-        TeamNumber = teamNumber;
     }
 }

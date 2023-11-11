@@ -5,11 +5,10 @@ namespace PugSharp.Api.G5Api;
 public sealed class PlayerDisconnectedEvent : MatchEvent
 {
     [JsonPropertyName("player")]
-    public Player Player { get; set; }
+    public required Player Player { get; init; }
 
-    public PlayerDisconnectedEvent(string matchId, Player player) : base(matchId, "player_disconnect")
+    public PlayerDisconnectedEvent() : base("player_disconnect")
     {
-        Player = player;
     }
 }
 

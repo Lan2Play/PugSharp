@@ -7,14 +7,12 @@ namespace PugSharp.Api.G5Api;
 public sealed class MolotovDetonatedEvent : VictimWithDamageGrenadeEvent
 {
     [JsonPropertyName("round_time_ended")]
-    public int EndTime { get; set; }
+    public required int EndTime { get; init; }
 
     [JsonPropertyName("duration")]
-    public int Duration { get; set; }
+    public required int Duration { get; init; }
 
-    public MolotovDetonatedEvent(string matchId, int mapNumber, int roundNumber, int roundTime, Player player, IEnumerable<GrenadeVictim> victims, int damageEnemies, int damageFriendlies, int endTime) : base(matchId, mapNumber, roundNumber, roundTime, player, new Weapon("molotov", CsWeaponId.MOLOTOV), victims, damageEnemies, damageFriendlies, "molotov_detonated")
+    public MolotovDetonatedEvent() : base(new Weapon("molotov", CsWeaponId.MOLOTOV), "molotov_detonated")
     {
-        EndTime = endTime;
-        Duration = endTime - roundTime;
     }
 }

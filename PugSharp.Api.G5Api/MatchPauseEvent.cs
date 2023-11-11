@@ -5,10 +5,9 @@ namespace PugSharp.Api.G5Api;
 public class MatchPauseEvent : MapTeamEvent
 {
     [JsonPropertyName("pause_type_int")]
-    public int PauseType { get; set; }
+    public required int PauseType { get; init; }
 
-    protected MatchPauseEvent(string matchId, int mapNumber, int teamNumber, PauseType pauseType, string eventName) : base(matchId, mapNumber, teamNumber, eventName)
+    protected MatchPauseEvent(string eventName) : base(eventName)
     {
-        PauseType = (int)pauseType;
     }
 }
