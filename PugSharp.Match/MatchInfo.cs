@@ -1,22 +1,25 @@
 ﻿using PugSharp.ApiStats;
+using PugSharp.Config;
 
 namespace PugSharp.Match;
 
-internal class MatchInfo
+public class MatchInfo
 {
-    public MatchInfo(int numberOfMaps)
+    public MatchInfo(Config.MatchConfig config)
     {
-        MatchMaps = Enumerable.Range(0, numberOfMaps).Select(n => new MatchMap(n)).ToList();
+        MatchMaps = Enumerable.Range(0, config.NumMaps).Select(n => new MatchMap(n)).ToList();
         CurrentMap = MatchMaps[0];
+        Config = config;
     }
 
     public MatchMap CurrentMap { get; set; }
 
     public IReadOnlyList<MatchMap> MatchMaps { get; }
     public string DemoFile { get; internal set; }
+    public MatchConfig Config { get; }
 }
 
-internal class MatchMap
+public class MatchMap
 {
     public MatchMap(int mapNumber)
     {

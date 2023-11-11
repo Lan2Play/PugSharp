@@ -262,12 +262,6 @@ public class PugSharp : BasePlugin, IMatchCallback
                 return;
             }
 
-            if (command.ArgCount < 2)
-            {
-                command.ReplyToCommand("Url is required as Argument!");
-                return;
-            }
-
             _Match.Dispose();
             _Match = null;
             ResetServer();
@@ -540,7 +534,7 @@ public class PugSharp : BasePlugin, IMatchCallback
                 return;
             }
 
-            if (_Match?.Config?.AllowSuicide != true)
+            if (_Match?.MatchInfo.Config?.AllowSuicide != true)
             {
                 command.ReplyToCommand("Suicide is not allowed during this match!");
             }
@@ -591,7 +585,7 @@ public class PugSharp : BasePlugin, IMatchCallback
 
                 if (_Match.CurrentState == MatchState.WaitingForPlayersConnectedReady)
                 {
-                    userId.PrintToChat($" {ChatColors.Default}Hello {ChatColors.Green}{userId.PlayerName}{ChatColors.Default}, welcome to match {_Match.Config.MatchId}");
+                    userId.PrintToChat($" {ChatColors.Default}Hello {ChatColors.Green}{userId.PlayerName}{ChatColors.Default}, welcome to match {_Match.MatchInfo.Config.MatchId}");
                     userId.PrintToChat($" {ChatColors.Default}powered by {ChatColors.Green}PugSharp{ChatColors.Default} (https://github.com/Lan2Play/PugSharp/)");
                     userId.PrintToChat($" {ChatColors.Default}type {ChatColors.BlueGrey}!ready {ChatColors.Default}to be marked as ready for the match");
                 }
@@ -721,8 +715,9 @@ public class PugSharp : BasePlugin, IMatchCallback
 
             var teamT = teamEntities.First(x => x.TeamNum == (int)Match.Contract.Team.Terrorist);
             var teamCT = teamEntities.First(x => x.TeamNum == (int)Match.Contract.Team.CounterTerrorist);
+            var currentRound = teamT.Score + teamCT.Score;
 
-            var isFirstHalf = (teamT.Score + teamCT.Score) <= _Match.Config.MaxRounds / 2;
+            var isFirstHalf = currentRound <= _Match.MatchInfo.Config.MaxRounds / 2;
             _Match.SendRoundResults(new RoundResult
             {
                 RoundWinner = (Match.Contract.Team)eventRoundEnd.Winner,
@@ -741,8 +736,20 @@ public class PugSharp : BasePlugin, IMatchCallback
                 PlayerResults = CreatePlayerResults(),
             });
 
+            var backupDir = Path.Combine(PugSharpDirectory, "Backup");
+            if (!Directory.Exists(backupDir))
+            {
+                Directory.CreateDirectory(backupDir);
+            }
+
+            var configFileName = Path.Combine(backupDir, string.Create(CultureInfo.InvariantCulture, $"Match_{_Match.MatchInfo.Config.MatchId}_Round_{currentRound}.json"));
+
+            using var configWriteStream = File.OpenWrite(configFileName);
+            JsonSerializer.Serialize(configWriteStream, _Match.MatchInfo);
+
+
             // Toggle after last round in half
-            if ((teamT.Score + teamCT.Score) == _Match.Config.MaxRounds / 2)
+            if ((teamT.Score + teamCT.Score) == _Match.MatchInfo.Config.MaxRounds / 2)
             {
                 _Match.SwitchTeam();
             }
@@ -1191,7 +1198,7 @@ public class PugSharp : BasePlugin, IMatchCallback
         {
             _CsServer.NextFrame(() =>
             {
-                SetMatchVariable(_Match.Config);
+                SetMatchVariable(_Match.MatchInfo.Config);
             });
         }
     }
@@ -1271,7 +1278,7 @@ public class PugSharp : BasePlugin, IMatchCallback
 
     public void SetupRoundBackup()
     {
-        var prefix = $"PugSharp/Backup/Match_{_Match?.Config.MatchId}";
+        var prefix = $"Match_{_Match?.MatchInfo.Config.MatchId}";
         _Logger.LogInformation("Create round backup files: {prefix}", prefix);
         UpdateConvar("mp_backup_round_file", prefix);
     }
@@ -1284,7 +1291,7 @@ public class PugSharp : BasePlugin, IMatchCallback
         }
 
         var formattedDateTime = DateTime.UtcNow.ToString("yyyyMMddHHmmss", CultureInfo.InvariantCulture);
-        var demoFileName = $"PugSharp_Match_{_Match.Config.MatchId}_{formattedDateTime}.dem";
+        var demoFileName = $"PugSharp_Match_{_Match.MatchInfo.Config.MatchId}_{formattedDateTime}.dem";
         try
         {
             string directoryPath = Path.Join(PugSharpDirectory, "Demo");

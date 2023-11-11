@@ -2,7 +2,7 @@
 
 namespace PugSharp.ApiStats
 {
-    internal class PlayerMatchStatistics : IPlayerMatchStatistics
+    public class PlayerMatchStatistics : IPlayerMatchStatistics
     {
         public bool Coaching { get; set; }
 

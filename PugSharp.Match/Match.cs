@@ -31,13 +31,13 @@ public class Match : IDisposable
 
     private readonly MatchInfo _MatchInfo;
 
-    private  List<Vote> _MapsToSelect;
+    private List<Vote> _MapsToSelect;
     private MatchTeam? _CurrentMatchTeamToVote;
     private bool disposedValue;
 
     public MatchState CurrentState => _MatchStateMachine.State;
 
-    public Config.MatchConfig Config { get; }
+    public MatchInfo MatchInfo { get; }
 
     public MatchTeam MatchTeam1 { get; }
 
@@ -47,24 +47,22 @@ public class Match : IDisposable
 
     public Match(IMatchCallback matchCallback, IApiProvider apiProvider, Config.MatchConfig matchConfig)
     {
-        Config = matchConfig;
-
         _MatchCallback = matchCallback;
         _ApiProvider = apiProvider;
-        _MatchInfo = new MatchInfo(matchConfig.NumMaps);
-        MatchTeam1 = new MatchTeam(Config.Team1);
-        MatchTeam2 = new MatchTeam(Config.Team2);
+        _MatchInfo = new MatchInfo(matchConfig);
+        MatchTeam1 = new MatchTeam(MatchInfo.Config.Team1);
+        MatchTeam2 = new MatchTeam(MatchInfo.Config.Team2);
 
-        _VoteTimer.Interval = Config.VoteTimeout;
+        _VoteTimer.Interval = MatchInfo.Config.VoteTimeout;
         _VoteTimer.Elapsed += VoteTimer_Elapsed;
         _ReadyReminderTimer.Elapsed += ReadyReminderTimer_Elapsed;
 
-        if (!string.IsNullOrEmpty(Config.EventulaDemoUploadUrl) && !string.IsNullOrEmpty(Config.EventulaApistatsToken))
+        if (!string.IsNullOrEmpty(MatchInfo.Config.EventulaDemoUploadUrl) && !string.IsNullOrEmpty(MatchInfo.Config.EventulaApistatsToken))
         {
-            _DemoUploader = new DemoUploader(Config.EventulaDemoUploadUrl, Config.EventulaApistatsToken);
+            _DemoUploader = new DemoUploader(MatchInfo.Config.EventulaDemoUploadUrl, MatchInfo.Config.EventulaApistatsToken);
         }
 
-        _MapsToSelect = matchConfig.Maplist.Select(x => new Vote(x)).ToList();
+        _MapsToSelect = MatchInfo.Config.Maplist.Select(x => new Vote(x)).ToList();
 
         _MatchStateMachine = new StateMachine<MatchState, MatchCommand>(MatchState.None);
         InitializeStateMachine();
@@ -180,8 +178,7 @@ public class Match : IDisposable
 
         _MatchCallback.SendMessage(string.Create(CultureInfo.InvariantCulture, $" {ChatColors.Default}Starting Match. {ChatColors.Highlight}{MatchTeam1.TeamConfig.Name} {ChatColors.Default}as {ChatColors.Highlight}{MatchTeam1.CurrentTeamSite}{ChatColors.Default}. {ChatColors.Highlight}{MatchTeam2.TeamConfig.Name}{ChatColors.Default} as {ChatColors.Highlight}{MatchTeam2.CurrentTeamSite}"));
 
-
-        _ = _ApiProvider.GoingLiveAsync(new GoingLiveParams(Config.MatchId, _MatchInfo.CurrentMap.MapName, _MatchInfo.CurrentMap.MapNumber), CancellationToken.None);
+        _ = _ApiProvider.GoingLiveAsync(new GoingLiveParams(MatchInfo.Config.MatchId, _MatchInfo.CurrentMap.MapName, _MatchInfo.CurrentMap.MapNumber), CancellationToken.None);
 
         TryFireState(MatchCommand.StartMatch);
     }
@@ -193,19 +190,19 @@ public class Match : IDisposable
             throw new NotSupportedException("Map Winner is not yet set. Can not send map results");
         }
 
-        _ = _ApiProvider.FinalizeMapAsync(new MapResultParams(Config.MatchId, _MatchInfo.CurrentMap.Winner.TeamConfig.Name, _MatchInfo.CurrentMap.Team1Points, _MatchInfo.CurrentMap.Team2Points, _MatchInfo.CurrentMap.MapNumber), CancellationToken.None);
+        _ = _ApiProvider.FinalizeMapAsync(new MapResultParams(MatchInfo.Config.MatchId, _MatchInfo.CurrentMap.Winner.TeamConfig.Name, _MatchInfo.CurrentMap.Team1Points, _MatchInfo.CurrentMap.Team2Points, _MatchInfo.CurrentMap.MapNumber), CancellationToken.None);
     }
 
     public void SendRoundResults(IRoundResults roundResults)
     {
         var teamInfo1 = new TeamInfo
         {
-            TeamName = Config.Team1.Name,
+            TeamName = MatchInfo.Config.Team1.Name,
         };
 
         var teamInfo2 = new TeamInfo
         {
-            TeamName = Config.Team2.Name,
+            TeamName = MatchInfo.Config.Team2.Name,
         };
 
         UpdateStats(roundResults.PlayerResults);
@@ -247,7 +244,7 @@ public class Match : IDisposable
         }
 
         var map = new Map { WinnerTeamName = winnerTeam.TeamConfig.Name, Name = _MatchInfo.CurrentMap.MapName, Team1 = mapTeamInfo1, Team2 = mapTeamInfo2, DemoFileName = Path.GetFileName(_MatchInfo.DemoFile) };
-        _ = _ApiProvider?.RoundStatsUpdateAsync(new RoundStatusUpdateParams(Config.MatchId, _MatchInfo.CurrentMap.MapNumber, teamInfo1, teamInfo2, map), CancellationToken.None);
+        _ = _ApiProvider?.RoundStatsUpdateAsync(new RoundStatusUpdateParams(MatchInfo.Config.MatchId, _MatchInfo.CurrentMap.MapNumber, teamInfo1, teamInfo2, map), CancellationToken.None);
     }
 
 #pragma warning disable MA0051 // Method is too long
@@ -458,7 +455,7 @@ public class Match : IDisposable
 
         if (_MatchInfo.MatchMaps[_MatchInfo.MatchMaps.Count - 1] == _MatchInfo.CurrentMap)
         {
-            var seriesResultParams = new SeriesResultParams(Config.MatchId, _MatchInfo.MatchMaps.GroupBy(x => x.Winner).MaxBy(x => x.Count())!.Key!.TeamConfig.Name, Forfeit: true, 120000, _MatchInfo.MatchMaps.Count(x => x.Team1Points > x.Team2Points), _MatchInfo.MatchMaps.Count(x => x.Team2Points > x.Team1Points));
+            var seriesResultParams = new SeriesResultParams(MatchInfo.Config.MatchId, _MatchInfo.MatchMaps.GroupBy(x => x.Winner).MaxBy(x => x.Count())!.Key!.TeamConfig.Name, Forfeit: true, 120000, _MatchInfo.MatchMaps.Count(x => x.Team1Points > x.Team2Points), _MatchInfo.MatchMaps.Count(x => x.Team2Points > x.Team1Points));
             await _ApiProvider.FinalizeAsync(seriesResultParams, CancellationToken.None).ConfigureAwait(false);
         }
 
@@ -576,7 +573,7 @@ public class Match : IDisposable
         if (_MapsToSelect.Count == 1)
         {
             _MatchInfo.CurrentMap.MapName = _MapsToSelect[0].Name;
-            _MapsToSelect = Config.Maplist.Select(x => new Vote(x)).ToList();
+            _MapsToSelect = MatchInfo.Config.Maplist.Select(x => new Vote(x)).ToList();
         }
     }
 
@@ -641,7 +638,7 @@ public class Match : IDisposable
     {
         var players = _MatchCallback.GetAllPlayers();
         var connectedPlayerSteamIds = players.Select(p => p.SteamID).ToList();
-        var allPlayerIds = Config.Team1.Players.Keys.Concat(Config.Team2.Players.Keys);
+        var allPlayerIds = MatchInfo.Config.Team1.Players.Keys.Concat(MatchInfo.Config.Team2.Players.Keys);
         if (allPlayerIds.All(p => connectedPlayerSteamIds.Contains(p)))
         {
             return true;
@@ -653,7 +650,7 @@ public class Match : IDisposable
     private bool AllPlayersAreReady()
     {
         var readyPlayers = AllMatchPlayers.Where(p => p.IsReady);
-        var requiredPlayers = Config.PlayersPerTeam * 2;
+        var requiredPlayers = MatchInfo.Config.PlayersPerTeam * 2;
 
         _Logger.LogInformation("Match has {readyPlayers} of {rquiredPlayers} ready players: {readyPlayers}", readyPlayers.Count(), requiredPlayers, string.Join("; ", readyPlayers.Select(a => $"{a.Player.PlayerName}[{a.IsReady}]")));
 
@@ -670,7 +667,7 @@ public class Match : IDisposable
             return false;
         }
 
-        return teamWithMostWins.Count() > Config.NumMaps / 2d;
+        return teamWithMostWins.Count() > MatchInfo.Config.NumMaps / 2d;
     }
 
     private bool NotAllMapsArePlayed() => !AllMapsArePlayed();
@@ -756,8 +753,8 @@ public class Match : IDisposable
 
     public bool TryAddPlayer(IPlayer player)
     {
-        var isTeam1 = Config.Team1.Players.ContainsKey(player.SteamID);
-        var isTeam2 = !isTeam1 && Config.Team2.Players.ContainsKey(player.SteamID);
+        var isTeam1 = MatchInfo.Config.Team1.Players.ContainsKey(player.SteamID);
+        var isTeam2 = !isTeam1 && MatchInfo.Config.Team2.Players.ContainsKey(player.SteamID);
         if (!isTeam1 && !isTeam2)
         {
             _Logger.LogInformation("Player with steam id {steamId} is no member of this match!", player.SteamID);
@@ -841,7 +838,7 @@ public class Match : IDisposable
         var readyPlayers = MatchTeam1.Players.Count(x => x.IsReady) + MatchTeam2.Players.Count(x => x.IsReady);
 
         // Min Players per Team
-        var requiredPlayers = Config.MinPlayersToReady * 2;
+        var requiredPlayers = MatchInfo.Config.MinPlayersToReady * 2;
 
         if (matchPlayer.IsReady)
         {
@@ -869,12 +866,12 @@ public class Match : IDisposable
 
     private Team GetConfigTeam(ulong steamID)
     {
-        if (Config.Team1.Players.ContainsKey(steamID))
+        if (MatchInfo.Config.Team1.Players.ContainsKey(steamID))
         {
             return Team.Terrorist;
         }
 
-        if (Config.Team2.Players.ContainsKey(steamID))
+        if (MatchInfo.Config.Team2.Players.ContainsKey(steamID))
         {
             return Team.CounterTerrorist;
         }
@@ -919,7 +916,7 @@ public class Match : IDisposable
         var mapToSelect = _MapsToSelect[mapNumber];
         mapToSelect.Votes.Add(player);
 
-        if (_MapsToSelect.Sum(x => x.Votes.Count) >= Config.PlayersPerTeam)
+        if (_MapsToSelect.Sum(x => x.Votes.Count) >= MatchInfo.Config.PlayersPerTeam)
         {
             TryFireState(MatchCommand.VoteMap);
         }
@@ -965,7 +962,7 @@ public class Match : IDisposable
 
         player.PrintToChat(string.Create(CultureInfo.InvariantCulture, $" {ChatColors.Default}You voted for {ChatColors.Highlight}{teamToVote.Name}"));
 
-        if (_TeamVotes.Sum(x => x.Votes.Count) >= Config.PlayersPerTeam)
+        if (_TeamVotes.Sum(x => x.Votes.Count) >= MatchInfo.Config.PlayersPerTeam)
         {
             TryFireState(MatchCommand.VoteTeam);
         }
@@ -1053,8 +1050,8 @@ public class Match : IDisposable
 
     public bool PlayerBelongsToMatch(ulong steamId)
     {
-        return Config.Team1.Players.Any(x => x.Key.Equals(steamId))
-                || Config.Team2.Players.Any(x => x.Key.Equals(steamId));
+        return MatchInfo.Config.Team1.Players.Any(x => x.Key.Equals(steamId))
+                || MatchInfo.Config.Team2.Players.Any(x => x.Key.Equals(steamId));
     }
 
     #endregion
