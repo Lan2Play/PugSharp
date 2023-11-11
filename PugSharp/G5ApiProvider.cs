@@ -166,7 +166,7 @@ public partial class G5CommandProvider : ICommandProvider
 
                 if (match.Success)
                 {
-                    return new[] { match.Groups["version"].Value };
+                    return new[] { match.Groups["version"].Value.Trim() };
                 }
 
                 _Logger.LogError("The 'PatchVersion' key could not be located in the steam.inf file.");
