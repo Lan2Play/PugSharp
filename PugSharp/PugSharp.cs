@@ -1294,7 +1294,7 @@ public class PugSharp : BasePlugin, IMatchCallback
 
     public void SetupRoundBackup()
     {
-        var prefix = $"Match_{_Match?.MatchInfo.Config.MatchId}";
+        var prefix = $"PugSharp_Match_{_Match?.MatchInfo.Config.MatchId}";
         _Logger.LogInformation("Create round backup files: {prefix}", prefix);
         UpdateConvar("mp_backup_round_file", prefix);
     }
