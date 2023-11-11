@@ -383,7 +383,7 @@ public class PugSharp : BasePlugin, IMatchCallback
 
     [ConsoleCommand("css_restorematch", "Restore a match")]
     [ConsoleCommand("ps_restorematch", "Restore a match")]
-    public void OnCommandResotreMatch(CCSPlayerController? player, CommandInfo command)
+    public void OnCommandRestoreMatch(CCSPlayerController? player, CommandInfo command)
     {
         HandleCommand(() =>
         {
@@ -399,10 +399,22 @@ public class PugSharp : BasePlugin, IMatchCallback
                 return;
             }
 
-            if (command.ArgCount != 2)
+            if (command.ArgCount < 2)
             {
-                command.ReplyToCommand("FileName is required as Argument! Path have to be put in \"pathToConfig\"");
+                command.ReplyToCommand("MatchId is required as Argument!");
                 return;
+            }
+
+            var matchId = int.Parse(command.ArgByIndex(1), CultureInfo.InvariantCulture);
+
+            var backupDir = Path.Combine(PugSharpDirectory, "Backup");
+            if (command.ArgCount == 2)
+            {
+                var files = Directory.EnumerateFiles(backupDir, $"Match_{matchId}_Round*");
+                foreach (var file in files)
+                {
+                    _Logger.LogInformation("found posisble Backup: {file} ", file);
+                }
             }
 
             _Logger.LogInformation("Start loading match config!");
