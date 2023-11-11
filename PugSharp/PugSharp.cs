@@ -59,21 +59,24 @@ public class PugSharp : BasePlugin, IMatchCallback
             serverConfig => _ServerConfig = serverConfig
         );
 
-        var commands = new G5CommandProvider(_CsServer).LoadProviderCommands();
-        foreach (var command in commands)
+        if (!hotReload)
         {
-            AddCommand(command.Name, command.Description, (p, c) =>
+            var commands = new G5CommandProvider(_CsServer).LoadProviderCommands();
+            foreach (var command in commands)
             {
-                HandleCommand(() =>
+                AddCommand(command.Name, command.Description, (p, c) =>
                 {
-                    var args = Enumerable.Range(0, c.ArgCount).Select(i => c.GetArg(i)).ToArray();
-                    var results = command.commandCallBack(args);
-                    foreach (var result in results)
+                    HandleCommand(() =>
                     {
-                        c.ReplyToCommand(result);
-                    }
-                }, c, c.GetCommandString, c.ArgString);
-            });
+                        var args = Enumerable.Range(0, c.ArgCount).Select(i => c.GetArg(i)).ToArray();
+                        var results = command.commandCallBack(args);
+                        foreach (var result in results)
+                        {
+                            c.ReplyToCommand(result);
+                        }
+                    }, c, c.GetCommandString, c.ArgString);
+                });
+            }
         }
     }
 
@@ -998,7 +1001,7 @@ public class PugSharp : BasePlugin, IMatchCallback
                     }
                 }
 
-                if (assister != null)
+                if (assister != null && assister.IsValid)
                 {
                     var friendlyFire = attackerSide == victimSide;
                     var assistedFlash = eventPlayerDeath.Assistedflash;
@@ -1294,9 +1297,12 @@ public class PugSharp : BasePlugin, IMatchCallback
 
     public void SetupRoundBackup()
     {
-        string prefix = $"PugSharp_Match_{_Match?.MatchInfo.Config.MatchId}";
-        _Logger.LogInformation("Create round backup files: {prefix}", prefix);
-        UpdateConvar("mp_backup_round_file", prefix);
+        if (_Match != null)
+        {
+            string prefix = $"PugSharp_Match_{_Match.MatchInfo.Config.MatchId}";
+            _Logger.LogInformation("Create round backup files: {prefix}", prefix);
+            UpdateConvar("mp_backup_round_file", prefix);
+        }
     }
 
     public string StartDemoRecording()
