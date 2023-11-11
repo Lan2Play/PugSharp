@@ -37,7 +37,7 @@ public class PugSharp : BasePlugin, IMatchCallback
 
     public override string ModuleVersion => "0.0.1";
 
-    public string PugSharpDirectory {get;}
+    public string PugSharpDirectory { get; }
 
     public PugSharp()
     {
@@ -312,7 +312,7 @@ public class PugSharp : BasePlugin, IMatchCallback
                 {
                     command.ReplyToCommand($"Loading config was not possible. Error: {error.Value}");
                 },
-                matchConfig =>
+                async matchConfig =>
                 {
                     // Use same token for APIstats if theres no token set in the matchconfig
                     if (string.IsNullOrEmpty(matchConfig.EventulaApistatsToken))
@@ -321,6 +321,13 @@ public class PugSharp : BasePlugin, IMatchCallback
                     }
 
                     command.ReplyToCommand("Matchconfig loaded!");
+
+                    var configFileName = Path.Combine(PugSharpDirectory, "Backup", $"Match_{matchConfig.MatchId}_Config.json");
+                    var configWriteStream = File.OpenWrite(configFileName);
+                    await using (configWriteStream.ConfigureAwait(false))
+                    {
+                        await JsonSerializer.SerializeAsync(configWriteStream, matchConfig).ConfigureAwait(false);
+                    }
 
                     InitializeMatch(matchConfig);
                 }
@@ -332,6 +339,51 @@ public class PugSharp : BasePlugin, IMatchCallback
     [ConsoleCommand("css_loadconfigfile", "Load a match config from a file")]
     [ConsoleCommand("ps_loadconfigfile", "Load a match config from a file")]
     public void OnCommandLoadConfigFromFile(CCSPlayerController? player, CommandInfo command)
+    {
+        HandleCommand(() =>
+        {
+            if (player != null && !player.IsAdmin(_ServerConfig))
+            {
+                command.ReplyToCommand("Command is only allowed for admins!");
+                return;
+            }
+
+            if (_Match != null)
+            {
+                command.ReplyToCommand("Currently Match {match} is running. To stop it call ps_stopmatch");
+                return;
+            }
+
+            if (command.ArgCount != 2)
+            {
+                command.ReplyToCommand("FileName is required as Argument! Path have to be put in \"pathToConfig\"");
+                return;
+            }
+
+            _Logger.LogInformation("Start loading match config!");
+            var fileName = command.ArgByIndex(1);
+
+            command.ReplyToCommand($"Loading Config from file {fileName}");
+            var loadMatchConfigFromFileResult = _ConfigProvider.LoadMatchConfigFromFileAsync(fileName).Result;
+
+            loadMatchConfigFromFileResult.Switch(
+                error =>
+                {
+                    command.ReplyToCommand($"Loading config was not possible. Error: {error.Value}");
+                },
+                matchConfig =>
+                {
+                    command.ReplyToCommand("Matchconfig loaded!");
+                    InitializeMatch(matchConfig);
+                }
+            );
+        },
+        command);
+    }
+
+    [ConsoleCommand("css_restorematch", "Restore a match")]
+    [ConsoleCommand("ps_restorematch", "Restore a match")]
+    public void OnCommandResotreMatch(CCSPlayerController? player, CommandInfo command)
     {
         HandleCommand(() =>
         {
