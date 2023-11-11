@@ -10,6 +10,7 @@ namespace PugSharp;
 
 public partial class G5CommandProvider : ICommandProvider
 {
+    private const int _RegexTimeout = 1000;
     private static readonly ILogger<G5ApiProvider> _Logger = LogManager.CreateLogger<G5ApiProvider>();
     private readonly ICsServer _CsServer;
 
@@ -105,8 +106,29 @@ public partial class G5CommandProvider : ICommandProvider
         return new[] { JsonSerializer.Serialize(new Get5Status { PluginVersion = "0.15.0", GameState = 0 }) };
     }
 
-    [GeneratedRegex(@"PatchVersion=(?<version>[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+)", RegexOptions.ExplicitCapture, 1000)]
-    private static partial Regex PatchVersion();
+    [GeneratedRegex(@"PatchVersion=(?<version>[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+)", RegexOptions.ExplicitCapture, _RegexTimeout)]
+    private static partial Regex PatchVersionRegex();
+
+    [GeneratedRegex(@"ClientVersion=(?<version>[0-9]+)", RegexOptions.ExplicitCapture, _RegexTimeout)]
+    private static partial Regex ClientVersionRegex();
+
+    [GeneratedRegex(@"ServerVersion=(?<version>[0-9]+)", RegexOptions.ExplicitCapture, _RegexTimeout)]
+    private static partial Regex ServerVersionRegex();
+
+    [GeneratedRegex(@"ProductName=(?<productname>.+)", RegexOptions.ExplicitCapture, _RegexTimeout)]
+    private static partial Regex ProductNameRegex();
+
+    private string LoadSteamInfValue(string steamInf, Regex regex, string regexGroupName, List<string> errors)
+    {
+        var result = regex.Match(steamInf);
+        if (!result.Success)
+        {
+            errors.Add("Error loading patchVersion");
+            return string.Empty;
+        }
+
+        return result.Groups[regexGroupName].Value;
+    }
 
     private IEnumerable<string> CommandVersion(string[] args)
     {
@@ -116,14 +138,24 @@ public partial class G5CommandProvider : ICommandProvider
         {
             try
             {
-                var match = PatchVersion().Match(File.ReadAllText(steamInfPath));
+                var errors = new List<string>();
+                var steamInf = File.ReadAllText(steamInfPath);
 
-                if (match.Success)
+                var patchVersion = LoadSteamInfValue(steamInf, PatchVersionRegex(), "version", errors);
+                var clientVersion = LoadSteamInfValue(steamInf, ClientVersionRegex(), "version", errors);
+                var serverVersion = LoadSteamInfValue(steamInf, ServerVersionRegex(), "version", errors);
+                var productName = LoadSteamInfValue(steamInf, ProductNameRegex(), "productname", errors);
+
+                if (errors.Any())
                 {
-                    return new[] { match.Groups["version"].Value.Trim() };
+                    return errors;
                 }
 
-                _Logger.LogError("The 'PatchVersion' key could not be located in the steam.inf file.");
+                return new[] {
+                        $"Protocol version {patchVersion.Replace(".","", StringComparison.OrdinalIgnoreCase)} [{clientVersion}/{serverVersion}]",
+                        $"Exe version {patchVersion} ({productName})",
+                    };
+
             }
             catch (Exception ex)
             {
