@@ -273,7 +273,7 @@ public class PugSharp : BasePlugin, IMatchCallback
     [ConsoleCommand("ps_loadconfig", "Load a match config")]
     public void OnCommandLoadConfig(CCSPlayerController? player, CommandInfo command)
     {
-        HandleCommand(() =>
+        _ = HandleCommandAsync(async () =>
         {
             if (player != null && !player.IsAdmin(_ServerConfig))
             {
@@ -299,7 +299,7 @@ public class PugSharp : BasePlugin, IMatchCallback
             var authToken = command.ArgCount > 2 ? command.ArgByIndex(2) : string.Empty;
 
             command.ReplyToCommand($"Loading Config from {url}");
-            var loadMatchConfigFromUrlResult = _ConfigProvider.LoadMatchConfigFromUrlAsync(url, authToken).Result;
+            var loadMatchConfigFromUrlResult = await _ConfigProvider.LoadMatchConfigFromUrlAsync(url, authToken).ConfigureAwait(false);
 
             loadMatchConfigFromUrlResult.Switch(
                 error =>
@@ -559,6 +559,22 @@ public class PugSharp : BasePlugin, IMatchCallback
             command.ReplyToCommand($"Error executing command \"{commandName}\"!");
         }
     }
+
+    private static async Task HandleCommandAsync(Func<Task> commandAction, CommandInfo command, [CallerMemberName] string? commandMethod = null, string? args = null)
+    {
+        var commandName = commandMethod?.Replace("OnCommand", "", StringComparison.OrdinalIgnoreCase) ?? commandAction.Method.Name;
+        try
+        {
+            _Logger.LogInformation("Command \"{commandName} {args}\" called.", commandName, args ?? string.Empty);
+            await commandAction().ConfigureAwait(false);
+        }
+        catch (Exception e)
+        {
+            _Logger.LogError(e, "Error executing command {command}", commandName);
+            command.ReplyToCommand($"Error executing command \"{commandName}\"!");
+        }
+    }
+
 
     #endregion
 
