@@ -1,4 +1,5 @@
 ﻿using Microsoft.Extensions.Logging;
+using Microsoft.Net.Http.Headers;
 using PugSharp.Logging;
 using System.Net.Http.Headers;
 
@@ -31,7 +32,7 @@ namespace PugSharp.ApiStats
 
             if (!string.IsNullOrEmpty(authKey))
             {
-                HttpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue(authKey);
+                HttpClient.DefaultRequestHeaders.Add(HeaderNames.Authorization, authKey);
             }
         }
 
