@@ -476,7 +476,7 @@ public class PugSharp : BasePlugin, IMatchCallback
                     _Logger.LogInformation("found posisble Backup: {file} ", file);
                 }
 
-                roundToRestore = files.Select(x => Path.GetFileNameWithoutExtension(x)).Select(x => x[^3..]).Select(x => int.Parse(x)).Max();
+                roundToRestore = files.Select(x => Path.GetFileNameWithoutExtension(x)).Select(x => x[^2..]).Select(x => int.Parse(x, CultureInfo.InvariantCulture)).Max();
             }
             else
             {
