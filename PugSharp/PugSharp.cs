@@ -380,7 +380,7 @@ public class PugSharp : BasePlugin, IMatchCallback
 
                     var configFileName = Path.Combine(backupDir, $"Match_{matchConfig.MatchId}_Config.json");
 
-                    var configWriteStream = File.OpenWrite(configFileName);
+                    var configWriteStream = File.Open(configFileName, FileMode.Create);
                     await using (configWriteStream.ConfigureAwait(false))
                     {
                         await JsonSerializer.SerializeAsync(configWriteStream, matchConfig).ConfigureAwait(false);
@@ -846,7 +846,7 @@ public class PugSharp : BasePlugin, IMatchCallback
 
             var configFileName = Path.Combine(backupDir, string.Create(CultureInfo.InvariantCulture, $"Match_{_Match.MatchInfo.Config.MatchId}_Round_{currentRound}.json"));
 
-            using var configWriteStream = File.OpenWrite(configFileName);
+            using var configWriteStream = File.Open(configFileName, FileMode.Create);
             JsonSerializer.Serialize(configWriteStream, _Match.MatchInfo);
 
 

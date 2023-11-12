@@ -29,7 +29,7 @@ namespace PugSharp.Api.Json
                 var fullFileName = Path.GetFullPath(Path.Combine(_ApiStatsDirectory, fileName));
                 CreateStatsDirectoryIfNotExists();
 
-                var fileStream = File.OpenWrite(fullFileName);
+                var fileStream = File.Open(fullFileName, FileMode.Create);
                 await using (fileStream.ConfigureAwait(false))
                 {
                     await JsonSerializer.SerializeAsync(fileStream, data, cancellationToken: cancellationToken).ConfigureAwait(false);

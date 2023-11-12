@@ -3,8 +3,6 @@ using Microsoft.Net.Http.Headers;
 using OneOf;
 using OneOf.Types;
 using PugSharp.Logging;
-using System.Net;
-using System.Net.Http.Headers;
 using System.Text.Json;
 
 namespace PugSharp.Config
@@ -89,7 +87,7 @@ namespace PugSharp.Config
 
                     configJsonStream.Seek(0, SeekOrigin.Begin);
                     var matchConfigPath = Path.Combine(_ConfigDirectory, "match.json");
-                    var fileWriteStream = File.OpenWrite(matchConfigPath);
+                    var fileWriteStream = File.Open(matchConfigPath, FileMode.Create);
                     await using (fileWriteStream.ConfigureAwait(false))
                     {
                         await configJsonStream.CopyToAsync(fileWriteStream).ConfigureAwait(false);
