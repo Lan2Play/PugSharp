@@ -29,7 +29,10 @@ namespace PugSharp.ApiStats
                 BaseAddress = new Uri(baseUrl),
             };
 
-            HttpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", authKey);
+            if (!string.IsNullOrEmpty(authKey))
+            {
+                HttpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue(authKey);
+            }
         }
 
         protected static async Task HandleResponseAsync(HttpResponseMessage? httpResponseMessage, CancellationToken cancellationToken)
