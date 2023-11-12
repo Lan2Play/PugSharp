@@ -23,6 +23,7 @@ public class MatchTeam
 
     public Config.Team TeamConfig { get; }
 
+    [JsonIgnore]
     public bool IsPaused { get; internal set; }
 
     internal void ToggleTeamSite()
