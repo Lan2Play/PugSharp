@@ -3,6 +3,7 @@ using OneOf;
 using OneOf.Types;
 using PugSharp.Logging;
 using System.Net;
+using System.Net.Http.Headers;
 using System.Text.Json;
 
 namespace PugSharp.Config
@@ -62,13 +63,13 @@ namespace PugSharp.Config
                 {
                     Method = HttpMethod.Get,
                     RequestUri = new Uri(url),
-                    Headers = {
-                        {
-                            nameof(HttpRequestHeader.Authorization),
-                            new List<string>{ new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", authToken).ToString() }
-                        },
-                    },
                 };
+
+
+                if (!string.IsNullOrEmpty(authToken))
+                {
+                    httpRequestMessage.Headers.Authorization = new AuthenticationHeaderValue(authToken);
+                }
 
                 var response = await _HttpClient.SendAsync(httpRequestMessage).ConfigureAwait(false);
 
