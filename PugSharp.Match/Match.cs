@@ -75,6 +75,8 @@ public class Match : IDisposable
         _ApiProvider = apiProvider;
         _RoundBackupFile = roundBackupFile;
         MatchInfo = matchInfo;
+        // TODO CompleteMatch if alls maps have an winner?
+        MatchInfo.CurrentMap = matchInfo.MatchMaps.FirstOrDefault(x => x.Winner == null) ?? matchInfo.MatchMaps.Last();
         MatchTeam1 = new MatchTeam(MatchInfo.Config.Team1);
         MatchTeam2 = new MatchTeam(MatchInfo.Config.Team2);
 

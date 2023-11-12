@@ -1,5 +1,6 @@
 ﻿using PugSharp.ApiStats;
 using PugSharp.Config;
+using System.Text.Json.Serialization;
 
 namespace PugSharp.Match;
 
@@ -12,6 +13,7 @@ public class MatchInfo
         Config = config;
     }
 
+    [JsonIgnore]
     public MatchMap CurrentMap { get; set; }
 
     public IReadOnlyList<MatchMap> MatchMaps { get; }
