@@ -504,12 +504,19 @@ public class PugSharp : BasePlugin, IMatchCallback
             }
 
             _CsServer.ExecuteCommand($"mp_backup_restore_load_file {roundBackupFile}");
+            var matchInfoStream = File.OpenRead(matchInfoFileName);
+            await using (matchInfoStream.ConfigureAwait(false))
+            {
+                var matchInfo = await JsonSerializer.DeserializeAsync<MatchInfo>(matchInfoStream).ConfigureAwait(false);
 
-            using var matchInfoStream = File.OpenRead(matchInfoFileName);
-            var matchInfo = await JsonSerializer.DeserializeAsync<MatchInfo>(matchInfoStream).ConfigureAwait(false);
+                if (matchInfo == null)
+                {
+                    command.ReplyToCommand($"MatchInfoFile {matchInfoFileName} could not be loaded!");
+                    return;
+                }
 
-
-            InitializeMatch(matchConfig, false);
+                InitializeMatch(matchInfo, false);
+            }
         },
         command).ConfigureAwait(false);
     }
