@@ -470,13 +470,13 @@ public class PugSharp : BasePlugin, IMatchCallback
             int roundToRestore;
             if (command.ArgCount == 2)
             {
-                var files = Directory.EnumerateFiles(csgoDirectory, $"Match_{matchId}_Round*");
+                var files = Directory.EnumerateFiles(csgoDirectory, $"PugSharp_Match_{matchId}_round*");
                 foreach (var file in files)
                 {
                     _Logger.LogInformation("found posisble Backup: {file} ", file);
                 }
 
-                roundToRestore = files.Select(x => Path.GetFileNameWithoutExtension(x)).Select(x => x[^3..]).Select(x => int.Parse(x)).Max();
+                roundToRestore = files.Select(x => Path.GetFileNameWithoutExtension(x)).Select(x => x[^2..]).Select(x => int.Parse(x, CultureInfo.InvariantCulture)).Max();
             }
             else
             {
@@ -489,7 +489,7 @@ public class PugSharp : BasePlugin, IMatchCallback
 
             _Logger.LogInformation("Start restoring match {matchid}!", matchId);
 
-            var roundBackupFile = Path.Combine(_CsServer.GameDirectory, $"PugSharp_Match{matchId}_round{roundToRestore:D2}.txt");
+            var roundBackupFile = Path.Combine(_CsServer.GameDirectory, "csgo", $"PugSharp_Match_{matchId}_round{roundToRestore:D2}.txt");
             if (!File.Exists(roundBackupFile))
             {
                 command.ReplyToCommand($"RoundBackupFile {roundBackupFile} not found");
