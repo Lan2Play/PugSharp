@@ -39,19 +39,16 @@ public class Match : IDisposable
 
     public MatchInfo MatchInfo { get; }
 
-    public MatchTeam MatchTeam1 { get; }
 
-    public MatchTeam MatchTeam2 { get; }
 
-    public IEnumerable<MatchPlayer> AllMatchPlayers => MatchTeam1.Players.Concat(MatchTeam2.Players);
+    public IEnumerable<MatchPlayer> AllMatchPlayers => MatchInfo.MatchTeam1.Players.Concat(MatchInfo.MatchTeam2.Players);
 
     public Match(IMatchCallback matchCallback, IApiProvider apiProvider, Config.MatchConfig matchConfig)
     {
         _MatchCallback = matchCallback;
         _ApiProvider = apiProvider;
         MatchInfo = new MatchInfo(matchConfig);
-        MatchTeam1 = new MatchTeam(MatchInfo.Config.Team1);
-        MatchTeam2 = new MatchTeam(MatchInfo.Config.Team2);
+       
 
         _VoteTimer.Interval = MatchInfo.Config.VoteTimeout;
         _VoteTimer.Elapsed += VoteTimer_Elapsed;
@@ -81,8 +78,6 @@ public class Match : IDisposable
         // TODO CompleteMatch if alls maps have an winner?
         MatchInfo.CurrentMap = matchInfo.MatchMaps.LastOrDefault(x => !string.IsNullOrEmpty(x.MapName)) ?? matchInfo.MatchMaps.Last();
         _Logger.LogInformation("Continue Match on map {mapNumber}({mapName})!", MatchInfo.CurrentMap.MapNumber, MatchInfo.CurrentMap.MapName);
-        MatchTeam1 = new MatchTeam(MatchInfo.Config.Team1);
-        MatchTeam2 = new MatchTeam(MatchInfo.Config.Team2);
 
         _VoteTimer.Interval = MatchInfo.Config.VoteTimeout;
         _VoteTimer.Elapsed += VoteTimer_Elapsed;
@@ -205,8 +200,8 @@ public class Match : IDisposable
 
     private void PauseMatch()
     {
-        MatchTeam1.IsPaused = true;
-        MatchTeam2.IsPaused = true;
+        MatchInfo.MatchTeam1.IsPaused = true;
+        MatchInfo.MatchTeam2.IsPaused = true;
 
         _MatchCallback.PauseMatch();
     }
@@ -219,7 +214,7 @@ public class Match : IDisposable
         _MatchCallback.SetupRoundBackup();
         MatchInfo.DemoFile = _MatchCallback.StartDemoRecording();
 
-        _MatchCallback.SendMessage(string.Create(CultureInfo.InvariantCulture, $" {ChatColors.Default}Starting Match. {ChatColors.Highlight}{MatchTeam1.TeamConfig.Name} {ChatColors.Default}as {ChatColors.Highlight}{MatchTeam1.CurrentTeamSite}{ChatColors.Default}. {ChatColors.Highlight}{MatchTeam2.TeamConfig.Name}{ChatColors.Default} as {ChatColors.Highlight}{MatchTeam2.CurrentTeamSite}"));
+        _MatchCallback.SendMessage(string.Create(CultureInfo.InvariantCulture, $" {ChatColors.Default}Starting Match. {ChatColors.Highlight}{MatchInfo.MatchTeam1.TeamConfig.Name} {ChatColors.Default}as {ChatColors.Highlight}{MatchInfo.MatchTeam1.CurrentTeamSite}{ChatColors.Default}. {ChatColors.Highlight}{MatchInfo.MatchTeam2.TeamConfig.Name}{ChatColors.Default} as {ChatColors.Highlight}{MatchInfo.MatchTeam2.CurrentTeamSite}"));
 
         _ = _ApiProvider.GoingLiveAsync(new GoingLiveParams(MatchInfo.Config.MatchId, MatchInfo.CurrentMap.MapName, MatchInfo.CurrentMap.MapNumber), CancellationToken.None);
 
@@ -250,32 +245,32 @@ public class Match : IDisposable
 
         UpdateStats(roundResults.PlayerResults);
 
-        var team1Results = MatchTeam1.CurrentTeamSite == Team.Terrorist ? roundResults.TRoundResult : roundResults.CTRoundResult;
-        var team2Results = MatchTeam2.CurrentTeamSite == Team.Terrorist ? roundResults.TRoundResult : roundResults.CTRoundResult;
+        var team1Results = MatchInfo.MatchTeam1.CurrentTeamSite == Team.Terrorist ? roundResults.TRoundResult : roundResults.CTRoundResult;
+        var team2Results = MatchInfo.MatchTeam2.CurrentTeamSite == Team.Terrorist ? roundResults.TRoundResult : roundResults.CTRoundResult;
 
-        _Logger.LogInformation("Team 1: {teamSite} : {teamScore}", MatchTeam1.CurrentTeamSite, team1Results.Score);
-        _Logger.LogInformation("Team 2: {teamSite} : {teamScore}", MatchTeam2.CurrentTeamSite, team2Results.Score);
+        _Logger.LogInformation("Team 1: {teamSite} : {teamScore}", MatchInfo.MatchTeam1.CurrentTeamSite, team1Results.Score);
+        _Logger.LogInformation("Team 2: {teamSite} : {teamScore}", MatchInfo.MatchTeam2.CurrentTeamSite, team2Results.Score);
 
         var mapTeamInfo1 = new MapTeamInfo
         {
-            StartingSide = MatchTeam1.StartingTeamSite == Team.Terrorist ? StartingSide.T : StartingSide.CT,
+            StartingSide = MatchInfo.MatchTeam1.StartingTeamSite == Team.Terrorist ? StartingSide.T : StartingSide.CT,
             Score = team1Results.Score,
             ScoreT = team1Results.ScoreT,
             ScoreCT = team1Results.ScoreCT,
             Players = MatchInfo.CurrentMap.PlayerMatchStatistics
-                            .Where(a => MatchTeam1.Players.Select(player => player.Player.SteamID).Contains(a.Key))
+                            .Where(a => MatchInfo.MatchTeam1.Players.Select(player => player.Player.SteamID).Contains(a.Key))
                             .ToDictionary(p => p.Key.ToString(CultureInfo.InvariantCulture), p => CreatePlayerStatistics(p.Value), StringComparer.OrdinalIgnoreCase),
         };
 
         var mapTeamInfo2 = new MapTeamInfo
         {
-            StartingSide = MatchTeam2.StartingTeamSite == Team.Terrorist ? StartingSide.T : StartingSide.CT,
+            StartingSide = MatchInfo.MatchTeam2.StartingTeamSite == Team.Terrorist ? StartingSide.T : StartingSide.CT,
             Score = team2Results.Score,
             ScoreT = team2Results.ScoreT,
             ScoreCT = team2Results.ScoreCT,
 
             Players = MatchInfo.CurrentMap.PlayerMatchStatistics
-                            .Where(a => MatchTeam2.Players.Select(player => player.Player.SteamID).Contains(a.Key))
+                            .Where(a => MatchInfo.MatchTeam2.Players.Select(player => player.Player.SteamID).Contains(a.Key))
                             .ToDictionary(p => p.Key.ToString(CultureInfo.InvariantCulture), p => CreatePlayerStatistics(p.Value), StringComparer.OrdinalIgnoreCase),
         };
 
@@ -646,7 +641,7 @@ public class Match : IDisposable
         {
             _CurrentMatchTeamToVote.StartingTeamSite = startTeam;
             _CurrentMatchTeamToVote.CurrentTeamSite = startTeam;
-            var otherTeam = _CurrentMatchTeamToVote == MatchTeam1 ? MatchTeam2 : MatchTeam1;
+            var otherTeam = _CurrentMatchTeamToVote == MatchInfo.MatchTeam1 ? MatchInfo.MatchTeam2 : MatchInfo.MatchTeam1;
             otherTeam.StartingTeamSite = startTeam == Team.Terrorist ? Team.CounterTerrorist : Team.Terrorist;
             otherTeam.CurrentTeamSite = otherTeam.StartingTeamSite;
 
@@ -669,11 +664,11 @@ public class Match : IDisposable
     {
         if (_CurrentMatchTeamToVote == null)
         {
-            _CurrentMatchTeamToVote = MatchTeam1;
+            _CurrentMatchTeamToVote = MatchInfo.MatchTeam1;
         }
         else
         {
-            _CurrentMatchTeamToVote = _CurrentMatchTeamToVote == MatchTeam1 ? MatchTeam2 : MatchTeam1;
+            _CurrentMatchTeamToVote = _CurrentMatchTeamToVote == MatchInfo.MatchTeam1 ? MatchInfo.MatchTeam2 : MatchInfo.MatchTeam1;
         }
     }
 
@@ -700,7 +695,7 @@ public class Match : IDisposable
         return readyPlayers.Take(requiredPlayers + 1).Count() == requiredPlayers;
     }
 
-    private bool AllTeamsUnpaused() => !MatchTeam1.IsPaused && !MatchTeam2.IsPaused;
+    private bool AllTeamsUnpaused() => !MatchInfo.MatchTeam1.IsPaused && !MatchInfo.MatchTeam2.IsPaused;
 
     private bool AllMapsArePlayed()
     {
@@ -772,16 +767,16 @@ public class Match : IDisposable
 
     private MatchTeam? GetMatchTeam(ulong steamID)
     {
-        _Logger.LogInformation("GetMatchTeam for {steamId} in MatchTeam1: {team1Ids}", steamID, string.Join(", ", MatchTeam1.Players.Select(x => x.Player.SteamID)));
-        if (MatchTeam1.Players.Exists(x => x.Player.SteamID.Equals(steamID)))
+        _Logger.LogInformation("GetMatchTeam for {steamId} in MatchTeam1: {team1Ids}", steamID, string.Join(", ", MatchInfo.MatchTeam1.Players.Select(x => x.Player.SteamID)));
+        if (MatchInfo.MatchTeam1.Players.Exists(x => x.Player.SteamID.Equals(steamID)))
         {
-            return MatchTeam1;
+            return MatchInfo.MatchTeam1;
         }
 
-        _Logger.LogInformation("GetMatchTeam for {steamId} in MatchTeam2: {team1Ids}", steamID, string.Join(", ", MatchTeam2.Players.Select(x => x.Player.SteamID)));
-        if (MatchTeam2.Players.Exists(x => x.Player.SteamID.Equals(steamID)))
+        _Logger.LogInformation("GetMatchTeam for {steamId} in MatchTeam2: {team1Ids}", steamID, string.Join(", ", MatchInfo.MatchTeam2.Players.Select(x => x.Player.SteamID)));
+        if (MatchInfo.MatchTeam2.Players.Exists(x => x.Player.SteamID.Equals(steamID)))
         {
-            return MatchTeam2;
+            return MatchInfo.MatchTeam2;
         }
 
         return null;
@@ -789,7 +784,7 @@ public class Match : IDisposable
 
     private MatchTeam? GetMatchTeam(Team team)
     {
-        return MatchTeam1.CurrentTeamSite == team ? MatchTeam1 : MatchTeam2;
+        return MatchInfo.MatchTeam1.CurrentTeamSite == team ? MatchInfo.MatchTeam1 : MatchInfo.MatchTeam2;
     }
 
     private MatchPlayer GetMatchPlayer(ulong steamID)
@@ -809,7 +804,7 @@ public class Match : IDisposable
             return false;
         }
 
-        var team = isTeam1 ? MatchTeam1 : MatchTeam2;
+        var team = isTeam1 ? MatchInfo.MatchTeam1 : MatchInfo.MatchTeam2;
         var startSite = team.CurrentTeamSite;
         if (startSite == Team.None)
         {
@@ -883,7 +878,7 @@ public class Match : IDisposable
         var matchPlayer = GetMatchPlayer(player.SteamID);
         matchPlayer.IsReady = !matchPlayer.IsReady;
 
-        var readyPlayers = MatchTeam1.Players.Count(x => x.IsReady) + MatchTeam2.Players.Count(x => x.IsReady);
+        var readyPlayers = MatchInfo.MatchTeam1.Players.Count(x => x.IsReady) + MatchInfo.MatchTeam2.Players.Count(x => x.IsReady);
 
         // Min Players per Team
         var requiredPlayers = MatchInfo.Config.MinPlayersToReady * 2;
@@ -1041,8 +1036,8 @@ public class Match : IDisposable
 
     public void SwitchTeam()
     {
-        MatchTeam1.ToggleTeamSite();
-        MatchTeam2.ToggleTeamSite();
+        MatchInfo.MatchTeam1.ToggleTeamSite();
+        MatchInfo.MatchTeam2.ToggleTeamSite();
     }
 
 

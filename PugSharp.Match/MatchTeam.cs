@@ -1,6 +1,7 @@
 ﻿using Microsoft.Extensions.Logging;
 using PugSharp.Logging;
 using PugSharp.Match.Contract;
+using System.Text.Json.Serialization;
 
 namespace PugSharp.Match;
 
@@ -13,6 +14,7 @@ public class MatchTeam
         TeamConfig = teamConfig;
     }
 
+    [JsonIgnore]
     public List<MatchPlayer> Players { get; } = new List<MatchPlayer>();
 
     public Team StartingTeamSite { get; set; }
