@@ -16,8 +16,8 @@ public class MatchInfo
     [JsonIgnore]
     public MatchMap CurrentMap { get; set; }
 
-    public IReadOnlyList<MatchMap> MatchMaps { get; }
-    public string DemoFile { get; internal set; }
+    public IReadOnlyList<MatchMap> MatchMaps { get; init; }
+    public string DemoFile { get; init; }
     public MatchConfig Config { get; }
 }
 
@@ -32,11 +32,11 @@ public class MatchMap
 
     public string MapName { get; set; }
 
-    public MatchTeam? Winner { get; internal set; }
+    public MatchTeam? Winner { get; set; }
 
     public int Team1Points { get; set; }
 
     public int Team2Points { get; set; }
 
-    public Dictionary<ulong, PlayerMatchStatistics> PlayerMatchStatistics { get; } = new Dictionary<ulong, PlayerMatchStatistics>();
+    public Dictionary<ulong, PlayerMatchStatistics> PlayerMatchStatistics { get; init; } = new Dictionary<ulong, PlayerMatchStatistics>();
 }

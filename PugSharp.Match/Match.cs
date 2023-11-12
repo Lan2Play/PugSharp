@@ -79,7 +79,7 @@ public class Match : IDisposable
         _RoundBackupFile = roundBackupFile;
         MatchInfo = matchInfo;
         // TODO CompleteMatch if alls maps have an winner?
-        MatchInfo.CurrentMap = matchInfo.MatchMaps.Last(x => !string.IsNullOrEmpty(x.MapName)) ?? matchInfo.MatchMaps.Last();
+        MatchInfo.CurrentMap = matchInfo.MatchMaps.LastOrDefault(x => !string.IsNullOrEmpty(x.MapName)) ?? matchInfo.MatchMaps.Last();
         _Logger.LogInformation("Continue Match on map {mapNumber}({mapName})!", MatchInfo.CurrentMap.MapNumber, MatchInfo.CurrentMap.MapName);
         MatchTeam1 = new MatchTeam(MatchInfo.Config.Team1);
         MatchTeam2 = new MatchTeam(MatchInfo.Config.Team2);
