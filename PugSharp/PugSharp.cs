@@ -489,7 +489,7 @@ public class PugSharp : BasePlugin, IMatchCallback
 
             _Logger.LogInformation("Start restoring match {matchid}!", matchId);
 
-            var roundBackupFile = Path.Combine(_CsServer.GameDirectory, $"PugSharp_Match{matchId}_round{roundToRestore:D2}.txt");
+            var roundBackupFile = Path.Combine(_CsServer.GameDirectory, "csgo", $"PugSharp_Match{matchId}_round{roundToRestore:D2}.txt");
             if (!File.Exists(roundBackupFile))
             {
                 command.ReplyToCommand($"RoundBackupFile {roundBackupFile} not found");
