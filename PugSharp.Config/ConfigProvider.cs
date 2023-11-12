@@ -1,4 +1,5 @@
 ﻿using Microsoft.Extensions.Logging;
+using Microsoft.Net.Http.Headers;
 using OneOf;
 using OneOf.Types;
 using PugSharp.Logging;
@@ -68,7 +69,7 @@ namespace PugSharp.Config
 
                 if (!string.IsNullOrEmpty(authToken))
                 {
-                    httpRequestMessage.Headers.Authorization = new AuthenticationHeaderValue(authToken);
+                    httpRequestMessage.Headers.Add(HeaderNames.Authorization, authToken);
                 }
 
                 var response = await _HttpClient.SendAsync(httpRequestMessage).ConfigureAwait(false);
