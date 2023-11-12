@@ -71,12 +71,14 @@ public class Match : IDisposable
 
     public Match(IMatchCallback matchCallback, IApiProvider apiProvider, MatchInfo matchInfo, string roundBackupFile)
     {
+        _Logger.LogInformation("Create Match from existing MatchInfo!");
         _MatchCallback = matchCallback;
         _ApiProvider = apiProvider;
         _RoundBackupFile = roundBackupFile;
         MatchInfo = matchInfo;
         // TODO CompleteMatch if alls maps have an winner?
         MatchInfo.CurrentMap = matchInfo.MatchMaps.FirstOrDefault(x => x.Winner == null) ?? matchInfo.MatchMaps.Last();
+        _Logger.LogInformation("Continue Match on map {mapNumber}({mapName})!", MatchInfo.CurrentMap.MapNumber, MatchInfo.CurrentMap.MapName);
         MatchTeam1 = new MatchTeam(MatchInfo.Config.Team1);
         MatchTeam2 = new MatchTeam(MatchInfo.Config.Team2);
 
