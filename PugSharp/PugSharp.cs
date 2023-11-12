@@ -17,6 +17,7 @@ using ChatColors = CounterStrikeSharp.API.Modules.Utils.ChatColors;
 using Player = PugSharp.Models.Player;
 using PugSharp.Server.Contract;
 using PugSharp.Api.Json;
+using PugSharp.Match;
 
 namespace PugSharp;
 
@@ -110,11 +111,12 @@ public class PugSharp : BasePlugin, IMatchCallback
         _Logger.LogInformation("End RegisterEventHandlers");
     }
 
-    private void InitializeMatch(MatchConfig matchConfig)
+    private void InitializeMatch(MatchConfig matchConfig, bool noReset = false)
     {
+        _ApiProvider.ClearApiProviders();
+
         if (!string.IsNullOrEmpty(matchConfig.EventulaApistatsUrl))
         {
-            _ApiProvider.ClearApiProviders();
             var apiStats = new ApiStats.ApiStats(matchConfig.EventulaApistatsUrl, matchConfig.EventulaApistatsToken ?? string.Empty);
             _ApiProvider.AddApiProvider(apiStats);
         }
@@ -144,7 +146,51 @@ public class PugSharp : BasePlugin, IMatchCallback
             }
         }
 
-        ResetServer();
+        if (!noReset)
+        {
+            ResetServer();
+        }
+    }
+
+    private void InitializeMatch(MatchInfo matchInfo, bool noReset = false)
+    {
+        _ApiProvider.ClearApiProviders();
+
+        if (!string.IsNullOrEmpty(matchInfo.Config.EventulaApistatsUrl))
+        {
+            var apiStats = new ApiStats.ApiStats(matchInfo.Config.EventulaApistatsUrl, matchInfo.Config.EventulaApistatsToken ?? string.Empty);
+            _ApiProvider.AddApiProvider(apiStats);
+        }
+
+        if (!string.IsNullOrEmpty(matchInfo.Config.G5ApiUrl))
+        {
+            var g5Stats = new G5ApiClient(matchInfo.Config.G5ApiUrl, matchInfo.Config.G5ApiHeader ?? string.Empty, matchInfo.Config.G5ApiHeaderValue ?? string.Empty);
+            var g5ApiProvider = new G5ApiProvider(g5Stats, _CsServer);
+            RegisterConsoleCommandAttributeHandlers(g5ApiProvider);
+            _ApiProvider.AddApiProvider(g5ApiProvider);
+        }
+
+        _ApiProvider.AddApiProvider(new JsonApiProvider(Path.Combine(PugSharpDirectory, "Stats")));
+
+
+        SetMatchVariable(matchInfo.Config);
+
+        _Match?.Dispose();
+        _Match = new Match.Match(this, _ApiProvider, matchInfo);
+
+        var players = GetAllPlayers();
+        foreach (var player in players.Where(x => x.UserId.HasValue && x.UserId >= 0))
+        {
+            if (player.UserId != null && !_Match.TryAddPlayer(player))
+            {
+                player.Kick();
+            }
+        }
+
+        if (!noReset)
+        {
+            ResetServer();
+        }
     }
 
     public static void UpdateConvar<T>(string name, T value)
@@ -389,9 +435,9 @@ public class PugSharp : BasePlugin, IMatchCallback
 
     [ConsoleCommand("css_restorematch", "Restore a match")]
     [ConsoleCommand("ps_restorematch", "Restore a match")]
-    public void OnCommandRestoreMatch(CCSPlayerController? player, CommandInfo command)
+    public async void OnCommandRestoreMatch(CCSPlayerController? player, CommandInfo command)
     {
-        HandleCommand(() =>
+        await HandleCommandAsync(async () =>
         {
             if (player != null && !player.IsAdmin(_ServerConfig))
             {
@@ -413,35 +459,59 @@ public class PugSharp : BasePlugin, IMatchCallback
 
             var matchId = int.Parse(command.ArgByIndex(1), CultureInfo.InvariantCulture);
 
-            var backupDir = Path.Combine(PugSharpDirectory, "Backup");
+            // Backups are stored in csgo directory
+            var csgoDirectory = Path.GetDirectoryName(PugSharpDirectory);
+            if (csgoDirectory == null)
+            {
+                command.ReplyToCommand("Csgo directory not found!");
+                return;
+            }
+
+            int roundToRestore;
             if (command.ArgCount == 2)
             {
-                var files = Directory.EnumerateFiles(backupDir, $"Match_{matchId}_Round*");
+                var files = Directory.EnumerateFiles(csgoDirectory, $"Match_{matchId}_Round*");
                 foreach (var file in files)
                 {
                     _Logger.LogInformation("found posisble Backup: {file} ", file);
                 }
+
+                roundToRestore = files.Select(x => Path.GetFileNameWithoutExtension(x)).Select(x => x[^3..]).Select(x => int.Parse(x)).Max();
+            }
+            else
+            {
+                if (!int.TryParse(command.GetArg(2), CultureInfo.InvariantCulture, out roundToRestore))
+                {
+                    command.ReplyToCommand("second argument for round index has to be numeric");
+                    return;
+                }
             }
 
-            _Logger.LogInformation("Start loading match config!");
-            var fileName = command.ArgByIndex(1);
+            _Logger.LogInformation("Start restoring match {matchid}!", matchId);
 
-            command.ReplyToCommand($"Loading Config from file {fileName}");
-            var loadMatchConfigFromFileResult = _ConfigProvider.LoadMatchConfigFromFileAsync(fileName).Result;
+            var roundBackupFile = Path.Combine(_CsServer.GameDirectory, $"PugSharp_Match{matchId}_round{roundToRestore:D2}.txt");
+            if (!File.Exists(roundBackupFile))
+            {
+                command.ReplyToCommand($"RoundBackupFile {roundBackupFile} not found");
+                return;
+            }
 
-            loadMatchConfigFromFileResult.Switch(
-                error =>
-                {
-                    command.ReplyToCommand($"Loading config was not possible. Error: {error.Value}");
-                },
-                matchConfig =>
-                {
-                    command.ReplyToCommand("Matchconfig loaded!");
-                    InitializeMatch(matchConfig);
-                }
-            );
+            var matchInfoFileName = Path.Combine(PugSharpDirectory, "Backup", $"Match_{matchId}_Round_{roundToRestore}.json");
+            if (!File.Exists(matchInfoFileName))
+            {
+                command.ReplyToCommand($"MatchInfoFile {matchInfoFileName} not found");
+                return;
+            }
+
+            _CsServer.ExecuteCommand($"mp_backup_restore_load_file {roundBackupFile}");
+
+            using var matchInfoStream = File.OpenRead(matchInfoFileName);
+            var matchInfo = await JsonSerializer.DeserializeAsync<MatchInfo>(matchInfoStream).ConfigureAwait(false);
+
+
+            InitializeMatch(matchConfig, false);
         },
-        command);
+        command).ConfigureAwait(false);
     }
 
     [ConsoleCommand("css_dumpmatch", "Serialize match to JSON on console")]
@@ -1303,7 +1373,6 @@ public class PugSharp : BasePlugin, IMatchCallback
         {
             string prefix = $"PugSharp_Match_{_Match.MatchInfo.Config.MatchId}";
             _Logger.LogInformation("Create round backup files: {prefix}", prefix);
-            //UpdateConvar("mp_backup_round_file", prefix);
             _CsServer.ExecuteCommand($"mp_backup_round_file {prefix}");
         }
     }

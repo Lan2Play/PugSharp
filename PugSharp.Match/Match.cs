@@ -68,12 +68,38 @@ public class Match : IDisposable
         SetMatchTeamCvars();
     }
 
+    public Match(IMatchCallback matchCallback, IApiProvider apiProvider, MatchInfo matchInfo)
+    {
+        _MatchCallback = matchCallback;
+        _ApiProvider = apiProvider;
+        MatchInfo = matchInfo;
+        MatchTeam1 = new MatchTeam(MatchInfo.Config.Team1);
+        MatchTeam2 = new MatchTeam(MatchInfo.Config.Team2);
+
+        _VoteTimer.Interval = MatchInfo.Config.VoteTimeout;
+        _VoteTimer.Elapsed += VoteTimer_Elapsed;
+        _ReadyReminderTimer.Elapsed += ReadyReminderTimer_Elapsed;
+
+        if (!string.IsNullOrEmpty(MatchInfo.Config.EventulaDemoUploadUrl) && !string.IsNullOrEmpty(MatchInfo.Config.EventulaApistatsToken))
+        {
+            _DemoUploader = new DemoUploader(MatchInfo.Config.EventulaDemoUploadUrl, MatchInfo.Config.EventulaApistatsToken);
+        }
+
+        _MapsToSelect = MatchInfo.Config.Maplist.Select(x => new Vote(x)).ToList();
+
+        _MatchStateMachine = new StateMachine<MatchState, MatchCommand>(MatchState.None);
+        InitializeStateMachine();
+
+        SetMatchTeamCvars();
+    }
+
 #pragma warning disable MA0051 // Method is too long
     private void InitializeStateMachine()
 #pragma warning restore MA0051 // Method is too long
     {
         _MatchStateMachine.Configure(MatchState.None)
-            .Permit(MatchCommand.LoadMatch, MatchState.WaitingForPlayersConnectedReady);
+            .PermitIf(MatchCommand.LoadMatch, MatchState.WaitingForPlayersConnectedReady, HasNoRestoredMatch)
+            .PermitIf(MatchCommand.LoadMatch, MatchState.WaitingForPlayersReady, HasRestoredMatch);
 
         _MatchStateMachine.Configure(MatchState.WaitingForPlayersConnectedReady)
             .PermitIf(MatchCommand.PlayerReady, MatchState.MapVote, AllPlayersAreReady)
@@ -135,6 +161,16 @@ public class Match : IDisposable
         _MatchStateMachine.OnTransitioned(OnMatchStateChanged);
 
         _MatchStateMachine.Fire(MatchCommand.LoadMatch);
+    }
+
+    private bool HasNoRestoredMatch()
+    {
+        return !HasRestoredMatch();
+    }
+
+    private bool HasRestoredMatch()
+    {
+        return !string.IsNullOrEmpty(MatchInfo.CurrentMap.MapName);
     }
 
     private void SetMatchTeamCvars()
