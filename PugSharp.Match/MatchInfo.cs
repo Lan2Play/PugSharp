@@ -17,7 +17,7 @@ public class MatchInfo
     public MatchMap CurrentMap { get; set; }
 
     public IReadOnlyList<MatchMap> MatchMaps { get; init; }
-    public string DemoFile { get; init; }
+    public string DemoFile { get; set; }
     public MatchConfig Config { get; }
 }
 
