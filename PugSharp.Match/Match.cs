@@ -701,10 +701,15 @@ public class Match : IDisposable
         var teamWithMostWins = MatchInfo.MatchMaps.Where(x => x.Winner != null).GroupBy(x => x.Winner).MaxBy(x => x.Count());
         if (teamWithMostWins?.Key == null)
         {
+            _Logger.LogError("Can not check if all maps are ready. No team with wins!");
             return false;
         }
 
-        return teamWithMostWins.Count() > MatchInfo.Config.NumMaps / 2d;
+        var wins = teamWithMostWins.Count();
+        var requiredWins = MatchInfo.Config.NumMaps / 2d;
+        _Logger.LogInformation("{team} has most wins: {wins} of {requiredWins}", teamWithMostWins.Key.TeamConfig.Name, wins, requiredWins);
+
+        return wins > requiredWins;
     }
 
     private bool NotAllMapsArePlayed() => !AllMapsArePlayed();
