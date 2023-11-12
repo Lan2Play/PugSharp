@@ -18,4 +18,5 @@ public interface IMatchCallback
     Team LoadMatchWinner();
     T? GetConvar<T>(string name);
     void CleanUpMatch();
+    void RestoreBackup(string roundBackupFile);
 }

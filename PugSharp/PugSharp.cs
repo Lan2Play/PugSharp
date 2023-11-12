@@ -152,7 +152,7 @@ public class PugSharp : BasePlugin, IMatchCallback
         }
     }
 
-    private void InitializeMatch(MatchInfo matchInfo, bool noReset = false)
+    private void InitializeMatch(MatchInfo matchInfo, string roundBackupFile, bool noReset = false)
     {
         _ApiProvider.ClearApiProviders();
 
@@ -176,7 +176,7 @@ public class PugSharp : BasePlugin, IMatchCallback
         SetMatchVariable(matchInfo.Config);
 
         _Match?.Dispose();
-        _Match = new Match.Match(this, _ApiProvider, matchInfo);
+        _Match = new Match.Match(this, _ApiProvider, matchInfo, roundBackupFile);
 
         var players = GetAllPlayers();
         foreach (var player in players.Where(x => x.UserId.HasValue && x.UserId >= 0))
@@ -246,6 +246,11 @@ public class PugSharp : BasePlugin, IMatchCallback
             _Match.Dispose();
             _Match = null;
         }
+    }
+
+    public void RestoreBackup(string roundBackupFile)
+    {
+        _CsServer.ExecuteCommand($"mp_backup_restore_load_file {roundBackupFile}");
     }
 
     private void ResetServer()
@@ -503,7 +508,6 @@ public class PugSharp : BasePlugin, IMatchCallback
                 return;
             }
 
-            _CsServer.ExecuteCommand($"mp_backup_restore_load_file {roundBackupFile}");
             var matchInfoStream = File.OpenRead(matchInfoFileName);
             await using (matchInfoStream.ConfigureAwait(false))
             {
@@ -515,7 +519,7 @@ public class PugSharp : BasePlugin, IMatchCallback
                     return;
                 }
 
-                InitializeMatch(matchInfo, false);
+                InitializeMatch(matchInfo, roundBackupFile, false);
             }
         },
         command).ConfigureAwait(false);

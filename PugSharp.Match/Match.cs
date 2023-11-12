@@ -24,6 +24,7 @@ public class Match : IDisposable
     private readonly System.Timers.Timer _ReadyReminderTimer = new(10000);
     private readonly IMatchCallback _MatchCallback;
     private readonly IApiProvider _ApiProvider;
+    private readonly string _RoundBackupFile;
     private readonly StateMachine<MatchState, MatchCommand> _MatchStateMachine;
 
     private readonly DemoUploader? _DemoUploader;
@@ -68,10 +69,11 @@ public class Match : IDisposable
         SetMatchTeamCvars();
     }
 
-    public Match(IMatchCallback matchCallback, IApiProvider apiProvider, MatchInfo matchInfo)
+    public Match(IMatchCallback matchCallback, IApiProvider apiProvider, MatchInfo matchInfo, string roundBackupFile)
     {
         _MatchCallback = matchCallback;
         _ApiProvider = apiProvider;
+        _RoundBackupFile = roundBackupFile;
         MatchInfo = matchInfo;
         MatchTeam1 = new MatchTeam(MatchInfo.Config.Team1);
         MatchTeam2 = new MatchTeam(MatchInfo.Config.Team2);
@@ -205,6 +207,7 @@ public class Match : IDisposable
 
     private void StartMatch()
     {
+        _MatchCallback.RestoreBackup(_RoundBackupFile);
         _MatchCallback.EndWarmup();
         _MatchCallback.DisableCheats();
         _MatchCallback.SetupRoundBackup();
