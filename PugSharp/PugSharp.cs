@@ -470,7 +470,7 @@ public class PugSharp : BasePlugin, IMatchCallback
             int roundToRestore;
             if (command.ArgCount == 2)
             {
-                var files = Directory.EnumerateFiles(csgoDirectory, $"Match_{matchId}_Round*");
+                var files = Directory.EnumerateFiles(csgoDirectory, $"PugSharp_Match_{matchId}_round*");
                 foreach (var file in files)
                 {
                     _Logger.LogInformation("found posisble Backup: {file} ", file);
