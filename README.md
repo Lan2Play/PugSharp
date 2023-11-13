@@ -41,7 +41,8 @@ If you want to help developing or translating, join our discord:
 - [x] pause / unpause feature
 - [x] demo recording
 - [x] demo upload
-
+- [x] automatic round backups
+- [x] restore round backups
 
 ## Usage
 
@@ -64,6 +65,7 @@ If you want to know how to use PugSharp, hop over to our [Documentation](https:/
 
 - `!ps_loadconfig <url> [authToken]` Load a [MatchConfig](#MatchConfig) to initialize a match
 - `!ps_loadconfigfile <filename>` Load a [MatchConfig](#MatchConfig) to initialize a match. The file path must be either rooted or relative to `csgo/PugSharp/Config/`
+- `!ps_restorematch <matchId> <round>` Restores match in the given round.
 - `!ps_stopmatch` Danger! Stops the current match immediatly and resets the server.
 - `!ps_dumpmatch` Dumps the current matchstate and config to console
 

@@ -39,61 +39,46 @@ public class Match : IDisposable
 
     public MatchInfo MatchInfo { get; }
 
-
-
     public IEnumerable<MatchPlayer> AllMatchPlayers => MatchInfo.MatchTeam1.Players.Concat(MatchInfo.MatchTeam2.Players);
 
-    public Match(IMatchCallback matchCallback, IApiProvider apiProvider, Config.MatchConfig matchConfig)
+    private Match(IMatchCallback matchCallback, IApiProvider apiProvider, MatchInfo matchInfo)
+    {
+        _MatchCallback = matchCallback;
+        _ApiProvider = apiProvider;
+        MatchInfo = matchInfo;
+        _VoteTimer.Interval = MatchInfo.Config.VoteTimeout;
+        _VoteTimer.Elapsed += VoteTimer_Elapsed;
+        _ReadyReminderTimer.Elapsed += ReadyReminderTimer_Elapsed;
+
+        MatchInfo.CurrentMap = matchInfo.MatchMaps.LastOrDefault(x => !string.IsNullOrEmpty(x.MapName)) ?? matchInfo.MatchMaps.Last();
+        _Logger.LogInformation("Continue Match on map {mapNumber}({mapName})!", MatchInfo.CurrentMap.MapNumber, MatchInfo.CurrentMap.MapName);
+
+        if (!string.IsNullOrEmpty(MatchInfo.Config.EventulaDemoUploadUrl) && !string.IsNullOrEmpty(MatchInfo.Config.EventulaApistatsToken))
+        {
+            _DemoUploader = new DemoUploader(MatchInfo.Config.EventulaDemoUploadUrl, MatchInfo.Config.EventulaApistatsToken);
+        }
+
+        _MapsToSelect = MatchInfo.Config.Maplist.Select(x => new Vote(x)).ToList();
+
+        _MatchStateMachine = new StateMachine<MatchState, MatchCommand>(MatchState.None);
+    }
+
+    public Match(IMatchCallback matchCallback, IApiProvider apiProvider, Config.MatchConfig matchConfig) : this(matchCallback, apiProvider, new MatchInfo(matchConfig))
     {
         _MatchCallback = matchCallback;
         _ApiProvider = apiProvider;
         MatchInfo = new MatchInfo(matchConfig);
-       
-
-        _VoteTimer.Interval = MatchInfo.Config.VoteTimeout;
-        _VoteTimer.Elapsed += VoteTimer_Elapsed;
-        _ReadyReminderTimer.Elapsed += ReadyReminderTimer_Elapsed;
-
-        if (!string.IsNullOrEmpty(MatchInfo.Config.EventulaDemoUploadUrl) && !string.IsNullOrEmpty(MatchInfo.Config.EventulaApistatsToken))
-        {
-            _DemoUploader = new DemoUploader(MatchInfo.Config.EventulaDemoUploadUrl, MatchInfo.Config.EventulaApistatsToken);
-        }
-
-        _MapsToSelect = MatchInfo.Config.Maplist.Select(x => new Vote(x)).ToList();
-
-        _MatchStateMachine = new StateMachine<MatchState, MatchCommand>(MatchState.None);
         InitializeStateMachine();
 
-        SetMatchTeamCvars();
+
     }
 
-    public Match(IMatchCallback matchCallback, IApiProvider apiProvider, MatchInfo matchInfo, string roundBackupFile)
+    public Match(IMatchCallback matchCallback, IApiProvider apiProvider, MatchInfo matchInfo, string roundBackupFile) : this(matchCallback, apiProvider, matchInfo)
     {
         _Logger.LogInformation("Create Match from existing MatchInfo!");
         _Logger.LogInformation(JsonSerializer.Serialize(matchInfo));
-        _MatchCallback = matchCallback;
-        _ApiProvider = apiProvider;
         _RoundBackupFile = roundBackupFile;
-        MatchInfo = matchInfo;
-        // TODO CompleteMatch if alls maps have an winner?
-        MatchInfo.CurrentMap = matchInfo.MatchMaps.LastOrDefault(x => !string.IsNullOrEmpty(x.MapName)) ?? matchInfo.MatchMaps.Last();
-        _Logger.LogInformation("Continue Match on map {mapNumber}({mapName})!", MatchInfo.CurrentMap.MapNumber, MatchInfo.CurrentMap.MapName);
-
-        _VoteTimer.Interval = MatchInfo.Config.VoteTimeout;
-        _VoteTimer.Elapsed += VoteTimer_Elapsed;
-        _ReadyReminderTimer.Elapsed += ReadyReminderTimer_Elapsed;
-
-        if (!string.IsNullOrEmpty(MatchInfo.Config.EventulaDemoUploadUrl) && !string.IsNullOrEmpty(MatchInfo.Config.EventulaApistatsToken))
-        {
-            _DemoUploader = new DemoUploader(MatchInfo.Config.EventulaDemoUploadUrl, MatchInfo.Config.EventulaApistatsToken);
-        }
-
-        _MapsToSelect = MatchInfo.Config.Maplist.Select(x => new Vote(x)).ToList();
-
-        _MatchStateMachine = new StateMachine<MatchState, MatchCommand>(MatchState.None);
         InitializeStateMachine();
-
-        SetMatchTeamCvars();
     }
 
 #pragma warning disable MA0051 // Method is too long
@@ -101,11 +86,10 @@ public class Match : IDisposable
 #pragma warning restore MA0051 // Method is too long
     {
         _MatchStateMachine.Configure(MatchState.None)
-            .PermitIf(MatchCommand.LoadMatch, MatchState.WaitingForPlayersConnectedReady, HasNoRestoredMatch)
-            .PermitIf(MatchCommand.LoadMatch, MatchState.WaitingForPlayersReady, HasRestoredMatch);
+            .PermitDynamicIf(MatchCommand.LoadMatch, () => HasRestoredMatch() ? MatchState.RestoreMatch : MatchState.WaitingForPlayersConnectedReady);
 
         _MatchStateMachine.Configure(MatchState.WaitingForPlayersConnectedReady)
-            .PermitIf(MatchCommand.PlayerReady, MatchState.MapVote, AllPlayersAreReady)
+            .PermitDynamicIf(MatchCommand.PlayerReady, () => HasRestoredMatch() ? MatchState.MatchRunning : MatchState.MapVote, AllPlayersAreReady)
             .OnEntry(SetAllPlayersNotReady)
             .OnEntry(StartReadyReminder)
             .OnExit(StopReadyReminder);
@@ -139,12 +123,24 @@ public class Match : IDisposable
             .Permit(MatchCommand.DisconnectPlayer, MatchState.MatchPaused)
             .Permit(MatchCommand.Pause, MatchState.MatchPaused)
             .PermitIf(MatchCommand.CompleteMap, MatchState.MapCompleted)
-            .OnEntryAsync(MatchLiveAsync);
+            .OnEntry(MatchLive);
 
         _MatchStateMachine.Configure(MatchState.MatchPaused)
             .PermitIf(MatchCommand.ConnectPlayer, MatchState.MatchRunning, AllPlayersAreConnected)
             .PermitIf(MatchCommand.Unpause, MatchState.MatchRunning, AllTeamsUnpaused)
             .OnEntry(PauseMatch)
+            .OnExit(UnpauseMatch);
+
+        _MatchStateMachine.Configure(MatchState.RestoreMatch)
+            .PermitIf(MatchCommand.ConnectPlayer, MatchState.MatchRunning, AllPlayersAreConnected)
+            .OnEntry(PauseMatch)
+            .OnExit(() =>
+            {
+                if (HasRestoredMatch())
+                {
+                    _MatchCallback.RestoreBackup(_RoundBackupFile);
+                }
+            })
             .OnExit(UnpauseMatch);
 
         _MatchStateMachine.Configure(MatchState.MapCompleted)
@@ -166,19 +162,9 @@ public class Match : IDisposable
         _MatchStateMachine.Fire(MatchCommand.LoadMatch);
     }
 
-    private bool HasNoRestoredMatch()
-    {
-        return !HasRestoredMatch();
-    }
-
     private bool HasRestoredMatch()
     {
         return !string.IsNullOrEmpty(MatchInfo.CurrentMap.MapName);
-    }
-
-    private void SetMatchTeamCvars()
-    {
-
     }
 
     private void StartReadyReminder()
@@ -208,7 +194,6 @@ public class Match : IDisposable
 
     private void StartMatch()
     {
-        _MatchCallback.RestoreBackup(_RoundBackupFile);
         _MatchCallback.EndWarmup();
         _MatchCallback.DisableCheats();
         _MatchCallback.SetupRoundBackup();
@@ -510,14 +495,17 @@ public class Match : IDisposable
         _MatchCallback.CleanUpMatch();
     }
 
-    private async Task MatchLiveAsync()
+    private void MatchLive()
     {
-        for (int i = 0; i < NumOfMatchLiveMessages; i++)
+        _ = Task.Run(async () =>
         {
-            _MatchCallback.SendMessage(string.Create(CultureInfo.InvariantCulture, $" {ChatColors.Default}Match is {ChatColors.Green}LIVE"));
+            for (int i = 0; i < NumOfMatchLiveMessages; i++)
+            {
+                _MatchCallback.SendMessage(string.Create(CultureInfo.InvariantCulture, $" {ChatColors.Default}Match is {ChatColors.Green}LIVE"));
 
-            await Task.Delay(TimeSpan.FromSeconds(1)).ConfigureAwait(false);
-        }
+                await Task.Delay(TimeSpan.FromSeconds(1)).ConfigureAwait(false);
+            }
+        });
     }
 
     private void OnMatchStateChanged(StateMachine<MatchState, MatchCommand>.Transition transition)
