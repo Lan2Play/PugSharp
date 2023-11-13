@@ -113,6 +113,8 @@ public class PugSharp : BasePlugin, IMatchCallback
 
     private void ResetForMatch(MatchConfig matchConfig)
     {
+        ResetServer(matchConfig.VoteMap);
+
         _ApiProvider.ClearApiProviders();
 
         if (!string.IsNullOrEmpty(matchConfig.EventulaApistatsUrl))
@@ -151,14 +153,12 @@ public class PugSharp : BasePlugin, IMatchCallback
 
         _Match = new Match.Match(this, _ApiProvider, matchConfig);
 
-        ResetServer();
     }
 
     private void InitializeMatch(MatchInfo matchInfo, string roundBackupFile)
     {
         ResetForMatch(matchInfo.Config);
         _Match = new Match.Match(this, _ApiProvider, matchInfo, roundBackupFile);
-
     }
 
     public static void UpdateConvar<T>(string name, T value)
@@ -221,33 +221,33 @@ public class PugSharp : BasePlugin, IMatchCallback
         _CsServer.ExecuteCommand($"mp_backup_restore_load_file {roundBackupFile}");
     }
 
-    private void ResetServer()
+    private void ResetServer(string map)
     {
         StopDemoRecording();
 
         // TODO Configure VoteMap/or reload current map
-        _CsServer.ExecuteCommand("changelevel de_dust2");
+        _CsServer.ExecuteCommand($"changelevel {map}");
     }
 
     private void SetMatchVariable(MatchConfig matchConfig)
     {
+#pragma warning disable S109 // Magic numbers should not be used
+#pragma warning disable MA0003 // Add parameter name to improve readability
         _Logger.LogInformation("Start set match variables");
 
         UpdateConvar("sv_disable_teamselect_menu", true);
         UpdateConvar("sv_human_autojoin_team", 2);
-        UpdateConvar("mp_warmuptime", (float)6000);
+        UpdateConvar("mp_warmuptime", 6000f);
 
         UpdateConvar("mp_overtime_enable", true);
         UpdateConvar("mp_overtime_maxrounds", matchConfig.MaxOvertimeRounds);
         UpdateConvar("mp_maxrounds", matchConfig.MaxRounds);
-        //UpdateConvar("mp_tournament", true);
         UpdateConvar("mp_autokick", false);
 
         UpdateConvar("mp_team_timeout_time", 30);
         UpdateConvar("mp_team_timeout_max", 3);
 
         UpdateConvar("mp_competitive_endofmatch_extra_time", (float)120);
-        //UpdateConvar("mp_chattime", (float)120);
 
         UpdateConvar("mp_endmatch_votenextmap", false);
 
@@ -262,10 +262,10 @@ public class PugSharp : BasePlugin, IMatchCallback
         UpdateConvar("tv_autorecord", false);
 
         _CsServer.ExecuteCommand("bot_quota 0");
-        //UpdateConvar("tv_delay", 30);
-        //UpdateConvar("tv_delay1", 30);
 
         _Logger.LogInformation("Set match variables done");
+#pragma warning restore MA0003 // Add parameter name to improve readability
+#pragma warning restore S109 // Magic numbers should not be used
     }
 
     #region Commands
@@ -288,9 +288,10 @@ public class PugSharp : BasePlugin, IMatchCallback
                 return;
             }
 
+            var resetMap = _Match.MatchInfo.Config.VoteMap;
             _Match.Dispose();
             _Match = null;
-            ResetServer();
+            ResetServer(resetMap);
         },
         command);
     }
