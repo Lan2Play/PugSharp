@@ -5,9 +5,9 @@
 .SILENT: init-env fix-metamod
 
 
-
 ## Variables
 currentDir = $(shell dirname $(realpath $(lastword $(MAKEFILE_LIST))))
+currentDirWin = $(shell dirname $(realpath $(lastword $(MAKEFILE_LIST))))
 userId = $(shell id -u)
 groupId = $(shell id -g)
 user = $(userId):$(groupId)
@@ -29,6 +29,7 @@ build-and-copy: git-pull build-debug copy-pugsharp
 build-and-copy-docker: git-pull build-debug-docker copy-pugsharp
 init-all: prepare-folders init-env install-deps pull-csserver start-csserver attach-csserver
 init-all-docker: prepare-folders init-env install-deps-docker pull-csserver start-csserver attach-csserver
+install-all-windows: install-windows-steamcmd install-windows
 install-deps: install-counterstrikesharp install-metamod
 install-deps-docker: install-counterstrikesharp-docker install-metamod
 clean-all: clean-csserver clean-env clean-build
@@ -41,11 +42,11 @@ prepare-folders:
 	mkdir -p $(currentDir)/cs2 && chmod 777 $(currentDir)/cs2
 
 init-env:
-	cp $(currentDir)/.env.example $(currentDir)/.env ; 
+	cp $(currentDir)/.env.example $(currentDir)/.env ;
 
 install-counterstrikesharp:
 	mkdir -p $(currentDir)/cs2/game/csgo/addons/
-	wget -q -O $(currentDir)/counterstrikesharp.zip $(shell curl -s -L -H "Accept: application/vnd.github+json" https://api.github.com/repos/roflmuffin/CounterStrikeSharp/releases/tags/$(shell dotnet list PugSharp/PugSharp.csproj package --format json | jq -r '.projects[].frameworks[].topLevelPackages[] | select(.id == "CounterStrikeSharp.API") | .resolvedVersion' | sed 's|1.0.|v|g') | jq -r '.assets[] | select(.browser_download_url | test("with-runtime")) | .browser_download_url') 
+	wget -q -O $(currentDir)/counterstrikesharp.zip $(shell curl -s -L -H "Accept: application/vnd.github+json" https://api.github.com/repos/roflmuffin/CounterStrikeSharp/releases/tags/$(shell dotnet list PugSharp/PugSharp.csproj package --format json | jq -r '.projects[].frameworks[].topLevelPackages[] | select(.id == "CounterStrikeSharp.API") | .resolvedVersion' | sed 's|1.0.|v|g') | jq -r '.assets[] | select(.browser_download_url | test("with-runtime")) | .browser_download_url')
 	unzip -o $(currentDir)/counterstrikesharp.zip -d $(currentDir)/cs2/game/csgo
 	rm -rf $(currentDir)/counterstrikesharp.zip
 
@@ -58,7 +59,7 @@ install-counterstrikesharp-docker:
 	wget -q -O /app/counterstrikesharp.zip $(shell curl -s -L -H "Accept: application/vnd.github+json" https://api.github.com/repos/roflmuffin/CounterStrikeSharp/releases/tags/$(shell dotnet list PugSharp/PugSharp.csproj package --format json | jq -r '.projects[].frameworks[].topLevelPackages[] | select(.id == "CounterStrikeSharp.API") | .resolvedVersion' | sed 's|1.0.|v|g') | jq -r '.assets.[] | select(.browser_download_url | test("with-runtime")) | .browser_download_url'); \
 	unzip -o /app/counterstrikesharp.zip -d /app/cs2/game/csgo; \
 	rm -rf /app/counterstrikesharp.zip; \
-	chown -R $(user) /app/cs2/game/csgo/addons;"	
+	chown -R $(user) /app/cs2/game/csgo/addons;"
 
 install-metamod:
 	mkdir -p $(currentDir)/cs2/game/csgo/
@@ -67,9 +68,21 @@ install-metamod:
 
 fix-metamod:
 	./resources/acmrs.sh
-	
+
 install-jq-and-unzip:
 	apt-get update && apt-get install jq unzip -y
+
+# install-windows:
+# 	powershell Start-Process -NoNewWindow -WorkingDirectory ${CURDIR} -FilePath "$$env:LOCALAPPDATA\Microsoft\WinGet\Links\steamcmd" -ArgumentList '+force_install_dir ${CURDIR}\cs2\ +login Anonymous +app_update 730 validate +exit';
+
+# install-windows-steamcmd:
+# 	winget install --id Valve.SteamCMD --exact --accept-source-agreements --disable-interactivity --accept-source-agreements --force
+
+# install-metamod-windows:
+# 	mkdir -p ${CURDIR}/cs2/game/csgo/
+# 	export LATESTMM=$(shell wget -qO- https://mms.alliedmods.net/mmsdrop/2.0/mmsource-latest-windows); \
+# 	powershell Start-Process wget -Argume -qO- https://mms.alliedmods.net/mmsdrop/2.0/$$LATESTMM | tar xvzf - -C ${CURDIR}/cs2/game/csgo
+
 
 ## base commands
 pull-csserver:
