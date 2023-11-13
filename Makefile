@@ -69,7 +69,10 @@ fix-metamod:
 	./resources/acmrs.sh
 	
 install-jq-and-unzip:
-	apt-get update && apt-get install jq unzip -y
+	apt-get update && apt-get install jq unzip -y	
+
+install-vsdebug:
+	$(DOCKER_COMPOSE) exec -u 0 cs2-server /bin/bash -c "apt-get update ; apt-get install procps -y ; mkdir -p /root/.vs-debugger; curl -sSL https://aka.ms/getvsdbgsh -o '/root/.vs-debugger/GetVsDbg.sh' && chmod +x /root/.vs-debugger/GetVsDbg.sh && /root/.vs-debugger/GetVsDbg.sh -v latest -l /vsdbg"
 
 ## base commands
 pull-csserver:
