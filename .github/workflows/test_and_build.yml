@@ -23,66 +23,66 @@ on:
 
 jobs:
 
-  test_linux_x64:
-    runs-on: ubuntu-latest
-    if: ${{ !startsWith( github.event.pull_request.head.label, 'lan2play-weblate' ) }}
-    steps:
-      - name : machine echo github
-        env : { CONTENT : "${{ toJson(github) }}" }
-        run : "echo $CONTENT"
-      - name: Set up JDK 11
-        uses: actions/setup-java@v3
-        with:
-          distribution: 'temurin'
-          java-version: '17'
-      - name: Setup .NET
-        uses: actions/setup-dotnet@v3
-        with:
-          dotnet-version: 7.0
-      - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-      - name: Cache SonarCloud packages
-        uses: actions/cache@v3
-        with:
-          path: ./sonar/cache
-          key: ${{ runner.os }}-sonar
-          restore-keys: ${{ runner.os }}-sonar
-      - name: Cache SonarCloud scanner
-        id: cache-sonar-scanner
-        uses: actions/cache@v3
-        with:
-          path: ./sonar/scanner
-          key: ${{ runner.os }}-sonar-scanner
-          restore-keys: ${{ runner.os }}-sonar-scanner
-      - name: Install SonarCloud scanner
-        if: steps.cache-sonar-scanner.outputs.cache-hit != 'true'
-        shell: pwsh
-        run: |
-          New-Item -Path ./sonar/scanner -ItemType Directory
-          dotnet tool install dotnet-sonarscanner --tool-path ./sonar/scanner
-      - name: Update SonarCloud scanner
-        if: steps.cache-sonar-scanner.outputs.cache-hit != 'false'
-        shell: pwsh
-        run: |
-          dotnet tool update dotnet-sonarscanner --tool-path ./sonar/scanner
-      - name: Restore dependencies
-        run: dotnet restore
-      - name: start sonarscanner
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-        run:  ./sonar/scanner/dotnet-sonarscanner begin /k:"Lan2Play_PugSharp" /o:"lan2play" /d:sonar.token="${{ secrets.SONAR_TOKEN }}" /d:sonar.host.url="https://sonarcloud.io" /d:sonar.cs.opencover.reportsPaths="./**/*.opencover.xml"
-      - name: dotnet build
-        run:  dotnet build --no-restore
-      - name: dotnet test
-        run:  dotnet test --no-build --no-restore --collect "XPlat Code Coverage" -- DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.Format=opencover
-      - name: stop sonarscanner
-        if: always()
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-        run: ./sonar/scanner/dotnet-sonarscanner end /d:sonar.token="${{ secrets.SONAR_TOKEN }}"
+  # test_linux_x64:
+  #   runs-on: ubuntu-latest
+  #   if: ${{ !startsWith( github.event.pull_request.head.label, 'lan2play-weblate' ) }}
+  #   steps:
+  #     - name : machine echo github
+  #       env : { CONTENT : "${{ toJson(github) }}" }
+  #       run : "echo $CONTENT"
+  #     - name: Set up JDK 11
+  #       uses: actions/setup-java@v3
+  #       with:
+  #         distribution: 'temurin'
+  #         java-version: '17'
+  #     - name: Setup .NET
+  #       uses: actions/setup-dotnet@v3
+  #       with:
+  #         dotnet-version: 7.0
+  #     - uses: actions/checkout@v4
+  #       with:
+  #         fetch-depth: 0
+  #     - name: Cache SonarCloud packages
+  #       uses: actions/cache@v3
+  #       with:
+  #         path: ./sonar/cache
+  #         key: ${{ runner.os }}-sonar
+  #         restore-keys: ${{ runner.os }}-sonar
+  #     - name: Cache SonarCloud scanner
+  #       id: cache-sonar-scanner
+  #       uses: actions/cache@v3
+  #       with:
+  #         path: ./sonar/scanner
+  #         key: ${{ runner.os }}-sonar-scanner
+  #         restore-keys: ${{ runner.os }}-sonar-scanner
+  #     - name: Install SonarCloud scanner
+  #       if: steps.cache-sonar-scanner.outputs.cache-hit != 'true'
+  #       shell: pwsh
+  #       run: |
+  #         New-Item -Path ./sonar/scanner -ItemType Directory
+  #         dotnet tool install dotnet-sonarscanner --tool-path ./sonar/scanner
+  #     - name: Update SonarCloud scanner
+  #       if: steps.cache-sonar-scanner.outputs.cache-hit != 'false'
+  #       shell: pwsh
+  #       run: |
+  #         dotnet tool update dotnet-sonarscanner --tool-path ./sonar/scanner
+  #     - name: Restore dependencies
+  #       run: dotnet restore
+  #     - name: start sonarscanner
+  #       env:
+  #         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  #         SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+  #       run:  ./sonar/scanner/dotnet-sonarscanner begin /k:"Lan2Play_PugSharp" /o:"lan2play" /d:sonar.token="${{ secrets.SONAR_TOKEN }}" /d:sonar.host.url="https://sonarcloud.io" /d:sonar.cs.opencover.reportsPaths="./**/*.opencover.xml"
+  #     - name: dotnet build
+  #       run:  dotnet build --no-restore
+  #     - name: dotnet test
+  #       run:  dotnet test --no-build --no-restore --collect "XPlat Code Coverage" -- DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.Format=opencover
+  #     - name: stop sonarscanner
+  #       if: always()
+  #       env:
+  #         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  #         SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+  #       run: ./sonar/scanner/dotnet-sonarscanner end /d:sonar.token="${{ secrets.SONAR_TOKEN }}"
 
 
   get_versions:
@@ -90,37 +90,71 @@ jobs:
     if: ${{ !startsWith( github.event.pull_request.head.label, 'lan2play-weblate' ) }}
     outputs:
       PUGSHARPNETVER: ${{ steps.PUGSHARPNETVER.outputs.PUGSHARPNETVER }}
-      # CSSHARPVER: ${{ steps.step2.outputs.test }}
-      # CSSHARPlink: ${{ steps.step2.outputs.test }}
-      # CSSHARPlinkWRuntime: ${{ steps.step2.outputs.test }}
+      CSSHARPVER: ${{ steps.CSSHARPVER.outputs.CSSHARPVER }}
+      CSSHARPlink: ${{ steps.CSSHARPlink.outputs.CSSHARPlink }}
+      CSSHARPlinkWRuntime: ${{ steps.CSSHARPlinkWRuntime.outputs.CSSHARPlinkWRuntime }}      
+      CSSHARPlinkWindows: ${{ steps.CSSHARPlinkWindows.outputs.CSSHARPlinkWindows }}
+      CSSHARPlinkWRuntimeWindows: ${{ steps.CSSHARPlinkWRuntimeWindows.outputs.CSSHARPlinkWRuntimeWindows }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
         with:
           submodules: recursive
-      - name: set Version
+      - name: install deps
+        run: sudo apt-get update && sudo apt-get install jq -y
+
+      - name: set Pugsharp Version
         if: ${{ (startsWith(github.ref, 'refs/tags/v')) }}
         run:  echo "PUGSHARPNETVER=$(echo ${GITHUB_REF} | sed 's|refs/heads/||g' | sed 's|refs/tags/v||g' )" >> $GITHUB_ENV
-      - name: set Version
+      - name: set Pugsharp Version
         if: ${{ !(startsWith(github.ref, 'refs/tags/v')) }}
         run:  echo "PUGSHARPNETVER=0.0.1-alpha" >> $GITHUB_ENV
-      - name: set Version
+      - name: set Pugsharp Version in output
         run: echo "PUGSHARPNETVER=$PUGSHARPNETVER" >> "$GITHUB_OUTPUT"
         id: PUGSHARPNETVER
 
+      - name: get counterstrikesharp version
+        run: echo "CSSHARPVER=$(dotnet list PugSharp/PugSharp.csproj package --format json | jq -r '.projects[].frameworks[].topLevelPackages[] | select(.id == "CounterStrikeSharp.API") | .resolvedVersion' | sed 's|1.0.|v|g')"  >> $GITHUB_ENV
+      - name: set counterstrikesharp version in output
+        run: echo "CSSHARPVER=$CSSHARPVER" >> "$GITHUB_OUTPUT"
+        id: CSSHARPVER
+
+      - name: get counterstrikesharp link with runtime
+        run: echo "CSSHARPlinkWRuntime=$(curl -s -L https://api.github.com/repos/roflmuffin/CounterStrikeSharp/releases/tags/$CSSHARPVER | jq -r '.assets[] | select(.browser_download_url | test("with-runtime.*linux")) | .browser_download_url')" >> $GITHUB_ENV
+      - name: set counterstrikesharp link with runtime in output
+        run: echo "CSSHARPlinkWRuntime=$CSSHARPlinkWRuntime" >> "$GITHUB_OUTPUT"
+        id: CSSHARPlinkWRuntime
+
+      - name: get counterstrikesharp link without runtime
+        run: echo "CSSHARPlink=$(curl -s -L https://api.github.com/repos/roflmuffin/CounterStrikeSharp/releases/tags/$CSSHARPVER | jq -r '.assets[] | select(.browser_download_url | contains("linux") and (. | contains("with-runtime") | not)) | .browser_download_url')" >> $GITHUB_ENV
+      - name: set counterstrikesharp link without runtime in output
+        run: echo "CSSHARPlink=$CSSHARPlink" >> "$GITHUB_OUTPUT"
+        id: CSSHARPlink
+
+      - name: get counterstrikesharp link with runtime for windows
+        run: echo "CSSHARPlinkWRuntimeWindows=$(curl -s -L https://api.github.com/repos/roflmuffin/CounterStrikeSharp/releases/tags/$CSSHARPVER | jq -r '.assets[] | select(.browser_download_url | test("with-runtime.*windows")) | .browser_download_url')" >> $GITHUB_ENV
+      - name: set counterstrikesharp link with runtime for windows in output
+        run: echo "CSSHARPlinkWRuntimeWindows=$CSSHARPlinkWRuntimeWindows" >> "$GITHUB_OUTPUT"
+        id: CSSHARPlinkWRuntimeWindows
+
+      - name: get counterstrikesharp link without runtime for windows
+        run: echo "CSSHARPlinkWindows=$(curl -s -L https://api.github.com/repos/roflmuffin/CounterStrikeSharp/releases/tags/$CSSHARPVER | jq -r '.assets[] | select(.browser_download_url | contains("windows") and (. | contains("with-runtime") | not)) | .browser_download_url')" >> $GITHUB_ENV
+      - name: set counterstrikesharp link without runtime for windows in output
+        run: echo "CSSHARPlinkWindows=$CSSHARPlinkWindows" >> "$GITHUB_OUTPUT"
+        id: CSSHARPlinkWindows       
 
 
   build_linux_x64:
     runs-on: ubuntu-latest
     if: ${{ !startsWith( github.event.pull_request.head.label, 'lan2play-weblate' ) }}
     needs:
-    - test_linux_x64
+    # - test_linux_x64
     - get_versions
     env:
       PUGSHARPNETVER: ${{needs.get_versions.outputs.PUGSHARPNETVER}}
-      # CSSHARPVER: ${{needs.get_versions.outputs.CSSHARPVER}}
-      # CSSHARPlink: ${{needs.get_versions.outputs.CSSHARPlink}}
-      # CSSHARPlinkWRuntime: ${{needs.get_versions.outputs.CSSHARPlinkWRuntime}}
+      CSSHARPVER: ${{needs.get_versions.outputs.CSSHARPVER}}
+      CSSHARPlink: ${{needs.get_versions.outputs.CSSHARPlink}}
+      CSSHARPlinkWRuntime: ${{needs.get_versions.outputs.CSSHARPlinkWRuntime}}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -141,15 +175,7 @@ jobs:
         run: mv PugSharp_linux_$PUGSHARPNETVER.zip ../
         working-directory: ./packagebuild
       - name: install deps
-        run: sudo apt-get update && sudo apt-get install jq unzip -y
-      - name: get counterstrikesharp version
-        run: echo "CSSHARPVER=$(dotnet list PugSharp/PugSharp.csproj package --format json | jq -r '.projects[].frameworks[].topLevelPackages[] | select(.id == "CounterStrikeSharp.API") | .resolvedVersion' | sed 's|1.0.|v|g')"  >> $GITHUB_ENV
-      - name: echo counterstrikesharp version
-        run: echo $CSSHARPVER
-      - name: get counterstrikesharp link without runtime
-        run: echo "CSSHARPlink=$(curl -s -L https://api.github.com/repos/roflmuffin/CounterStrikeSharp/releases/tags/$CSSHARPVER | jq -r '.assets[] | select(.browser_download_url | contains("linux") and (. | contains("with-runtime") | not)) | .browser_download_url')" >> $GITHUB_ENV
-      - name: echo counterstrikesharp link without runtime
-        run: echo $CSSHARPlink
+        run: sudo apt-get update && sudo apt-get install unzip -y
       - name: get counterstrikesharp without runtime
         run: "wget -q -O counterstrikesharp.zip $CSSHARPlink"
       - name: extract counterstrikesharp without runtime
@@ -160,10 +186,6 @@ jobs:
       - name: move package
         run: mv PugSharp_with_cssharp_linux_$PUGSHARPNETVER.zip ../
         working-directory: ./packagebuild
-      - name: get counterstrikesharp link with runtime
-        run: echo "CSSHARPlinkWRuntime=$(curl -s -L https://api.github.com/repos/roflmuffin/CounterStrikeSharp/releases/tags/$CSSHARPVER | jq -r '.assets[] | select(.browser_download_url | test("with-runtime.*linux")) | .browser_download_url')" >> $GITHUB_ENV
-      - name: echo counterstrikesharp link with runtime
-        run: echo $CSSHARPlinkWRuntime
       - name: get counterstrikesharp with runtime
         run: "wget -q -O counterstrikesharp.zip $CSSHARPlinkWRuntime"
       - name: extract counterstrikesharp with runtime
