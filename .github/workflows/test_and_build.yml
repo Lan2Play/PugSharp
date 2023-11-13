@@ -222,7 +222,23 @@ jobs:
         with:
           name: latest_build_linux
           path: |
-            ./PugSharp_*.zip 
+            ./PugSharp_linux_*.zip 
+          retention-days: 10
+      - name: upload artefact
+        if: github.event_name != 'pull_request'
+        uses: actions/upload-artifact@v3
+        with:
+          name: latest_build_linux_with_cssharp
+          path: |
+            ./PugSharp_with_cssharp_linux_*.zip 
+          retention-days: 10      
+      - name: upload artefact
+        if: github.event_name != 'pull_request'
+        uses: actions/upload-artifact@v3
+        with:
+          name: latest_build_linux_with_cssharp_and_runtime
+          path: |
+            ./PugSharp_with_cssharp_and_runtime_linux_*.zip 
           retention-days: 10
 
 
@@ -296,9 +312,26 @@ jobs:
         with:
           name: latest_build_windows
           path: |
-            ./PugSharp_*.zip 
+            ./PugSharp_windows_*.zip 
+          retention-days: 10
+      - name: upload artefact
+        if: github.event_name != 'pull_request'
+        uses: actions/upload-artifact@v3
+        with:
+          name: latest_build_windows_with_cssharp
+          path: |
+            ./PugSharp_with_cssharp_windows_*.zip 
+          retention-days: 10      
+      - name: upload artefact
+        if: github.event_name != 'pull_request'
+        uses: actions/upload-artifact@v3
+        with:
+          name: latest_build_windows_with_cssharp_and_runtime
+          path: |
+            ./PugSharp_with_cssharp_and_runtime_windows_*.zip 
           retention-days: 10
 
+          
   release:
     runs-on: ubuntu-latest
     if: ${{ startsWith(github.ref, 'refs/tags/v') }}
@@ -314,6 +347,14 @@ jobs:
       - uses: actions/download-artifact@v3
         with:
           name: latest_build_windows
+          path: build/windows      
+      - uses: actions/download-artifact@v3
+        with:
+          name: latest_build_windows_with_cssharp
+          path: build/windows
+      - uses: actions/download-artifact@v3
+        with:
+          name: latest_build_windows_with_cssharp_and_runtime
           path: build/windows
       - uses: actions/download-artifact@v3
         with:
@@ -321,11 +362,19 @@ jobs:
           path: build/linux
       - uses: actions/download-artifact@v3
         with:
+          name: latest_build_linux_with_cssharp
+          path: build/linux
+      - uses: actions/download-artifact@v3
+        with:
+          name: latest_build_linux_with_cssharp_and_runtime
+          path: build/linux
+      - uses: actions/download-artifact@v3
+        with:
           name: latest_build_meta
           path: build/meta
 
       - name: Release
-        if: ${{ (startsWith(github.ref, 'refs/tags/v')) && !(contains(github.ref, '-beta')) }}
+        if: ${{ !(contains(github.ref, '-beta')) }}
         uses: softprops/action-gh-release@v1
         with:
           files: |
@@ -335,7 +384,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: pre Release
-        if: ${{ (startsWith(github.ref, 'refs/tags/v')) && (contains(github.ref, '-beta')) }}
+        if: ${{ contains(github.ref, '-beta') }}
         uses: softprops/action-gh-release@v1
         with:
           prerelease: true
