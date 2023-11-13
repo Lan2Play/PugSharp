@@ -26,6 +26,12 @@ public class MatchTeam
     [JsonIgnore]
     public bool IsPaused { get; internal set; }
 
+
+    internal void PrintToChat(string message)
+    {
+        Players.ForEach(p=>p.Player.PrintToChat(message));
+    }
+
     internal void ToggleTeamSite()
     {
         CurrentTeamSite = CurrentTeamSite == Team.Terrorist ? Team.CounterTerrorist : Team.Terrorist;
