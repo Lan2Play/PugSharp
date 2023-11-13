@@ -173,8 +173,8 @@ jobs:
     env:
       PUGSHARPNETVER: ${{needs.get_versions.outputs.PUGSHARPNETVER}}
       CSSHARPVER: ${{needs.get_versions.outputs.CSSHARPVER}}
-      CSSHARPlink: ${{needs.get_versions.outputs.CSSHARPlink}}
-      CSSHARPlinkWRuntime: ${{needs.get_versions.outputs.CSSHARPlinkWRuntime}}
+      CSSHARPlink: ${{needs.get_versions.outputs.CSSHARPlinkWindows}}
+      CSSHARPlinkWRuntime: ${{needs.get_versions.outputs.CSSHARPlinkWRuntimeWindows}}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -299,47 +299,49 @@ jobs:
             ./PugSharp_*.zip 
           retention-days: 10
 
+  release:
+    runs-on: ubuntu-latest
+    if: ${{ startsWith(github.ref, 'refs/tags/v') }}
+    needs:
+    - build_linux_x64
+    - build_windows_x64
+    env:
+      PUGSHARPNETVER: ${{needs.get_versions.outputs.PUGSHARPNETVER}}
+      CSSHARPVER: ${{needs.get_versions.outputs.CSSHARPVER}}
+      CSSHARPlink: ${{needs.get_versions.outputs.CSSHARPlink}}
+      CSSHARPlinkWRuntime: ${{needs.get_versions.outputs.CSSHARPlinkWRuntime}}
+    steps:
+      - uses: actions/download-artifact@v3
+        with:
+          name: latest_build_windows
+          path: build/windows
+      - uses: actions/download-artifact@v3
+        with:
+          name: latest_build_linux
+          path: build/linux
+      - uses: actions/download-artifact@v3
+        with:
+          name: latest_build_meta
+          path: build/meta
 
-
-
-
-
-
-
-  # release:
-  #   runs-on: ubuntu-latest
-  #   if: ${{ startsWith(github.ref, 'refs/tags/v') }}
-  #   needs:
-  #   - build_linux_x64
-  #   - build_windows_x64
-  #   env:
-  #     PUGSHARPNETVER: ${{needs.get_versions.outputs.PUGSHARPNETVER}}
-  #     CSSHARPVER: ${{needs.get_versions.outputs.CSSHARPVER}}
-  #     CSSHARPlink: ${{needs.get_versions.outputs.CSSHARPlink}}
-  #     CSSHARPlinkWRuntime: ${{needs.get_versions.outputs.CSSHARPlinkWRuntime}}
-  #   steps:
-  #     - name: Checkout
-  #       uses: actions/checkout@v4
-  #       with:
-  #         submodules: recursive
-
-
-  #     - name: Release
-  #       if: ${{ (startsWith(github.ref, 'refs/tags/v')) && !(contains(github.ref, '-beta')) }}
-  #       uses: softprops/action-gh-release@v1
-  #       with:
-  #         files: |
-  #           ./release.json
-  #           ./packagebuild/PugSharp_*.zip 
-  #       env:
-  #         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-  #     - name: pre Release
-  #       if: ${{ (startsWith(github.ref, 'refs/tags/v')) && (contains(github.ref, '-beta')) }}
-  #       uses: softprops/action-gh-release@v1
-  #       with:
-  #         prerelease: true
-  #         files: |
-  #           ./release.json
-  #           ./PugSharp_*.zip 
-  #       env:
-  #         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Release
+        if: ${{ (startsWith(github.ref, 'refs/tags/v')) && !(contains(github.ref, '-beta')) }}
+        uses: softprops/action-gh-release@v1
+        with:
+          files: |
+            ./build/windows/PugSharp_*.zip 
+            ./build/linux/PugSharp_*.zip 
+            ./build/meta/release.json
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: pre Release
+        if: ${{ (startsWith(github.ref, 'refs/tags/v')) && (contains(github.ref, '-beta')) }}
+        uses: softprops/action-gh-release@v1
+        with:
+          prerelease: true
+          files: |
+            ./build/windows/PugSharp_*.zip 
+            ./build/linux/PugSharp_*.zip 
+            ./build/meta/release.json
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
