@@ -55,5 +55,9 @@ namespace PugSharp.Config
         [JsonPropertyName("allow_suicide")]
         public bool AllowSuicide { get; init; } = true;
 
+
+        [JsonPropertyName("vote_map")]
+        public string VoteMap { get; init; } = "de_dust2";
+
     }
 }

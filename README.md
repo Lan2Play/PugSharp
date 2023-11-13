@@ -28,7 +28,7 @@ If you want to help developing or translating, join our discord:
 
 ## Working features
 
-- [x] Configuration via http(s) json (example below)
+- [x] Configuration via http(s) json ([description](#Match_Config) and [example config](#MatchConfig))
 - [x] Configuration via json file
 - [x] api reporting to a http(s) server
   - [x] Report start of match
@@ -49,7 +49,7 @@ If you want to help developing or translating, join our discord:
 > **Warning**
 > Don't use this in production right now!
 
-If you want to know how to use PugSharp, hop over to our [Documentation](https://pugsharp.lan2play.de) .
+If you want to know how to use PugSharp, hop over to our [Documentation](https://pugsharp.lan2play.de).
 
 ## Commands
 
@@ -92,6 +92,7 @@ If you want to know how to use PugSharp, hop over to our [Documentation](https:/
 | g5_api_header            | (optional)   | Header that should be set to access the g5 events api.                                                               |
 | g5_api_headervalue       | (optional)   | Header value that should be set to access the g5 events api.                                                         |
 | allow_suicide            | true         | Flag to determine if players are allowed to suicide.                                                                 |
+| vote_map                 | de_dust2     | Map that is used during warm up and voting                                                                           |
 
 #### Example Config
 
@@ -125,7 +126,8 @@ If you want to know how to use PugSharp, hop over to our [Documentation](https:/
   "vote_timeout": 60000,
   "eventula_apistats_url": "https://dev.lan2play.de/api/matchmaking/40/",
   "eventula_apistats_token": "S0XRU0UhIExFQ0tFUiEK",
-  "eventula_demo_upload_url": "https://dev.lan2play.de/api/matchmaking/40/demo"
+  "eventula_demo_upload_url": "https://dev.lan2play.de/api/matchmaking/40/demo",
+  "vote_map": "de_inferno",
 }
 ```
 
@@ -151,13 +153,11 @@ If you want to know how to use PugSharp, hop over to our [Documentation](https:/
 
 [![Translation status](https://translate.lan2play.de/widgets/eventula-manager/-/multi-auto.svg)](https://translate.lan2play.de/engage/eventula-manager/) -->
 
-
-
 ## Credits
 
-* Awesome match plugin for CS:GO and inspiration: [Get5](https://github.com/splewis/get5)
-* Plugin Framework: [CounterStrikeSharp by roflmuffin](https://github.com/roflmuffin/CounterStrikeSharp)
-* Docker test setup: [joedwards32/cs2](https://github.com/joedwards32/CS2)
-* Metamod fix script: [ghostcap-gaming/cs2-metamod-re-enable-script](https://github.com/ghostcap-gaming/cs2-metamod-re-enable-script)
-* Metamod: https://www.sourcemm.net/
-* Version detection stolen (and modified) with permission from [CS2-AutoUpdater](https://github.com/dran1x/CS2-AutoUpdater)
+- Awesome match plugin for CS:GO and inspiration: [Get5](https://github.com/splewis/get5)
+- Plugin Framework: [CounterStrikeSharp by roflmuffin](https://github.com/roflmuffin/CounterStrikeSharp)
+- Docker test setup: [joedwards32/cs2](https://github.com/joedwards32/CS2)
+- Metamod fix script: [ghostcap-gaming/cs2-metamod-re-enable-script](https://github.com/ghostcap-gaming/cs2-metamod-re-enable-script)
+- Metamod: https://www.sourcemm.net/
+- Version detection stolen (and modified) with permission from [CS2-AutoUpdater](https://github.com/dran1x/CS2-AutoUpdater)
