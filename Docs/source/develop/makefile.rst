@@ -185,6 +185,15 @@ installs jq and unzip on your debian/ubuntu system via apt
 
 No Parameters
 
+
+install-vsdebug
+........................
+installs vsdebug to your local cs2 container for using vscode debug via the launch.json
+
+**Parameters:**
+
+No Parameters
+
 fix-metamod
 ........................
 inserts the ``Game	csgo/addons/metamod`` command into ./cs2/game/csgo/gameinfo.gi

@@ -70,7 +70,10 @@ fix-metamod:
 	./resources/acmrs.sh
 
 install-jq-and-unzip:
-	apt-get update && apt-get install jq unzip -y
+	apt-get update && apt-get install jq unzip -y	
+
+install-vsdebug:
+	$(DOCKER_COMPOSE) exec -u 0 cs2-server /bin/bash -c "apt-get update ; apt-get install procps -y ; mkdir -p /root/.vs-debugger; curl -sSL https://aka.ms/getvsdbgsh -o '/root/.vs-debugger/GetVsDbg.sh' && chmod +x /root/.vs-debugger/GetVsDbg.sh && /root/.vs-debugger/GetVsDbg.sh -v latest -l /vsdbg"
 
 # install-windows:
 # 	powershell Start-Process -NoNewWindow -WorkingDirectory ${CURDIR} -FilePath "$$env:LOCALAPPDATA\Microsoft\WinGet\Links\steamcmd" -ArgumentList '+force_install_dir ${CURDIR}\cs2\ +login Anonymous +app_update 730 validate +exit';
@@ -116,7 +119,6 @@ build-release-docker:
 	cd /app && dotnet publish -c release; chown -R $(user) /app"
 
 copy-pugsharp:
-	rm -rf $(currentDir)/PugSharp/bin/Debug/net7.0/publish/CounterStrikeSharp.API.dll
 	mkdir -p $(currentDir)/cs2/game/csgo/addons/counterstrikesharp/plugins/PugSharp
 	cp -rf $(currentDir)/PugSharp/bin/Debug/net7.0/publish/* $(currentDir)/cs2/game/csgo/addons/counterstrikesharp/plugins/PugSharp
 
