@@ -112,6 +112,11 @@ jobs:
       - name: set Pugsharp Version in output
         run: echo "PUGSHARPNETVER=$PUGSHARPNETVER" >> "$GITHUB_OUTPUT"
         id: PUGSHARPNETVER
+      
+      - name: test
+        run: find
+      - name: test2
+        run: dotnet list PugSharp/PugSharp.csproj package --format json
 
       - name: get counterstrikesharp version
         run: echo "CSSHARPVER=$(dotnet list PugSharp/PugSharp.csproj package --format json | jq -r '.projects[].frameworks[].topLevelPackages[] | select(.id == "CounterStrikeSharp.API") | .resolvedVersion' | sed 's|1.0.|v|g')"  >> $GITHUB_ENV
