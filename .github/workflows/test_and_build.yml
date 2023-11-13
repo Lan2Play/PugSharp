@@ -143,7 +143,25 @@ jobs:
         run: echo "CSSHARPlinkWindows=$(curl -s -L https://api.github.com/repos/roflmuffin/CounterStrikeSharp/releases/tags/$CSSHARPVER | jq -r '.assets[] | select(.browser_download_url | contains("windows") and (. | contains("with-runtime") | not)) | .browser_download_url')" >> $GITHUB_ENV
       - name: set counterstrikesharp link without runtime for windows in output
         run: echo "CSSHARPlinkWindows=$CSSHARPlinkWindows" >> "$GITHUB_OUTPUT"
-        id: CSSHARPlinkWindows       
+        id: CSSHARPlinkWindows      
+
+      - name: replace version variable in meta files
+        run: sed -i "s|%%VERSION%%|$PUGSHARPNETVER|g" ./release.json;       
+      - name: replace CounterStrikeSharpVersion variable in meta files
+        run: sed -i "s|%%COUNTERSTRIKESHARPVERSION%%|$CSSHARPVER|g" ./release.json; 
+      - name: replace CS2VERSION variable in meta files
+        run: sed -i "s|%%CS2VERSION%%|1.39.6.5/13965 9842|g" ./release.json; 
+      - name: replace METAMODVERSION variable in meta files
+        run: sed -i "s|%%METAMODVERSION%%|2.0 - 1256|g" ./release.json; 
+      - name: upload artefact
+        if: github.event_name != 'pull_request'
+        uses: actions/upload-artifact@v3
+        with:
+          name: latest_build_meta
+          path: |
+            ./release.json
+          retention-days: 10
+ 
 
 
   build_linux_x64:
@@ -198,39 +216,130 @@ jobs:
       - name: move package
         run: mv PugSharp_with_cssharp_and_runtime_linux_$PUGSHARPNETVER.zip ../
         working-directory: ./packagebuild
-      - name: replace version variable in meta files
-        run: sed -i "s|%%VERSION%%|$PUGSHARPNETVER|g" ./release.json;       
-      - name: replace CounterStrikeSharpVersion variable in meta files
-        run: sed -i "s|%%COUNTERSTRIKESHARPVERSION%%|$CSSHARPVER|g" ./release.json; 
-      - name: replace CS2VERSION variable in meta files
-        run: sed -i "s|%%CS2VERSION%%|1.39.6.5/13965 9842|g" ./release.json; 
-      - name: replace METAMODVERSION variable in meta files
-        run: sed -i "s|%%METAMODVERSION%%|2.0 - 1256|g" ./release.json; 
-      - name: Release
-        if: ${{ (startsWith(github.ref, 'refs/tags/v')) && !(contains(github.ref, '-beta')) }}
-        uses: softprops/action-gh-release@v1
-        with:
-          files: |
-            ./release.json
-            ./packagebuild/PugSharp_*.zip 
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      - name: pre Release
-        if: ${{ (startsWith(github.ref, 'refs/tags/v')) && (contains(github.ref, '-beta')) }}
-        uses: softprops/action-gh-release@v1
-        with:
-          prerelease: true
-          files: |
-            ./release.json
-            ./PugSharp_*.zip 
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      - name: upload pre - pre release
+      - name: upload artefact
         if: github.event_name != 'pull_request'
         uses: actions/upload-artifact@v3
         with:
-          name: latest_alpha
+          name: latest_build_linux
           path: |
-            ./release.json
             ./PugSharp_*.zip 
           retention-days: 10
+
+
+  build_windows_x64:
+    runs-on: ubuntu-latest
+    if: ${{ !startsWith( github.event.pull_request.head.label, 'lan2play-weblate' ) }}
+    needs:
+    # - test_linux_x64
+    - get_versions
+    env:
+      PUGSHARPNETVER: ${{needs.get_versions.outputs.PUGSHARPNETVER}}
+      CSSHARPVER: ${{needs.get_versions.outputs.CSSHARPVER}}
+      CSSHARPlink: ${{needs.get_versions.outputs.CSSHARPlink}}
+      CSSHARPlinkWRuntime: ${{needs.get_versions.outputs.CSSHARPlinkWRuntime}}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+      - name: set Pugsharp version
+        run: sed -i "s|0.0.1|$PUGSHARPNETVER|g" PugSharp/PugSharp.cs
+        shell: bash
+      - name: Build Pugsharp
+        run: dotnet publish
+        shell: bash
+      - name: prepare package structure
+        run: mkdir -p packagebuild/addons/counterstrikesharp/plugins/PugSharp
+        shell: bash
+      - name: copy package content
+        run: cp -rf PugSharp/bin/Debug/net7.0/publish/* packagebuild/addons/counterstrikesharp/plugins/PugSharp
+        shell: bash
+      - name: build package
+        run: zip -r PugSharp_windows_$PUGSHARPNETVER.zip addons
+        shell: bash
+        working-directory: ./packagebuild
+      - name: move package
+        run: mv PugSharp_windows_$PUGSHARPNETVER.zip ../
+        shell: bash
+        working-directory: ./packagebuild
+      - name: get counterstrikesharp without runtime
+        run: "wget -q -O counterstrikesharp.zip $CSSHARPlink"
+        shell: bash
+      - name: extract counterstrikesharp without runtime
+        run: unzip -o counterstrikesharp.zip -d  packagebuild/
+        shell: bash
+      - name: build package
+        run: zip -r PugSharp_with_cssharp_windows_$PUGSHARPNETVER.zip addons
+        shell: bash
+        working-directory: ./packagebuild
+      - name: move package
+        shell: bash
+        run: mv PugSharp_with_cssharp_windows_$PUGSHARPNETVER.zip ../
+        working-directory: ./packagebuild
+      - name: get counterstrikesharp with runtime
+        shell: bash
+        run: "wget -q -O counterstrikesharp.zip $CSSHARPlinkWRuntime"
+      - name: extract counterstrikesharp with runtime
+        shell: bash
+        run: unzip -o counterstrikesharp.zip -d  packagebuild/
+      - name: build package
+        shell: bash
+        run: zip -r PugSharp_with_cssharp_and_runtime_windows_$PUGSHARPNETVER.zip addons
+        working-directory: ./packagebuild
+      - name: move package
+        shell: bash
+        run: mv PugSharp_with_cssharp_and_runtime_windows_$PUGSHARPNETVER.zip ../
+        working-directory: ./packagebuild
+      - name: upload artefact
+        if: github.event_name != 'pull_request'
+        uses: actions/upload-artifact@v3
+        with:
+          name: latest_build_windows
+          path: |
+            ./PugSharp_*.zip 
+          retention-days: 10
+
+
+
+
+
+
+
+
+  # release:
+  #   runs-on: ubuntu-latest
+  #   if: ${{ startsWith(github.ref, 'refs/tags/v') }}
+  #   needs:
+  #   - build_linux_x64
+  #   - build_windows_x64
+  #   env:
+  #     PUGSHARPNETVER: ${{needs.get_versions.outputs.PUGSHARPNETVER}}
+  #     CSSHARPVER: ${{needs.get_versions.outputs.CSSHARPVER}}
+  #     CSSHARPlink: ${{needs.get_versions.outputs.CSSHARPlink}}
+  #     CSSHARPlinkWRuntime: ${{needs.get_versions.outputs.CSSHARPlinkWRuntime}}
+  #   steps:
+  #     - name: Checkout
+  #       uses: actions/checkout@v4
+  #       with:
+  #         submodules: recursive
+
+
+  #     - name: Release
+  #       if: ${{ (startsWith(github.ref, 'refs/tags/v')) && !(contains(github.ref, '-beta')) }}
+  #       uses: softprops/action-gh-release@v1
+  #       with:
+  #         files: |
+  #           ./release.json
+  #           ./packagebuild/PugSharp_*.zip 
+  #       env:
+  #         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  #     - name: pre Release
+  #       if: ${{ (startsWith(github.ref, 'refs/tags/v')) && (contains(github.ref, '-beta')) }}
+  #       uses: softprops/action-gh-release@v1
+  #       with:
+  #         prerelease: true
+  #         files: |
+  #           ./release.json
+  #           ./PugSharp_*.zip 
+  #       env:
+  #         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
