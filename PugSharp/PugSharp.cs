@@ -111,7 +111,7 @@ public class PugSharp : BasePlugin, IMatchCallback
         _Logger.LogInformation("End RegisterEventHandlers");
     }
 
-    private void InitializeMatch(MatchConfig matchConfig, bool noReset = false)
+    private void ResetForMatch(MatchConfig matchConfig)
     {
         _ApiProvider.ClearApiProviders();
 
@@ -131,66 +131,34 @@ public class PugSharp : BasePlugin, IMatchCallback
 
         _ApiProvider.AddApiProvider(new JsonApiProvider(Path.Combine(PugSharpDirectory, "Stats")));
 
-
         SetMatchVariable(matchConfig);
 
-        _Match?.Dispose();
-        _Match = new Match.Match(this, _ApiProvider, matchConfig);
-
         var players = GetAllPlayers();
         foreach (var player in players.Where(x => x.UserId.HasValue && x.UserId >= 0))
         {
-            if (player.UserId != null && !_Match.TryAddPlayer(player))
+            if (player.UserId != null)
             {
                 player.Kick();
             }
         }
 
-        if (!noReset)
-        {
-            ResetServer();
-        }
+        _Match?.Dispose();
     }
 
-    private void InitializeMatch(MatchInfo matchInfo, string roundBackupFile, bool noReset = false)
+    private void InitializeMatch(MatchConfig matchConfig)
     {
-        _ApiProvider.ClearApiProviders();
+        ResetForMatch(matchConfig);
 
-        if (!string.IsNullOrEmpty(matchInfo.Config.EventulaApistatsUrl))
-        {
-            var apiStats = new ApiStats.ApiStats(matchInfo.Config.EventulaApistatsUrl, matchInfo.Config.EventulaApistatsToken ?? string.Empty);
-            _ApiProvider.AddApiProvider(apiStats);
-        }
+        _Match = new Match.Match(this, _ApiProvider, matchConfig);
 
-        if (!string.IsNullOrEmpty(matchInfo.Config.G5ApiUrl))
-        {
-            var g5Stats = new G5ApiClient(matchInfo.Config.G5ApiUrl, matchInfo.Config.G5ApiHeader ?? string.Empty, matchInfo.Config.G5ApiHeaderValue ?? string.Empty);
-            var g5ApiProvider = new G5ApiProvider(g5Stats, _CsServer);
-            RegisterConsoleCommandAttributeHandlers(g5ApiProvider);
-            _ApiProvider.AddApiProvider(g5ApiProvider);
-        }
+        ResetServer();
+    }
 
-        _ApiProvider.AddApiProvider(new JsonApiProvider(Path.Combine(PugSharpDirectory, "Stats")));
-
-
-        SetMatchVariable(matchInfo.Config);
-
-        _Match?.Dispose();
+    private void InitializeMatch(MatchInfo matchInfo, string roundBackupFile)
+    {
+        ResetForMatch(matchInfo.Config);
         _Match = new Match.Match(this, _ApiProvider, matchInfo, roundBackupFile);
 
-        var players = GetAllPlayers();
-        foreach (var player in players.Where(x => x.UserId.HasValue && x.UserId >= 0))
-        {
-            if (player.UserId != null && !_Match.TryAddPlayer(player))
-            {
-                player.Kick();
-            }
-        }
-
-        if (!noReset)
-        {
-            ResetServer();
-        }
     }
 
     public static void UpdateConvar<T>(string name, T value)
@@ -292,6 +260,8 @@ public class PugSharp : BasePlugin, IMatchCallback
         UpdateConvar("mp_teamflag_2", matchConfig.Team1.Flag);
 
         UpdateConvar("tv_autorecord", false);
+
+        _CsServer.ExecuteCommand("bot_quota 0");
         //UpdateConvar("tv_delay", 30);
         //UpdateConvar("tv_delay1", 30);
 
@@ -494,8 +464,9 @@ public class PugSharp : BasePlugin, IMatchCallback
 
             _Logger.LogInformation("Start restoring match {matchid}!", matchId);
 
-            var roundBackupFile = Path.Combine(_CsServer.GameDirectory, "csgo", $"PugSharp_Match_{matchId}_round{roundToRestore:D2}.txt");
-            if (!File.Exists(roundBackupFile))
+            var roundBackupFile = $"PugSharp_Match_{matchId}_round{roundToRestore:D2}.txt";
+
+            if (!File.Exists(Path.Combine(_CsServer.GameDirectory, "csgo", roundBackupFile)))
             {
                 command.ReplyToCommand($"RoundBackupFile {roundBackupFile} not found");
                 return;
@@ -519,7 +490,7 @@ public class PugSharp : BasePlugin, IMatchCallback
                     return;
                 }
 
-                InitializeMatch(matchInfo, roundBackupFile, false);
+                InitializeMatch(matchInfo, roundBackupFile);
             }
         },
         command).ConfigureAwait(false);
@@ -691,15 +662,24 @@ public class PugSharp : BasePlugin, IMatchCallback
                     userId.PrintToChat($" {ChatColors.Default}powered by {ChatColors.Green}PugSharp{ChatColors.Default} (https://github.com/Lan2Play/PugSharp/)");
                     userId.PrintToChat($" {ChatColors.Default}type {ChatColors.BlueGrey}!ready {ChatColors.Default}to be marked as ready for the match");
                 }
-                else if (_Match.CurrentState == MatchState.MatchPaused)
+                else if (_Match.CurrentState == MatchState.MatchPaused
+                      || _Match.CurrentState == MatchState.RestoreMatch)
                 {
                     _Match.TryAddPlayer(new Player(userId));
+                }
+                else
+                {
+                    // do nothing
                 }
             }
             else if (!userId.IsAdmin(_ServerConfig))
             {
                 _Logger.LogInformation("No match is loaded. Kick Player {player}!", userId.PlayerName);
                 userId.Kick();
+            }
+            else
+            {
+                // do nothing
             }
         }
         else
@@ -727,24 +707,31 @@ public class PugSharp : BasePlugin, IMatchCallback
         _Logger.LogInformation("OnPlayerTeam called");
         if (_Match != null)
         {
-            var configTeam = _Match.GetPlayerTeam(@event.Userid.SteamID);
-
-            if ((int)configTeam != @event.Team)
+            if (_Match.CurrentState == MatchState.WaitingForPlayersConnectedReady)
             {
-                _Logger.LogInformation("Player {playerName} tried to join {team} but is not allowed!", @event.Userid.PlayerName, @event.Team);
-                var player = new Player(@event.Userid);
+                var configTeam = _Match.GetPlayerTeam(@event.Userid.SteamID);
 
-                _CsServer.NextFrame(() =>
+                if ((int)configTeam != @event.Team)
                 {
-                    _Logger.LogInformation("Switch {playerName} to team {team}!", player.PlayerName, configTeam);
-                    player.SwitchTeam(configTeam);
-                });
+                    _Logger.LogInformation("Player {playerName} tried to join {team} but is not allowed!", @event.Userid.PlayerName, @event.Team);
+                    var player = new Player(@event.Userid);
+
+                    _CsServer.NextFrame(() =>
+                    {
+                        _Logger.LogInformation("Switch {playerName} to team {team}!", player.PlayerName, configTeam);
+                        player.SwitchTeam(configTeam);
+                    });
+                }
             }
         }
         else if (!@event.Userid.IsAdmin(_ServerConfig))
         {
             _Logger.LogInformation("No match is loaded. Kick Player {player}!", @event.Userid.PlayerName);
             @event.Userid.Kick();
+        }
+        else
+        {
+            // Do nothing
         }
 
         return HookResult.Continue;
