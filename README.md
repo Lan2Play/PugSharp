@@ -40,6 +40,7 @@ If you want to help developing or translating, join our discord:
 - [x] automatic pause if player disconnects
 - [x] pause / unpause feature
 - [x] demo recording
+- [x] demo upload
 
 
 ## Usage

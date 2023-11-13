@@ -12,7 +12,7 @@
 			<PrivateAssets>none</PrivateAssets>
 			<ExcludeAssets>runtime</ExcludeAssets>
 		</PackageReference>
-	
+
 	  <PackageReference Include="OneOf" Version="3.0.263" />
 	</ItemGroup>
 
