@@ -119,7 +119,6 @@ build-release-docker:
 	cd /app && dotnet publish -c release; chown -R $(user) /app"
 
 copy-pugsharp:
-	rm -rf $(currentDir)/PugSharp/bin/Debug/net7.0/publish/CounterStrikeSharp.API.dll
 	mkdir -p $(currentDir)/cs2/game/csgo/addons/counterstrikesharp/plugins/PugSharp
 	cp -rf $(currentDir)/PugSharp/bin/Debug/net7.0/publish/* $(currentDir)/cs2/game/csgo/addons/counterstrikesharp/plugins/PugSharp
 
