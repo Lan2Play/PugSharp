@@ -265,20 +265,17 @@ public class PugSharp : BasePlugin, IMatchCallback
     private void LoadAndExecuteConfig(string configFileName)
     {
         var configFile = Path.Combine(_CsServer.GameDirectory, "csgo", "cfg", "PugSharp", configFileName);
-
+        if (!File.Exists(configFile))
         if (File.Exists(configFile))
         {
             _Logger.LogError("Config {configFile} was not found on the server.", configFile);
             return;
         }
 
-        var configCommands = File.ReadAllLines(configFile);
+        configFile = Path.Join("PugSharp", configFileName);
 
-        foreach (var configCommand in configCommands)
-        {
-            _Logger.LogInformation("Executing config command {command}", configCommand);
-            _CsServer.ExecuteCommand(configCommand);
-        }
+        _Logger.LogInformation("Loading {configFile}.", configFile);
+        _CsServer.ExecuteCommand($"exec \"{configFile}\"");
     }
 
     private void EndWarmup()
