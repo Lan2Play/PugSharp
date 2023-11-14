@@ -36,6 +36,11 @@
             return Task.WhenAll(_ApiProviders.Select(a => a.RoundStatsUpdateAsync(roundStatusUpdateParams, cancellationToken)));
         }
 
+        public Task FreeServerAsync(CancellationToken cancellationToken)
+        {
+            return Task.WhenAll(_ApiProviders.Select(a => a.FreeServerAsync(cancellationToken)));
+        }
+
         #endregion
     }
 }
