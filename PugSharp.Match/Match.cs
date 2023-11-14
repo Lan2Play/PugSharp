@@ -147,8 +147,7 @@ public class Match : IDisposable
             .OnExit(UnpauseMatch);
 
         _MatchStateMachine.Configure(MatchState.MapCompleted)
-            .PermitIf(MatchCommand.CompleteMatch, MatchState.MatchCompleted, AllMapsArePlayed)
-            .PermitIf(MatchCommand.CompleteMatch, MatchState.WaitingForPlayersConnectedReady, NotAllMapsArePlayed)
+            .PermitDynamic(MatchCommand.CompleteMatch, () => AllMapsArePlayed() ? MatchState.MatchCompleted : MatchState.WaitingForPlayersConnectedReady)
             .OnEntry(SendMapResults)
             .OnEntry(TryCompleteMatch);
 
@@ -694,13 +693,11 @@ public class Match : IDisposable
         }
 
         var wins = teamWithMostWins.Count();
-        var requiredWins = MatchInfo.Config.NumMaps / 2d;
+        var requiredWins = Math.Ceiling(MatchInfo.Config.NumMaps / 2d);
         _Logger.LogInformation("{team} has most wins: {wins} of {requiredWins}", teamWithMostWins.Key.TeamConfig.Name, wins, requiredWins);
 
         return wins > requiredWins;
     }
-
-    private bool NotAllMapsArePlayed() => !AllMapsArePlayed();
 
     private void SetAllPlayersNotReady()
     {
