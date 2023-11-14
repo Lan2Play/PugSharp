@@ -25,7 +25,7 @@ copyright = 'Lan2Play Team'
 author = 'Lan2Play Team'
 
 # The full version, including alpha/beta/rc tags
-release = '2.0'
+release = 'latest'
 
 
 # -- General configuration ---------------------------------------------------

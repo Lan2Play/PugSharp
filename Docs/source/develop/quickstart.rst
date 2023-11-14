@@ -40,12 +40,16 @@ What will happen after you have converted to the finalized pull request:
 
 Prerequisites
 ----------------------------------------
-- Linux / inside WSL2
+
+.. warning::
+    Currently this guide is only suited for Linux or inside your WSL. The development on windows including the testing and debugging in a windows based cs2 server is possible right now, but our makefile and the documentation is lacking how. We will add the support for that soon.
+
+- Linux / inside WSL2 
 - `Docker <https://docs.docker.com/engine/install/>`_ installed
 - `Make <https://www.gnu.org/software/make>`_ installed (use your os packagemanager)
 - Install your IDE of choise (Visual Studio or VSCode works best)
 - a Steam User that has started cs2 at least one time (we recommended a seperate account with Steamguard disabled)
-- (optional) `.Net7 SDK <https://dotnet.microsoft.com/download/dotnet/7.0>`_ (highly recommended - otherwhise use the -docker suffixed commands, see :doc:`/develop/makefile` )
+- (optional - required for debugging) `.NET SDK <https://learn.microsoft.com/en-us/dotnet/core/install/linux>`_ - check which version is currently required `here <https://github.com/Lan2Play/PugSharp/blob/main/PugSharp/PugSharp.csproj>`_ - (highly recommended - otherwhise use the -docker suffixed commands, see :doc:`/develop/makefile` )
 - (optional) ``jq`` installed on your machine. If you are running debian/ubuntu, you can simply use ``make install-jq-and-unzip`` when you cloned the repo, otherwhise refer to the `jq download page <https://jqlang.github.io/jq/download/>`_ (highly recommended - otherwhise use the -docker suffixed commands, see :doc:`/develop/makefile` )
 - (optional) ``unzip`` installed on your machine. If you are running debian/ubuntu, you can simply use ``make install-jq-and-unzip`` when you cloned the repo, otherwhise look up your distros packagemanager (highly recommended - otherwhise use the -docker suffixed commands, see :doc:`/develop/makefile` )
 
@@ -108,12 +112,15 @@ You should now have a fully loaded PugSharp plugin inside your running server wh
 
 The Makefile offers a lot more commands, that you should check out. You can find the detailed documentation on :doc:`/develop/makefile`. 
 
+You should also take a look into the :doc:`/develop/debugging` section, since you can now debug pugsharp interactiveley inside the cs2 server.
+
 
 Digging deeper
 ----------------------------------------
 If you want to know more about our development thoughts, you might want to take a look into:
 
 - :doc:`/develop/makefile`
+- :doc:`/develop/debugging`
 - :doc:`/develop/folderstructure`
 - :doc:`/develop/cicd`
 - :doc:`/develop/release`
