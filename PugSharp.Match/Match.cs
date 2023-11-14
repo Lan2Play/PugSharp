@@ -699,7 +699,7 @@ public class Match : IDisposable
         var requiredWins = Math.Ceiling(MatchInfo.Config.NumMaps / 2d);
         _Logger.LogInformation("{team} has most wins: {wins} of {requiredWins}", teamWithMostWins.Key.TeamConfig.Name, wins, requiredWins);
 
-        return wins > requiredWins;
+        return wins >= requiredWins;
     }
 
     private void SetAllPlayersNotReady()

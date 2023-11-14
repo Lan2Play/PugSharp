@@ -740,7 +740,10 @@ public class PugSharp : BasePlugin, IMatchCallback
         {
             if (_Match.CurrentState == MatchState.WaitingForPlayersConnectedReady)
             {
-                _CsServer.NextFrame(() => LoadAndExecuteWarmupConfig());
+                if (Utilities.GetPlayers().Count == 1)
+                {
+                    _CsServer.NextFrame(() => StartWarmup());
+                }
 
                 var configTeam = _Match.GetPlayerTeam(eventPlayerTeam.Userid.SteamID);
 
@@ -755,6 +758,11 @@ public class PugSharp : BasePlugin, IMatchCallback
                         player.SwitchTeam(configTeam);
                     });
                 }
+            }
+
+            if ((_Match.CurrentState == MatchState.WaitingForPlayersConnectedReady || _Match.CurrentState == MatchState.WaitingForPlayersReady) && Utilities.GetPlayers().Count == 1)
+            {
+                _CsServer.NextFrame(() => StartWarmup());
             }
         }
         else if (!eventPlayerTeam.Userid.IsAdmin(_ServerConfig))
@@ -907,7 +915,7 @@ public class PugSharp : BasePlugin, IMatchCallback
         }
 
         var userId = eventPlayerSpawn.Userid;
-        if (_Match.CurrentState < MatchState.MatchRunning && userId != null && userId.IsValid)
+        if (_Match.CurrentState < MatchState.MatchStarting && userId != null && userId.IsValid)
         {
             // Give players max money if no match is running
             _CsServer.NextFrame(() =>
@@ -1092,7 +1100,7 @@ public class PugSharp : BasePlugin, IMatchCallback
                             }
                         }
 
-                        var weaponId = Enum.Parse<CSWeaponID>(eventPlayerDeath.WeaponItemid);
+                        var weaponId = Enum.Parse<CSWeaponID>(eventPlayerDeath.Weapon, true);
 
                         // Other than these constants, all knives can be found after CSWeapon_MAX_WEAPONS_NO_KNIFES.
                         // See https://sourcemod.dev/#/cstrike/enumeration.CSWeaponID
@@ -1458,13 +1466,15 @@ public class PugSharp : BasePlugin, IMatchCallback
     {
         LoadAndExecuteWarmupConfig();
 
-        // Set additional convars
-        UpdateConvar("mp_do_warmup_period", true);
-        UpdateConvar("mp_warmuptime_all_players_connected", false);
-        _CsServer.ExecuteCommand("mp_warmup_start");
 
-        UpdateConvar("mp_warmuptime", 10f);
-        UpdateConvar("mp_warmup_pausetimer", 1f);
+
+        //// Set additional convars
+        //UpdateConvar("mp_do_warmup_period", true);
+        //UpdateConvar("mp_warmuptime_all_players_connected", false);
+        //_CsServer.ExecuteCommand("mp_warmup_start");
+
+        //UpdateConvar("mp_warmuptime", 10f);
+        //UpdateConvar("mp_warmup_pausetimer", 1f);
     }
 
 
@@ -1478,6 +1488,8 @@ public class PugSharp : BasePlugin, IMatchCallback
 
         // Load live config
         LoadAndExecuteLiveConfig();
+
+        _CsServer.ExecuteCommand("mp_restartgame 1");
     }
 
     #endregion
