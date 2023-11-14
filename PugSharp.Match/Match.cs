@@ -25,7 +25,7 @@ public class Match : IDisposable
     private readonly System.Timers.Timer _ReadyReminderTimer = new(10000);
     private readonly IMatchCallback _MatchCallback;
     private readonly IApiProvider _ApiProvider;
-    private readonly string _RoundBackupFile;
+    private readonly string _RoundBackupFile = string.Empty;
     private readonly StateMachine<MatchState, MatchCommand> _MatchStateMachine;
 
     private readonly DemoUploader? _DemoUploader;
@@ -271,7 +271,9 @@ public class Match : IDisposable
     }
 
 #pragma warning disable MA0051 // Method is too long
+#pragma warning disable S3776 // Cognitive Complexity of methods should not be too high
     private void UpdateStats(IReadOnlyDictionary<ulong, IPlayerRoundResults> playerResults)
+#pragma warning restore S3776 // Cognitive Complexity of methods should not be too high
 #pragma warning restore MA0051 // Method is too long
     {
         foreach (var kvp in playerResults)
@@ -454,7 +456,6 @@ public class Match : IDisposable
         _ = TryFireStateAsync(MatchCommand.CompleteMatch);
     }
 
-
     private async Task CompleteMatchAsync()
     {
         _MatchCallback.StopDemoRecording();
@@ -582,7 +583,7 @@ public class Match : IDisposable
         }
 
         ShowMenuToTeam(_CurrentMatchTeamToVote!, string.Create(CultureInfo.InvariantCulture, $" {ChatColors.Default}Vote to ban map: type {ChatColors.Command}!<mapnumber>"), mapOptions);
-
+        GetOtherTeam(_CurrentMatchTeamToVote!).PrintToChat("Waiting for other Team to vote!");
         _VoteTimer.Start();
     }
 
@@ -614,6 +615,7 @@ public class Match : IDisposable
         };
 
         ShowMenuToTeam(_CurrentMatchTeamToVote!, "Choose starting side:", mapOptions);
+        GetOtherTeam(_CurrentMatchTeamToVote!).PrintToChat("Waiting for other Team to vote!");
 
         _VoteTimer.Start();
     }
@@ -629,7 +631,7 @@ public class Match : IDisposable
         {
             _CurrentMatchTeamToVote.StartingTeamSite = startTeam;
             _CurrentMatchTeamToVote.CurrentTeamSite = startTeam;
-            var otherTeam = _CurrentMatchTeamToVote == MatchInfo.MatchTeam1 ? MatchInfo.MatchTeam2 : MatchInfo.MatchTeam1;
+            var otherTeam = GetOtherTeam(_CurrentMatchTeamToVote);
             otherTeam.StartingTeamSite = startTeam == Team.Terrorist ? Team.CounterTerrorist : Team.Terrorist;
             otherTeam.CurrentTeamSite = otherTeam.StartingTeamSite;
 
@@ -638,6 +640,11 @@ public class Match : IDisposable
         }
 
         _MatchCallback.SendMessage(string.Create(CultureInfo.InvariantCulture, $"{_CurrentMatchTeamToVote!.TeamConfig.Name} selected {startTeam} as startside!"));
+    }
+
+    private MatchTeam GetOtherTeam(MatchTeam team)
+    {
+        return team == MatchInfo.MatchTeam1 ? MatchInfo.MatchTeam2 : MatchInfo.MatchTeam1;
     }
 
     private static void ShowMenuToTeam(MatchTeam team, string title, IEnumerable<MenuOption> options)
@@ -828,7 +835,6 @@ public class Match : IDisposable
             return;
         }
 
-        // TODO Error when Player was not ready
         var matchPlayer = GetMatchPlayer(player.SteamID);
         TryFireState(MatchCommand.DisconnectPlayer);
 
