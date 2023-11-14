@@ -5,7 +5,7 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": ".NET Core Docker Attach",
+            "name": "PugSharp Docker Attach",
             "type": "coreclr",
             "request": "attach",
             "processId": "${command:pickRemoteProcess}",

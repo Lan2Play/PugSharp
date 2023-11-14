@@ -107,6 +107,7 @@ public class PugSharp : BasePlugin, IMatchCallback
         RegisterEventHandler<EventBombPlanted>(OnBombPlanted);
         RegisterEventHandler<EventPlayerHurt>(OnPlayerHurt);
 
+
         RegisterListener<Listeners.OnMapStart>(OnMapStartHandler);
 
         AddCommandListener("jointeam", OnClientCommandJoinTeam);
@@ -1456,6 +1457,14 @@ public class PugSharp : BasePlugin, IMatchCallback
     public void StartWarmup()
     {
         LoadAndExecuteWarmupConfig();
+
+        // Set additional convars
+        UpdateConvar("mp_do_warmup_period", true);
+        UpdateConvar("mp_warmuptime_all_players_connected", false);
+        _CsServer.ExecuteCommand("mp_warmup_start");
+
+        UpdateConvar("mp_warmuptime", 10f);
+        UpdateConvar("mp_warmup_pausetimer", 1f);
     }
 
 
