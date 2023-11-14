@@ -6,14 +6,14 @@ PugSharp
 |Duplicated Lines (%)| |Coverage| |Maintainability Rating| |Reliability
 Rating| |Security Rating| |Vulnerabilities| |Code Smells| |Bugs| 
 
-Pugsharp is a PUG System Plugin for CS2 based on the awsome  `CounterStrikeSharp by roflmuffin <https://github.com/roflmuffin/CounterStrikeSharp>`_. 
+`Pugsharp <https://github.com/Lan2Play/PugSharp>`_ is a PUG System Plugin for CS2 based on the awsome  `CounterStrikeSharp by roflmuffin <https://github.com/roflmuffin/CounterStrikeSharp>`_. 
 
 Its intended purpose is to be used with our fork of `eventula <https://github.com/Lan2Play/eventula-manager>`_, but ofc can be used in a different environment or with different software as well.
 If you implement software to interface with PugSharp let us know please!
 
 
 .. warning::
-   This Plugin is in a very early state of development and is not fully working right now! We keep you updated on our discord below, if you are interested in using it.
+   This Plugin is in a very early state of development and some things not fully working right now! Please report any issues you find either on Discord or in our issues tab on `Github <https://github.com/Lan2Play/PugSharp/issues>`_ 
 
 .. image:: https://discordapp.com/api/guilds/748086853449810013/widget.png?style=banner3
    :target: https://discord.gg/zF5C9WPWFq
