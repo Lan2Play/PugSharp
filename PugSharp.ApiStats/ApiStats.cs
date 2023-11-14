@@ -206,12 +206,9 @@ namespace PugSharp.ApiStats
 
             // Wait before freeing server
             await Task.Delay(TimeSpan.FromMilliseconds(seriesResultParams.TimeBeforeFreeingServerMs), cancellationToken).ConfigureAwait(false);
-
-            await SendFreeServerInternalAsync(cancellationToken).ConfigureAwait(false);
         }
 
-
-        internal async Task SendFreeServerInternalAsync(CancellationToken cancellationToken)
+        public async Task FreeServerAsync(CancellationToken cancellationToken)
         {
             if (HttpClient == null)
             {
@@ -229,9 +226,9 @@ namespace PugSharp.ApiStats
             // Series stats(root section)
             public const string StatsSeriesWinner = "winner";
 
-                            //public const string StatsSeriesType = "series_type";
-                            //public const string StatsSeriesTeamId = "id";
-                            //public const string StatsSeriesTeamName = "name";
+            //public const string StatsSeriesType = "series_type";
+            //public const string StatsSeriesTeamId = "id";
+            //public const string StatsSeriesTeamName = "name";
             public const string StatsSeriesForfeit = "forfeit";
 
             // Map stats (under "map0", "map1", etc.)

@@ -458,15 +458,18 @@ public class Match : IDisposable
     {
         _MatchCallback.StopDemoRecording();
 
-        var delay = 15;
+        var delay = 15u;
 
         if (_MatchCallback.GetConvar<bool>("tv_enable") || _MatchCallback.GetConvar<bool>("tv_enable1"))
         {
             // TV Delay in s
-            var tvDelaySeconds = Math.Max(_MatchCallback.GetConvar<int>("tv_delay"), _MatchCallback.GetConvar<int>("tv_delay1"));
+            var tvDelaySeconds = Math.Max(_MatchCallback.GetConvar<uint>("tv_delay"), _MatchCallback.GetConvar<uint>("tv_delay1"));
             _Logger.LogInformation("Waiting for sourceTV. Delay: {delay}s + 15s", tvDelaySeconds);
             delay += tvDelaySeconds;
         }
+
+        var seriesResultParams = new SeriesResultParams(MatchInfo.Config.MatchId, MatchInfo.MatchMaps.GroupBy(x => x.Winner).MaxBy(x => x.Count())!.Key!.TeamConfig.Name, Forfeit: true, delay * 1100, MatchInfo.MatchMaps.Count(x => x.Team1Points > x.Team2Points), MatchInfo.MatchMaps.Count(x => x.Team2Points > x.Team1Points));
+        await _ApiProvider.FinalizeAsync(seriesResultParams, CancellationToken.None).ConfigureAwait(false);
 
         await Task.Delay(TimeSpan.FromSeconds(delay)).ConfigureAwait(false);
 
@@ -475,17 +478,12 @@ public class Match : IDisposable
             await _DemoUploader.UploadDemoAsync(MatchInfo.DemoFile, CancellationToken.None).ConfigureAwait(false);
         }
 
-        if (MatchInfo.MatchMaps[MatchInfo.MatchMaps.Count - 1] == MatchInfo.CurrentMap)
-        {
-            var seriesResultParams = new SeriesResultParams(MatchInfo.Config.MatchId, MatchInfo.MatchMaps.GroupBy(x => x.Winner).MaxBy(x => x.Count())!.Key!.TeamConfig.Name, Forfeit: true, 120000, MatchInfo.MatchMaps.Count(x => x.Team1Points > x.Team2Points), MatchInfo.MatchMaps.Count(x => x.Team2Points > x.Team1Points));
-            await _ApiProvider.FinalizeAsync(seriesResultParams, CancellationToken.None).ConfigureAwait(false);
-        }
-
         foreach (var player in AllMatchPlayers)
         {
             player.Player.Kick();
         }
 
+        await _ApiProvider.FreeServerAsync(CancellationToken.None).ConfigureAwait(false);
         _MatchCallback.CleanUpMatch();
     }
 

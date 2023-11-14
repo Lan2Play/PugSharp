@@ -42,9 +42,9 @@ namespace PugSharp.Api.Json
             }
         }
 
-        public Task FinalizeAsync(SeriesResultParams seriesResultParams, CancellationToken cancellationToken)
+        public Task GoingLiveAsync(GoingLiveParams goingLiveParams, CancellationToken cancellationToken)
         {
-            return SerializeAndSaveData($"Match_{seriesResultParams.MatchId}_result.json", seriesResultParams, cancellationToken);
+            return SerializeAndSaveData($"Match_{goingLiveParams.MatchId}_golive.json", goingLiveParams, cancellationToken);
         }
 
         public Task FinalizeMapAsync(MapResultParams finalizeMapParams, CancellationToken cancellationToken)
@@ -52,9 +52,14 @@ namespace PugSharp.Api.Json
             return SerializeAndSaveData($"Match_{finalizeMapParams.MatchId}_mapresult.json", finalizeMapParams, cancellationToken);
         }
 
-        public Task GoingLiveAsync(GoingLiveParams goingLiveParams, CancellationToken cancellationToken)
+        public Task FinalizeAsync(SeriesResultParams seriesResultParams, CancellationToken cancellationToken)
         {
-            return SerializeAndSaveData($"Match_{goingLiveParams.MatchId}_golive.json", goingLiveParams, cancellationToken);
+            return SerializeAndSaveData($"Match_{seriesResultParams.MatchId}_result.json", seriesResultParams, cancellationToken);
+        }
+
+        public Task FreeServerAsync(CancellationToken cancellationToken)
+        {
+            return Task.CompletedTask;
         }
 
         public Task RoundStatsUpdateAsync(RoundStatusUpdateParams roundStatusUpdateParams, CancellationToken cancellationToken)

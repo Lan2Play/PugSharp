@@ -58,10 +58,17 @@ public partial class G5ApiProvider : IApiProvider
         return _G5Stats.SendEventAsync(seriesResultEvent, cancellationToken);
     }
 
+    public Task FreeServerAsync(CancellationToken cancellationToken)
+    {
+        // Not Required. Handled via TimeUntilRestore of in the Finalize event
+        return Task.CompletedTask;
+    }
+
     public Task RoundStatsUpdateAsync(RoundStatusUpdateParams roundStatusUpdateParams, CancellationToken cancellationToken)
     {
         return Task.CompletedTask;
     }
+
 
     #endregion
 
