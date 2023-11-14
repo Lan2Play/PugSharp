@@ -172,8 +172,8 @@ jobs:
     env:
       PUGSHARPNETVER: ${{needs.get_versions.outputs.PUGSHARPNETVER}}
       CSSHARPVER: ${{needs.get_versions.outputs.CSSHARPVER}}
-      CSSHARPlink: ${{needs.get_versions.outputs.CSSHARPlinkWindows}}
-      CSSHARPlinkWRuntime: ${{needs.get_versions.outputs.CSSHARPlinkWRuntimeWindows}}
+      CSSHARPlink: ${{needs.get_versions.outputs.CSSHARPlink}}
+      CSSHARPlinkWRuntime: ${{needs.get_versions.outputs.CSSHARPlinkWRuntime}}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -250,8 +250,8 @@ jobs:
     env:
       PUGSHARPNETVER: ${{needs.get_versions.outputs.PUGSHARPNETVER}}
       CSSHARPVER: ${{needs.get_versions.outputs.CSSHARPVER}}
-      CSSHARPlink: ${{needs.get_versions.outputs.CSSHARPlink}}
-      CSSHARPlinkWRuntime: ${{needs.get_versions.outputs.CSSHARPlinkWRuntime}}
+      CSSHARPlink: ${{needs.get_versions.outputs.CSSHARPlinkWindows}}
+      CSSHARPlinkWRuntime: ${{needs.get_versions.outputs.CSSHARPlinkWRuntimeWindows}}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
