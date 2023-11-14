@@ -14,5 +14,4 @@ public enum MatchCommand
     CompleteMap,
     Pause,
     Unpause,
-    CleanUpMatch,
 }

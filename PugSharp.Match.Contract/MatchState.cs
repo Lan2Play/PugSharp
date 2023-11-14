@@ -13,6 +13,5 @@ public enum MatchState
     MatchPaused,
     MapCompleted,
     MatchCompleted,
-    CleanUpMatch,
     RestoreMatch,
 }

@@ -150,11 +150,6 @@ public class Match : IDisposable
             .OnEntry(TryCompleteMatch);
 
         _MatchStateMachine.Configure(MatchState.MatchCompleted)
-            .PermitIf(MatchCommand.CleanUpMatch, MatchState.CleanUpMatch)
-            .OnEntry(CleanUpMatch);
-
-
-        _MatchStateMachine.Configure(MatchState.CleanUpMatch)
             .OnEntryAsync(CompleteMatchAsync);
 
         _MatchStateMachine.OnTransitioned(OnMatchStateChanged);
@@ -488,11 +483,6 @@ public class Match : IDisposable
             player.Player.Kick();
         }
 
-        await TryFireStateAsync(MatchCommand.CleanUpMatch).ConfigureAwait(false);
-    }
-
-    private void CleanUpMatch()
-    {
         _MatchCallback.CleanUpMatch();
     }
 
@@ -952,6 +942,8 @@ public class Match : IDisposable
 
         var mapToSelect = _MapsToSelect[mapNumber];
         mapToSelect.Votes.Add(player);
+
+        player.PrintToChat($" {ChatColors.Default}You voted to ban {ChatColors.Highlight}{mapToSelect.Name}");
 
         if (_MapsToSelect.Sum(x => x.Votes.Count) >= MatchInfo.Config.PlayersPerTeam)
         {
