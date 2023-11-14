@@ -706,19 +706,25 @@ public class PugSharp : BasePlugin, IMatchCallback
         return HookResult.Continue;
     }
 
-    public HookResult OnPlayerTeam(EventPlayerTeam @event, GameEventInfo info)
+    public HookResult OnPlayerTeam(EventPlayerTeam eventPlayerTeam, GameEventInfo info)
     {
-        _Logger.LogInformation("OnPlayerTeam called");
+        _Logger.LogInformation("OnPlayerTeam called. {playerName} tries to join {team} IsHLTV: {isHLTV} IsBot {isBot}", eventPlayerTeam.Userid.PlayerName, eventPlayerTeam.Team, eventPlayerTeam.Userid.IsHLTV, eventPlayerTeam.Userid.IsBot);
+
+        if(eventPlayerTeam.Userid.IsHLTV)
+        {
+            return HookResult.Continue;
+        }
+
         if (_Match != null)
         {
             if (_Match.CurrentState == MatchState.WaitingForPlayersConnectedReady)
             {
-                var configTeam = _Match.GetPlayerTeam(@event.Userid.SteamID);
+                var configTeam = _Match.GetPlayerTeam(eventPlayerTeam.Userid.SteamID);
 
-                if ((int)configTeam != @event.Team)
+                if ((int)configTeam != eventPlayerTeam.Team)
                 {
-                    _Logger.LogInformation("Player {playerName} tried to join {team} but is not allowed!", @event.Userid.PlayerName, @event.Team);
-                    var player = new Player(@event.Userid);
+                    _Logger.LogInformation("Player {playerName} tried to join {team} but is not allowed!", eventPlayerTeam.Userid.PlayerName, eventPlayerTeam.Team);
+                    var player = new Player(eventPlayerTeam.Userid);
 
                     _CsServer.NextFrame(() =>
                     {
@@ -728,10 +734,10 @@ public class PugSharp : BasePlugin, IMatchCallback
                 }
             }
         }
-        else if (!@event.Userid.IsAdmin(_ServerConfig))
+        else if (!eventPlayerTeam.Userid.IsAdmin(_ServerConfig))
         {
-            _Logger.LogInformation("No match is loaded. Kick Player {player}!", @event.Userid.PlayerName);
-            @event.Userid.Kick();
+            _Logger.LogInformation("No match is loaded. Kick Player {player}!", eventPlayerTeam.Userid.PlayerName);
+            eventPlayerTeam.Userid.Kick();
         }
         else
         {
