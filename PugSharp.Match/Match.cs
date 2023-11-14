@@ -3,6 +3,7 @@ using PugSharp.Api.Contract;
 using PugSharp.ApiStats;
 using PugSharp.Logging;
 using PugSharp.Match.Contract;
+using PugSharp.Translation;
 using Stateless;
 using Stateless.Graph;
 using System.Globalization;
@@ -25,6 +26,7 @@ public class Match : IDisposable
     private readonly System.Timers.Timer _ReadyReminderTimer = new(10000);
     private readonly IMatchCallback _MatchCallback;
     private readonly IApiProvider _ApiProvider;
+    private readonly ITextHelper _TextHelper;
     private readonly string _RoundBackupFile = string.Empty;
     private readonly StateMachine<MatchState, MatchCommand> _MatchStateMachine;
 
@@ -41,10 +43,11 @@ public class Match : IDisposable
 
     public IEnumerable<MatchPlayer> AllMatchPlayers => MatchInfo.MatchTeam1.Players.Concat(MatchInfo.MatchTeam2.Players);
 
-    private Match(IMatchCallback matchCallback, IApiProvider apiProvider, MatchInfo matchInfo)
+    private Match(IMatchCallback matchCallback, IApiProvider apiProvider, ITextHelper textHelper, MatchInfo matchInfo)
     {
         _MatchCallback = matchCallback;
         _ApiProvider = apiProvider;
+        _TextHelper = textHelper;
         MatchInfo = matchInfo;
         _VoteTimer.Interval = MatchInfo.Config.VoteTimeout;
         _VoteTimer.Elapsed += VoteTimer_Elapsed;
@@ -63,7 +66,7 @@ public class Match : IDisposable
         _MatchStateMachine = new StateMachine<MatchState, MatchCommand>(MatchState.None);
     }
 
-    public Match(IMatchCallback matchCallback, IApiProvider apiProvider, Config.MatchConfig matchConfig) : this(matchCallback, apiProvider, new MatchInfo(matchConfig))
+    public Match(IMatchCallback matchCallback, IApiProvider apiProvider, ITextHelper textHelper, Config.MatchConfig matchConfig) : this(matchCallback, apiProvider, textHelper, new MatchInfo(matchConfig))
     {
         _MatchCallback = matchCallback;
         _ApiProvider = apiProvider;
@@ -73,7 +76,7 @@ public class Match : IDisposable
 
     }
 
-    public Match(IMatchCallback matchCallback, IApiProvider apiProvider, MatchInfo matchInfo, string roundBackupFile) : this(matchCallback, apiProvider, matchInfo)
+    public Match(IMatchCallback matchCallback, IApiProvider apiProvider, ITextHelper textHelper, MatchInfo matchInfo, string roundBackupFile) : this(matchCallback, apiProvider, textHelper, matchInfo)
     {
         _Logger.LogInformation("Create Match from existing MatchInfo!");
         _Logger.LogInformation(JsonSerializer.Serialize(matchInfo));
@@ -194,7 +197,7 @@ public class Match : IDisposable
         _MatchCallback.SetupRoundBackup();
         MatchInfo.DemoFile = _MatchCallback.StartDemoRecording();
 
-        _MatchCallback.SendMessage(string.Create(CultureInfo.InvariantCulture, $" {ChatColors.Default}Starting Match. {ChatColors.Highlight}{MatchInfo.MatchTeam1.TeamConfig.Name} {ChatColors.Default}as {ChatColors.Highlight}{MatchInfo.MatchTeam1.CurrentTeamSite}{ChatColors.Default}. {ChatColors.Highlight}{MatchInfo.MatchTeam2.TeamConfig.Name}{ChatColors.Default} as {ChatColors.Highlight}{MatchInfo.MatchTeam2.CurrentTeamSite}"));
+        _MatchCallback.SendMessage(_TextHelper.GetText(nameof(Resources.PugSharp_Match_Info_StartMatch), MatchInfo.MatchTeam1.TeamConfig.Name, MatchInfo.MatchTeam1.CurrentTeamSite, MatchInfo.MatchTeam2.TeamConfig.Name, MatchInfo.MatchTeam2.CurrentTeamSite));
 
         _ = _ApiProvider.GoingLiveAsync(new GoingLiveParams(MatchInfo.Config.MatchId, MatchInfo.CurrentMap.MapName, MatchInfo.CurrentMap.MapNumber), CancellationToken.None);
 
@@ -490,9 +493,10 @@ public class Match : IDisposable
     {
         _ = Task.Run(async () =>
         {
+            var matchIsLiveMessage = _TextHelper.GetText(nameof(Resources.PugSharp_Match_Info_IsLive));
             for (int i = 0; i < NumOfMatchLiveMessages; i++)
             {
-                _MatchCallback.SendMessage(string.Create(CultureInfo.InvariantCulture, $" {ChatColors.Default}Match is {ChatColors.Green}LIVE"));
+                _MatchCallback.SendMessage(matchIsLiveMessage);
 
                 await Task.Delay(TimeSpan.FromSeconds(1)).ConfigureAwait(false);
             }
@@ -540,7 +544,7 @@ public class Match : IDisposable
             var readyPlayerIds = AllMatchPlayers.Where(p => p.IsReady).Select(x => x.Player.SteamID).ToList();
             var notReadyPlayers = _MatchCallback.GetAllPlayers().Where(p => !readyPlayerIds.Contains(p.SteamID));
 
-            var remindMessage = $" {ChatColors.Default}You are {ChatColors.Error}not {ChatColors.Default}ready! Type {ChatColors.Command}!ready {ChatColors.Default}if you are ready.";
+            var remindMessage = _TextHelper.GetText(nameof(Resources.PugSharp_Match_RemindReady));
             foreach (var player in notReadyPlayers)
             {
                 player.PrintToChat(remindMessage);
@@ -572,8 +576,8 @@ public class Match : IDisposable
             mapOptions.Add(new MenuOption(map, (opt, player) => BanMap(player, mapNumber)));
         }
 
-        ShowMenuToTeam(_CurrentMatchTeamToVote!, string.Create(CultureInfo.InvariantCulture, $" {ChatColors.Default}Vote to ban map: type {ChatColors.Command}!<mapnumber>"), mapOptions);
-        GetOtherTeam(_CurrentMatchTeamToVote!).PrintToChat("Waiting for other Team to vote!");
+        ShowMenuToTeam(_CurrentMatchTeamToVote!, _TextHelper.GetText(nameof(Resources.PugSharp_Match_VoteMapMenuHeader)), mapOptions);
+        GetOtherTeam(_CurrentMatchTeamToVote!).PrintToChat(_TextHelper.GetText(nameof(Resources.PugSharp_Match_WaitForOtherTeam)));
         _VoteTimer.Start();
     }
 
@@ -585,7 +589,7 @@ public class Match : IDisposable
         _MapsToSelect.Remove(mapToBan!);
         _MapsToSelect.ForEach(x => x.Votes.Clear());
 
-        _MatchCallback.SendMessage(string.Create(CultureInfo.InvariantCulture, $" {ChatColors.Default}Map {ChatColors.Highlight}{mapToBan!.Name} {ChatColors.Default}was banned by {_CurrentMatchTeamToVote?.TeamConfig.Name}!"));
+        _MatchCallback.SendMessage(_TextHelper.GetText(nameof(Resources.PugSharp_Match_WaitForOtherTeam), mapToBan!.Name, _CurrentMatchTeamToVote?.TeamConfig.Name));
 
         if (_MapsToSelect.Count == 1)
         {
@@ -604,8 +608,8 @@ public class Match : IDisposable
             new("CT", (opt, player) => VoteTeam(player, "CT")),
         };
 
-        ShowMenuToTeam(_CurrentMatchTeamToVote!, "Choose starting side:", mapOptions);
-        GetOtherTeam(_CurrentMatchTeamToVote!).PrintToChat("Waiting for other Team to vote!");
+        ShowMenuToTeam(_CurrentMatchTeamToVote!, _TextHelper.GetText(nameof(Resources.PugSharp_Match_VoteTeamMenuHeader)), mapOptions);
+        GetOtherTeam(_CurrentMatchTeamToVote!).PrintToChat(_TextHelper.GetText(nameof(Resources.PugSharp_Match_WaitForOtherTeam)));
 
         _VoteTimer.Start();
     }
@@ -629,7 +633,7 @@ public class Match : IDisposable
             _Logger.LogInformation("{team} starts as Team {startTeam}", otherTeam.TeamConfig.Name, otherTeam!.CurrentTeamSite.ToString());
         }
 
-        _MatchCallback.SendMessage(string.Create(CultureInfo.InvariantCulture, $"{_CurrentMatchTeamToVote!.TeamConfig.Name} selected {startTeam} as startside!"));
+        _MatchCallback.SendMessage(_TextHelper.GetText(nameof(Resources.PugSharp_Match_SelectedTeam), _CurrentMatchTeamToVote!.TeamConfig.Name, startTeam));
     }
 
     private MatchTeam GetOtherTeam(MatchTeam team)
@@ -709,8 +713,8 @@ public class Match : IDisposable
             player.IsReady = false;
         }
 
-        _MatchCallback.SendMessage($"Waiting for all players to be ready.");
-        _MatchCallback.SendMessage(string.Create(CultureInfo.InvariantCulture, $" {ChatColors.Command}!ready {ChatColors.Default}to toggle your ready state."));
+        _MatchCallback.SendMessage(_TextHelper.GetText(nameof(Resources.PugSharp_Match_Info_WaitingForAllPlayers)));
+        _MatchCallback.SendMessage(_TextHelper.GetText(nameof(Resources.PugSharp_Match_RemindReady)));
     }
 
     private bool MapIsSelected()
@@ -855,7 +859,7 @@ public class Match : IDisposable
     {
         if (CurrentState != MatchState.WaitingForPlayersConnectedReady && CurrentState != MatchState.WaitingForPlayersReady)
         {
-            player.PrintToChat("Currently ready state is not awaited!");
+            player.PrintToChat(_TextHelper.GetText(nameof(Resources.PugSharp_Match_Error_NoReadyExpected)));
             return;
         }
 
@@ -869,12 +873,12 @@ public class Match : IDisposable
 
         if (matchPlayer.IsReady)
         {
-            _MatchCallback.SendMessage(string.Create(CultureInfo.InvariantCulture, $"{player.PlayerName} is ready! {readyPlayers} of {requiredPlayers} are ready."));
+            _MatchCallback.SendMessage(_TextHelper.GetText(nameof(Resources.PugSharp_Match_Info_Ready), player.PlayerName, readyPlayers, requiredPlayers));
             await TryFireStateAsync(MatchCommand.PlayerReady).ConfigureAwait(false);
         }
         else
         {
-            _MatchCallback.SendMessage(string.Create(CultureInfo.InvariantCulture, $"{player.PlayerName} is not ready! {readyPlayers} of {requiredPlayers} are ready."));
+            _MatchCallback.SendMessage(_TextHelper.GetText(nameof(Resources.PugSharp_Match_Info_NotReady), player.PlayerName, readyPlayers, requiredPlayers));
         }
     }
 
@@ -910,40 +914,40 @@ public class Match : IDisposable
     {
         if (CurrentState != MatchState.MapVote)
         {
-            player.PrintToChat("Currently no map vote is active!");
+            player.PrintToChat(_TextHelper.GetText(nameof(Resources.PugSharp_Match_Error_NoMapVoteExpected)));
             return false;
         }
 
         if (_CurrentMatchTeamToVote == null)
         {
-            player.PrintToChat("There is not current matchteam to vote!");
+            // Should never happen
             return false;
         }
 
         if (!_CurrentMatchTeamToVote.Players.Select(x => x.Player.UserId).Contains(player.UserId))
         {
-            player.PrintToChat("You are currently not permitted to ban a map!");
+            player.PrintToChat(_TextHelper.GetText(nameof(Resources.PugSharp_Match_Error_NotPermittedToBanMap)));
             return false;
         }
 
 
         if (_MapsToSelect.Count <= mapNumber || mapNumber < 0)
         {
-            player.PrintToChat(string.Create(CultureInfo.InvariantCulture, $"Mapnumber {mapNumber} is not available!"));
+            player.PrintToChat(_TextHelper.GetText(nameof(Resources.PugSharp_Match_Error_UnknownMapNumber), mapNumber));
             return false;
         }
 
         var bannedMap = _MapsToSelect.Find(x => x.Votes.Exists(x => x.UserId == player.UserId));
         if (bannedMap != null)
         {
-            player.PrintToChat(string.Create(CultureInfo.InvariantCulture, $"You already banned mapnumber {_MapsToSelect.IndexOf(bannedMap)}: {bannedMap.Name} !"));
+            player.PrintToChat(_TextHelper.GetText(nameof(Resources.PugSharp_Match_Error_AlreadyBannedMap), _MapsToSelect.IndexOf(bannedMap), bannedMap.Name));
             return false;
         }
 
         var mapToSelect = _MapsToSelect[mapNumber];
         mapToSelect.Votes.Add(player);
 
-        player.PrintToChat($" {ChatColors.Default}You voted to ban {ChatColors.Highlight}{mapToSelect.Name}");
+        player.PrintToChat(_TextHelper.GetText(nameof(Resources.PugSharp_Match_Error_AlreadyBannedMap), mapToSelect.Name));
 
         if (_MapsToSelect.Sum(x => x.Votes.Count) >= MatchInfo.Config.PlayersPerTeam)
         {
@@ -957,39 +961,39 @@ public class Match : IDisposable
     {
         if (CurrentState != MatchState.TeamVote)
         {
-            player.PrintToChat("Currently no team vote is active!");
+            player.PrintToChat(_TextHelper.GetText(nameof(Resources.PugSharp_Match_Error_NoTeamVoteExpected)));
             return false;
         }
 
         if (_CurrentMatchTeamToVote == null)
         {
-            player.PrintToChat("There is not current matchteam to vote!");
+            // Should never happen
             return false;
         }
 
         if (!_CurrentMatchTeamToVote.Players.Select(x => x.Player.UserId).Contains(player.UserId))
         {
-            player.PrintToChat("You are currently not permitted to vote for a team!");
+            player.PrintToChat(_TextHelper.GetText(nameof(Resources.PugSharp_Match_Error_NotPermittedToVoteForTeam)));
             return false;
         }
 
         var votedTeam = _TeamVotes.Find(x => x.Votes.Exists(x => x.UserId == player.UserId));
         if (votedTeam != null)
         {
-            player.PrintToChat(string.Create(CultureInfo.InvariantCulture, $"You already voted for team {_MapsToSelect.IndexOf(votedTeam)}: {votedTeam.Name} !"));
+            player.PrintToChat(_TextHelper.GetText(nameof(Resources.PugSharp_Match_Error_AlreadyVotedForTeam), _MapsToSelect.IndexOf(votedTeam), votedTeam.Name));
             return false;
         }
 
         var teamToVote = _TeamVotes.Find(x => x.Name.Equals(teamName, StringComparison.OrdinalIgnoreCase));
         if (teamToVote == null)
         {
-            player.PrintToChat(string.Create(CultureInfo.InvariantCulture, $"Team with name {teamName} is not available!"));
+            player.PrintToChat(_TextHelper.GetText(nameof(Resources.PugSharp_Match_Error_AlreadyVotedForTeam), teamName));
             return false;
         }
 
         teamToVote.Votes.Add(player);
 
-        player.PrintToChat(string.Create(CultureInfo.InvariantCulture, $" {ChatColors.Default}You voted for {ChatColors.Highlight}{teamToVote.Name}"));
+        player.PrintToChat(_TextHelper.GetText(nameof(Resources.PugSharp_Match_Error_AlreadyVotedForTeam), teamToVote.Name));
 
         if (_TeamVotes.Sum(x => x.Votes.Count) >= MatchInfo.Config.PlayersPerTeam)
         {
@@ -1003,7 +1007,7 @@ public class Match : IDisposable
     {
         if (!TryFireState(MatchCommand.Pause))
         {
-            player.PrintToChat("Pause is currently not possible!");
+            player.PrintToChat(_TextHelper.GetText(nameof(Resources.PugSharp_Match_Error_PauseNotPossible)));
         }
     }
 
@@ -1012,7 +1016,7 @@ public class Match : IDisposable
         var team = GetMatchTeam(player.SteamID);
         if (team == null)
         {
-            player.PrintToChat("Unpause is currently not possible!");
+            player.PrintToChat(_TextHelper.GetText(nameof(Resources.PugSharp_Match_Error_UnpauseNotPossible)));
             return;
         }
 

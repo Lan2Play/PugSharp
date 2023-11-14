@@ -3,6 +3,7 @@ using PugSharp.Api.Contract;
 using PugSharp.Api.G5Api;
 using PugSharp.Config;
 using PugSharp.Match.Contract;
+using PugSharp.Translation;
 using System.Text.Json;
 
 namespace PugSharp.Match.Tests
@@ -14,9 +15,10 @@ namespace PugSharp.Match.Tests
         {
             var matchCallback = Substitute.For<IMatchCallback>();
             var apiProvider = Substitute.For<IApiProvider>();
+            var textHelper = Substitute.For<ITextHelper>();
             MatchConfig config = CreateExampleConfig();
 
-            var match = new Match(matchCallback, apiProvider, config);
+            var match = new Match(matchCallback, apiProvider, textHelper, config);
 
             var dotGraphString = match.CreateDotGraph();
             Assert.True(!string.IsNullOrEmpty(dotGraphString));
@@ -27,9 +29,10 @@ namespace PugSharp.Match.Tests
         {
             var matchCallback = Substitute.For<IMatchCallback>();
             var apiProvider = Substitute.For<IApiProvider>();
+            var textHelper = Substitute.For<ITextHelper>();
             MatchConfig config = CreateExampleConfig();
 
-            var match = new Match(matchCallback, apiProvider, config);
+            var match = new Match(matchCallback, apiProvider, textHelper, config);
 
             Assert.Equal(MatchState.WaitingForPlayersConnectedReady, match.CurrentState);
 
@@ -43,9 +46,10 @@ namespace PugSharp.Match.Tests
         {
             var matchCallback = Substitute.For<IMatchCallback>();
             var apiProvider = Substitute.For<IApiProvider>();
+            var textHelper = Substitute.For<ITextHelper>();
             MatchConfig config = CreateExampleConfig();
 
-            var match = new Match(matchCallback, apiProvider, config);
+            var match = new Match(matchCallback, apiProvider, textHelper, config);
 
             Assert.Equal(MatchState.WaitingForPlayersConnectedReady, match.CurrentState);
 
@@ -59,13 +63,14 @@ namespace PugSharp.Match.Tests
         {
             var matchPlayers = new List<IPlayer>();
             var apiProvider = Substitute.For<IApiProvider>();
+            var textHelper = Substitute.For<ITextHelper>();
             var matchCallback = Substitute.For<IMatchCallback>();
 
             matchCallback.GetAllPlayers().Returns(matchPlayers);
 
             MatchConfig config = CreateExampleConfig();
 
-            var match = new Match(matchCallback, apiProvider, config);
+            var match = new Match(matchCallback, apiProvider, textHelper, config);
 
             Assert.Equal(MatchState.WaitingForPlayersConnectedReady, match.CurrentState);
 

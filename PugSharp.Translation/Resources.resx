@@ -1,0 +1,201 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <!-- 
+    Microsoft ResX Schema 
+    
+    Version 2.0
+    
+    The primary goals of this format is to allow a simple XML format 
+    that is mostly human readable. The generation and parsing of the 
+    various data types are done through the TypeConverter classes 
+    associated with the data types.
+    
+    Example:
+    
+    ... ado.net/XML headers & schema ...
+    <resheader name="resmimetype">text/microsoft-resx</resheader>
+    <resheader name="version">2.0</resheader>
+    <resheader name="reader">System.Resources.ResXResourceReader, System.Windows.Forms, ...</resheader>
+    <resheader name="writer">System.Resources.ResXResourceWriter, System.Windows.Forms, ...</resheader>
+    <data name="Name1"><value>this is my long string</value><comment>this is a comment</comment></data>
+    <data name="Color1" type="System.Drawing.Color, System.Drawing">Blue</data>
+    <data name="Bitmap1" mimetype="application/x-microsoft.net.object.binary.base64">
+        <value>[base64 mime encoded serialized .NET Framework object]</value>
+    </data>
+    <data name="Icon1" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
+        <value>[base64 mime encoded string representing a byte array form of the .NET Framework object]</value>
+        <comment>This is a comment</comment>
+    </data>
+                
+    There are any number of "resheader" rows that contain simple 
+    name/value pairs.
+    
+    Each data row contains a name, and value. The row also contains a 
+    type or mimetype. Type corresponds to a .NET class that support 
+    text/value conversion through the TypeConverter architecture. 
+    Classes that don't support this are serialized and stored with the 
+    mimetype set.
+    
+    The mimetype is used for serialized objects, and tells the 
+    ResXResourceReader how to depersist the object. This is currently not 
+    extensible. For a given mimetype the value must be set accordingly:
+    
+    Note - application/x-microsoft.net.object.binary.base64 is the format 
+    that the ResXResourceWriter will generate, however the reader can 
+    read any of the formats listed below.
+    
+    mimetype: application/x-microsoft.net.object.binary.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Binary.BinaryFormatter
+            : and then encoded with base64 encoding.
+    
+    mimetype: application/x-microsoft.net.object.soap.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Soap.SoapFormatter
+            : and then encoded with base64 encoding.
+
+    mimetype: application/x-microsoft.net.object.bytearray.base64
+    value   : The object must be serialized into a byte array 
+            : using a System.ComponentModel.TypeConverter
+            : and then encoded with base64 encoding.
+    -->
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="PugSharp.Hello" xml:space="preserve">
+    <value>Hello **{0:playerName}**, welcome to match {1:matchId}</value>
+  </data>
+  <data name="PugSharp.Match.BannedMap" xml:space="preserve">
+    <value>Map **{0:mapName}** was banned by {1:teamName}!</value>
+  </data>
+  <data name="PugSharp.Match.Error.AlreadyBannedMap" xml:space="preserve">
+    <value>You already banned mapnumber {0: mapNumber}: {1:mapName}!</value>
+  </data>
+  <data name="PugSharp.Match.Error.AlreadyVotedForTeam" xml:space="preserve">
+    <value>ou already voted for team {0:teamNumber}: {1:teamName}!</value>
+  </data>
+  <data name="PugSharp.Match.Error.NoMapVoteExpected" xml:space="preserve">
+    <value>Currently no map vote is active!</value>
+  </data>
+  <data name="PugSharp.Match.Error.NoReadyExpected" xml:space="preserve">
+    <value>Currently ready state is not awaited!</value>
+  </data>
+  <data name="PugSharp.Match.Error.NoTeamVoteExpected" xml:space="preserve">
+    <value>Currently no team vote is active!</value>
+  </data>
+  <data name="PugSharp.Match.Error.NotPermittedToBanMap" xml:space="preserve">
+    <value>You are currently not permitted to ban a map!</value>
+  </data>
+  <data name="PugSharp.Match.Error.NotPermittedToVoteForTeam" xml:space="preserve">
+    <value>You are currently not permitted to vote for a team!</value>
+  </data>
+  <data name="PugSharp.Match.Error.PauseNotPossible" xml:space="preserve">
+    <value>Pause is currently not possible!</value>
+  </data>
+  <data name="PugSharp.Match.Error.TeamNotAvailable" xml:space="preserve">
+    <value>Team with name {0:teamName} is not available!</value>
+  </data>
+  <data name="PugSharp.Match.Error.UnknownMapNumber" xml:space="preserve">
+    <value>Mapnumber **{0:mapNumber}** is not available!</value>
+  </data>
+  <data name="PugSharp.Match.Error.UnpauseNotPossible" xml:space="preserve">
+    <value>Unpause is currently not possible!</value>
+  </data>
+  <data name="PugSharp.Match.Info.IsLive" xml:space="preserve">
+    <value>Match is **LIVE**</value>
+  </data>
+  <data name="PugSharp.Match.Info.NotReady" xml:space="preserve">
+    <value>{0:playerName} is not ready! {1:readyPlayers} of {2:requiredPlayers} are ready.</value>
+  </data>
+  <data name="PugSharp.Match.Info.Ready" xml:space="preserve">
+    <value>{0:playerName} is ready! {1:readyPlayers} of {2:requiredPlayers} are ready.</value>
+  </data>
+  <data name="PugSharp.Match.Info.StartMatch" xml:space="preserve">
+    <value>Starting Match. **{0:team1Name}** as **{1:team1Side}**. **{2:team2Name}** as **{team2Side}**</value>
+  </data>
+  <data name="PugSharp.Match.Info.WaitingForAllPlayers" xml:space="preserve">
+    <value>Waiting for all players to be ready.</value>
+  </data>
+  <data name="PugSharp.Match.RemindReady" xml:space="preserve">
+    <value>You are !!not!! ready! Type `!ready` if you are ready.</value>
+  </data>
+  <data name="PugSharp.Match.SelectedTeam" xml:space="preserve">
+    <value>{0:teamName} selected 1:side} as startside!</value>
+  </data>
+  <data name="PugSharp.Match.VotedForTeam" xml:space="preserve">
+    <value>You voted for **{0:teamName}**</value>
+  </data>
+  <data name="PugSharp.Match.VotedToBanMap" xml:space="preserve">
+    <value>You voted to ban **{0:mapName}**</value>
+  </data>
+  <data name="PugSharp.Match.VoteMapMenuHeader" xml:space="preserve">
+    <value>Vote to ban map: type `!&lt;mapnumber&gt;`</value>
+  </data>
+  <data name="PugSharp.Match.VoteTeamMenuHeader" xml:space="preserve">
+    <value>Choose starting side:</value>
+  </data>
+  <data name="PugSharp.Match.WaitForOtherTeam" xml:space="preserve">
+    <value>Waiting for other Team to vote!</value>
+  </data>
+  <data name="PugSharp.NotifyReady" xml:space="preserve">
+    <value>type `!ready` to be marked as ready for the match</value>
+  </data>
+  <data name="PugSharp.PoweredBy" xml:space="preserve">
+    <value>powered by **PugSharp** (https://github.com/Lan2Play/PugSharp/)</value>
+  </data>
+</root>

@@ -18,6 +18,7 @@ using Player = PugSharp.Models.Player;
 using PugSharp.Server.Contract;
 using PugSharp.Api.Json;
 using PugSharp.Match;
+using PugSharp.Translation;
 
 namespace PugSharp;
 
@@ -30,6 +31,8 @@ public class PugSharp : BasePlugin, IMatchCallback
 
     private readonly CurrentRoundState _CurrentRountState = new();
     private readonly MultiApiProvider _ApiProvider = new();
+
+    private readonly TextHelper _TextHelper = new(ChatColors.Blue, ChatColors.Green, ChatColors.Red);
 
     private Match.Match? _Match;
     private ServerConfig? _ServerConfig;
@@ -151,14 +154,14 @@ public class PugSharp : BasePlugin, IMatchCallback
     {
         ResetForMatch(matchConfig);
 
-        _Match = new Match.Match(this, _ApiProvider, matchConfig);
+        _Match = new Match.Match(this, _ApiProvider, _TextHelper, matchConfig);
 
     }
 
     private void InitializeMatch(MatchInfo matchInfo, string roundBackupFile)
     {
         ResetForMatch(matchInfo.Config);
-        _Match = new Match.Match(this, _ApiProvider, matchInfo, roundBackupFile);
+        _Match = new Match.Match(this, _ApiProvider, _TextHelper, matchInfo, roundBackupFile);
     }
 
     public static void UpdateConvar<T>(string name, T value)
@@ -659,9 +662,9 @@ public class PugSharp : BasePlugin, IMatchCallback
 
                 if (_Match.CurrentState == MatchState.WaitingForPlayersConnectedReady)
                 {
-                    userId.PrintToChat($" {ChatColors.Default}Hello {ChatColors.Green}{userId.PlayerName}{ChatColors.Default}, welcome to match {_Match.MatchInfo.Config.MatchId}");
-                    userId.PrintToChat($" {ChatColors.Default}powered by {ChatColors.Green}PugSharp{ChatColors.Default} (https://github.com/Lan2Play/PugSharp/)");
-                    userId.PrintToChat($" {ChatColors.Default}type {ChatColors.BlueGrey}!ready {ChatColors.Default}to be marked as ready for the match");
+                    userId.PrintToChat(_TextHelper.GetText(nameof(Resources.PugSharp_Hello), userId.PlayerName, _Match.MatchInfo.Config.MatchId));
+                    userId.PrintToChat(_TextHelper.GetText(nameof(Resources.PugSharp_PoweredBy)));
+                    userId.PrintToChat(_TextHelper.GetText(nameof(Resources.PugSharp_NotifyReady)));
                 }
                 else if (_Match.CurrentState == MatchState.MatchPaused
                       || _Match.CurrentState == MatchState.RestoreMatch)
