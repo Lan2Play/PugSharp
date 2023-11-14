@@ -11,13 +11,20 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<PackageReference Include="Stateless" Version="5.13.0" />
+		<PackageReference Include="Stateless" Version="5.14.0" />
 	</ItemGroup>
 
 	<ItemGroup>
 		<ProjectReference Include="..\PugSharp.ApiStats\PugSharp.ApiStats.csproj" />
 		<ProjectReference Include="..\PugSharp.Config\PugSharp.Config.csproj" />
 		<ProjectReference Include="..\PugSharp.Match.Contract\PugSharp.Match.Contract.csproj" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <PackageReference Update="Meziantou.Analyzer" Version="2.0.109">
+	    <PrivateAssets>all</PrivateAssets>
+	    <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
+	  </PackageReference>
 	</ItemGroup>
 
 </Project>
