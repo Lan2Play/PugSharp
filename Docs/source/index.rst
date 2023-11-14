@@ -39,6 +39,7 @@ If you implement software to interface with PugSharp let us know please!
 
    develop/quickstart
    develop/makefile
+   develop/debugging
    develop/folderstructure
    develop/cicd
    develop/release
