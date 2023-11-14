@@ -72,8 +72,6 @@ public class Match : IDisposable
         _ApiProvider = apiProvider;
         MatchInfo = new MatchInfo(matchConfig);
         InitializeStateMachine();
-
-
     }
 
     public Match(IMatchCallback matchCallback, IApiProvider apiProvider, ITextHelper textHelper, MatchInfo matchInfo, string roundBackupFile) : this(matchCallback, apiProvider, textHelper, matchInfo)
@@ -591,7 +589,7 @@ public class Match : IDisposable
         _MapsToSelect.Remove(mapToBan!);
         _MapsToSelect.ForEach(x => x.Votes.Clear());
 
-        _MatchCallback.SendMessage(_TextHelper.GetText(nameof(Resources.PugSharp_Match_WaitForOtherTeam), mapToBan!.Name, _CurrentMatchTeamToVote?.TeamConfig.Name));
+        _MatchCallback.SendMessage(_TextHelper.GetText(nameof(Resources.PugSharp_Match_BannedMap), mapToBan!.Name, _CurrentMatchTeamToVote?.TeamConfig.Name));
 
         if (_MapsToSelect.Count == 1)
         {
@@ -947,7 +945,7 @@ public class Match : IDisposable
         var mapToSelect = _MapsToSelect[mapNumber];
         mapToSelect.Votes.Add(player);
 
-        player.PrintToChat(_TextHelper.GetText(nameof(Resources.PugSharp_Match_Error_AlreadyBannedMap), mapToSelect.Name));
+        player.PrintToChat(_TextHelper.GetText(nameof(Resources.PugSharp_Match_VotedToBanMap), mapToSelect.Name));
 
         if (_MapsToSelect.Sum(x => x.Votes.Count) >= MatchInfo.Config.PlayersPerTeam)
         {
