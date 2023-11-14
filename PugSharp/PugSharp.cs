@@ -266,11 +266,11 @@ public class PugSharp : BasePlugin, IMatchCallback
     {
         var configFile = Path.Combine(_CsServer.GameDirectory, "csgo", "cfg", "PugSharp", configFileName);
         if (!File.Exists(configFile))
-        if (File.Exists(configFile))
-        {
-            _Logger.LogError("Config {configFile} was not found on the server.", configFile);
-            return;
-        }
+            if (File.Exists(configFile))
+            {
+                _Logger.LogError("Config {configFile} was not found on the server.", configFile);
+                return;
+            }
 
         configFile = Path.Join("PugSharp", configFileName);
 
@@ -739,6 +739,8 @@ public class PugSharp : BasePlugin, IMatchCallback
         {
             if (_Match.CurrentState == MatchState.WaitingForPlayersConnectedReady)
             {
+                _CsServer.NextFrame(() => LoadAndExecuteWarmupConfig());
+
                 var configTeam = _Match.GetPlayerTeam(eventPlayerTeam.Userid.SteamID);
 
                 if ((int)configTeam != eventPlayerTeam.Team)
