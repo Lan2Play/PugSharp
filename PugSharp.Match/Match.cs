@@ -93,6 +93,7 @@ public class Match : IDisposable
 
         _MatchStateMachine.Configure(MatchState.WaitingForPlayersConnectedReady)
             .PermitDynamicIf(MatchCommand.PlayerReady, () => HasRestoredMatch() ? MatchState.MatchRunning : MatchState.MapVote, AllPlayersAreReady)
+            .OnEntry(StartWarmup)
             .OnEntry(SetAllPlayersNotReady)
             .OnEntry(StartReadyReminder)
             .OnExit(StopReadyReminder);
@@ -159,6 +160,11 @@ public class Match : IDisposable
         _MatchStateMachine.Fire(MatchCommand.LoadMatch);
     }
 
+    private void StartWarmup()
+    {
+        _MatchCallback.StartWarmup();
+    }
+
     private bool HasRestoredMatch()
     {
         return !string.IsNullOrEmpty(MatchInfo.CurrentMap.MapName);
@@ -191,8 +197,7 @@ public class Match : IDisposable
 
     private void StartMatch()
     {
-        _MatchCallback.EndWarmup();
-        _MatchCallback.DisableCheats();
+        _MatchCallback.StartingMatch();
         _MatchCallback.SetupRoundBackup();
         MatchInfo.DemoFile = _MatchCallback.StartDemoRecording();
 

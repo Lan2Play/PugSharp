@@ -234,25 +234,11 @@ public class PugSharp : BasePlugin, IMatchCallback
 
     private void SetMatchVariable(MatchConfig matchConfig)
     {
-#pragma warning disable S109 // Magic numbers should not be used
 #pragma warning disable MA0003 // Add parameter name to improve readability
         _Logger.LogInformation("Start set match variables");
 
-        UpdateConvar("sv_disable_teamselect_menu", true);
-        UpdateConvar("sv_human_autojoin_team", 2);
-        UpdateConvar("mp_warmuptime", 6000f);
-
-        UpdateConvar("mp_overtime_enable", true);
         UpdateConvar("mp_overtime_maxrounds", matchConfig.MaxOvertimeRounds);
         UpdateConvar("mp_maxrounds", matchConfig.MaxRounds);
-        UpdateConvar("mp_autokick", false);
-
-        UpdateConvar("mp_team_timeout_time", 30);
-        UpdateConvar("mp_team_timeout_max", 3);
-
-        UpdateConvar("mp_competitive_endofmatch_extra_time", (float)120);
-
-        UpdateConvar("mp_endmatch_votenextmap", false);
 
         // Set T Name
         UpdateConvar("mp_teamname_1", matchConfig.Team2.Name);
@@ -262,13 +248,49 @@ public class PugSharp : BasePlugin, IMatchCallback
         UpdateConvar("mp_teamname_2", matchConfig.Team1.Name);
         UpdateConvar("mp_teamflag_2", matchConfig.Team1.Flag);
 
-        UpdateConvar("tv_autorecord", false);
-
-        _CsServer.ExecuteCommand("bot_quota 0");
-
         _Logger.LogInformation("Set match variables done");
 #pragma warning restore MA0003 // Add parameter name to improve readability
-#pragma warning restore S109 // Magic numbers should not be used
+    }
+
+    private void LoadAndExecuteWarmupConfig()
+    {
+        LoadAndExecuteConfig("warmup.cfg");
+    }
+
+    private void LoadAndExecuteLiveConfig()
+    {
+        LoadAndExecuteConfig("live.cfg");
+    }
+
+    private void LoadAndExecuteConfig(string configFileName)
+    {
+        var configFile = Path.Combine(_CsServer.GameDirectory, "csgo", "cfg", "PugSharp", configFileName);
+
+        if (File.Exists(configFile))
+        {
+            _Logger.LogError("Config {configFile} was not found on the server.", configFile);
+            return;
+        }
+
+        var configCommands = File.ReadAllLines(configFile);
+
+        foreach (var configCommand in configCommands)
+        {
+            _Logger.LogInformation("Executing config command {command}", configCommand);
+            _CsServer.ExecuteCommand(configCommand);
+        }
+    }
+
+    private void EndWarmup()
+    {
+        _Logger.LogInformation("Ending warmup immediately");
+        _CsServer.ExecuteCommand("mp_warmup_end");
+    }
+
+    private void DisableCheats()
+    {
+        _Logger.LogInformation("Disabling cheats");
+        UpdateConvar("sv_cheats", false);
     }
 
     #region Commands
@@ -710,7 +732,8 @@ public class PugSharp : BasePlugin, IMatchCallback
     {
         _Logger.LogInformation("OnPlayerTeam called. {playerName} tries to join {team} IsHLTV: {isHLTV} IsBot {isBot}", eventPlayerTeam.Userid.PlayerName, eventPlayerTeam.Team, eventPlayerTeam.Userid.IsHLTV, eventPlayerTeam.Userid.IsBot);
 
-        if(eventPlayerTeam.Userid.IsHLTV)
+        // Ignore SourceTV
+        if (eventPlayerTeam.Userid.IsHLTV)
         {
             return HookResult.Continue;
         }
@@ -1319,6 +1342,8 @@ public class PugSharp : BasePlugin, IMatchCallback
 
     #endregion
 
+
+
     #region Implementation of IMatchCallback
 
     public void SwitchMap(string selectedMap)
@@ -1351,11 +1376,7 @@ public class PugSharp : BasePlugin, IMatchCallback
         _CsServer.PrintToChatAll(message);
     }
 
-    public void EndWarmup()
-    {
-        _Logger.LogInformation("Ending warmup immediately");
-        _CsServer.ExecuteCommand("mp_warmup_end");
-    }
+
 
     public void PauseMatch()
     {
@@ -1369,11 +1390,7 @@ public class PugSharp : BasePlugin, IMatchCallback
         _CsServer.ExecuteCommand("mp_unpause_match");
     }
 
-    public void DisableCheats()
-    {
-        _Logger.LogInformation("Disabling cheats");
-        UpdateConvar("sv_cheats", false);
-    }
+
 
     public void SetupRoundBackup()
     {
@@ -1384,7 +1401,6 @@ public class PugSharp : BasePlugin, IMatchCallback
             _CsServer.ExecuteCommand($"mp_backup_round_file {prefix}");
         }
     }
-
     public string StartDemoRecording()
     {
         if (_Match == null)
@@ -1438,6 +1454,24 @@ public class PugSharp : BasePlugin, IMatchCallback
         return Match.Contract.Team.None;
     }
 
+    public void StartWarmup()
+    {
+        LoadAndExecuteWarmupConfig();
+    }
+
+
+    public void StartingMatch()
+    {
+        // Disable cheats
+        DisableCheats();
+
+        // End warmup
+        EndWarmup();
+
+        // Load live config
+        LoadAndExecuteLiveConfig();
+    }
+
     #endregion
 
     protected override void Dispose(bool disposing)
@@ -1450,4 +1484,6 @@ public class PugSharp : BasePlugin, IMatchCallback
             _ConfigProvider.Dispose();
         }
     }
+
+
 }
