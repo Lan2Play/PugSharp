@@ -172,8 +172,8 @@ jobs:
     env:
       PUGSHARPNETVER: ${{needs.get_versions.outputs.PUGSHARPNETVER}}
       CSSHARPVER: ${{needs.get_versions.outputs.CSSHARPVER}}
-      CSSHARPlink: ${{needs.get_versions.outputs.CSSHARPlinkWindows}}
-      CSSHARPlinkWRuntime: ${{needs.get_versions.outputs.CSSHARPlinkWRuntimeWindows}}
+      CSSHARPlink: ${{needs.get_versions.outputs.CSSHARPlink}}
+      CSSHARPlinkWRuntime: ${{needs.get_versions.outputs.CSSHARPlinkWRuntime}}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -182,7 +182,11 @@ jobs:
       - name: set Pugsharp version
         run: sed -i "s|0.0.1|$PUGSHARPNETVER|g" PugSharp/PugSharp.cs
       - name: Build Pugsharp
-        run: dotnet publish    
+        if: ${{ !(startsWith(github.ref, 'refs/tags/v')) ||  contains(github.ref, '-beta') }}
+        run: dotnet publish
+      - name: Build Pugsharp release
+        if: ${{ startsWith(github.ref, 'refs/tags/v') &&  !(contains(github.ref, '-beta')) }}
+        run: dotnet publish -c Release 
       - name: prepare package structure
         run: mkdir -p packagebuild/addons/counterstrikesharp/plugins/PugSharp
       - name: copy package content
@@ -250,8 +254,8 @@ jobs:
     env:
       PUGSHARPNETVER: ${{needs.get_versions.outputs.PUGSHARPNETVER}}
       CSSHARPVER: ${{needs.get_versions.outputs.CSSHARPVER}}
-      CSSHARPlink: ${{needs.get_versions.outputs.CSSHARPlink}}
-      CSSHARPlinkWRuntime: ${{needs.get_versions.outputs.CSSHARPlinkWRuntime}}
+      CSSHARPlink: ${{needs.get_versions.outputs.CSSHARPlinkWindows}}
+      CSSHARPlinkWRuntime: ${{needs.get_versions.outputs.CSSHARPlinkWRuntimeWindows}}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -261,7 +265,12 @@ jobs:
         run: sed -i "s|0.0.1|$PUGSHARPNETVER|g" PugSharp/PugSharp.cs
         shell: bash
       - name: Build Pugsharp
+        if: ${{ !(startsWith(github.ref, 'refs/tags/v')) ||  contains(github.ref, '-beta') }}
         run: dotnet publish
+        shell: bash
+      - name: Build Pugsharp release
+        if: ${{ startsWith(github.ref, 'refs/tags/v') &&  !(contains(github.ref, '-beta')) }}
+        run: dotnet publish -c Release
         shell: bash
       - name: prepare package structure
         run: mkdir -p packagebuild/addons/counterstrikesharp/plugins/PugSharp
