@@ -27,8 +27,8 @@ endif
 ## group commands
 build-and-copy: git-pull build-debug copy-pugsharp
 build-and-copy-docker: git-pull build-debug-docker copy-pugsharp
-init-all: prepare-folders init-env install-deps pull-csserver start-csserver attach-csserver
-init-all-docker: prepare-folders init-env install-deps-docker pull-csserver start-csserver attach-csserver
+init-all: prepare-folders init-env install-deps copy-pugsharp-sample-configs pull-csserver start-csserver attach-csserver
+init-all-docker: prepare-folders init-env install-deps-docker copy-pugsharp-sample-configs pull-csserver start-csserver attach-csserver
 install-all-windows: install-windows-steamcmd install-windows
 install-deps: install-counterstrikesharp install-metamod
 install-deps-docker: install-counterstrikesharp-docker install-metamod
@@ -121,6 +121,10 @@ build-release-docker:
 copy-pugsharp:
 	mkdir -p $(currentDir)/cs2/game/csgo/addons/counterstrikesharp/plugins/PugSharp
 	cp -rf $(currentDir)/PugSharp/bin/Debug/net7.0/publish/* $(currentDir)/cs2/game/csgo/addons/counterstrikesharp/plugins/PugSharp
+
+copy-pugsharp-sample-configs:
+	mkdir -p $(currentDir)/cs2/game/csgo/cfg
+	cp -rf $(currentDir)/resources/cfg/* $(currentDir)/cs2/game/csgo/cfg/
 
 git-pull:
 	git pull || true

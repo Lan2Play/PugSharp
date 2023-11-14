@@ -60,6 +60,7 @@ Prepares the gameserver folder, initializes the .env file for the cs2 server, co
 - :ref:`develop/makefile:prepare-folders` 
 - :ref:`develop/makefile:init-env` 
 - :ref:`develop/makefile:install-deps` 
+- :ref:`develop/makefile:copy-pugsharp-sample-configs` 
 - :ref:`develop/makefile:pull-csserver` 
 - :ref:`develop/makefile:start-csserver` 
 
@@ -76,6 +77,7 @@ Prepares the gameserver folder, initializes the .env file for the cs2 server, co
 - :ref:`develop/makefile:prepare-folders` 
 - :ref:`develop/makefile:init-env` 
 - :ref:`develop/makefile:install-deps-docker` 
+- :ref:`develop/makefile:copy-pugsharp-sample-configs` 
 - :ref:`develop/makefile:pull-csserver` 
 - :ref:`develop/makefile:start-csserver` 
 
@@ -269,6 +271,14 @@ No Parameters
 copy-pugsharp
 ........................
 copies pugsharp debug build in to the local cs2 server
+
+**Parameters:**
+
+No Parameters
+
+copy-pugsharp-sample-configs
+........................
+copies pugsharp sample configs in to the local cs2 server
 
 **Parameters:**
 
