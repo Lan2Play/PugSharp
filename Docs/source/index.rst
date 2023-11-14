@@ -13,7 +13,7 @@ If you implement software to interface with PugSharp let us know please!
 
 
 .. warning::
-   This Plugin is in a very early state of development and some things not fully working right now! Please report any issues you find either on Discord or in our issues tab on `Github <https://github.com/Lan2Play/PugSharp/issues>`_ 
+   This Plugin is in a very early state of development and some things are not fully working right now! Please report any issues you find either on Discord or in our issues tab on `Github <https://github.com/Lan2Play/PugSharp/issues>`_ 
 
 .. image:: https://discordapp.com/api/guilds/748086853449810013/widget.png?style=banner3
    :target: https://discord.gg/zF5C9WPWFq

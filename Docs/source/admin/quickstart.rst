@@ -242,6 +242,6 @@ Notes
 -------------------------------
 
 .. warning::
-   This Plugin is in a very early state of development and some things not fully working right now! Please report any issues you find either on Discord (you can find it on the `home of the docs <https://pugsharp.lan2play.de/>`_ ) or in our issues tab on `Github <https://github.com/Lan2Play/PugSharp/issues>`_ 
+   This Plugin is in a very early state of development and some things are not fully working right now! Please report any issues you find either on Discord (you can find it on the `home of the docs <https://pugsharp.lan2play.de/>`_ ) or in our issues tab on `Github <https://github.com/Lan2Play/PugSharp/issues>`_ 
 
 
