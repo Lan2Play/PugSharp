@@ -128,7 +128,7 @@
     <value>El número de mapa **{0:mapNumber}** no está disponible!</value>
   </data>
   <data name="PugSharp.Match.RemindReady" xml:space="preserve">
-    <value>¡¡no!! estás preparado! Escribe `!ready` si estás preparado.</value>
+    <value>!!no!! estás preparado! Escribe `!ready` si estás preparado.</value>
   </data>
   <data name="PugSharp.Match.SelectedTeam" xml:space="preserve">
     <value>{0:teamName} ha seleccionado {1:side} como bando de inicio!</value>
