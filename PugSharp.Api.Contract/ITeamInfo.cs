@@ -2,7 +2,6 @@
 {
     public interface ITeamInfo
     {
-        string Id { get; set; }
-        string TeamName { get; set; }
+        string TeamName { get; }
     }
 }

@@ -4,8 +4,6 @@ namespace PugSharp.ApiStats
 {
     public class TeamInfo : ITeamInfo
     {
-        public string Id { get; set; }
-
-        public string TeamName { get; set; }
+        public required string TeamName { get; init; }
     }
 }

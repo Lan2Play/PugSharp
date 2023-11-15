@@ -6,7 +6,7 @@ namespace PugSharp.ApiStats
 {
     public class MapTeamInfo : IMapTeamInfo
     {
-        public IReadOnlyDictionary<string, IPlayerStatistics> Players { get; set; }
+        public IReadOnlyDictionary<string, IPlayerStatistics> Players { get; set; } = new Dictionary<string, IPlayerStatistics>();
 
         public int Score { get; set; }
 

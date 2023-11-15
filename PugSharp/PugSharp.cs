@@ -627,7 +627,7 @@ public class PugSharp : BasePlugin, IMatchCallback
     }
 
 
-    private static void HandleCommand(Action commandAction, CommandInfo command, [CallerMemberName] string? commandMethod = null, string? args = null)
+    private static void HandleCommand(Action commandAction, CommandInfo command, string? args = null, [CallerMemberName] string? commandMethod = null)
     {
         var commandName = commandMethod?.Replace("OnCommand", "", StringComparison.OrdinalIgnoreCase) ?? commandAction.Method.Name;
         try
@@ -642,7 +642,7 @@ public class PugSharp : BasePlugin, IMatchCallback
         }
     }
 
-    private static async Task HandleCommandAsync(Func<Task> commandAction, CommandInfo command, [CallerMemberName] string? commandMethod = null, string? args = null)
+    private static async Task HandleCommandAsync(Func<Task> commandAction, CommandInfo command, string? args = null, [CallerMemberName] string? commandMethod = null)
     {
         var commandName = commandMethod?.Replace("OnCommand", "", StringComparison.OrdinalIgnoreCase) ?? commandAction.Method.Name;
         try

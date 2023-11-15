@@ -2,17 +2,17 @@
 {
     public class Series
     {
-        public Dictionary<string, Map> Maps { get; set; }
+        public required Dictionary<string, Map> Maps { get; init; }
 
-        public TeamInfo Team1 { get; set; }
+        public required TeamInfo Team1 { get; init; }
 
-        public TeamInfo Team2 { get; set; }
+        public required TeamInfo Team2 { get; init; }
 
         public string SeriesType => $"bo{Maps.Count}";
 
-        public Config.Team Winner { get; set; }
+        public required Config.Team Winner { get; init; }
 
-        public bool Forfeit { get; set; }
+        public required bool Forfeit { get; init; }
 
         public Map GetMap(int mapNumber)
         {
