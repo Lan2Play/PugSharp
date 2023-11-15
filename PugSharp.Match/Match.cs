@@ -71,10 +71,17 @@ public class Match : IDisposable
 
     private static void SetServerCulture(string locale)
     {
-        CultureInfo.DefaultThreadCurrentCulture = CultureInfo.GetCultureInfo(locale);
-        CultureInfo.DefaultThreadCurrentUICulture = CultureInfo.DefaultThreadCurrentCulture;
-        CultureInfo.CurrentCulture = CultureInfo.DefaultThreadCurrentCulture;
-        CultureInfo.CurrentUICulture = CultureInfo.DefaultThreadCurrentCulture;
+        try
+        {
+            CultureInfo.DefaultThreadCurrentCulture = CultureInfo.GetCultureInfo(locale);
+            CultureInfo.DefaultThreadCurrentUICulture = CultureInfo.DefaultThreadCurrentCulture;
+            CultureInfo.CurrentCulture = CultureInfo.DefaultThreadCurrentCulture;
+            CultureInfo.CurrentUICulture = CultureInfo.DefaultThreadCurrentCulture;
+        }
+        catch (Exception ex)
+        {
+            _Logger.LogError(ex, "Setting cultureInfo is not possible. Linux requires libicu-dev/libicu/icu-libs to support translations.");
+        }
     }
 
     public Match(IMatchCallback matchCallback, IApiProvider apiProvider, ITextHelper textHelper, Config.MatchConfig matchConfig) : this(matchCallback, apiProvider, textHelper, new MatchInfo(matchConfig))
