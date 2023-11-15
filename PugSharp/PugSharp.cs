@@ -20,6 +20,7 @@ using PugSharp.Api.Json;
 using PugSharp.Match;
 using PugSharp.Translation;
 using PugSharp.Translation.Properties;
+using PugSharp.Api;
 
 namespace PugSharp;
 
@@ -166,25 +167,25 @@ public class PugSharp : BasePlugin, IMatchCallback
         _Match = new Match.Match(this, _ApiProvider, _TextHelper, matchInfo, roundBackupFile);
     }
 
-    public static void UpdateConvar<T>(string name, T value)
+    public void UpdateConvar<T>(string name, T value)
     {
         try
         {
-            var convar = ConVar.Find(name);
-
-            if (convar == null)
-            {
-                _Logger.LogError("ConVar {name} couldn't be found", name);
-                return;
-            }
-
             if (value is string stringValue)
             {
                 _Logger.LogInformation("Update ConVar {name} to stringvalue {value}", name, stringValue);
-                convar.StringValue = stringValue;
+                _CsServer.ExecuteCommand($"{name} {stringValue}");
             }
             else
             {
+                var convar = ConVar.Find(name);
+
+                if (convar == null)
+                {
+                    _Logger.LogError("ConVar {name} couldn't be found", name);
+                    return;
+                }
+
                 _Logger.LogInformation("Update ConVar {name} to value {value}", name, value);
                 convar.SetValue(value);
             }
@@ -233,7 +234,7 @@ public class PugSharp : BasePlugin, IMatchCallback
         _CsServer.ExecuteCommand($"changelevel {map}");
     }
 
-    private static void SetMatchVariable(MatchConfig matchConfig)
+    private void SetMatchVariable(MatchConfig matchConfig)
     {
         _Logger.LogInformation("Start set match variables");
 
@@ -243,6 +244,7 @@ public class PugSharp : BasePlugin, IMatchCallback
         // Set T Name
         UpdateConvar("mp_teamname_1", matchConfig.Team2.Name);
         UpdateConvar("mp_teamflag_1", matchConfig.Team2.Flag);
+
 
         // Set CT Name
         UpdateConvar("mp_teamname_2", matchConfig.Team1.Name);
@@ -282,7 +284,7 @@ public class PugSharp : BasePlugin, IMatchCallback
         _CsServer.ExecuteCommand("mp_warmup_end");
     }
 
-    private static void DisableCheats()
+    private void DisableCheats()
     {
         _Logger.LogInformation("Disabling cheats");
         UpdateConvar("sv_cheats", false);
@@ -743,7 +745,7 @@ public class PugSharp : BasePlugin, IMatchCallback
 
         if (_Match != null)
         {
-            if (_Match.CurrentState == MatchState.WaitingForPlayersConnectedReady)
+            if (_Match.CurrentState == MatchState.WaitingForPlayersConnectedReady || _Match.CurrentState == MatchState.WaitingForPlayersReady)
             {
                 if (Utilities.GetPlayers().Count == 1)
                 {
@@ -884,11 +886,21 @@ public class PugSharp : BasePlugin, IMatchCallback
 
 
             // Toggle after last round in half
-            if ((teamT.Score + teamCT.Score) == _Match.MatchInfo.Config.MaxRounds / 2)
+            if (currentRound == _Match.MatchInfo.Config.MaxRounds.Half())
             {
+                _Logger.LogInformation("Switching Teams on halftime");
                 _Match.SwitchTeam();
             }
-            // TODO OT handling
+
+            if (currentRound > _Match.MatchInfo.Config.MaxRounds)
+            {
+                var otRound = currentRound - _Match.MatchInfo.Config.MaxRounds;
+                if (otRound == _Match.MatchInfo.Config.MaxOvertimeRounds.Half())
+                {
+                    _Logger.LogInformation("Switching Teams on overtime halftime");
+                    _Match.SwitchTeam();
+                }
+            }
         }
 
         return HookResult.Continue;
@@ -1221,6 +1233,27 @@ public class PugSharp : BasePlugin, IMatchCallback
             var mvpStats = _CurrentRountState.GetPlayerRoundStats(mvp.SteamID, mvp.PlayerName);
 
             mvpStats.Mvp = true;
+
+            // Report MVP
+            if (mvp.UserId.HasValue)
+            {
+                var roundMvpParams = new RoundMvpParams(
+                _Match.MatchInfo.Config.MatchId,
+                _Match.MatchInfo.CurrentMap.MapNumber,
+                _Match.MatchInfo.CurrentMap.Team1Points + _Match.MatchInfo.CurrentMap.Team2Points,
+                new ApiPlayer
+                {
+                    UserId = mvp.UserId.Value,
+                    SteamId = mvp.SteamID,
+                    IsBot = mvp.IsBot,
+                    Name = mvp.PlayerName,
+                    Side = mvp.TeamNum
+                },
+                eventRoundMvp.Reason
+                );
+
+                _ = _ApiProvider.RoundMvpAsync(roundMvpParams, CancellationToken.None);
+            }
         }
 
         return HookResult.Continue;

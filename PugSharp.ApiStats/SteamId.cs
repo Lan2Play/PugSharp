@@ -1,4 +1,3 @@
-﻿namespace PugSharp.ApiStats
-{
-    public record SteamId(string SteamId64);
-}
+﻿namespace PugSharp.ApiStats;
+
+public record SteamId(string SteamId64);

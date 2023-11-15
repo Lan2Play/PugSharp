@@ -20,7 +20,7 @@ public class Match : IDisposable
     private const int Kill4 = 4;
     private const int Kill5 = 5;
     private const int NumOfMatchLiveMessages = 10;
-
+    private const uint _TimeBetweenDelayMessages = 10;
     private static readonly ILogger<Match> _Logger = LogManager.CreateLogger<Match>();
 
     private readonly System.Timers.Timer _VoteTimer = new();
@@ -46,7 +46,8 @@ public class Match : IDisposable
 
     private Match(IMatchCallback matchCallback, IApiProvider apiProvider, ITextHelper textHelper, MatchInfo matchInfo)
     {
-        CultureInfo.CurrentCulture = CultureInfo.GetCultureInfo(matchInfo.Config.ServerLocale);
+        SetServerCulture(matchInfo.Config.ServerLocale);
+
         _MatchCallback = matchCallback;
         _ApiProvider = apiProvider;
         _TextHelper = textHelper;
@@ -66,6 +67,14 @@ public class Match : IDisposable
         _MapsToSelect = MatchInfo.Config.Maplist.Select(x => new Vote(x)).ToList();
 
         _MatchStateMachine = new StateMachine<MatchState, MatchCommand>(MatchState.None);
+    }
+
+    private static void SetServerCulture(string locale)
+    {
+        CultureInfo.DefaultThreadCurrentCulture = CultureInfo.GetCultureInfo(locale);
+        CultureInfo.DefaultThreadCurrentUICulture = CultureInfo.DefaultThreadCurrentCulture;
+        CultureInfo.CurrentCulture = CultureInfo.DefaultThreadCurrentCulture;
+        CultureInfo.CurrentUICulture = CultureInfo.DefaultThreadCurrentCulture;
     }
 
     public Match(IMatchCallback matchCallback, IApiProvider apiProvider, ITextHelper textHelper, Config.MatchConfig matchConfig) : this(matchCallback, apiProvider, textHelper, new MatchInfo(matchConfig))
@@ -475,7 +484,13 @@ public class Match : IDisposable
         var seriesResultParams = new SeriesResultParams(MatchInfo.Config.MatchId, MatchInfo.MatchMaps.GroupBy(x => x.Winner).MaxBy(x => x.Count())!.Key!.TeamConfig.Name, Forfeit: true, delay * 1100, MatchInfo.MatchMaps.Count(x => x.Team1Points > x.Team2Points), MatchInfo.MatchMaps.Count(x => x.Team2Points > x.Team1Points));
         await _ApiProvider.FinalizeAsync(seriesResultParams, CancellationToken.None).ConfigureAwait(false);
 
-        await Task.Delay(TimeSpan.FromSeconds(delay)).ConfigureAwait(false);
+        while (delay > 0)
+        {
+            _Logger.LogInformation("Waiting for sourceTV. Remaining Delay: {delay}s", delay);
+            var delayLoopTime = Math.Min(_TimeBetweenDelayMessages, delay);
+            await Task.Delay(TimeSpan.FromSeconds(delayLoopTime)).ConfigureAwait(false);
+            delay -= delayLoopTime;
+        }
 
         if (_DemoUploader != null)
         {
@@ -565,6 +580,14 @@ public class Match : IDisposable
 
     private void SendRemainingMapsToVotingTeam()
     {
+        // If only one map is configured
+        if (MatchInfo.Config.Maplist.Length == 1)
+        {
+            _MapsToSelect = MatchInfo.Config.Maplist.Select(x => new Vote(x)).ToList();
+            TryFireState(MatchCommand.VoteMap);
+            return;
+        }
+
         SwitchVotingTeam();
 
         _MapsToSelect.ForEach(m => m.Votes.Clear());
@@ -585,13 +608,20 @@ public class Match : IDisposable
 
     private void RemoveBannedMap()
     {
-        _VoteTimer.Stop();
+        if (_VoteTimer.Enabled)
+        {
+            _VoteTimer.Stop();
+        }
 
-        var mapToBan = _MapsToSelect.MaxBy(m => m.Votes.Count);
-        _MapsToSelect.Remove(mapToBan!);
-        _MapsToSelect.ForEach(x => x.Votes.Clear());
+        //Only ban map if theres more than one
+        if (_MapsToSelect.Count > 1)
+        {
+            var mapToBan = _MapsToSelect.MaxBy(m => m.Votes.Count);
+            _MapsToSelect.Remove(mapToBan!);
+            _MapsToSelect.ForEach(x => x.Votes.Clear());
 
-        _MatchCallback.SendMessage(_TextHelper.GetText(nameof(Resources.PugSharp_Match_BannedMap), mapToBan!.Name, _CurrentMatchTeamToVote?.TeamConfig.Name));
+            _MatchCallback.SendMessage(_TextHelper.GetText(nameof(Resources.PugSharp_Match_BannedMap), mapToBan!.Name, _CurrentMatchTeamToVote?.TeamConfig.Name));
+        }
 
         if (_MapsToSelect.Count == 1)
         {
@@ -720,7 +750,17 @@ public class Match : IDisposable
     private bool MapIsSelected()
     {
         // The SelectedCount is checked when the Votes are done but the map is still in the list
-        return _MapsToSelect.Count == 2;
+        return _MapsToSelect.Count <= 2;
+    }
+
+    private bool OneMapConfigured()
+    {
+        if (MatchInfo.Config.Maplist.Count() == 1)
+        {
+            return true;
+        }
+
+        return false;
     }
 
     private bool MapIsNotSelected()

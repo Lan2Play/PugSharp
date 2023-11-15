@@ -3,60 +3,59 @@ using CounterStrikeSharp.API.Modules.Memory;
 using PugSharp.Config;
 using System.Globalization;
 
-namespace PugSharp
+namespace PugSharp;
+
+public static class CounterStrikeSharpExtensions
 {
-    public static class CounterStrikeSharpExtensions
+    internal static bool IsAdmin(this CCSPlayerController? playerController, ServerConfig? serverConfig)
     {
-        internal static bool IsAdmin(this CCSPlayerController? playerController, ServerConfig? serverConfig)
+        if (serverConfig?.Admins == null || playerController == null)
         {
-            if (serverConfig?.Admins == null || playerController == null)
-            {
-                return false;
-            }
-
-            return serverConfig.Admins.ContainsKey(playerController.SteamID);
+            return false;
         }
 
-        internal static void Kick(this CCSPlayerController? playerController)
-        {
-            if (playerController?.UserId == null)
-            {
-                return;
-            }
+        return serverConfig.Admins.ContainsKey(playerController.SteamID);
+    }
 
-            CounterStrikeSharp.API.Server.ExecuteCommand(string.Create(CultureInfo.InvariantCulture, $"kickid {playerController.UserId.Value} \"You are not part of the current match!\""));
+    internal static void Kick(this CCSPlayerController? playerController)
+    {
+        if (playerController?.UserId == null)
+        {
+            return;
         }
 
-        internal static PlayerConnectedState PlayerState(this CCSPlayerController player)
+        CounterStrikeSharp.API.Server.ExecuteCommand(string.Create(CultureInfo.InvariantCulture, $"kickid {playerController.UserId.Value} \"You are not part of the current match!\""));
+    }
+
+    internal static PlayerConnectedState PlayerState(this CCSPlayerController player)
+    {
+        if (player == null || !player.IsValid)
         {
-            if (player == null || !player.IsValid)
-            {
-                return PlayerConnectedState.PlayerNeverConnected;
-            }
-
-            var statusRef = Schema.GetRef<UInt32>(player.Handle, "CBasePlayerController", "m_iConnected");
-
-            return (PlayerConnectedState)statusRef;
+            return PlayerConnectedState.PlayerNeverConnected;
         }
 
-        internal static bool IsUtility(string weapon)
+        var statusRef = Schema.GetRef<UInt32>(player.Handle, "CBasePlayerController", "m_iConnected");
+
+        return (PlayerConnectedState)statusRef;
+    }
+
+    internal static bool IsUtility(string weapon)
+    {
+        switch (weapon)
         {
-            switch (weapon)
-            {
-                case "flashbang":
-                case "hegrenade":
-                case "inferno":
-                case "smoke":
+            case "flashbang":
+            case "hegrenade":
+            case "inferno":
+            case "smoke":
 
-                    {
-                        return true;
-                    }
+                {
+                    return true;
+                }
 
-                default:
-                    {
-                        return false;
-                    }
-            }
+            default:
+                {
+                    return false;
+                }
         }
     }
 }
