@@ -19,7 +19,23 @@ If you implement software to interface with PugSharp let us know please!
    :target: https://discord.gg/zF5C9WPWFq
 
 
+Admins quickstart note
+----------------------
+- If you want to deploy PugSharp, please take a look into the :doc:`/admin/quickstart`
+- If you want to help with the translation of PugSharp, please check out our :doc:`/develop/translation` section
+
+Developer note
+----------------------
+- Github url: https://github.com/Lan2Play/PugSharp
+- If you want to contribute to PugSharp, please take a look into the :doc:`/develop/quickstart`
+- If you want to help with the translation of PugSharp, please check out our :doc:`/develop/translation` section
+
+
+Table of contents
+----------------------
+
 .. toctree::
+   :caption: General
    :maxdepth: 2
 
    contribution
@@ -80,16 +96,6 @@ If you implement software to interface with PugSharp let us know please!
 .. readd |Client Translation| to the top
 
 
-Admins quickstart note
-----------------------
-- If you want to deploy PugSharp, please take a look into the :doc:`/admin/quickstart`
-- If you want to help with the translation of PugSharp, please check out our :doc:`/develop/translation` section
-
-Developer note
-----------------------
-- Github url: https://github.com/Lan2Play/PugSharp
-- If you want to contribute to PugSharp, please take a look into the :doc:`/develop/quickstart`
-- If you want to help with the translation of PugSharp, please check out our :doc:`/develop/translation` section
 
 Indices and tables
 ==================
