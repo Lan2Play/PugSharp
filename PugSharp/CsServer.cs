@@ -1,11 +1,15 @@
 ﻿using CounterStrikeSharp.API;
 using CounterStrikeSharp.API.Core;
+using Microsoft.Extensions.Logging;
+using PugSharp.Logging;
 using PugSharp.Server.Contract;
 
 namespace PugSharp;
 
 public class CsServer : ICsServer
 {
+    private static readonly ILogger<CsServer> _Logger = LogManager.CreateLogger<CsServer>();
+
     public string GameDirectory => CounterStrikeSharp.API.Server.GameDirectory;
 
     public void ExecuteCommand(string v)
@@ -32,6 +36,10 @@ public class CsServer : ICsServer
             else if (team.Teamname.Equals("TERRORIST", StringComparison.OrdinalIgnoreCase))
             {
                 tScore = team.Score;
+            }
+            else
+            {
+                _Logger.LogError("TeamName '{name}'is not supported!", team.Teamname);
             }
         }
 

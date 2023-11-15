@@ -1,14 +1,16 @@
-﻿namespace PugSharp.ApiStats
+﻿using System.Globalization;
+
+namespace PugSharp.ApiStats
 {
     public class Series
     {
-        public required Dictionary<string, Map> Maps { get; init; }
+        public required IDictionary<string, Map> Maps { get; init; }
 
         public required TeamInfo Team1 { get; init; }
 
         public required TeamInfo Team2 { get; init; }
 
-        public string SeriesType => $"bo{Maps.Count}";
+        public string SeriesType => string.Create(CultureInfo.CurrentCulture, $"bo{Maps.Count}");
 
         public required Config.Team Winner { get; init; }
 

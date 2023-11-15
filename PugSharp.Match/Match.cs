@@ -55,7 +55,7 @@ public class Match : IDisposable
         _VoteTimer.Elapsed += VoteTimer_Elapsed;
         _ReadyReminderTimer.Elapsed += ReadyReminderTimer_Elapsed;
 
-        MatchInfo.CurrentMap = matchInfo.MatchMaps.LastOrDefault(x => !string.IsNullOrEmpty(x.MapName)) ?? matchInfo.MatchMaps.Last();
+        MatchInfo.CurrentMap = matchInfo.MatchMaps.LastOrDefault(x => !string.IsNullOrEmpty(x.MapName)) ?? matchInfo.MatchMaps[matchInfo.MatchMaps.Count - 1];
         _Logger.LogInformation("Continue Match on map {mapNumber}({mapName})!", MatchInfo.CurrentMap.MapNumber, MatchInfo.CurrentMap.MapName);
 
         if (!string.IsNullOrEmpty(MatchInfo.Config.EventulaDemoUploadUrl) && !string.IsNullOrEmpty(MatchInfo.Config.EventulaApistatsToken))
@@ -79,7 +79,7 @@ public class Match : IDisposable
     public Match(IMatchCallback matchCallback, IApiProvider apiProvider, ITextHelper textHelper, MatchInfo matchInfo, string roundBackupFile) : this(matchCallback, apiProvider, textHelper, matchInfo)
     {
         _Logger.LogInformation("Create Match from existing MatchInfo!");
-        _Logger.LogInformation(JsonSerializer.Serialize(matchInfo));
+        _Logger.LogInformation("{matchInfo}", JsonSerializer.Serialize(matchInfo));
         _RoundBackupFile = roundBackupFile;
         InitializeStateMachine();
     }
@@ -268,7 +268,7 @@ public class Match : IDisposable
             return;
         }
 
-        var map = new Map { WinnerTeamName = winnerTeam.TeamConfig.Name, Name = MatchInfo.CurrentMap.MapName, Team1 = mapTeamInfo1, Team2 = mapTeamInfo2, DemoFileName = Path.GetFileName(MatchInfo.DemoFile) };
+        var map = new Map { WinnerTeamName = winnerTeam.TeamConfig.Name, Name = MatchInfo.CurrentMap.MapName, Team1 = mapTeamInfo1, Team2 = mapTeamInfo2, DemoFileName = Path.GetFileName(MatchInfo.DemoFile) ?? string.Empty };
         _ = _ApiProvider?.RoundStatsUpdateAsync(new RoundStatusUpdateParams(MatchInfo.Config.MatchId, MatchInfo.CurrentMap.MapNumber, teamInfo1, teamInfo2, map), CancellationToken.None);
     }
 
@@ -544,7 +544,7 @@ public class Match : IDisposable
         {
             _Logger.LogInformation("ReadyReminder Elapsed");
             var readyPlayerIds = AllMatchPlayers.Where(p => p.IsReady).Select(x => x.Player.SteamID).ToList();
-            var notReadyPlayers = _MatchCallback.GetAllPlayers().Where(p => !readyPlayerIds.Contains(p.SteamID));
+            var notReadyPlayers = _MatchCallback.LoadAllPlayers().Where(p => !readyPlayerIds.Contains(p.SteamID));
 
             var remindMessage = _TextHelper.GetText(nameof(Resources.PugSharp_Match_RemindReady));
             foreach (var player in notReadyPlayers)
@@ -645,10 +645,10 @@ public class Match : IDisposable
 
     private static void ShowMenuToTeam(MatchTeam team, string title, IEnumerable<MenuOption> options)
     {
-        team.Players.ForEach(p =>
+        foreach (var player in team.Players.Select(p => p.Player))
         {
-            p.Player.ShowMenu(title, options);
-        });
+            player.ShowMenu(title, options);
+        }
     }
 
     private void SwitchVotingTeam()
@@ -665,7 +665,7 @@ public class Match : IDisposable
 
     private bool AllPlayersAreConnected()
     {
-        var players = _MatchCallback.GetAllPlayers();
+        var players = _MatchCallback.LoadAllPlayers();
         var connectedPlayerSteamIds = players.Select(p => p.SteamID).ToList();
         var allPlayerIds = MatchInfo.Config.Team1.Players.Keys.Concat(MatchInfo.Config.Team2.Players.Keys);
         if (allPlayerIds.All(p => connectedPlayerSteamIds.Contains(p)))
@@ -757,13 +757,13 @@ public class Match : IDisposable
     private MatchTeam? GetMatchTeam(ulong steamID)
     {
         _Logger.LogInformation("GetMatchTeam for {steamId} in MatchTeam1: {team1Ids}", steamID, string.Join(", ", MatchInfo.MatchTeam1.Players.Select(x => x.Player.SteamID)));
-        if (MatchInfo.MatchTeam1.Players.Exists(x => x.Player.SteamID.Equals(steamID)))
+        if (MatchInfo.MatchTeam1.Players.Any(x => x.Player.SteamID.Equals(steamID)))
         {
             return MatchInfo.MatchTeam1;
         }
 
         _Logger.LogInformation("GetMatchTeam for {steamId} in MatchTeam2: {team1Ids}", steamID, string.Join(", ", MatchInfo.MatchTeam2.Players.Select(x => x.Player.SteamID)));
-        if (MatchInfo.MatchTeam2.Players.Exists(x => x.Player.SteamID.Equals(steamID)))
+        if (MatchInfo.MatchTeam2.Players.Any(x => x.Player.SteamID.Equals(steamID)))
         {
             return MatchInfo.MatchTeam2;
         }
@@ -809,7 +809,7 @@ public class Match : IDisposable
             player.SwitchTeam(startSite);
         }
 
-        var existingPlayer = team.Players.Find(x => x.Player.SteamID.Equals(player.SteamID));
+        var existingPlayer = team.Players.FirstOrDefault(x => x.Player.SteamID.Equals(player.SteamID));
         if (existingPlayer != null)
         {
             team.Players.Remove(existingPlayer);
@@ -937,7 +937,7 @@ public class Match : IDisposable
             return false;
         }
 
-        var bannedMap = _MapsToSelect.Find(x => x.Votes.Exists(x => x.UserId == player.UserId));
+        var bannedMap = _MapsToSelect.Find(x => x.Votes.Any(x => x.UserId == player.UserId));
         if (bannedMap != null)
         {
             player.PrintToChat(_TextHelper.GetText(nameof(Resources.PugSharp_Match_Error_AlreadyBannedMap), _MapsToSelect.IndexOf(bannedMap), bannedMap.Name));
@@ -977,7 +977,7 @@ public class Match : IDisposable
             return false;
         }
 
-        var votedTeam = _TeamVotes.Find(x => x.Votes.Exists(x => x.UserId == player.UserId));
+        var votedTeam = _TeamVotes.Find(x => x.Votes.Any(x => x.UserId == player.UserId));
         if (votedTeam != null)
         {
             player.PrintToChat(_TextHelper.GetText(nameof(Resources.PugSharp_Match_Error_AlreadyVotedForTeam), _MapsToSelect.IndexOf(votedTeam), votedTeam.Name));

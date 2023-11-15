@@ -11,7 +11,7 @@ public class MatchMap
 
     public int MapNumber { get; }
 
-    public string MapName { get; set; }
+    public string MapName { get; set; } = string.Empty;
 
     public MatchTeam? Winner { get; set; }
 
@@ -19,5 +19,5 @@ public class MatchMap
 
     public int Team2Points { get; set; }
 
-    public Dictionary<ulong, PlayerMatchStatistics> PlayerMatchStatistics { get; init; } = new Dictionary<ulong, PlayerMatchStatistics>();
+    public IDictionary<ulong, PlayerMatchStatistics> PlayerMatchStatistics { get; init; } = new Dictionary<ulong, PlayerMatchStatistics>();
 }

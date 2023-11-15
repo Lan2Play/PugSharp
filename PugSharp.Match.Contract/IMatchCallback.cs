@@ -3,7 +3,7 @@ namespace PugSharp.Match.Contract;
 
 public interface IMatchCallback
 {
-    IReadOnlyList<IPlayer> GetAllPlayers();
+    IReadOnlyList<IPlayer> LoadAllPlayers();
     void PauseMatch();
     void SendMessage(string message);
     void SwitchMap(string selectedMap);
