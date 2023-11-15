@@ -744,7 +744,7 @@ public class PugSharp : BasePlugin, IMatchCallback
 
         if (_Match != null)
         {
-            if (_Match.CurrentState == MatchState.WaitingForPlayersConnectedReady)
+            if (_Match.CurrentState == MatchState.WaitingForPlayersConnectedReady || _Match.CurrentState == MatchState.WaitingForPlayersReady)
             {
                 if (Utilities.GetPlayers().Count == 1)
                 {
