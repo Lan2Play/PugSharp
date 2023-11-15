@@ -574,6 +574,14 @@ public class Match : IDisposable
 
     private void SendRemainingMapsToVotingTeam()
     {
+        // If only one map is configured
+        if (MatchInfo.Config.Maplist.Length == 1)
+        {
+            _MapsToSelect = MatchInfo.Config.Maplist.Select(x => new Vote(x)).ToList();
+            TryFireState(MatchCommand.VoteMap);
+            return;
+        }
+
         SwitchVotingTeam();
 
         _MapsToSelect.ForEach(m => m.Votes.Clear());
@@ -594,13 +602,20 @@ public class Match : IDisposable
 
     private void RemoveBannedMap()
     {
-        _VoteTimer.Stop();
+        if (_VoteTimer.Enabled)
+        {
+            _VoteTimer.Stop();
+        }
 
-        var mapToBan = _MapsToSelect.MaxBy(m => m.Votes.Count);
-        _MapsToSelect.Remove(mapToBan!);
-        _MapsToSelect.ForEach(x => x.Votes.Clear());
+        //Only ban map if theres more than one
+        if (_MapsToSelect.Count > 1)
+        {
+            var mapToBan = _MapsToSelect.MaxBy(m => m.Votes.Count);
+            _MapsToSelect.Remove(mapToBan!);
+            _MapsToSelect.ForEach(x => x.Votes.Clear());
 
-        _MatchCallback.SendMessage(_TextHelper.GetText(nameof(Resources.PugSharp_Match_BannedMap), mapToBan!.Name, _CurrentMatchTeamToVote?.TeamConfig.Name));
+            _MatchCallback.SendMessage(_TextHelper.GetText(nameof(Resources.PugSharp_Match_BannedMap), mapToBan!.Name, _CurrentMatchTeamToVote?.TeamConfig.Name));
+        }
 
         if (_MapsToSelect.Count == 1)
         {
@@ -729,7 +744,17 @@ public class Match : IDisposable
     private bool MapIsSelected()
     {
         // The SelectedCount is checked when the Votes are done but the map is still in the list
-        return _MapsToSelect.Count == 2;
+        return _MapsToSelect.Count <= 2;
+    }
+
+    private bool OneMapConfigured()
+    {
+        if (MatchInfo.Config.Maplist.Count() == 1)
+        {
+            return true;
+        }
+
+        return false;
     }
 
     private bool MapIsNotSelected()
