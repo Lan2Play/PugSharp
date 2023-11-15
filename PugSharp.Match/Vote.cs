@@ -11,5 +11,5 @@ public class Vote
 
     public string Name { get; }
 
-    public List<IPlayer> Votes { get; } = new List<IPlayer>();
+    public IList<IPlayer> Votes { get; } = new List<IPlayer>();
 }

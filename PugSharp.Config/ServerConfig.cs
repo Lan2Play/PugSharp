@@ -5,6 +5,6 @@ namespace PugSharp.Config
     public class ServerConfig
     {
         [JsonPropertyName("admins")]
-        public Dictionary<ulong, string> Admins { get; set; } = new();
+        public IDictionary<ulong, string> Admins { get; set; } = new Dictionary<ulong, string>();
     }
 }

@@ -14,6 +14,6 @@ namespace PugSharp.Config
         public string Flag { get; init; } = string.Empty;
 
         [JsonPropertyName("players")]
-        public required Dictionary<ulong, string> Players { get; init; }
+        public required IDictionary<ulong, string> Players { get; init; }
     }
 }

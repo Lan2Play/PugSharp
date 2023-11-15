@@ -140,7 +140,7 @@ public class PugSharp : BasePlugin, IMatchCallback
 
         SetMatchVariable(matchConfig);
 
-        var players = GetAllPlayers();
+        var players = LoadAllPlayers();
         foreach (var player in players.Where(x => x.UserId.HasValue && x.UserId >= 0))
         {
             if (player.UserId != null)
@@ -1379,7 +1379,7 @@ public class PugSharp : BasePlugin, IMatchCallback
         _CsServer.ExecuteCommand("mp_swapteams");
     }
 
-    public IReadOnlyList<IPlayer> GetAllPlayers()
+    public IReadOnlyList<IPlayer> LoadAllPlayers()
     {
         var playerEntities = Utilities.FindAllEntitiesByDesignerName<CCSPlayerController>("cs_player_controller");
 

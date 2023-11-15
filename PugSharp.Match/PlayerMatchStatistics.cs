@@ -6,7 +6,7 @@ namespace PugSharp.ApiStats
     {
         public bool Coaching { get; set; }
 
-        public string Name { get; set; }
+        public string Name { get; set; } = string.Empty;
 
         public int Kills { get; set; }
 

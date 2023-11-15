@@ -8,7 +8,7 @@ using System.Text.Json.Serialization;
 
 namespace PugSharp;
 
-public partial class G5CommandProvider : ICommandProvider
+public sealed partial class G5CommandProvider : ICommandProvider
 {
     private const int _RegexTimeout = 1000;
     private static readonly ILogger<G5ApiProvider> _Logger = LogManager.CreateLogger<G5ApiProvider>();

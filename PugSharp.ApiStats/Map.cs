@@ -6,7 +6,7 @@ namespace PugSharp.ApiStats
     {
         public required string Name { get; init; }
 
-        public string? DemoFileName { get; init; }
+        public required string DemoFileName { get; init; }
 
         public required string WinnerTeamName { get; init; }
 

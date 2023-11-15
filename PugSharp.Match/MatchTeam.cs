@@ -15,7 +15,7 @@ public class MatchTeam
     }
 
     [JsonIgnore]
-    public List<MatchPlayer> Players { get; } = new List<MatchPlayer>();
+    public IList<MatchPlayer> Players { get; } = new List<MatchPlayer>();
 
     public Team StartingTeamSite { get; set; }
 
@@ -29,7 +29,10 @@ public class MatchTeam
 
     internal void PrintToChat(string message)
     {
-        Players.ForEach(p=>p.Player.PrintToChat(message));
+        foreach (var player in Players)
+        {
+            player.Player.PrintToChat(message);
+        }
     }
 
     internal void ToggleTeamSite()
