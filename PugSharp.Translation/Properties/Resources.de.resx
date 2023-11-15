@@ -1,0 +1,142 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <xsd:schema xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata" id="root">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="PugSharp.Hello" xml:space="preserve">
+    <value>Hallo **{0:playerName}**, willkommen zu dem Match {1:matchId}</value>
+  </data>
+  <data name="PugSharp.Match.Error.AlreadyBannedMap" xml:space="preserve">
+    <value>Die hast die Kartennummer {0: mapNumber}: {1:mapName} bereits gebannt!</value>
+  </data>
+  <data name="PugSharp.Match.BannedMap" xml:space="preserve">
+    <value>Die Karte **{0:mapName}** wurde von {1:teamName} gebannt!</value>
+  </data>
+  <data name="PugSharp.Match.Info.Ready" xml:space="preserve">
+    <value>{0:playerName} ist bereit! {1:readyPlayers} von {2:requiredPlayers} sind bereit.</value>
+  </data>
+  <data name="PugSharp.Match.Error.NoTeamVoteExpected" xml:space="preserve">
+    <value>Im Moment ist keine Teamabstimmung aktiv!</value>
+  </data>
+  <data name="PugSharp.Match.Error.UnpauseNotPossible" xml:space="preserve">
+    <value>Im Moment kann die Pause nicht beendet werden!</value>
+  </data>
+  <data name="PugSharp.Match.Error.TeamNotAvailable" xml:space="preserve">
+    <value>Das Team mit dem Namen {0:teamName} ist nicht verfügbar!</value>
+  </data>
+  <data name="PugSharp.Match.Info.WaitingForAllPlayers" xml:space="preserve">
+    <value>Warte darauf dass alle Spieler bereit sind.</value>
+  </data>
+  <data name="PugSharp.Match.Info.IsLive" xml:space="preserve">
+    <value>Das Spiel ist jetzt **LIVE**</value>
+  </data>
+  <data name="PugSharp.Match.Error.AlreadyVotedForTeam" xml:space="preserve">
+    <value>Du hast bereits für das Team {0:teamNumber}: {1:teamName} gewählt!</value>
+  </data>
+  <data name="PugSharp.Match.Error.PauseNotPossible" xml:space="preserve">
+    <value>Im Moment kann keine Pause gestartet werden!</value>
+  </data>
+  <data name="PugSharp.Match.Error.NotPermittedToBanMap" xml:space="preserve">
+    <value>Dir ist es im Momment nicht erlaubt eine Karte zu bannen!</value>
+  </data>
+  <data name="PugSharp.Match.Info.NotReady" xml:space="preserve">
+    <value>{0:playerName} ist nicht bereit! {1:readyPlayers} von {2:requiredPlayers} sind bereit.</value>
+  </data>
+  <data name="PugSharp.Match.Info.StartMatch" xml:space="preserve">
+    <value>Start Spiel. **{0:team1Name}** als **{1:team1Side}**. **{2:team2Name}** als **{team2Side}**</value>
+  </data>
+  <data name="PugSharp.Match.Error.NoMapVoteExpected" xml:space="preserve">
+    <value>Im Moment ist keine Kartenabstimmung aktiv!</value>
+  </data>
+  <data name="PugSharp.Match.Error.NoReadyExpected" xml:space="preserve">
+    <value>Im Moment wird nicht auf den Bereitstatus gewartet!</value>
+  </data>
+  <data name="PugSharp.Match.Error.UnknownMapNumber" xml:space="preserve">
+    <value>Die Karte mit der Kartennummer **{0:mapNumber}** ist nicht verfügbar!</value>
+  </data>
+  <data name="PugSharp.Match.RemindReady" xml:space="preserve">
+    <value>Du bist !!nicht!! bereit! Schreibe `!ready` in den chat wenn du bereit bist.</value>
+  </data>
+  <data name="PugSharp.Match.Error.NotPermittedToVoteForTeam" xml:space="preserve">
+    <value>Dir ist es im Moment nicht erlaubt ein Team zu wählen!</value>
+  </data>
+  <data name="PugSharp.Match.VoteTeamMenuHeader" xml:space="preserve">
+    <value>Wähle die Startseite:</value>
+  </data>
+  <data name="PugSharp.Match.VoteMapMenuHeader" xml:space="preserve">
+    <value>Stimme ab um eine Karte zu bannen: schreibe `!&lt;Kartennummer&gt;` in den Chat</value>
+  </data>
+  <data name="PugSharp.NotifyReady" xml:space="preserve">
+    <value>schreibe `!ready`in den Chat um als bereit markiert zu werden</value>
+  </data>
+  <data name="PugSharp.Match.WaitForOtherTeam" xml:space="preserve">
+    <value>Warte auf die Abstimmung des anderen Teams!</value>
+  </data>
+  <data name="PugSharp.PoweredBy" xml:space="preserve">
+    <value>powered by **PugSharp** (https://github.com/Lan2Play/PugSharp/)</value>
+  </data>
+  <data name="PugSharp.Match.VotedForTeam" xml:space="preserve">
+    <value>Du hast **{0:teamName}** gewählt</value>
+  </data>
+  <data name="PugSharp.Match.VotedToBanMap" xml:space="preserve">
+    <value>Du hast dafür gestimmt **{0:mapName}** zu bannen</value>
+  </data>
+  <data name="PugSharp.Match.SelectedTeam" xml:space="preserve">
+    <value>{0:teamName} hat {1:side} als Startseite gewählt!</value>
+  </data>
+</root>
