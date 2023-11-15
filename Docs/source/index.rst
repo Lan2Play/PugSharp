@@ -31,6 +31,8 @@ If you implement software to interface with PugSharp let us know please!
    :maxdepth: 1
 
    admin/quickstart
+   admin/commands
+   admin/configuration
 
    
 .. toctree::
