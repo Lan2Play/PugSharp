@@ -1,15 +1,14 @@
 ﻿
-namespace PugSharp.Server.Contract
+namespace PugSharp.Server.Contract;
+
+public interface ICsServer
 {
-    public interface ICsServer
-    {
-        string GameDirectory { get; }
+    string GameDirectory { get; }
 
-        void ExecuteCommand(string v);
-        bool IsMapValid(string selectedMap);
-        (int CtScore, int TScore) LoadTeamsScore();
+    void ExecuteCommand(string v);
+    bool IsMapValid(string selectedMap);
+    (int CtScore, int TScore) LoadTeamsScore();
 
-        void NextFrame(Action value);
-        void PrintToChatAll(string message);
-    }
+    void NextFrame(Action value);
+    void PrintToChatAll(string message);
 }
