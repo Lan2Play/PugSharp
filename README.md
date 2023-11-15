@@ -56,10 +56,10 @@ If you want to know how to use PugSharp, hop over to our [Documentation](https:/
 
 - Api compatibility for the awesome [Get5](https://github.com/splewis/get5)
 
-<!--
+
 ## Tanslation
 
-[![Translation status](https://translate.lan2play.de/widgets/eventula-manager/-/multi-auto.svg)](https://translate.lan2play.de/engage/eventula-manager/) -->
+[![Translation status](https://translate.lan2play.de/widgets/pugsharp/-/multi-auto.svg)](https://translate.lan2play.de/engage/pugsharp/)
 
 ## Credits
 
