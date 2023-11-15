@@ -1,4 +1,6 @@
-﻿using PugSharp.Translation.Properties;
+﻿using Microsoft.Extensions.Logging;
+using PugSharp.Logging;
+using PugSharp.Translation.Properties;
 using System.Globalization;
 using System.Text.RegularExpressions;
 
@@ -6,6 +8,8 @@ namespace PugSharp.Translation;
 
 public partial class TextHelper : ITextHelper
 {
+    private static readonly ILogger<Match> _Logger = LogManager.CreateLogger<Match>();
+
     private const char _DefaultColor = '\u0001';
     private const int _RegexTimeout = 1000;
     private readonly char _HighlightColor;
@@ -44,9 +48,9 @@ public partial class TextHelper : ITextHelper
                 var stringArguments = arguments.Select(GetArgumentString).ToArray<object>();
                 text = string.Format(CultureInfo.CurrentCulture, text, stringArguments);
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                // Do nothing
+                _Logger.LogError(ex, "Error formatting text {text}", text);
             }
         }
 

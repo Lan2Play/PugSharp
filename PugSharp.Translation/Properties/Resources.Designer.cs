@@ -205,7 +205,7 @@ namespace PugSharp.Translation.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Starting Match. **{0:team1Name}** as **{1:team1Side}**. **{2:team2Name}** as **{team2Side}**.
+        ///   Looks up a localized string similar to Starting Match. **{0:team1Name}** as **{1:team1Side}**. **{2:team2Name}** as **{3:team2Side}**.
         /// </summary>
         public static string PugSharp_Match_Info_StartMatch {
             get {

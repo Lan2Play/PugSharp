@@ -20,7 +20,7 @@ public class Match : IDisposable
     private const int Kill4 = 4;
     private const int Kill5 = 5;
     private const int NumOfMatchLiveMessages = 10;
-    private const int _TimeBetweenDelayMessages = 10;
+    private const uint _TimeBetweenDelayMessages = 10;
     private static readonly ILogger<Match> _Logger = LogManager.CreateLogger<Match>();
 
     private readonly System.Timers.Timer _VoteTimer = new();
@@ -487,10 +487,10 @@ public class Match : IDisposable
         while (delay > 0)
         {
             _Logger.LogInformation("Waiting for sourceTV. Remaining Delay: {delay}s", delay);
-            await Task.Delay(TimeSpan.FromSeconds(Math.Min(_TimeBetweenDelayMessages, delay))).ConfigureAwait(false);
-            delay -= _TimeBetweenDelayMessages;
+            var delayLoopTime = Math.Min(_TimeBetweenDelayMessages, delay);
+            await Task.Delay(TimeSpan.FromSeconds(delayLoopTime)).ConfigureAwait(false);
+            delay -= delayLoopTime;
         }
-
 
         if (_DemoUploader != null)
         {

@@ -166,7 +166,7 @@
     <value>{0:playerName} is ready! {1:readyPlayers} of {2:requiredPlayers} are ready.</value>
   </data>
   <data name="PugSharp.Match.Info.StartMatch" xml:space="preserve">
-    <value>Starting Match. **{0:team1Name}** as **{1:team1Side}**. **{2:team2Name}** as **{team2Side}**</value>
+    <value>Starting Match. **{0:team1Name}** as **{1:team1Side}**. **{2:team2Name}** as **{3:team2Side}**</value>
   </data>
   <data name="PugSharp.Match.Info.WaitingForAllPlayers" xml:space="preserve">
     <value>Waiting for all players to be ready.</value>
