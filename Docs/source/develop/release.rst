@@ -7,8 +7,8 @@ Release process / Branches
 Introduction / Alpha
 ----------------------------------------
 
-Currently we are developing on the ``main`` branch, which also builds alpha versions on every push automatically. 
-In the future it will be changed, so every feature gets its own feature branch and main will only accept pull requests.
+Currently we are developing on the ``feature/*`` branches, which also builds alpha versions on every push automatically as soon as pull requests are opened. 
+Also alpha builds will be created when we merge something into ``main``
 
 Beta
 ----------------------------------------
