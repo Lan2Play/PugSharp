@@ -21,6 +21,7 @@ using PugSharp.Match;
 using PugSharp.Translation;
 using PugSharp.Translation.Properties;
 using PugSharp.Api;
+using CounterStrikeSharp.API.Modules.Admin;
 
 namespace PugSharp;
 
@@ -293,15 +294,11 @@ public class PugSharp : BasePlugin, IMatchCallback
 
     [ConsoleCommand("css_stopmatch", "Stop the current match")]
     [ConsoleCommand("ps_stopmatch", "Stop the current match")]
+    [RequiresPermissions("@pugsharp/matchadmin")]
     public void OnCommandStopMatch(CCSPlayerController? player, CommandInfo command)
     {
         HandleCommandAsync(() =>
         {
-            if (player != null && !player.IsAdmin(_ServerConfig))
-            {
-                command.ReplyToCommand("Command is only allowed for admins!");
-                return;
-            }
 
             if (_Match == null)
             {
@@ -319,17 +316,13 @@ public class PugSharp : BasePlugin, IMatchCallback
 
     [ConsoleCommand("css_loadconfig", "Load a match config")]
     [ConsoleCommand("ps_loadconfig", "Load a match config")]
+    [RequiresPermissions("@pugsharp/matchadmin")]
     public void OnCommandLoadConfig(CCSPlayerController? player, CommandInfo command)
     {
         const int requiredArgCount = 2;
 
         _ = HandleCommandAsync(async () =>
         {
-            if (player != null && !player.IsAdmin(_ServerConfig))
-            {
-                command.ReplyToCommand("Command is only allowed for admins!");
-                return;
-            }
 
             if (_Match != null)
             {
@@ -389,17 +382,13 @@ public class PugSharp : BasePlugin, IMatchCallback
 
     [ConsoleCommand("css_loadconfigfile", "Load a match config from a file")]
     [ConsoleCommand("ps_loadconfigfile", "Load a match config from a file")]
+    [RequiresPermissions("@pugsharp/matchadmin")]
     public void OnCommandLoadConfigFromFile(CCSPlayerController? player, CommandInfo command)
     {
         const int requiredArgCount = 2;
 
         _ = HandleCommandAsync(async () =>
         {
-            if (player != null && !player.IsAdmin(_ServerConfig))
-            {
-                command.ReplyToCommand("Command is only allowed for admins!");
-                return;
-            }
 
             if (_Match != null)
             {
@@ -436,6 +425,7 @@ public class PugSharp : BasePlugin, IMatchCallback
 
     [ConsoleCommand("css_restorematch", "Restore a match")]
     [ConsoleCommand("ps_restorematch", "Restore a match")]
+    [RequiresPermissions("@pugsharp/matchadmin")]
     public async void OnCommandRestoreMatch(CCSPlayerController? player, CommandInfo command)
     {
         const int requiredArgCount = 2;
@@ -444,11 +434,6 @@ public class PugSharp : BasePlugin, IMatchCallback
 
         await HandleCommandAsync(async () =>
         {
-            if (player != null && !player.IsAdmin(_ServerConfig))
-            {
-                command.ReplyToCommand("Command is only allowed for admins!");
-                return;
-            }
 
             if (_Match != null)
             {
@@ -529,16 +514,11 @@ public class PugSharp : BasePlugin, IMatchCallback
 
     [ConsoleCommand("css_dumpmatch", "Serialize match to JSON on console")]
     [ConsoleCommand("ps_dumpmatch", "Load a match config")]
+    [RequiresPermissions("@pugsharp/matchadmin")]
     public void OnCommandDumpMatch(CCSPlayerController? player, CommandInfo command)
     {
         HandleCommandAsync(() =>
         {
-            if (player != null && !player.IsAdmin(_ServerConfig))
-            {
-                command.ReplyToCommand("Command is only allowed for admins!");
-                return;
-            }
-
             _Logger.LogInformation("################ dump match ################");
             _Logger.LogInformation("{matchJson}", JsonSerializer.Serialize(_Match));
             _Logger.LogInformation("################ dump match ################");
@@ -702,14 +682,10 @@ public class PugSharp : BasePlugin, IMatchCallback
                     // do nothing
                 }
             }
-            else if (!userId.IsAdmin(_ServerConfig))
+            else
             {
                 _Logger.LogInformation("No match is loaded. Kick Player {player}!", userId.PlayerName);
                 userId.Kick();
-            }
-            else
-            {
-                // do nothing
             }
         }
         else
@@ -771,14 +747,10 @@ public class PugSharp : BasePlugin, IMatchCallback
                 _CsServer.NextFrame(() => StartWarmup());
             }
         }
-        else if (!eventPlayerTeam.Userid.IsAdmin(_ServerConfig))
+        else
         {
             _Logger.LogInformation("No match is loaded. Kick Player {player}!", eventPlayerTeam.Userid.PlayerName);
             eventPlayerTeam.Userid.Kick();
-        }
-        else
-        {
-            // Do nothing
         }
 
         return HookResult.Continue;
@@ -1234,7 +1206,7 @@ public class PugSharp : BasePlugin, IMatchCallback
             mvpStats.Mvp = true;
 
             // Report MVP
-            if(mvp.UserId.HasValue)
+            if (mvp.UserId.HasValue)
             {
                 var roundMvpParams = new RoundMvpParams(
                 _Match.MatchInfo.Config.MatchId,

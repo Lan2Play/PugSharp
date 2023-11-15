@@ -1,20 +1,15 @@
 ﻿using CounterStrikeSharp.API.Core;
+using CounterStrikeSharp.API.Modules.Admin;
 using CounterStrikeSharp.API.Modules.Memory;
-using PugSharp.Config;
 using System.Globalization;
 
 namespace PugSharp;
 
 public static class CounterStrikeSharpExtensions
 {
-    internal static bool IsAdmin(this CCSPlayerController? playerController, ServerConfig? serverConfig)
+    internal static bool IsAdmin(this CCSPlayerController? playerController)
     {
-        if (serverConfig?.Admins == null || playerController == null)
-        {
-            return false;
-        }
-
-        return serverConfig.Admins.ContainsKey(playerController.SteamID);
+        return AdminManager.PlayerHasPermissions(playerController, "@pugsharp/matchadmin");
     }
 
     internal static void Kick(this CCSPlayerController? playerController)
