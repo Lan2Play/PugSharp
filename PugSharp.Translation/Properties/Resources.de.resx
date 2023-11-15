@@ -115,4 +115,28 @@
   <data name="PugSharp.Match.Error.NotPermittedToVoteForTeam" xml:space="preserve">
     <value>Dir ist es im Moment nicht erlaubt ein Team zu wählen!</value>
   </data>
+  <data name="PugSharp.Match.VoteTeamMenuHeader" xml:space="preserve">
+    <value>Wähle die Startseite:</value>
+  </data>
+  <data name="PugSharp.Match.VoteMapMenuHeader" xml:space="preserve">
+    <value>Stimme ab um eine Karte zu bannen: schreibe `!&lt;Kartennummer&gt;` in den Chat</value>
+  </data>
+  <data name="PugSharp.NotifyReady" xml:space="preserve">
+    <value>schreibe `!ready`in den Chat um als bereit markiert zu werden</value>
+  </data>
+  <data name="PugSharp.Match.WaitForOtherTeam" xml:space="preserve">
+    <value>Warte auf die Abstimmung des anderen Teams!</value>
+  </data>
+  <data name="PugSharp.PoweredBy" xml:space="preserve">
+    <value>powered by **PugSharp** (https://github.com/Lan2Play/PugSharp/)</value>
+  </data>
+  <data name="PugSharp.Match.VotedForTeam" xml:space="preserve">
+    <value>Du hast **{0:teamName}** gewählt</value>
+  </data>
+  <data name="PugSharp.Match.VotedToBanMap" xml:space="preserve">
+    <value>Du hast dafür gestimmt **{0:mapName}** zu bannen</value>
+  </data>
+  <data name="PugSharp.Match.SelectedTeam" xml:space="preserve">
+    <value>{0:teamName} hat {1:side} als Startseite gewählt!</value>
+  </data>
 </root>
