@@ -118,7 +118,7 @@ public partial class G5CommandProvider : ICommandProvider
     [GeneratedRegex(@"ProductName=(?<productname>.+)", RegexOptions.ExplicitCapture, _RegexTimeout)]
     private static partial Regex ProductNameRegex();
 
-    private string LoadSteamInfValue(string steamInf, Regex regex, string regexGroupName, List<string> errors)
+    private static string LoadSteamInfValue(string steamInf, Regex regex, string regexGroupName, List<string> errors)
     {
         var result = regex.Match(steamInf);
         if (!result.Success)

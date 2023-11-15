@@ -71,7 +71,7 @@ public class PugSharp : BasePlugin, IMatchCallback
             {
                 AddCommand(command.Name, command.Description, (p, c) =>
                 {
-                    HandleCommand(() =>
+                    HandleCommandAsync(() =>
                     {
                         var args = Enumerable.Range(0, c.ArgCount).Select(i => c.GetArg(i)).ToArray();
                         var results = command.commandCallBack(args);
@@ -230,13 +230,11 @@ public class PugSharp : BasePlugin, IMatchCallback
     {
         StopDemoRecording();
 
-        // TODO Configure VoteMap/or reload current map
         _CsServer.ExecuteCommand($"changelevel {map}");
     }
 
-    private void SetMatchVariable(MatchConfig matchConfig)
+    private static void SetMatchVariable(MatchConfig matchConfig)
     {
-#pragma warning disable MA0003 // Add parameter name to improve readability
         _Logger.LogInformation("Start set match variables");
 
         UpdateConvar("mp_overtime_maxrounds", matchConfig.MaxOvertimeRounds);
@@ -251,7 +249,6 @@ public class PugSharp : BasePlugin, IMatchCallback
         UpdateConvar("mp_teamflag_2", matchConfig.Team1.Flag);
 
         _Logger.LogInformation("Set match variables done");
-#pragma warning restore MA0003 // Add parameter name to improve readability
     }
 
     private void LoadAndExecuteWarmupConfig()
@@ -268,11 +265,10 @@ public class PugSharp : BasePlugin, IMatchCallback
     {
         var configFile = Path.Combine(_CsServer.GameDirectory, "csgo", "cfg", "PugSharp", configFileName);
         if (!File.Exists(configFile))
-            if (File.Exists(configFile))
-            {
-                _Logger.LogError("Config {configFile} was not found on the server.", configFile);
-                return;
-            }
+        {
+            _Logger.LogError("Config {configFile} was not found on the server.", configFile);
+            return;
+        }
 
         configFile = Path.Join("PugSharp", configFileName);
 
@@ -286,7 +282,7 @@ public class PugSharp : BasePlugin, IMatchCallback
         _CsServer.ExecuteCommand("mp_warmup_end");
     }
 
-    private void DisableCheats()
+    private static void DisableCheats()
     {
         _Logger.LogInformation("Disabling cheats");
         UpdateConvar("sv_cheats", false);
@@ -298,7 +294,7 @@ public class PugSharp : BasePlugin, IMatchCallback
     [ConsoleCommand("ps_stopmatch", "Stop the current match")]
     public void OnCommandStopMatch(CCSPlayerController? player, CommandInfo command)
     {
-        HandleCommand(() =>
+        HandleCommandAsync(() =>
         {
             if (player != null && !player.IsAdmin(_ServerConfig))
             {
@@ -324,6 +320,8 @@ public class PugSharp : BasePlugin, IMatchCallback
     [ConsoleCommand("ps_loadconfig", "Load a match config")]
     public void OnCommandLoadConfig(CCSPlayerController? player, CommandInfo command)
     {
+        const int requiredArgCount = 2;
+
         _ = HandleCommandAsync(async () =>
         {
             if (player != null && !player.IsAdmin(_ServerConfig))
@@ -338,7 +336,7 @@ public class PugSharp : BasePlugin, IMatchCallback
                 return;
             }
 
-            if (command.ArgCount < 2)
+            if (command.ArgCount < requiredArgCount)
             {
                 command.ReplyToCommand("Url is required as Argument!");
                 return;
@@ -392,7 +390,9 @@ public class PugSharp : BasePlugin, IMatchCallback
     [ConsoleCommand("ps_loadconfigfile", "Load a match config from a file")]
     public void OnCommandLoadConfigFromFile(CCSPlayerController? player, CommandInfo command)
     {
-        HandleCommand(() =>
+        const int requiredArgCount = 2;
+
+        _ = HandleCommandAsync(async () =>
         {
             if (player != null && !player.IsAdmin(_ServerConfig))
             {
@@ -406,7 +406,7 @@ public class PugSharp : BasePlugin, IMatchCallback
                 return;
             }
 
-            if (command.ArgCount != 2)
+            if (command.ArgCount != requiredArgCount)
             {
                 command.ReplyToCommand("FileName is required as Argument! Path have to be put in \"pathToConfig\"");
                 return;
@@ -416,7 +416,7 @@ public class PugSharp : BasePlugin, IMatchCallback
             var fileName = command.ArgByIndex(1);
 
             command.ReplyToCommand($"Loading Config from file {fileName}");
-            var loadMatchConfigFromFileResult = _ConfigProvider.LoadMatchConfigFromFileAsync(fileName).Result;
+            var loadMatchConfigFromFileResult = await _ConfigProvider.LoadMatchConfigFromFileAsync(fileName).ConfigureAwait(false);
 
             loadMatchConfigFromFileResult.Switch(
                 error =>
@@ -437,6 +437,10 @@ public class PugSharp : BasePlugin, IMatchCallback
     [ConsoleCommand("ps_restorematch", "Restore a match")]
     public async void OnCommandRestoreMatch(CCSPlayerController? player, CommandInfo command)
     {
+        const int requiredArgCount = 2;
+        const int argMatchIdIndex = 1;
+        const int argRoundNumberIndex = 2;
+
         await HandleCommandAsync(async () =>
         {
             if (player != null && !player.IsAdmin(_ServerConfig))
@@ -451,13 +455,13 @@ public class PugSharp : BasePlugin, IMatchCallback
                 return;
             }
 
-            if (command.ArgCount < 2)
+            if (command.ArgCount < requiredArgCount)
             {
                 command.ReplyToCommand("MatchId is required as Argument!");
                 return;
             }
 
-            var matchId = int.Parse(command.ArgByIndex(1), CultureInfo.InvariantCulture);
+            var matchId = int.Parse(command.ArgByIndex(argMatchIdIndex), CultureInfo.InvariantCulture);
 
             // Backups are stored in csgo directory
             var csgoDirectory = Path.GetDirectoryName(PugSharpDirectory);
@@ -468,7 +472,7 @@ public class PugSharp : BasePlugin, IMatchCallback
             }
 
             int roundToRestore;
-            if (command.ArgCount == 2)
+            if (command.ArgCount == argRoundNumberIndex)
             {
                 var files = Directory.EnumerateFiles(csgoDirectory, $"PugSharp_Match_{matchId}_round*");
                 foreach (var file in files)
@@ -476,11 +480,12 @@ public class PugSharp : BasePlugin, IMatchCallback
                     _Logger.LogInformation("found posisble Backup: {file} ", file);
                 }
 
-                roundToRestore = files.Select(x => Path.GetFileNameWithoutExtension(x)).Select(x => x[^2..]).Select(x => int.Parse(x, CultureInfo.InvariantCulture)).Max();
+                const int last2Chars = 2;
+                roundToRestore = files.Select(x => Path.GetFileNameWithoutExtension(x)).Select(x => x[^last2Chars..]).Select(x => int.Parse(x, CultureInfo.InvariantCulture)).Max();
             }
             else
             {
-                if (!int.TryParse(command.GetArg(2), CultureInfo.InvariantCulture, out roundToRestore))
+                if (!int.TryParse(command.ArgByIndex(argRoundNumberIndex), CultureInfo.InvariantCulture, out roundToRestore))
                 {
                     command.ReplyToCommand("second argument for round index has to be numeric");
                     return;
@@ -525,7 +530,7 @@ public class PugSharp : BasePlugin, IMatchCallback
     [ConsoleCommand("ps_dumpmatch", "Load a match config")]
     public void OnCommandDumpMatch(CCSPlayerController? player, CommandInfo command)
     {
-        HandleCommand(() =>
+        HandleCommandAsync(() =>
         {
             if (player != null && !player.IsAdmin(_ServerConfig))
             {
@@ -534,7 +539,7 @@ public class PugSharp : BasePlugin, IMatchCallback
             }
 
             _Logger.LogInformation("################ dump match ################");
-            _Logger.LogInformation(JsonSerializer.Serialize(_Match));
+            _Logger.LogInformation("{matchJson}", JsonSerializer.Serialize(_Match));
             _Logger.LogInformation("################ dump match ################");
         },
         command);
@@ -543,7 +548,7 @@ public class PugSharp : BasePlugin, IMatchCallback
     [ConsoleCommand("css_ready", "Mark player as ready")]
     public void OnCommandReady(CCSPlayerController? player, CommandInfo command)
     {
-        HandleCommand(() =>
+        _ = HandleCommandAsync(async () =>
         {
             if (player == null)
             {
@@ -564,8 +569,7 @@ public class PugSharp : BasePlugin, IMatchCallback
                 return;
             }
 
-            // TODO Async Handling?
-            _Match.TogglePlayerIsReadyAsync(matchPlayer).Wait();
+            await _Match.TogglePlayerIsReadyAsync(matchPlayer).ConfigureAwait(false);
         },
         command);
     }
@@ -573,7 +577,7 @@ public class PugSharp : BasePlugin, IMatchCallback
     [ConsoleCommand("css_unpause", "Starts a match")]
     public void OnCommandUnpause(CCSPlayerController? player, CommandInfo command)
     {
-        HandleCommand(() =>
+        HandleCommandAsync(() =>
         {
             if (player == null)
             {
@@ -589,7 +593,7 @@ public class PugSharp : BasePlugin, IMatchCallback
     [ConsoleCommand("css_pause", "Pauses the current match")]
     public void OnCommandPause(CCSPlayerController? player, CommandInfo command)
     {
-        HandleCommand(() =>
+        HandleCommandAsync(() =>
         {
             if (player == null)
             {
@@ -608,7 +612,7 @@ public class PugSharp : BasePlugin, IMatchCallback
     [ConsoleCommand("ps_suicide", "Kills the calling player")]
     public void OnCommandKillCalled(CCSPlayerController? player, CommandInfo command)
     {
-        HandleCommand(() =>
+        HandleCommandAsync(() =>
         {
             if (player == null || !player.IsValid)
             {
@@ -627,7 +631,7 @@ public class PugSharp : BasePlugin, IMatchCallback
     }
 
 
-    private static void HandleCommand(Action commandAction, CommandInfo command, string? args = null, [CallerMemberName] string? commandMethod = null)
+    private static void HandleCommandAsync(Action commandAction, CommandInfo command, string? args = null, [CallerMemberName] string? commandMethod = null)
     {
         var commandName = commandMethod?.Replace("OnCommand", "", StringComparison.OrdinalIgnoreCase) ?? commandAction.Method.Name;
         try
@@ -954,25 +958,10 @@ public class PugSharp : BasePlugin, IMatchCallback
             return HookResult.Continue;
         }
 
-        // TODO wait for GOTV recording to finish
-
         if (_Match.CurrentState == MatchState.MatchRunning)
         {
-            var scores = _CsServer.LoadTeamsScore();
-            _Match?.CompleteMap(scores.TScore, scores.CtScore);
-
-
-            // TODO Figure out who won => Done In match Complete
-
-            // TODO Update stats
-
-            // TODO Fire map result event
-
-            // TODO If we use series functionality check if the series is over
-
-            // TODO Fire series event
-
-            // TODO Reset server to defaults
+            var (CtScore, TScore) = _CsServer.LoadTeamsScore();
+            _Match.CompleteMap(TScore, CtScore);
         }
         return HookResult.Continue;
     }
@@ -986,7 +975,6 @@ public class PugSharp : BasePlugin, IMatchCallback
     private HookResult OnEventRoundAnnounceLastRoundHalf(EventRoundAnnounceLastRoundHalf eventRoundAnnounceLastRoundHalf, GameEventInfo info)
     {
         _Logger.LogInformation("OnEventRoundAnnounceLastRoundHalf");
-        //_Match?.SwitchTeam();
         return HookResult.Continue;
     }
 
@@ -1023,26 +1011,12 @@ public class PugSharp : BasePlugin, IMatchCallback
 
             victimStats.Dead = true;
 
-            if (!_CurrentRountState.FirstDeathDone)
-            {
-                _CurrentRountState.FirstDeathDone = true;
-
-                switch (victimSide)
-                {
-                    case TeamConstants.TEAM_CT:
-                        victimStats.FirstDeathCt = true;
-                        break;
-                    case TeamConstants.TEAM_T:
-                        victimStats.FirstDeathT = true;
-                        break;
-                }
-            }
+            OnPlayerDeathHandleFirstKill(victimSide, victimStats);
 
             if (isSuicide)
             {
                 victimStats.Suicide = true;
             }
-
             else if (!killedByBomb)
             {
                 if (attacker != null)
@@ -1067,6 +1041,9 @@ public class PugSharp : BasePlugin, IMatchCallback
                                 case TeamConstants.TEAM_T:
                                     attackerStats.FirstKillT = true;
                                     break;
+                                default:
+                                    // Do nothing
+                                    break;
                             }
                         }
 
@@ -1088,6 +1065,9 @@ public class PugSharp : BasePlugin, IMatchCallback
                                     break;
                                 case TeamConstants.TEAM_T:
                                     _CurrentRountState.TerroristsClutching = true;
+                                    break;
+                                default:
+                                    // Do nothing
                                     break;
                             }
 
@@ -1142,8 +1122,33 @@ public class PugSharp : BasePlugin, IMatchCallback
                     }
                 }
             }
+            else
+            {
+                // Do nothing
+            }
         }
         return HookResult.Continue;
+    }
+
+    private void OnPlayerDeathHandleFirstKill(TeamConstants victimSide, PlayerRoundStats victimStats)
+    {
+        if (!_CurrentRountState.FirstDeathDone)
+        {
+            _CurrentRountState.FirstDeathDone = true;
+
+            switch (victimSide)
+            {
+                case TeamConstants.TEAM_CT:
+                    victimStats.FirstDeathCt = true;
+                    break;
+                case TeamConstants.TEAM_T:
+                    victimStats.FirstDeathT = true;
+                    break;
+                default:
+                    // Do nothing
+                    break;
+            }
+        }
     }
 
     private HookResult OnPlayerBlind(EventPlayerBlind eventPlayerBlind, GameEventInfo info)
@@ -1178,7 +1183,8 @@ public class PugSharp : BasePlugin, IMatchCallback
 
             // 2.5 is an arbitrary value that closely matches the "enemies flashed" column of the in-game
             // scoreboard.
-            if (eventPlayerBlind.BlindDuration >= 2.5)
+            const double requieredenemiesFlashedDuration = 2.5;
+            if (eventPlayerBlind.BlindDuration >= requieredenemiesFlashedDuration)
             {
                 var attackerStats = _CurrentRountState.GetPlayerRoundStats(attacker.SteamID, attacker.PlayerName);
 
@@ -1466,16 +1472,6 @@ public class PugSharp : BasePlugin, IMatchCallback
     public void StartWarmup()
     {
         LoadAndExecuteWarmupConfig();
-
-
-
-        //// Set additional convars
-        //UpdateConvar("mp_do_warmup_period", true);
-        //UpdateConvar("mp_warmuptime_all_players_connected", false);
-        //_CsServer.ExecuteCommand("mp_warmup_start");
-
-        //UpdateConvar("mp_warmuptime", 10f);
-        //UpdateConvar("mp_warmup_pausetimer", 1f);
     }
 
 
