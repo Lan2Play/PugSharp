@@ -116,7 +116,7 @@
     <value>{0:playerName} no está preparado! {1:readyPlayers} de {2:requiredPlayers} están preparados.</value>
   </data>
   <data name="PugSharp.Match.Info.StartMatch" xml:space="preserve">
-    <value>Comenzando partida. **{0:team1Name}** como **{1:team1Side}**. **{2:team2Name}** como **{team2Side}**</value>
+    <value>Comenzando partida. **{0:team1Name}** como **{1:team1Side}**. **{2:team2Name}** como **{3:team2Side}**</value>
   </data>
   <data name="PugSharp.Match.Error.NoMapVoteExpected" xml:space="preserve">
     <value>No hay ninguna votación de mapa activa en este momento!</value>
