@@ -55,6 +55,7 @@ If you want to know how to use PugSharp, hop over to our [Documentation](https:/
 - [x] demo upload
 - [x] automatic round backups
 - [x] restore round backups
+- [x] localisation
 
 ## partially working features
 

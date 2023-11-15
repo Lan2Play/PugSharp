@@ -57,6 +57,8 @@ Matchconfig Fields
 +--------------------------+-----------------+-------------------------------------------------------------------------------------------+
 | vote_map                 | de_dust2        | Map used during warm-up and voting.                                                       |
 +--------------------------+-----------------+-------------------------------------------------------------------------------------------+
+| server_locale            | en              | This is the language that will be used for the messages that are printed to the users     |
++--------------------------+-----------------+-------------------------------------------------------------------------------------------+
     
 Matchconfig Example
 '''''''''''''''''''''
@@ -93,7 +95,8 @@ Matchconfig Example
      "eventula_apistats_url": "https://dev.lan2play.de/api/matchmaking/40/",
      "eventula_apistats_token": "Bearer S0XRU0UhIExFQ0tFUiEK",
      "eventula_demo_upload_url": "https://dev.lan2play.de/api/matchmaking/40/demo",
-     "vote_map": "de_inferno"
+     "vote_map": "de_inferno",
+     "server_locale": "en"
    }
 
 Serverconfig
