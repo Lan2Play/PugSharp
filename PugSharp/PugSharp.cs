@@ -884,11 +884,21 @@ public class PugSharp : BasePlugin, IMatchCallback
 
 
             // Toggle after last round in half
-            if ((teamT.Score + teamCT.Score) == _Match.MatchInfo.Config.MaxRounds / 2)
+            if (currentRound == _Match.MatchInfo.Config.MaxRounds.Half())
             {
+                _Logger.LogInformation("Switching Teams on halftime");
                 _Match.SwitchTeam();
             }
-            // TODO OT handling
+
+            if (currentRound > _Match.MatchInfo.Config.MaxRounds)
+            {
+                var otRound = currentRound - _Match.MatchInfo.Config.MaxRounds;
+                if (otRound == _Match.MatchInfo.Config.MaxOvertimeRounds.Half())
+                {
+                    _Logger.LogInformation("Switching Teams on overtime halftime");
+                    _Match.SwitchTeam();
+                }
+            }
         }
 
         return HookResult.Continue;

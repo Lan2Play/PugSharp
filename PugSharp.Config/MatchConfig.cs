@@ -26,7 +26,7 @@ namespace PugSharp.Config
         public int MinPlayersToReady { get; init; } = 5;
 
         [JsonPropertyName("max_rounds")]
-        public int MaxRounds { get; init; } = 24;
+        public int MaxRounds => 4;
 
         [JsonPropertyName("max_overtime_rounds")]
         public int MaxOvertimeRounds { get; init; } = 6;
