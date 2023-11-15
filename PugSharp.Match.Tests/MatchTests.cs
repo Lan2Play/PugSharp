@@ -91,7 +91,7 @@ namespace PugSharp.Match.Tests
             var textHelper = Substitute.For<ITextHelper>();
             var matchCallback = Substitute.For<IMatchCallback>();
 
-            matchCallback.GetAllPlayers().Returns(matchPlayers);
+            matchCallback.LoadAllPlayers().Returns(matchPlayers);
 
             MatchConfig config = CreateExampleConfig(new List<string> { "de_dust2" });
 
