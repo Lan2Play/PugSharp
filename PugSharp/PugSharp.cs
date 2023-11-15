@@ -20,6 +20,7 @@ using PugSharp.Api.Json;
 using PugSharp.Match;
 using PugSharp.Translation;
 using PugSharp.Translation.Properties;
+using PugSharp.Api;
 
 namespace PugSharp;
 
@@ -1221,6 +1222,27 @@ public class PugSharp : BasePlugin, IMatchCallback
             var mvpStats = _CurrentRountState.GetPlayerRoundStats(mvp.SteamID, mvp.PlayerName);
 
             mvpStats.Mvp = true;
+
+            // Report MVP
+            if(mvp.UserId.HasValue)
+            {
+                var roundMvpParams = new RoundMvpParams(
+                _Match.MatchInfo.Config.MatchId,
+                _Match.MatchInfo.CurrentMap.MapNumber,
+                _Match.MatchInfo.CurrentMap.Team1Points + _Match.MatchInfo.CurrentMap.Team2Points,
+                new ApiPlayer
+                {
+                    UserId = mvp.UserId.Value,
+                    SteamId = mvp.SteamID,
+                    IsBot = mvp.IsBot,
+                    Name = mvp.PlayerName,
+                    Side = mvp.TeamNum
+                },
+                eventRoundMvp.Reason
+                );
+
+                _ = _ApiProvider.RoundMvpAsync(roundMvpParams, CancellationToken.None);
+            }
         }
 
         return HookResult.Continue;

@@ -1,6 +1,7 @@
 ﻿using PugSharp.Api.Contract;
 using PugSharp.Api.G5Api;
 using PugSharp.Server.Contract;
+using System.Globalization;
 
 namespace PugSharp;
 
@@ -67,6 +68,22 @@ public partial class G5ApiProvider : IApiProvider
     public Task RoundStatsUpdateAsync(RoundStatusUpdateParams roundStatusUpdateParams, CancellationToken cancellationToken)
     {
         return Task.CompletedTask;
+    }
+
+    public Task RoundMvpAsync(RoundMvpParams roundMvpParams, CancellationToken cancellationToken)
+    {
+        var player = roundMvpParams.Player;
+
+        var roundMvpEvent = new RoundMvpEvent
+        {
+            MapNumber = roundMvpParams.MapNumber,
+            MatchId = roundMvpParams.MatchId,
+            Reason = roundMvpParams.Reason,
+            RoundNumber = roundMvpParams.RoundNumber,
+            Player = new Player(player.SteamId.ToString(CultureInfo.InvariantCulture), player.Name, player.UserId, (Side)player.Side, player.IsBot)
+        };
+
+        return _G5Stats.SendEventAsync(roundMvpEvent, cancellationToken);
     }
 
 

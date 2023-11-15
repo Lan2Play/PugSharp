@@ -1,9 +1,8 @@
-﻿namespace PugSharp.Api.Contract
+﻿namespace PugSharp.Api.Contract;
+
+public enum StartingSide
 {
-    public enum StartingSide
-    {
-        None,
-        T = 2,
-        CT = 3,
-    }
+    None,
+    T = 2,
+    CT = 3,
 }
