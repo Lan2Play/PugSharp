@@ -69,3 +69,4 @@ If you want to know how to use PugSharp, hop over to our [Documentation](https:/
 - Metamod fix script: [ghostcap-gaming/cs2-metamod-re-enable-script](https://github.com/ghostcap-gaming/cs2-metamod-re-enable-script)
 - Metamod: https://www.sourcemm.net/
 - Version detection stolen (and modified) with permission from [CS2-AutoUpdater](https://github.com/dran1x/CS2-AutoUpdater)
+
