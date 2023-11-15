@@ -4,9 +4,12 @@ Admins quickstart guide
 Prerequisites
 -------------------------------
 - Linux Dedicated Server
+- ``libicu`` / ``icu-libs`` / ``libicu-dev`` (depending on your distribution) install from your package manager for support of multiple languages
 - `MetaMod 2.0 <https://www.sourcemm.net/downloads.php?branch=dev>`_
 - `CounterStrikeSharp by roflmuffin <https://github.com/roflmuffin/CounterStrikeSharp>`_  (depending on your selected package, there is no need to install this seperatly)
 - Dotnet Runtime needed by `CounterStrikeSharp by roflmuffin <https://github.com/roflmuffin/CounterStrikeSharp>`_ (depending on your selected package, there is no need to install this seperatly)
+
+
 
    .. Installation - Stable
    .. -------------------------------
@@ -16,6 +19,7 @@ Prerequisites
    .. ................................................................................
 
    .. - Install `MetaMod 2.0 <https://www.sourcemm.net/downloads.php?branch=dev>`_ on your Linux Dedicated Server 
+   .. - ``libicu`` / ``icu-libs`` / ``libicu-dev`` (depending on your distribution) install from your package manager for support of multiple languages
    .. - Download one of our releases including `CounterStrikeSharp by roflmuffin <https://github.com/roflmuffin/CounterStrikeSharp>`_ and the Dotnet Runtime named ``PugSharp_with_cssharp_and_runtime_linux_X.X.X.zip`` from our `releases <https://github.com/Lan2Play/PugSharp/releases>`_ and unpack it to your csgo folder. 
    .. - Have fun and report bugs :D
 
@@ -33,6 +37,7 @@ Prerequisites
    ..    This method is not recommended, since you have to make sure you update your dotnet runtime yourself, if `CounterStrikeSharp by roflmuffin <https://github.com/roflmuffin/CounterStrikeSharp>`_ does so. Only use this if you know why you want to do that.
 
    .. - Install `MetaMod 2.0 <https://www.sourcemm.net/downloads.php?branch=dev>`_ on your Linux Dedicated Server 
+   .. - ``libicu`` / ``icu-libs`` / ``libicu-dev`` (depending on your distribution) install from your package manager for support of multiple languages
    .. - Download one of our releases including `CounterStrikeSharp by roflmuffin <https://github.com/roflmuffin/CounterStrikeSharp>`_  named ``PugSharp_with_cssharp_linux_X.X.X.zip`` from our `releases <https://github.com/Lan2Play/PugSharp/releases>`_ and unpack it to your csgo folder. 
    .. - check the ``Add dotnet runtime`` step in `the ci file of CounterStrikeSharp <https://github.com/roflmuffin/CounterStrikeSharp/blob/main/.github/workflows/cmake-single-platform.yml>`_ (make sure you use the one from the corresponding release instead the one from the ``main`` branch) and download the ``aspnetcore-runtime-X.X.X-linux-x64.tar.gz`` linked there. 
    .. - Extract the contents of the dotnet runtime into ``addons/counterstrikesharp/dotnet`` of your csgo server
@@ -59,6 +64,7 @@ Prerequisites
    ..    This method is not recommended, since you have to make sure you update your dotnet runtime yourself, if `CounterStrikeSharp by roflmuffin <https://github.com/roflmuffin/CounterStrikeSharp>`_ does so and also update `CounterStrikeSharp by roflmuffin <https://github.com/roflmuffin/CounterStrikeSharp>`_  if the version of it that PugSharp depends on changes. Only use this if you know why you want to do that.
 
    .. - Install `MetaMod 2.0 <https://www.sourcemm.net/downloads.php?branch=dev>`_ on your Linux Dedicated Server 
+   .. - ``libicu`` / ``icu-libs`` / ``libicu-dev`` (depending on your distribution) install from your package manager for support of multiple languages
    .. - Download one of our releases named ``PugSharp_linux_X.X.X.zip`` from our `releases <https://github.com/Lan2Play/PugSharp/releases>`_ and unpack it to your csgo folder. 
    .. - check the ``CounterStrikeSharp.API`` dependency version in `the csproj file of Pugsharp <https://github.com/Lan2Play/PugSharp/blob/main/PugSharp/PugSharp.csproj>`_ (make sure you use the one from the corresponding release instead the one from the ``main`` branch) and download the `CounterStrikeSharp release <https://github.com/roflmuffin/CounterStrikeSharp/releases>`_ that is configured there. 
    .. - Extract the contents of the CounterStrikeSharp into the csgo folder of your csgo server
@@ -92,6 +98,7 @@ Linux - Beta with CounterStrikeSharp and Dotnet Runtime (recommended)
 ................................................................................
 
 - Install `MetaMod 2.0 <https://www.sourcemm.net/downloads.php?branch=dev>`_ on your Linux Dedicated Server 
+- ``libicu`` / ``icu-libs`` / ``libicu-dev`` (depending on your distribution) install from your package manager for support of multiple languages
 - Download one of our pre-releases including `CounterStrikeSharp by roflmuffin <https://github.com/roflmuffin/CounterStrikeSharp>`_ and the Dotnet Runtime named ``PugSharp_with_cssharp_and_runtime_linux_X.X.X-beta.zip`` from our `releases <https://github.com/Lan2Play/PugSharp/releases>`_ and unpack it to your csgo folder. 
 - Have fun and report bugs :D
 
@@ -109,6 +116,7 @@ Linux - Beta with CounterStrikeSharp
    This method is not recommended, since you have to make sure you update your dotnet runtime yourself, if `CounterStrikeSharp by roflmuffin <https://github.com/roflmuffin/CounterStrikeSharp>`_ does so. Only use this if you know why you want to do that.
 
 - Install `MetaMod 2.0 <https://www.sourcemm.net/downloads.php?branch=dev>`_ on your Linux Dedicated Server 
+- ``libicu`` / ``icu-libs`` / ``libicu-dev`` (depending on your distribution) install from your package manager for support of multiple languages
 - Download one of our pre-releases including `CounterStrikeSharp by roflmuffin <https://github.com/roflmuffin/CounterStrikeSharp>`_  named ``PugSharp_with_cssharp_linux_X.X.X-beta.zip`` from our `releases <https://github.com/Lan2Play/PugSharp/releases>`_ and unpack it to your csgo folder. 
 - check the ``Add dotnet runtime`` step in `the ci file of CounterStrikeSharp <https://github.com/roflmuffin/CounterStrikeSharp/blob/main/.github/workflows/cmake-single-platform.yml>`_ (make sure you use the one from the corresponding release instead the one from the ``main`` branch) and download the ``aspnetcore-runtime-X.X.X-linux-x64.tar.gz`` linked there. 
 - Extract the contents of the dotnet runtime into ``addons/counterstrikesharp/dotnet`` of your csgo server
@@ -135,6 +143,7 @@ Linux Beta
    This method is not recommended, since you have to make sure you update your dotnet runtime yourself, if `CounterStrikeSharp by roflmuffin <https://github.com/roflmuffin/CounterStrikeSharp>`_ does so and also update `CounterStrikeSharp by roflmuffin <https://github.com/roflmuffin/CounterStrikeSharp>`_  if the version of it that PugSharp depends on changes. Only use this if you know why you want to do that.
 
 - Install `MetaMod 2.0 <https://www.sourcemm.net/downloads.php?branch=dev>`_ on your Linux Dedicated Server 
+- ``libicu`` / ``icu-libs`` / ``libicu-dev`` (depending on your distribution) install from your package manager for support of multiple languages
 - Download one of our pre-releases named ``PugSharp_linux_X.X.X-beta.zip`` from our `releases <https://github.com/Lan2Play/PugSharp/releases>`_ and unpack it to your csgo folder. 
 - check the ``CounterStrikeSharp.API`` dependency version in `the csproj file of Pugsharp <https://github.com/Lan2Play/PugSharp/blob/main/PugSharp/PugSharp.csproj>`_ (make sure you use the one from the corresponding release instead the one from the ``main`` branch) and download the `CounterStrikeSharp release <https://github.com/roflmuffin/CounterStrikeSharp/releases>`_ that is configured there. 
 - Extract the contents of the CounterStrikeSharp into the csgo folder of your csgo server
@@ -170,6 +179,7 @@ Linux - Alpha with CounterStrikeSharp and Dotnet Runtime (recommended)
 ................................................................................
 
 - Install `MetaMod 2.0 <https://www.sourcemm.net/downloads.php?branch=dev>`_ on your Linux Dedicated Server 
+- ``libicu`` / ``icu-libs`` / ``libicu-dev`` (depending on your distribution) install from your package manager for support of multiple languages
 - Download one of our alphas including `CounterStrikeSharp by roflmuffin <https://github.com/roflmuffin/CounterStrikeSharp>`_ and the Dotnet Runtime named ``latest_build_linux_with_cssharp_and_runtime`` from our `alpha builds <https://github.com/Lan2Play/PugSharp/actions/workflows/test_and_build.yml>`_ (click on a run, scroll down to artifacts) and unpack the containing ``PugSharp_with_cssharp_and_runtime_linux_X.X.X-alpha.zip`` to your csgo folder. 
 - Have fun and report bugs :D
 
@@ -187,6 +197,7 @@ Linux - Alpha with CounterStrikeSharp
    This method is not recommended, since you have to make sure you update your dotnet runtime yourself, if `CounterStrikeSharp by roflmuffin <https://github.com/roflmuffin/CounterStrikeSharp>`_ does so. Only use this if you know why you want to do that.
 
 - Install `MetaMod 2.0 <https://www.sourcemm.net/downloads.php?branch=dev>`_ on your Linux Dedicated Server 
+- ``libicu`` / ``icu-libs`` / ``libicu-dev`` (depending on your distribution) install from your package manager for support of multiple languages
 - Download one of our alphas including `CounterStrikeSharp by roflmuffin <https://github.com/roflmuffin/CounterStrikeSharp>`_  named ``latest_build_linux_with_cssharp`` from our `alpha builds <https://github.com/Lan2Play/PugSharp/actions/workflows/test_and_build.yml>`_ (click on a run, scroll down to artifacts) and unpack the containing ``PugSharp_with_cssharp_linux_X.X.X-alpha.zip`` to your csgo folder. 
 - check the ``Add dotnet runtime`` step in `the ci file of CounterStrikeSharp <https://github.com/roflmuffin/CounterStrikeSharp/blob/main/.github/workflows/cmake-single-platform.yml>`_ (make sure you use the one from the corresponding release instead the one from the ``main`` branch) and download the ``aspnetcore-runtime-X.X.X-linux-x64.tar.gz`` linked there. 
 - Extract the contents of the dotnet runtime into ``addons/counterstrikesharp/dotnet`` of your csgo server
@@ -213,6 +224,7 @@ Linux Alpha
    This method is not recommended, since you have to make sure you update your dotnet runtime yourself, if `CounterStrikeSharp by roflmuffin <https://github.com/roflmuffin/CounterStrikeSharp>`_ does so and also update `CounterStrikeSharp by roflmuffin <https://github.com/roflmuffin/CounterStrikeSharp>`_  if the version of it that PugSharp depends on changes. Only use this if you know why you want to do that.
 
 - Install `MetaMod 2.0 <https://www.sourcemm.net/downloads.php?branch=dev>`_ on your Linux Dedicated Server 
+- ``libicu`` / ``icu-libs`` / ``libicu-dev`` (depending on your distribution) install from your package manager for support of multiple languages
 - Download one of our alphas named ``latest_build_linux`` from our `alpha builds <https://github.com/Lan2Play/PugSharp/actions/workflows/test_and_build.yml>`_ (click on a run, scroll down to artifacts) and unpack the containing ``PugSharp_linux_X.X.X-alpha.zip`` to your csgo folder. 
 - check the ``CounterStrikeSharp.API`` dependency version in `the csproj file of Pugsharp <https://github.com/Lan2Play/PugSharp/blob/main/PugSharp/PugSharp.csproj>`_ (make sure you use the one from the corresponding release instead the one from the ``main`` branch) and download the `CounterStrikeSharp release <https://github.com/roflmuffin/CounterStrikeSharp/releases>`_ that is configured there. 
 - Extract the contents of the CounterStrikeSharp into the csgo folder of your csgo server
