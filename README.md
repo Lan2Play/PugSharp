@@ -26,6 +26,14 @@ If you want to help developing or translating, join our discord:
 
 [![Discord](https://discordapp.com/api/guilds/748086853449810013/widget.png?style=banner3)](https://discord.gg/zF5C9WPWFq)
 
+## Usage
+
+> **Warning**
+> Don't use this in production right now!
+
+If you want to know how to use PugSharp, hop over to our [Documentation](https://pugsharp.lan2play.de).
+
+
 ## Working features
 
 - [x] Configuration via http(s) json ([description](#Match_Config) and [example config](#MatchConfig))
@@ -47,110 +55,6 @@ If you want to help developing or translating, join our discord:
 ## partially working features
 
 - Api compatibility for the awesome [Get5](https://github.com/splewis/get5)
-
-## Usage
-
-> **Warning**
-> Don't use this in production right now!
-
-If you want to know how to use PugSharp, hop over to our [Documentation](https://pugsharp.lan2play.de).
-
-## Commands
-
-- `!ready` Mark the player as ready
-- `!pause` Pause the match in the next freezetime
-- `!unpause` Unpause the match. To continue the match, both teams have to !unpause.
-- `!kill` or `!suicide` Kill the current player if allowed by [MatchConfig](#MatchConfig).
-
-### Admin/Rcon Commands
-
-`<requiredParameter>` This marks parameters that are required for commands
-`[optionalParameter]` This marks parameters that can be optional added to commands
-
-- `!ps_loadconfig <url> [authToken]` Load a [MatchConfig](#MatchConfig) to initialize a match
-- `!ps_loadconfigfile <filename>` Load a [MatchConfig](#MatchConfig) to initialize a match. The file path must be either rooted or relative to `csgo/PugSharp/Config/`
-- `!ps_restorematch <matchId> <round>` Restores match in the given round.
-- `!ps_stopmatch` Danger! Stops the current match immediatly and resets the server.
-- `!ps_dumpmatch` Dumps the current matchstate and config to console
-
-## Configuration
-
-### MatchConfig
-
-| Field                    | DefaultValue | Description                                                                                                          |
-| ------------------------ | ------------ | -------------------------------------------------------------------------------------------------------------------- |
-| maplist                  | - (required) | List of availbale maps for the map vote                                                                              |
-| team1                    | - (required) | [Team](TODO Link) Description                                                                                        |
-| team2                    | - (required) | [Team](TODO Link) Description                                                                                        |
-| matchid                  | - (required) | Unique Identifier for the match                                                                                      |
-| num_maps                 | 1            | Number of Maps to be played. This should be an odd number to be able to determine an winner.                         |
-| players_per_team         | 5            | Maximum possible number of players per team.                                                                         |
-| min_players_to_ready     | 5            | Number of players per team, that have to be ready to start the game.                                                 |
-| max_rounds               | 24           | Maximum number of rounds that are played for mainmatch.                                                              |
-| max_overtime_rounds      | 6            | Maximum number of rounds that are played in overtime.                                                                |
-| vote_timeout             | 60000 (60s)  | Timeout in milliseconds. If team does not complete vote within this timeout the map with the most votes gets banned. |
-| eventula_apistats_url    | (optional)   | Url where the Game State have to be send.                                                                            |
-| eventula_apistats_token  | (optional)   | Optional Authtoken that is used to authenticate on apistats upload.                                                  |
-| eventula_demo_upload_url | (optional)   | Url to upload the game demo to [Eventula](https://github.com/Lan2Play/eventula-manager).                             |
-| g5_api_url               | (optional)   | Url to send the g5 events to.                                                                                        |
-| g5_api_header            | (optional)   | Header that should be set to access the g5 events api.                                                               |
-| g5_api_headervalue       | (optional)   | Header value that should be set to access the g5 events api.                                                         |
-| allow_suicide            | true         | Flag to determine if players are allowed to suicide.                                                                 |
-| vote_map                 | de_dust2     | Map that is used during warm up and voting                                                                           |
-
-#### Example Config
-
-```json
-{
-  "maplist": ["de_vertigo", "de_dust2", "de_inferno", "de_mirage", "de_nuke", "de_overpass", "de_ancient"],
-  "team1": {
-    "name": "hallo",
-    "tag": "hallo",
-    "flag": "DE",
-    "players": {
-      "12345678901234567": "Apfelwurm",
-      "12345678901234568": "strange name"
-    }
-  },
-  "team2": {
-    "name": "asd",
-    "tag": "asd",
-    "flag": "DE",
-    "players": {
-      "12345678901234569": "BOT R00st3r",
-      "76561198064576360": "heatwave"
-    }
-  },
-  "matchid": "40",
-  "num_maps": 1,
-  "players_per_team": 2,
-  "min_players_to_ready": 2,
-  "max_rounds": 24,
-  "max_overtime_rounds": 6,
-  "vote_timeout": 60000,
-  "eventula_apistats_url": "https://dev.lan2play.de/api/matchmaking/40/",
-  "eventula_apistats_token": "S0XRU0UhIExFQ0tFUiEK",
-  "eventula_demo_upload_url": "https://dev.lan2play.de/api/matchmaking/40/demo",
-  "vote_map": "de_inferno",
-}
-```
-
-### ServerConfig
-
-| Field  | Description                                |
-| ------ | ------------------------------------------ |
-| admins | List of admins with the steamId and a Name |
-
-#### Example Config
-
-```json
-{
-  "admins": {
-    "12345678901234569": "BOT R00st3r",
-    "12345678901234567": "Apfelwurm"
-  }
-}
-```
 
 <!--
 ## Tanslation
