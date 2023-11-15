@@ -740,13 +740,12 @@ public class Match : IDisposable
 
     private bool OneMapConfigured()
     {
-        if (MatchInfo.MatchMaps.Count != 1)
+        if (MatchInfo.Config.Maplist.Count() == 1)
         {
-            return false;
+            return true;
         }
 
-
-        return true;
+        return false;
     }
 
     private bool MapIsNotSelected()
