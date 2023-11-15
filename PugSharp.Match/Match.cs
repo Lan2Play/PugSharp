@@ -45,6 +45,7 @@ public class Match : IDisposable
 
     private Match(IMatchCallback matchCallback, IApiProvider apiProvider, ITextHelper textHelper, MatchInfo matchInfo)
     {
+        CultureInfo.CurrentCulture = CultureInfo.GetCultureInfo(matchInfo.Config.ServerLocale);
         _MatchCallback = matchCallback;
         _ApiProvider = apiProvider;
         _TextHelper = textHelper;
