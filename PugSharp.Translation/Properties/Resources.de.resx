@@ -122,7 +122,7 @@
     <value>Stimme ab um eine Karte zu bannen: schreibe `!&lt;Kartennummer&gt;` in den Chat</value>
   </data>
   <data name="PugSharp.NotifyReady" xml:space="preserve">
-    <value>schreibe `!ready`in den Chat um als bereit markiert zu werden</value>
+    <value>schreibe `!ready` in den Chat um als bereit markiert zu werden</value>
   </data>
   <data name="PugSharp.Match.WaitForOtherTeam" xml:space="preserve">
     <value>Warte auf die Abstimmung des anderen Teams!</value>
