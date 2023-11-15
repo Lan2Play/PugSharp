@@ -175,7 +175,7 @@
     <value>You are !!not!! ready! Type `!ready` if you are ready.</value>
   </data>
   <data name="PugSharp.Match.SelectedTeam" xml:space="preserve">
-    <value>{0:teamName} selected 1:side} as startside!</value>
+    <value>{0:teamName} selected {1:side} as startside!</value>
   </data>
   <data name="PugSharp.Match.VotedForTeam" xml:space="preserve">
     <value>You voted for **{0:teamName}**</value>
