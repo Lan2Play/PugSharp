@@ -46,7 +46,8 @@ public class Match : IDisposable
 
     private Match(IMatchCallback matchCallback, IApiProvider apiProvider, ITextHelper textHelper, MatchInfo matchInfo)
     {
-        CultureInfo.CurrentCulture = CultureInfo.GetCultureInfo(matchInfo.Config.ServerLocale);
+        SetServerCulture(matchInfo.Config.ServerLocale);
+
         _MatchCallback = matchCallback;
         _ApiProvider = apiProvider;
         _TextHelper = textHelper;
@@ -66,6 +67,14 @@ public class Match : IDisposable
         _MapsToSelect = MatchInfo.Config.Maplist.Select(x => new Vote(x)).ToList();
 
         _MatchStateMachine = new StateMachine<MatchState, MatchCommand>(MatchState.None);
+    }
+
+    private static void SetServerCulture(string locale)
+    {
+        CultureInfo.DefaultThreadCurrentCulture = CultureInfo.GetCultureInfo(locale);
+        CultureInfo.DefaultThreadCurrentUICulture = CultureInfo.DefaultThreadCurrentCulture;
+        CultureInfo.CurrentCulture = CultureInfo.DefaultThreadCurrentCulture;
+        CultureInfo.CurrentUICulture = CultureInfo.DefaultThreadCurrentCulture;
     }
 
     public Match(IMatchCallback matchCallback, IApiProvider apiProvider, ITextHelper textHelper, Config.MatchConfig matchConfig) : this(matchCallback, apiProvider, textHelper, new MatchInfo(matchConfig))

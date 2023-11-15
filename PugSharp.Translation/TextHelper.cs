@@ -64,16 +64,16 @@ namespace PugSharp.Translation
             return text;
         }
 
-        public string GetText(string key, params object?[] arguments) => GetTranslatedText(key, CultureInfo.CurrentCulture, arguments);
+        public string GetText(string key, params object?[] arguments) => GetTranslatedText(key, CultureInfo.CurrentUICulture, arguments);
 
         private string GetArgumentString(object? value)
         {
             return value switch
             {
                 string s => s,
-                int i => i.ToString(CultureInfo.CurrentCulture),
-                float f => f.ToString(CultureInfo.CurrentCulture),
-                double d => d.ToString(CultureInfo.CurrentCulture),
+                int i => i.ToString(CultureInfo.CurrentUICulture),
+                float f => f.ToString(CultureInfo.CurrentUICulture),
+                double d => d.ToString(CultureInfo.CurrentUICulture),
                 _ => value?.ToString() ?? string.Empty,
             };
         }

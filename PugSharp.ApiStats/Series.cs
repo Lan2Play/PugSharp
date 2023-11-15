@@ -10,7 +10,7 @@ namespace PugSharp.ApiStats
 
         public required TeamInfo Team2 { get; init; }
 
-        public string SeriesType => string.Create(CultureInfo.CurrentCulture, $"bo{Maps.Count}");
+        public string SeriesType => string.Create(CultureInfo.CurrentUICulture, $"bo{Maps.Count}");
 
         public required Config.Team Winner { get; init; }
 
