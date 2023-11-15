@@ -91,11 +91,15 @@ public class Match : IDisposable
             .PermitDynamicIf(MatchCommand.LoadMatch, () => HasRestoredMatch() ? MatchState.RestoreMatch : MatchState.WaitingForPlayersConnectedReady);
 
         _MatchStateMachine.Configure(MatchState.WaitingForPlayersConnectedReady)
-            .PermitDynamicIf(MatchCommand.PlayerReady, () => HasRestoredMatch() ? MatchState.MatchRunning : MatchState.MapVote, AllPlayersAreReady)
+            .PermitDynamicIf(MatchCommand.PlayerReady, () => HasRestoredMatch() ? MatchState.MatchRunning : MatchState.PreMapVote, AllPlayersAreReady)
             .OnEntry(StartWarmup)
             .OnEntry(SetAllPlayersNotReady)
             .OnEntry(StartReadyReminder)
             .OnExit(StopReadyReminder);
+
+        _MatchStateMachine.Configure(MatchState.PreMapVote)
+           .PermitDynamicIf(MatchCommand.MapListCheckCompleted, () => OneMapConfigured() ? MatchState.TeamVote : MatchState.MapVote)
+           .OnEntry(CheckMapList);
 
         _MatchStateMachine.Configure(MatchState.MapVote)
             .PermitReentryIf(MatchCommand.VoteMap, MapIsNotSelected)
@@ -157,6 +161,18 @@ public class Match : IDisposable
         _MatchStateMachine.OnTransitioned(OnMatchStateChanged);
 
         _MatchStateMachine.Fire(MatchCommand.LoadMatch);
+    }
+
+    private void CheckMapList()
+    {
+        // If only one map is configured we choose it and skip the mapvote
+        if (OneMapConfigured())
+        {
+            MatchInfo.CurrentMap.MapName = _MapsToSelect[0].Name;
+            _MapsToSelect = MatchInfo.Config.Maplist.Select(x => new Vote(x)).ToList();
+        }
+
+        TryFireState(MatchCommand.MapListCheckCompleted);
     }
 
     private void StartWarmup()
@@ -720,6 +736,17 @@ public class Match : IDisposable
     {
         // The SelectedCount is checked when the Votes are done but the map is still in the list
         return _MapsToSelect.Count == 2;
+    }
+
+    private bool OneMapConfigured()
+    {
+        if (MatchInfo.MatchMaps.Count != 1)
+        {
+            return false;
+        }
+
+
+        return true;
     }
 
     private bool MapIsNotSelected()

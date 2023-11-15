@@ -6,6 +6,7 @@ public enum MatchCommand
     ConnectPlayer,
     DisconnectPlayer,
     PlayerReady,
+    MapListCheckCompleted,
     VoteMap,
     VoteTeam,
     SwitchMap,
