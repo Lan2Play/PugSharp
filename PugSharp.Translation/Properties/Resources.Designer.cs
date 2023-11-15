@@ -223,6 +223,24 @@ namespace PugSharp.Translation.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Not Ready.
+        /// </summary>
+        public static string PugSharp_Match_NotReadyTag {
+            get {
+                return ResourceManager.GetString("PugSharp.Match.NotReadyTag", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Ready.
+        /// </summary>
+        public static string PugSharp_Match_ReadyTag {
+            get {
+                return ResourceManager.GetString("PugSharp.Match.ReadyTag", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to You are !!not!! ready! Type `!ready` if you are ready..
         /// </summary>
         public static string PugSharp_Match_RemindReady {

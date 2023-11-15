@@ -873,13 +873,16 @@ public class Match : IDisposable
 
         if (matchPlayer.IsReady)
         {
+            player.Clan = _TextHelper.GetText(nameof(Resources.PugSharp_Match_ReadyTag));
             _MatchCallback.SendMessage(_TextHelper.GetText(nameof(Resources.PugSharp_Match_Info_Ready), player.PlayerName, readyPlayers, requiredPlayers));
             await TryFireStateAsync(MatchCommand.PlayerReady).ConfigureAwait(false);
         }
         else
         {
+            player.Clan = _TextHelper.GetText(nameof(Resources.PugSharp_Match_NotReadyTag));
             _MatchCallback.SendMessage(_TextHelper.GetText(nameof(Resources.PugSharp_Match_Info_NotReady), player.PlayerName, readyPlayers, requiredPlayers));
         }
+
     }
 
     public Team GetPlayerTeam(ulong steamID)

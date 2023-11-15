@@ -83,6 +83,18 @@ public class Player : IPlayer
         }
     }
 
+    public string Clan
+    {
+        get => DefaultIfInvalid(() => _PlayerController.Clan, string.Empty);
+        set
+        {
+            if (_PlayerController.IsValid)
+            {
+                _PlayerController.Clan = value;
+            }
+        }
+    }
+
     public void PrintToChat(string message)
     {
         _PlayerController.PrintToChat(message);
@@ -117,6 +129,7 @@ public class Player : IPlayer
     {
         CounterStrikeSharp.API.Server.ExecuteCommand(string.Create(CultureInfo.InvariantCulture, $"kickid {UserId!.Value} \"You are not part of the current match!\""));
     }
+
 
     private void ResetScoreboard()
     {
