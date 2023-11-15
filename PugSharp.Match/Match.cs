@@ -91,15 +91,11 @@ public class Match : IDisposable
             .PermitDynamicIf(MatchCommand.LoadMatch, () => HasRestoredMatch() ? MatchState.RestoreMatch : MatchState.WaitingForPlayersConnectedReady);
 
         _MatchStateMachine.Configure(MatchState.WaitingForPlayersConnectedReady)
-            .PermitDynamicIf(MatchCommand.PlayerReady, () => HasRestoredMatch() ? MatchState.MatchRunning : MatchState.PreMapVote, AllPlayersAreReady)
+            .PermitDynamicIf(MatchCommand.PlayerReady, () => HasRestoredMatch() ? MatchState.MatchRunning : MatchState.MapVote, AllPlayersAreReady)
             .OnEntry(StartWarmup)
             .OnEntry(SetAllPlayersNotReady)
             .OnEntry(StartReadyReminder)
             .OnExit(StopReadyReminder);
-
-        _MatchStateMachine.Configure(MatchState.PreMapVote)
-           .PermitDynamicIf(MatchCommand.MapListCheckCompleted, () => OneMapConfigured() ? MatchState.TeamVote : MatchState.MapVote)
-           .OnEntry(CheckMapList);
 
         _MatchStateMachine.Configure(MatchState.MapVote)
             .PermitReentryIf(MatchCommand.VoteMap, MapIsNotSelected)
@@ -161,18 +157,6 @@ public class Match : IDisposable
         _MatchStateMachine.OnTransitioned(OnMatchStateChanged);
 
         _MatchStateMachine.Fire(MatchCommand.LoadMatch);
-    }
-
-    private void CheckMapList()
-    {
-        // If only one map is configured we choose it and skip the mapvote
-        if (OneMapConfigured())
-        {
-            MatchInfo.CurrentMap.MapName = _MapsToSelect[0].Name;
-            _MapsToSelect = MatchInfo.Config.Maplist.Select(x => new Vote(x)).ToList();
-        }
-
-        TryFireState(MatchCommand.MapListCheckCompleted);
     }
 
     private void StartWarmup()
@@ -580,6 +564,14 @@ public class Match : IDisposable
 
     private void SendRemainingMapsToVotingTeam()
     {
+        // If only one map is configured
+        if (MatchInfo.Config.Maplist.Length == 1)
+        {
+            _MapsToSelect = MatchInfo.Config.Maplist.Select(x => new Vote(x)).ToList();
+            TryFireState(MatchCommand.VoteMap);
+            return;
+        }
+
         SwitchVotingTeam();
 
         _MapsToSelect.ForEach(m => m.Votes.Clear());
@@ -600,13 +592,20 @@ public class Match : IDisposable
 
     private void RemoveBannedMap()
     {
-        _VoteTimer.Stop();
+        if(_VoteTimer.Enabled)
+        {
+            _VoteTimer.Stop();
+        }
 
-        var mapToBan = _MapsToSelect.MaxBy(m => m.Votes.Count);
-        _MapsToSelect.Remove(mapToBan!);
-        _MapsToSelect.ForEach(x => x.Votes.Clear());
+        //Only ban map if theres more than one
+        if(_MapsToSelect.Count > 1 )
+        {
+            var mapToBan = _MapsToSelect.MaxBy(m => m.Votes.Count);
+            _MapsToSelect.Remove(mapToBan!);
+            _MapsToSelect.ForEach(x => x.Votes.Clear());
 
-        _MatchCallback.SendMessage(_TextHelper.GetText(nameof(Resources.PugSharp_Match_BannedMap), mapToBan!.Name, _CurrentMatchTeamToVote?.TeamConfig.Name));
+            _MatchCallback.SendMessage(_TextHelper.GetText(nameof(Resources.PugSharp_Match_BannedMap), mapToBan!.Name, _CurrentMatchTeamToVote?.TeamConfig.Name));
+        }
 
         if (_MapsToSelect.Count == 1)
         {
@@ -735,7 +734,7 @@ public class Match : IDisposable
     private bool MapIsSelected()
     {
         // The SelectedCount is checked when the Votes are done but the map is still in the list
-        return _MapsToSelect.Count == 2;
+        return _MapsToSelect.Count <= 2;
     }
 
     private bool OneMapConfigured()

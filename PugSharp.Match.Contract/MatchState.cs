@@ -4,7 +4,6 @@ public enum MatchState
 {
     None,
     WaitingForPlayersConnectedReady,
-    PreMapVote,
     MapVote,
     TeamVote,
     SwitchMap,
