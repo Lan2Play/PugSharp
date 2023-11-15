@@ -592,13 +592,13 @@ public class Match : IDisposable
 
     private void RemoveBannedMap()
     {
-        if(_VoteTimer.Enabled)
+        if (_VoteTimer.Enabled)
         {
             _VoteTimer.Stop();
         }
 
         //Only ban map if theres more than one
-        if(_MapsToSelect.Count > 1 )
+        if (_MapsToSelect.Count > 1)
         {
             var mapToBan = _MapsToSelect.MaxBy(m => m.Votes.Count);
             _MapsToSelect.Remove(mapToBan!);

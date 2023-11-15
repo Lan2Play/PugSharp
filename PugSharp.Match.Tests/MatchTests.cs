@@ -1,10 +1,9 @@
 using NSubstitute;
 using PugSharp.Api.Contract;
-using PugSharp.Api.G5Api;
 using PugSharp.Config;
 using PugSharp.Match.Contract;
 using PugSharp.Translation;
-using System.Text.Json;
+using System.Collections;
 
 namespace PugSharp.Match.Tests
 {
@@ -78,11 +77,37 @@ namespace PugSharp.Match.Tests
             IPlayer player2 = CreatePlayerSub(1, 1);
 
             ConnectPlayers(matchPlayers, match, player1, player2);
-            await SetPlayersReady(match, player1, player2);
+            await SetPlayersReady(match, player1, player2, MatchState.MapVote);
             IPlayer votePlayer = VoteForMap(config, match, player1, player2);
             await VoteTeam(matchCallback, config, match, player1, player2, votePlayer);
             PauseUnpauseMatch(matchCallback, match, player1);
         }
+
+        [Fact]
+        public async Task MatchTestWithOneMap()
+        {
+            var matchPlayers = new List<IPlayer>();
+            var apiProvider = Substitute.For<IApiProvider>();
+            var textHelper = Substitute.For<ITextHelper>();
+            var matchCallback = Substitute.For<IMatchCallback>();
+
+            matchCallback.GetAllPlayers().Returns(matchPlayers);
+
+            MatchConfig config = CreateExampleConfig(new List<string> { "de_dust2" });
+
+            var match = new Match(matchCallback, apiProvider, textHelper, config);
+
+            Assert.Equal(MatchState.WaitingForPlayersConnectedReady, match.CurrentState);
+
+            IPlayer player1 = CreatePlayerSub(0, 0);
+            IPlayer player2 = CreatePlayerSub(1, 1);
+
+            ConnectPlayers(matchPlayers, match, player1, player2);
+            await SetPlayersReady(match, player1, player2, MatchState.TeamVote);
+            await VoteTeam(matchCallback, config, match, player1, player2, player1);
+            PauseUnpauseMatch(matchCallback, match, player1);
+        }
+
 
         private static void PauseUnpauseMatch(IMatchCallback matchCallback, Match match, IPlayer player1)
         {
@@ -135,12 +160,12 @@ namespace PugSharp.Match.Tests
             return votePlayer;
         }
 
-        private static async Task SetPlayersReady(Match match, IPlayer player1, IPlayer player2)
+        private static async Task SetPlayersReady(Match match, IPlayer player1, IPlayer player2, MatchState expectedMatchStateAfterReady)
         {
             await match.TogglePlayerIsReadyAsync(player1).ConfigureAwait(false);
             Assert.Equal(MatchState.WaitingForPlayersConnectedReady, match.CurrentState);
             await match.TogglePlayerIsReadyAsync(player2).ConfigureAwait(false);
-            Assert.Equal(MatchState.MapVote, match.CurrentState);
+            Assert.Equal(expectedMatchStateAfterReady, match.CurrentState);
         }
 
         private static void ConnectPlayers(List<IPlayer> matchPlayers, Match match, IPlayer player1, IPlayer player2)
@@ -154,8 +179,15 @@ namespace PugSharp.Match.Tests
             Assert.Equal(MatchState.WaitingForPlayersConnectedReady, match.CurrentState);
         }
 
-        private static MatchConfig CreateExampleConfig()
+        private static MatchConfig CreateExampleConfig(IEnumerable<string>? mapList = null)
         {
+            IEnumerable<string> mapListInternal = new List<string> { "de_dust2", "de_overpass", "de_inferno" };
+
+            if (mapList != null)
+            {
+                mapListInternal = mapList;
+            }
+
             return new MatchConfig
             {
                 MatchId = "1337",
@@ -178,7 +210,7 @@ namespace PugSharp.Match.Tests
                         { 1,"Def" },
                     },
                 },
-                Maplist = new string[] { "de_dust2", "de_overpass", "de_inferno" },
+                Maplist = mapListInternal.ToArray(),
             };
         }
 
