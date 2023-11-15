@@ -4,6 +4,7 @@ using PugSharp.ApiStats;
 using PugSharp.Logging;
 using PugSharp.Match.Contract;
 using PugSharp.Translation;
+using PugSharp.Translation.Properties;
 using Stateless;
 using Stateless.Graph;
 using System.Globalization;

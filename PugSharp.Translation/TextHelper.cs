@@ -1,4 +1,5 @@
-﻿using System.Globalization;
+﻿using PugSharp.Translation.Properties;
+using System.Globalization;
 using System.Text.RegularExpressions;
 
 namespace PugSharp.Translation
@@ -28,10 +29,9 @@ namespace PugSharp.Translation
         [GeneratedRegex(@"(!!(?<error>.*?)!!)", RegexOptions.ExplicitCapture, _RegexTimeout)]
         private static partial Regex ErrorRegex();
 
-        public string GetText(string key, params object?[] arguments)
+        public string GetTranslatedText(string key, CultureInfo cultureInfo, params object?[] arguments)
         {
-
-            var text = Resources.ResourceManager.GetString(key.Replace('_', '.'), CultureInfo.CurrentCulture);
+            var text = Resources.ResourceManager.GetString(key.Replace('_', '.'), cultureInfo);
             if (text == null)
             {
                 return $"?key?";
@@ -63,6 +63,8 @@ namespace PugSharp.Translation
 
             return text;
         }
+
+        public string GetText(string key, params object?[] arguments) => GetTranslatedText(key, CultureInfo.CurrentCulture, arguments);
 
         private string GetArgumentString(object? value)
         {
