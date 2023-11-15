@@ -8,7 +8,7 @@ using System.Text.Json.Serialization;
 
 namespace PugSharp;
 
-public partial class G5CommandProvider : ICommandProvider
+public sealed partial class G5CommandProvider : ICommandProvider
 {
     private const int _RegexTimeout = 1000;
     private static readonly ILogger<G5ApiProvider> _Logger = LogManager.CreateLogger<G5ApiProvider>();
@@ -118,7 +118,7 @@ public partial class G5CommandProvider : ICommandProvider
     [GeneratedRegex(@"ProductName=(?<productname>.+)", RegexOptions.ExplicitCapture, _RegexTimeout)]
     private static partial Regex ProductNameRegex();
 
-    private string LoadSteamInfValue(string steamInf, Regex regex, string regexGroupName, List<string> errors)
+    private static string LoadSteamInfValue(string steamInf, Regex regex, string regexGroupName, List<string> errors)
     {
         var result = regex.Match(steamInf);
         if (!result.Success)

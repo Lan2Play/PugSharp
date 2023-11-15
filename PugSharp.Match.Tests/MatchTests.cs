@@ -65,7 +65,7 @@ namespace PugSharp.Match.Tests
             var textHelper = Substitute.For<ITextHelper>();
             var matchCallback = Substitute.For<IMatchCallback>();
 
-            matchCallback.GetAllPlayers().Returns(matchPlayers);
+            matchCallback.LoadAllPlayers().Returns(matchPlayers);
 
             MatchConfig config = CreateExampleConfig();
 
@@ -197,7 +197,7 @@ namespace PugSharp.Match.Tests
                 Team1 = new Config.Team
                 {
                     Name = "Team1",
-                    Players = new()
+                    Players = new Dictionary<ulong,string>()
                     {
                         { 0,"Abc" },
                     },
@@ -205,7 +205,7 @@ namespace PugSharp.Match.Tests
                 Team2 = new Config.Team
                 {
                     Name = "Team2",
-                    Players = new()
+                    Players = new Dictionary<ulong, string>()
                     {
                         { 1,"Def" },
                     },

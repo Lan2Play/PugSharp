@@ -26,6 +26,10 @@ If you want to help developing or translating, join our discord:
 
 [![Discord](https://discordapp.com/api/guilds/748086853449810013/widget.png?style=banner3)](https://discord.gg/zF5C9WPWFq)
 
+## Tanslation
+
+[![Translation status](https://translate.lan2play.de/widgets/pugsharp/-/multi-auto.svg)](https://translate.lan2play.de/engage/pugsharp/)
+
 ## Usage
 
 > **Warning**
@@ -56,11 +60,6 @@ If you want to know how to use PugSharp, hop over to our [Documentation](https:/
 
 - Api compatibility for the awesome [Get5](https://github.com/splewis/get5)
 
-<!--
-## Tanslation
-
-[![Translation status](https://translate.lan2play.de/widgets/eventula-manager/-/multi-auto.svg)](https://translate.lan2play.de/engage/eventula-manager/) -->
-
 ## Credits
 
 - Awesome match plugin for CS:GO and inspiration: [Get5](https://github.com/splewis/get5)
@@ -69,3 +68,4 @@ If you want to know how to use PugSharp, hop over to our [Documentation](https:/
 - Metamod fix script: [ghostcap-gaming/cs2-metamod-re-enable-script](https://github.com/ghostcap-gaming/cs2-metamod-re-enable-script)
 - Metamod: https://www.sourcemm.net/
 - Version detection stolen (and modified) with permission from [CS2-AutoUpdater](https://github.com/dran1x/CS2-AutoUpdater)
+

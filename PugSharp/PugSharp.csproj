@@ -8,7 +8,7 @@
 
 	<ItemGroup>
 
-		<PackageReference Include="CounterStrikeSharp.API" Version="1.0.52">
+		<PackageReference Include="CounterStrikeSharp.API" Version="1.0.53">
 			<PrivateAssets>none</PrivateAssets>
 			<ExcludeAssets>runtime</ExcludeAssets>
 			<IncludeAssets>compile; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
@@ -27,7 +27,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
-	  <PackageReference Update="Meziantou.Analyzer" Version="2.0.109">
+	  <PackageReference Update="Meziantou.Analyzer" Version="2.0.110">
 	    <PrivateAssets>all</PrivateAssets>
 	    <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
 	  </PackageReference>

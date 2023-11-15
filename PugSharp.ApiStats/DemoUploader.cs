@@ -12,9 +12,9 @@ namespace PugSharp.ApiStats
             _Logger.LogInformation("Create Api Stats with BaseUrl: {url}", demoUploadUrl);
         }
 
-        public async Task UploadDemoAsync(string demoFile, CancellationToken cancellationToken)
+        public async Task UploadDemoAsync(string? demoFile, CancellationToken cancellationToken)
         {
-            if (HttpClient == null)
+            if (HttpClient == null || demoFile == null)
             {
                 return;
             }

@@ -5,15 +5,15 @@ namespace PugSharp.Config
     public class Team
     {
         [JsonPropertyName("name")]
-        public string Name { get; set; } = string.Empty;
+        public required string Name { get; init; }
 
         [JsonPropertyName("tag")]
-        public string Tag { get; set; } = string.Empty;
+        public string Tag { get; init; } = string.Empty;
 
         [JsonPropertyName("flag")]
-        public string Flag { get; set; } = string.Empty;
+        public string Flag { get; init; } = string.Empty;
 
         [JsonPropertyName("players")]
-        public Dictionary<ulong, string> Players { get; set; }
+        public required IDictionary<ulong, string> Players { get; init; }
     }
 }

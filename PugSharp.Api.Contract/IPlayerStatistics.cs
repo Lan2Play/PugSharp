@@ -2,40 +2,40 @@
 {
     public interface IPlayerStatistics
     {
-        int Assists { get; set; }
-        int BombDefuses { get; set; }
-        int BombPlants { get; set; }
-        bool Coaching { get; set; }
-        int ContributionScore { get; set; }
-        int Count1K { get; set; }
-        int Count2K { get; set; }
-        int Count3K { get; set; }
-        int Count4K { get; set; }
-        int Count5K { get; set; }
-        int Damage { get; set; }
-        int Deaths { get; set; }
-        int EnemiesFlashed { get; set; }
-        int FirstDeathCt { get; set; }
-        int FirstDeathT { get; set; }
-        int FirstKillCt { get; set; }
-        int FirstKillT { get; set; }
-        int FlashbangAssists { get; set; }
-        int FriendliesFlashed { get; set; }
-        int HeadshotKills { get; set; }
-        int Kast { get; set; }
-        int Kills { get; set; }
-        int KnifeKills { get; set; }
-        int Mvp { get; set; }
-        string Name { get; set; }
-        int RoundsPlayed { get; set; }
-        int Suicides { get; set; }
-        int TeamKills { get; set; }
-        int TradeKill { get; set; }
-        int UtilityDamage { get; set; }
-        int V1 { get; set; }
-        int V2 { get; set; }
-        int V3 { get; set; }
-        int V4 { get; set; }
-        int V5 { get; set; }
+        int Assists { get;  }
+        int BombDefuses { get; }
+        int BombPlants { get; }
+        bool Coaching { get; }
+        int ContributionScore { get; }
+        int Count1K { get; }
+        int Count2K { get; }
+        int Count3K { get; }
+        int Count4K { get; }
+        int Count5K { get; }
+        int Damage { get; }
+        int Deaths { get; }
+        int EnemiesFlashed { get; }
+        int FirstDeathCt { get; }
+        int FirstDeathT { get; }
+        int FirstKillCt { get; }
+        int FirstKillT { get; }
+        int FlashbangAssists { get; }
+        int FriendliesFlashed { get; }
+        int HeadshotKills { get; }
+        int Kast { get; }
+        int Kills { get; }
+        int KnifeKills { get; }
+        int Mvp { get; }
+        string Name { get; }
+        int RoundsPlayed { get; }
+        int Suicides { get; }
+        int TeamKills { get; }
+        int TradeKill { get; }
+        int UtilityDamage { get; }
+        int V1 { get; }
+        int V2 { get; }
+        int V3 { get; }
+        int V4 { get; }
+        int V5 { get; }
     }
 }

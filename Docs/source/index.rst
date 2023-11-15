@@ -4,7 +4,7 @@ PugSharp
 
 |PugSharp_test_and_build| |PugSharp_website_build| |Lines of Code| |Quality Gate Status|
 |Duplicated Lines (%)| |Coverage| |Maintainability Rating| |Reliability
-Rating| |Security Rating| |Vulnerabilities| |Code Smells| |Bugs| 
+Rating| |Security Rating| |Vulnerabilities| |Code Smells| |Bugs| |PugSharp Translation|
 
 `Pugsharp <https://github.com/Lan2Play/PugSharp>`_ is a PUG System Plugin for CS2 based on the awsome  `CounterStrikeSharp by roflmuffin <https://github.com/roflmuffin/CounterStrikeSharp>`_. 
 
@@ -87,13 +87,9 @@ Table of contents
    :target: https://sonarcloud.io/summary/new_code?id=Lan2Play_PugSharp
 .. |Bugs| image:: https://sonarcloud.io/api/project_badges/measure?project=Lan2Play_PugSharp&metric=bugs
    :target: https://sonarcloud.io/summary/new_code?id=Lan2Play_PugSharp
-
-
-
-.. .. |Client Translation| image:: https://translate.lan2play.de/widgets/pugsharp-client/-/pugsharp-client/svg-badge.svg
-..     :alt: Client Translation status
-..     :target: https://translate.lan2play.de/engage/pugsharp-client/
-.. readd |Client Translation| to the top
+.. |PugSharp Translation| image:: https://translate.lan2play.de/widgets/pugsharp/-/pugsharp/svg-badge.svg
+    :alt: PugSharp Translation status
+    :target: https://translate.lan2play.de/engage/pugsharp/
 
 
 
