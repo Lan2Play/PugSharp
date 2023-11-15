@@ -20,7 +20,7 @@ public class Match : IDisposable
     private const int Kill4 = 4;
     private const int Kill5 = 5;
     private const int NumOfMatchLiveMessages = 10;
-
+    private const int _TimeBetweenDelayMessages = 10;
     private static readonly ILogger<Match> _Logger = LogManager.CreateLogger<Match>();
 
     private readonly System.Timers.Timer _VoteTimer = new();
@@ -484,7 +484,13 @@ public class Match : IDisposable
         var seriesResultParams = new SeriesResultParams(MatchInfo.Config.MatchId, MatchInfo.MatchMaps.GroupBy(x => x.Winner).MaxBy(x => x.Count())!.Key!.TeamConfig.Name, Forfeit: true, delay * 1100, MatchInfo.MatchMaps.Count(x => x.Team1Points > x.Team2Points), MatchInfo.MatchMaps.Count(x => x.Team2Points > x.Team1Points));
         await _ApiProvider.FinalizeAsync(seriesResultParams, CancellationToken.None).ConfigureAwait(false);
 
-        await Task.Delay(TimeSpan.FromSeconds(delay)).ConfigureAwait(false);
+        while (delay > 0)
+        {
+            _Logger.LogInformation("Waiting for sourceTV. Remaining Delay: {delay}s", delay);
+            await Task.Delay(TimeSpan.FromSeconds(Math.Min(_TimeBetweenDelayMessages, delay))).ConfigureAwait(false);
+            delay -= _TimeBetweenDelayMessages;
+        }
+
 
         if (_DemoUploader != null)
         {
