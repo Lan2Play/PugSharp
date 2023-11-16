@@ -6,22 +6,19 @@ using CounterStrikeSharp.API.Modules.Cvars;
 using Microsoft.Extensions.Logging;
 using PugSharp.Api.Contract;
 using PugSharp.Config;
-using PugSharp.Api.G5Api;
 using PugSharp.Logging;
 using PugSharp.Match.Contract;
 using PugSharp.Models;
 using System.Globalization;
 using System.Runtime.CompilerServices;
 using System.Text.Json;
-using ChatColors = CounterStrikeSharp.API.Modules.Utils.ChatColors;
-using Player = PugSharp.Models.Player;
 using PugSharp.Server.Contract;
 using PugSharp.Api.Json;
 using PugSharp.Match;
 using PugSharp.Translation;
 using PugSharp.Translation.Properties;
-using PugSharp.Api;
 using CounterStrikeSharp.API.Modules.Admin;
+using CounterStrikeSharp.API.Modules.Utils;
 
 namespace PugSharp;
 
@@ -132,7 +129,7 @@ public class PugSharp : BasePlugin, IMatchCallback
 
         if (!string.IsNullOrEmpty(matchConfig.G5ApiUrl))
         {
-            var g5Stats = new G5ApiClient(matchConfig.G5ApiUrl, matchConfig.G5ApiHeader ?? string.Empty, matchConfig.G5ApiHeaderValue ?? string.Empty);
+            var g5Stats = new Api.G5Api.G5ApiClient(matchConfig.G5ApiUrl, matchConfig.G5ApiHeader ?? string.Empty, matchConfig.G5ApiHeaderValue ?? string.Empty);
             var g5ApiProvider = new G5ApiProvider(g5Stats, _CsServer);
             RegisterConsoleCommandAttributeHandlers(g5ApiProvider);
             _ApiProvider.AddApiProvider(g5ApiProvider);
@@ -157,9 +154,7 @@ public class PugSharp : BasePlugin, IMatchCallback
     private void InitializeMatch(MatchConfig matchConfig)
     {
         ResetForMatch(matchConfig);
-
         _Match = new Match.Match(this, _ApiProvider, _TextHelper, matchConfig);
-
     }
 
     private void InitializeMatch(MatchInfo matchInfo, string roundBackupFile)
@@ -242,14 +237,13 @@ public class PugSharp : BasePlugin, IMatchCallback
         UpdateConvar("mp_overtime_maxrounds", matchConfig.MaxOvertimeRounds);
         UpdateConvar("mp_maxrounds", matchConfig.MaxRounds);
 
-        // Set T Name
-        UpdateConvar("mp_teamname_1", matchConfig.Team2.Name);
-        UpdateConvar("mp_teamflag_1", matchConfig.Team2.Flag);
+        // Set T Name, can be changed to ConVar if issue https://github.com/roflmuffin/CounterStrikeSharp/issues/45 is fixed
+        _CsServer.ExecuteCommand($"mp_teamname_1 {matchConfig.Team2.Name}");
+        _CsServer.ExecuteCommand($"mp_teamflag_1 {matchConfig.Team2.Flag}");
 
-
-        // Set CT Name
-        UpdateConvar("mp_teamname_2", matchConfig.Team1.Name);
-        UpdateConvar("mp_teamflag_2", matchConfig.Team1.Flag);
+        // Set CT Name, can be changed to ConVar if issue https://github.com/roflmuffin/CounterStrikeSharp/issues/45 is fixed
+        _CsServer.ExecuteCommand($"mp_teamname_2 {matchConfig.Team1.Name}");
+        _CsServer.ExecuteCommand($"mp_teamflag_2 {matchConfig.Team1.Flag}");
 
         _Logger.LogInformation("Set match variables done");
     }
@@ -266,17 +260,17 @@ public class PugSharp : BasePlugin, IMatchCallback
 
     private void LoadAndExecuteConfig(string configFileName)
     {
-        var configFile = Path.Combine(_CsServer.GameDirectory, "csgo", "cfg", "PugSharp", configFileName);
-        if (!File.Exists(configFile))
+        var absoluteConfigFilePath = Path.Combine(_CsServer.GameDirectory, "csgo", "cfg", "PugSharp", configFileName);
+        if (!File.Exists(absoluteConfigFilePath))
         {
-            _Logger.LogError("Config {configFile} was not found on the server.", configFile);
+            _Logger.LogError("Config {configFile} was not found on the server.", absoluteConfigFilePath);
             return;
         }
 
-        configFile = Path.Join("PugSharp", configFileName);
+        var configFilePath = $"PugSharp/{configFileName}";
 
-        _Logger.LogInformation("Loading {configFile}.", configFile);
-        _CsServer.ExecuteCommand($"exec \"{configFile}\"");
+        _Logger.LogInformation("Loading {configFilePath} with absolute path {absoluteConfigFilePath}.", configFilePath, absoluteConfigFilePath);
+        _CsServer.ExecuteCommand($"exec {configFilePath}");
     }
 
     private void EndWarmup()
@@ -300,7 +294,6 @@ public class PugSharp : BasePlugin, IMatchCallback
     {
         HandleCommandAsync(() =>
         {
-
             if (_Match == null)
             {
                 command.ReplyToCommand("Currently no Match is running. ");
