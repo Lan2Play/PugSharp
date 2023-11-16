@@ -171,6 +171,12 @@
   <data name="PugSharp.Match.Info.WaitingForAllPlayers" xml:space="preserve">
     <value>Waiting for all players to be ready.</value>
   </data>
+  <data name="PugSharp.Match.NotReadyTag" xml:space="preserve">
+    <value>Not Ready</value>
+  </data>
+  <data name="PugSharp.Match.ReadyTag" xml:space="preserve">
+    <value>Ready</value>
+  </data>
   <data name="PugSharp.Match.RemindReady" xml:space="preserve">
     <value>You are !!not!! ready! Type `!ready` if you are ready.</value>
   </data>
