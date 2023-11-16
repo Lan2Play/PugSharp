@@ -35,6 +35,10 @@ public class PugSharp : BasePlugin, IMatchCallback
 
     private readonly TextHelper _TextHelper = new(ChatColors.Blue, ChatColors.Green, ChatColors.Red);
 
+    private readonly PeriodicTimer _ConfigTimer = new(TimeSpan.FromSeconds(1));
+
+    private readonly CancellationTokenSource _CancellationTokenSource = new();
+
     private Match.Match? _Match;
 
     public override string ModuleName => "PugSharp Plugin";
@@ -48,6 +52,7 @@ public class PugSharp : BasePlugin, IMatchCallback
         _CsServer = new CsServer();
         PugSharpDirectory = Path.Combine(_CsServer.GameDirectory, "csgo", "PugSharp");
         _ConfigProvider = new(Path.Join(PugSharpDirectory, "Config"));
+        _ = Task.Run(ConfigLoaderTask, _CancellationTokenSource.Token);
     }
 
     public override void Load(bool hotReload)
@@ -104,6 +109,17 @@ public class PugSharp : BasePlugin, IMatchCallback
         AddCommandListener("jointeam", OnClientCommandJoinTeam);
 
         _Logger.LogInformation("End RegisterEventHandlers");
+    }
+
+    private async Task ConfigLoaderTask()
+    {
+        while (await _ConfigTimer.WaitForNextTickAsync(_CancellationTokenSource.Token).ConfigureAwait(false))
+        {
+            if (_Match != null && (_Match.CurrentState == MatchState.WaitingForPlayersConnectedReady || _Match.CurrentState == MatchState.WaitingForPlayersReady) && Utilities.GetPlayers().Count(x => !x.IsBot) == 0)
+            {
+                StartWarmup();
+            }
+        }
     }
 
     private void ResetForMatch(MatchConfig matchConfig)
@@ -737,11 +753,6 @@ public class PugSharp : BasePlugin, IMatchCallback
         {
             if (_Match.CurrentState == MatchState.WaitingForPlayersConnectedReady || _Match.CurrentState == MatchState.WaitingForPlayersReady)
             {
-                if (Utilities.GetPlayers().Count == 1)
-                {
-                    _CsServer.NextFrame(() => StartWarmup());
-                }
-
                 var configTeam = _Match.GetPlayerTeam(eventPlayerTeam.Userid.SteamID);
 
                 if ((int)configTeam != eventPlayerTeam.Team)
@@ -755,11 +766,6 @@ public class PugSharp : BasePlugin, IMatchCallback
                         player.SwitchTeam(configTeam);
                     });
                 }
-            }
-
-            if ((_Match.CurrentState == MatchState.WaitingForPlayersConnectedReady || _Match.CurrentState == MatchState.WaitingForPlayersReady) && Utilities.GetPlayers().Count == 1)
-            {
-                _CsServer.NextFrame(() => StartWarmup());
             }
         }
         else
@@ -926,7 +932,7 @@ public class PugSharp : BasePlugin, IMatchCallback
         }
 
         var userId = eventPlayerSpawn.Userid;
-        if (_Match.CurrentState < MatchState.MatchStarting && userId != null && userId.IsValid)
+        if (_Match.CurrentState < MatchState.MatchStarting && userId != null && userId.IsValid && !userId.IsBot)
         {
             // Give players max money if no match is running
             _CsServer.NextFrame(() =>
@@ -1430,8 +1436,6 @@ public class PugSharp : BasePlugin, IMatchCallback
         _CsServer.ExecuteCommand("mp_unpause_match");
     }
 
-
-
     public void SetupRoundBackup()
     {
         if (_Match != null)
@@ -1522,6 +1526,9 @@ public class PugSharp : BasePlugin, IMatchCallback
 
         if (disposing)
         {
+            _CancellationTokenSource.Cancel();
+            _CancellationTokenSource.Dispose();
+
             _Match?.Dispose();
             _ConfigProvider.Dispose();
         }
