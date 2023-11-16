@@ -313,6 +313,7 @@ public class PugSharp : BasePlugin, IMatchCallback
             _Match.Dispose();
             _Match = null;
             ResetServer(resetMap);
+            command.ReplyToCommand("Match stopped!");
         },
         command,
         player);
