@@ -13,6 +13,7 @@
 	<ItemGroup>
 	  <ProjectReference Include="..\PugSharp.Config\PugSharp.Config.csproj" />
 	  <ProjectReference Include="..\PugSharp.Logging\PugSharp.Logging.csproj" />
+	  <ProjectReference Include="..\PugSharp.Shared\PugSharp.Shared.csproj" />
 	</ItemGroup>
 
 	<ItemGroup>

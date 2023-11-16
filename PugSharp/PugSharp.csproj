@@ -23,6 +23,7 @@
 	  <ProjectReference Include="..\PugSharp.Logging\PugSharp.Logging.csproj" />
 	  <ProjectReference Include="..\PugSharp.Match\PugSharp.Match.csproj" />
 	  <ProjectReference Include="..\PugSharp.Server.Contract\PugSharp.Server.Contract.csproj" />
+	  <ProjectReference Include="..\PugSharp.Shared\PugSharp.Shared.csproj" />
 	  <ProjectReference Include="..\PugSharp.Translation\PugSharp.Translation.csproj" />
 	</ItemGroup>
 

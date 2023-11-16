@@ -1,8 +1,10 @@
-﻿namespace PugSharp.Api.G5Api;
+﻿using PugSharp.Shared;
+
+namespace PugSharp.Api.G5Api;
 
 public sealed class HeDetonatedEvent : VictimWithDamageGrenadeEvent
 {
-    public HeDetonatedEvent() : base(new Weapon("hegrenade", CsWeaponId.HEGRENADE), "hegrenade_detonated")
+    public HeDetonatedEvent() : base(new Weapon("hegrenade", CSWeaponId.HEGrenade), "hegrenade_detonated")
     {
     }
 }

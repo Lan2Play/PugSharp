@@ -19,6 +19,7 @@ using PugSharp.Translation;
 using PugSharp.Translation.Properties;
 using CounterStrikeSharp.API.Modules.Admin;
 using CounterStrikeSharp.API.Modules.Utils;
+using PugSharp.Shared;
 
 namespace PugSharp;
 
@@ -35,7 +36,6 @@ public class PugSharp : BasePlugin, IMatchCallback
     private readonly TextHelper _TextHelper = new(ChatColors.Blue, ChatColors.Green, ChatColors.Red);
 
     private Match.Match? _Match;
-    private ServerConfig? _ServerConfig;
 
     public override string ModuleName => "PugSharp Plugin";
 
@@ -55,14 +55,6 @@ public class PugSharp : BasePlugin, IMatchCallback
         _Logger.LogInformation("Loading PugSharp!");
         RegisterEventHandlers();
 
-        var configPath = Path.Join(_CsServer.GameDirectory, "csgo", "PugSharp", "Config", "server.json");
-        var serverConfigResult = ConfigProvider.LoadServerConfig(configPath);
-
-        serverConfigResult.Switch(
-            error => { }, // Do nothing - Error already logged
-            serverConfig => _ServerConfig = serverConfig
-        );
-
         if (!hotReload)
         {
             var commands = new G5CommandProvider(_CsServer).LoadProviderCommands();
@@ -78,7 +70,7 @@ public class PugSharp : BasePlugin, IMatchCallback
                         {
                             c.ReplyToCommand(result);
                         }
-                    }, c, c.GetCommandString, c.ArgString);
+                    }, c, player: null, c.GetCommandString, c.ArgString);
                 });
             }
         }
@@ -282,7 +274,9 @@ public class PugSharp : BasePlugin, IMatchCallback
     private void DisableCheats()
     {
         _Logger.LogInformation("Disabling cheats");
+#pragma warning disable MA0003 // Add parameter name to improve readability
         UpdateConvar("sv_cheats", false);
+#pragma warning restore MA0003 // Add parameter name to improve readability
     }
 
     #region Commands
@@ -305,7 +299,8 @@ public class PugSharp : BasePlugin, IMatchCallback
             _Match = null;
             ResetServer(resetMap);
         },
-        command);
+        command,
+        player);
     }
 
     [ConsoleCommand("css_loadconfig", "Load a match config")]
@@ -371,7 +366,7 @@ public class PugSharp : BasePlugin, IMatchCallback
                 }
             );
         },
-        command);
+        command, player);
     }
 
     [ConsoleCommand("css_loadconfigfile", "Load a match config from a file")]
@@ -414,7 +409,8 @@ public class PugSharp : BasePlugin, IMatchCallback
                 }
             );
         },
-        command);
+        command,
+        player);
     }
 
     [ConsoleCommand("css_restorematch", "Restore a match")]
@@ -454,7 +450,9 @@ public class PugSharp : BasePlugin, IMatchCallback
             int roundToRestore;
             if (command.ArgCount == argRoundNumberIndex)
             {
-                var files = Directory.EnumerateFiles(csgoDirectory, $"PugSharp_Match_{matchId}_round*");
+                var fileNameWildcard = string.Create(CultureInfo.InvariantCulture, $"PugSharp_Match_{matchId}_round*");
+
+                var files = Directory.EnumerateFiles(csgoDirectory, fileNameWildcard);
                 foreach (var file in files)
                 {
                     _Logger.LogInformation("found posisble Backup: {file} ", file);
@@ -474,7 +472,8 @@ public class PugSharp : BasePlugin, IMatchCallback
 
             _Logger.LogInformation("Start restoring match {matchid}!", matchId);
 
-            var roundBackupFile = $"PugSharp_Match_{matchId}_round{roundToRestore:D2}.txt";
+
+            var roundBackupFile = string.Create(CultureInfo.InvariantCulture, $"PugSharp_Match_{matchId}_round{roundToRestore:D2}.txt");
 
             if (!File.Exists(Path.Combine(_CsServer.GameDirectory, "csgo", roundBackupFile)))
             {
@@ -482,7 +481,7 @@ public class PugSharp : BasePlugin, IMatchCallback
                 return;
             }
 
-            var matchInfoFileName = Path.Combine(PugSharpDirectory, "Backup", $"Match_{matchId}_Round_{roundToRestore}.json");
+            var matchInfoFileName = Path.Combine(PugSharpDirectory, "Backup", string.Create(CultureInfo.InvariantCulture, $"Match_{matchId}_Round_{roundToRestore}.json"));
             if (!File.Exists(matchInfoFileName))
             {
                 command.ReplyToCommand($"MatchInfoFile {matchInfoFileName} not found");
@@ -503,7 +502,8 @@ public class PugSharp : BasePlugin, IMatchCallback
                 InitializeMatch(matchInfo, roundBackupFile);
             }
         },
-        command).ConfigureAwait(false);
+        command,
+        player).ConfigureAwait(false);
     }
 
     [ConsoleCommand("css_dumpmatch", "Serialize match to JSON on console")]
@@ -517,7 +517,8 @@ public class PugSharp : BasePlugin, IMatchCallback
             _Logger.LogInformation("{matchJson}", JsonSerializer.Serialize(_Match));
             _Logger.LogInformation("################ dump match ################");
         },
-        command);
+        command,
+        player);
     }
 
     [ConsoleCommand("css_ready", "Mark player as ready")]
@@ -546,7 +547,8 @@ public class PugSharp : BasePlugin, IMatchCallback
 
             await _Match.TogglePlayerIsReadyAsync(matchPlayer).ConfigureAwait(false);
         },
-        command);
+        command,
+        player);
     }
 
     [ConsoleCommand("css_unpause", "Starts a match")]
@@ -562,7 +564,8 @@ public class PugSharp : BasePlugin, IMatchCallback
 
             _Match?.Unpause(new Player(player));
         },
-        command);
+        command,
+        player);
     }
 
     [ConsoleCommand("css_pause", "Pauses the current match")]
@@ -578,7 +581,8 @@ public class PugSharp : BasePlugin, IMatchCallback
 
             _Match?.Pause(new Player(player));
         },
-        command);
+        command,
+        player);
     }
 
     [ConsoleCommand("css_kill", "Kills the calling player")]
@@ -600,18 +604,29 @@ public class PugSharp : BasePlugin, IMatchCallback
                 command.ReplyToCommand("Suicide is not allowed during this match!");
             }
 
+#pragma warning disable MA0003 // Add parameter name to improve readability
             player.Pawn.Value.CommitSuicide(true, true);
+#pragma warning restore MA0003 // Add parameter name to improve readability
         },
-        command);
+        command,
+        player);
     }
 
 
-    private static void HandleCommandAsync(Action commandAction, CommandInfo command, string? args = null, [CallerMemberName] string? commandMethod = null)
+    private static void HandleCommandAsync(Action commandAction, CommandInfo command, CCSPlayerController? player = null, string? args = null, [CallerMemberName] string? commandMethod = null)
     {
         var commandName = commandMethod?.Replace("OnCommand", "", StringComparison.OrdinalIgnoreCase) ?? commandAction.Method.Name;
         try
         {
-            _Logger.LogInformation("Command \"{commandName} {args}\" called.", commandName, args ?? string.Empty);
+            if (player != null)
+            {
+                _Logger.LogInformation("Command \"{commandName} {args}\" called by player with SteamID {steamId}.", commandName, args ?? string.Empty, player.SteamID);
+            }
+            else
+            {
+                _Logger.LogInformation("Command \"{commandName} {args}\" called.", commandName, args ?? string.Empty);
+            }
+
             commandAction();
         }
         catch (Exception e)
@@ -621,12 +636,20 @@ public class PugSharp : BasePlugin, IMatchCallback
         }
     }
 
-    private static async Task HandleCommandAsync(Func<Task> commandAction, CommandInfo command, string? args = null, [CallerMemberName] string? commandMethod = null)
+    private static async Task HandleCommandAsync(Func<Task> commandAction, CommandInfo command, CCSPlayerController? player = null, string? args = null, [CallerMemberName] string? commandMethod = null)
     {
         var commandName = commandMethod?.Replace("OnCommand", "", StringComparison.OrdinalIgnoreCase) ?? commandAction.Method.Name;
         try
         {
-            _Logger.LogInformation("Command \"{commandName} {args}\" called.", commandName, args ?? string.Empty);
+            if (player != null)
+            {
+                _Logger.LogInformation("Command \"{commandName} {args}\" called by player with SteamID {steamId}.", commandName, args ?? string.Empty, player.SteamID);
+            }
+            else
+            {
+                _Logger.LogInformation("Command \"{commandName} {args}\" called.", commandName, args ?? string.Empty);
+            }
+
             await commandAction().ConfigureAwait(false);
         }
         catch (Exception e)
@@ -775,8 +798,6 @@ public class PugSharp : BasePlugin, IMatchCallback
         {
             return HookResult.Continue;
         }
-
-        // TODO Write Backup file
 
         return HookResult.Continue;
     }
@@ -1058,12 +1079,14 @@ public class PugSharp : BasePlugin, IMatchCallback
                             }
                         }
 
-                        var weaponId = Enum.Parse<CSWeaponID>(eventPlayerDeath.Weapon, true);
+#pragma warning disable MA0003 // Add parameter name to improve readability
+                        var weaponId = Enum.Parse<CSWeaponId>(eventPlayerDeath.Weapon, true);
+#pragma warning restore MA0003 // Add parameter name to improve readability
 
                         // Other than these constants, all knives can be found after CSWeapon_MAX_WEAPONS_NO_KNIFES.
                         // See https://sourcemod.dev/#/cstrike/enumeration.CSWeaponID
-                        if (weaponId == CSWeaponID.KNIFE || weaponId == CSWeaponID.KNIFE_GG || weaponId == CSWeaponID.KNIFE_T ||
-                            weaponId == CSWeaponID.KNIFE_GHOST || weaponId > CSWeaponID.MAX_WEAPONS_NO_KNIFES)
+                        if (weaponId == CSWeaponId.Knife || weaponId == CSWeaponId.Knife_GG || weaponId == CSWeaponId.Knife_T ||
+                            weaponId == CSWeaponId.Knife_Ghost || weaponId > CSWeaponId.Max_Weapons_No_Knifes)
                         {
                             attackerStats.KnifeKills++;
                         }
@@ -1212,7 +1235,7 @@ public class PugSharp : BasePlugin, IMatchCallback
                     SteamId = mvp.SteamID,
                     IsBot = mvp.IsBot,
                     Name = mvp.PlayerName,
-                    Side = mvp.TeamNum
+                    Side = mvp.TeamNum,
                 },
                 eventRoundMvp.Reason
                 );

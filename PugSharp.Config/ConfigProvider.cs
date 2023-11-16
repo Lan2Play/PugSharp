@@ -112,43 +112,6 @@ public class ConfigProvider : IDisposable
         }
     }
 
-    public static OneOf<Error<string>, ServerConfig> LoadServerConfig(string configPath)
-    {
-        try
-        {
-            if (!File.Exists(configPath))
-            {
-                var directoryName = Path.GetDirectoryName(configPath);
-                if (directoryName != null && !Directory.Exists(directoryName))
-                {
-                    Directory.CreateDirectory(directoryName);
-                }
-
-                // Create default config
-                var config = new ServerConfig();
-                using FileStream createStream = File.Create(configPath);
-                JsonSerializer.Serialize(createStream, config);
-                return config;
-            }
-
-            using var loadingStream = File.OpenRead(configPath);
-            var loadedConfig = JsonSerializer.Deserialize<ServerConfig>(loadingStream);
-
-            if (loadedConfig == null)
-            {
-                _Logger.LogError("ServerConfig was deserialized to null");
-                return new Error<string>("ServerConfig couldn't be deserialized");
-            }
-
-            return loadedConfig;
-        }
-        catch (Exception ex)
-        {
-            _Logger.LogError(ex, "Error loading server config");
-            return new Error<string>("Error loading server config");
-        }
-    }
-
     #region IDisposable
 
     protected virtual void Dispose(bool disposing)

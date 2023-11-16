@@ -35,7 +35,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PugSharp.Api.Json", "PugSha
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PugSharp.DebugDummy", "PugSharp.DebugDummy\PugSharp.DebugDummy.csproj", "{572B6279-3307-4D11-A834-1D598CA2C21C}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PugSharp.Translation", "PugSharp.Translation\PugSharp.Translation.csproj", "{E70DA922-7DCA-4586-9676-B76E5CFA588C}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PugSharp.Translation", "PugSharp.Translation\PugSharp.Translation.csproj", "{E70DA922-7DCA-4586-9676-B76E5CFA588C}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PugSharp.Shared", "PugSharp.Shared\PugSharp.Shared.csproj", "{4A212EEC-6CED-4A28-A1FE-2E543AD105A3}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -95,6 +97,10 @@ Global
 		{E70DA922-7DCA-4586-9676-B76E5CFA588C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{E70DA922-7DCA-4586-9676-B76E5CFA588C}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{E70DA922-7DCA-4586-9676-B76E5CFA588C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4A212EEC-6CED-4A28-A1FE-2E543AD105A3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4A212EEC-6CED-4A28-A1FE-2E543AD105A3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4A212EEC-6CED-4A28-A1FE-2E543AD105A3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4A212EEC-6CED-4A28-A1FE-2E543AD105A3}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

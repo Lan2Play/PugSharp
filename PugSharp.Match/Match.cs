@@ -289,9 +289,7 @@ public class Match : IDisposable
     }
 
 #pragma warning disable MA0051 // Method is too long
-#pragma warning disable S3776 // Cognitive Complexity of methods should not be too high
     private void UpdateStats(IReadOnlyDictionary<ulong, IPlayerRoundResults> playerResults)
-#pragma warning restore S3776 // Cognitive Complexity of methods should not be too high
 #pragma warning restore MA0051 // Method is too long
     {
         foreach (var kvp in playerResults)
@@ -758,16 +756,6 @@ public class Match : IDisposable
     {
         // The SelectedCount is checked when the Votes are done but the map is still in the list
         return _MapsToSelect.Count <= 2;
-    }
-
-    private bool OneMapConfigured()
-    {
-        if (MatchInfo.Config.Maplist.Count() == 1)
-        {
-            return true;
-        }
-
-        return false;
     }
 
     private bool MapIsNotSelected()

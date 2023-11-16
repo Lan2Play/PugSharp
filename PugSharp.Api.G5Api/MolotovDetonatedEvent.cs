@@ -1,4 +1,5 @@
 ﻿using System.Text.Json.Serialization;
+using PugSharp.Shared;
 
 namespace PugSharp.Api.G5Api;
 
@@ -12,7 +13,7 @@ public sealed class MolotovDetonatedEvent : VictimWithDamageGrenadeEvent
     [JsonPropertyName("duration")]
     public required int Duration { get; init; }
 
-    public MolotovDetonatedEvent() : base(new Weapon("molotov", CsWeaponId.MOLOTOV), "molotov_detonated")
+    public MolotovDetonatedEvent() : base(new Weapon("molotov", CSWeaponId.Molotov), "molotov_detonated")
     {
     }
 }
