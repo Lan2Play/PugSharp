@@ -330,7 +330,7 @@ public class PugSharp : BasePlugin, IMatchCallback
             var authToken = command.ArgCount > 2 ? command.ArgByIndex(2) : string.Empty;
 
             command.ReplyToCommand($"Loading Config from {url}");
-            var loadMatchConfigFromUrlResult = _ConfigProvider.LoadMatchConfigFromUrlAsync(url, authToken).Result;
+            var loadMatchConfigFromUrlResult = _ConfigProvider.LoadMatchConfigFromUrlAsync(url, authToken).GetAwaiter().GetResult();
 
             loadMatchConfigFromUrlResult.Switch(
                 error =>
