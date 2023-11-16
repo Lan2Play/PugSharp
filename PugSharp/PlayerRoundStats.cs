@@ -50,6 +50,8 @@ internal sealed class PlayerRoundStats : IPlayerRoundResults
 
     public string Name { get; }
 
+    public int ContributionScore { get; set; }
+
     public PlayerRoundStats(string name)
     {
         Name = name;

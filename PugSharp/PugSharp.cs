@@ -99,7 +99,6 @@ public class PugSharp : BasePlugin, IMatchCallback
         RegisterEventHandler<EventBombPlanted>(OnBombPlanted);
         RegisterEventHandler<EventPlayerHurt>(OnPlayerHurt);
 
-
         RegisterListener<Listeners.OnMapStart>(OnMapStartHandler);
 
         AddCommandListener("jointeam", OnClientCommandJoinTeam);
@@ -836,6 +835,16 @@ public class PugSharp : BasePlugin, IMatchCallback
         {
             var teamEntities = Utilities.FindAllEntitiesByDesignerName<CCSTeam>("cs_team_manager");
 
+            // Update contribution score foreach player
+            var players = Utilities.GetPlayers();
+
+            foreach (var player in players)
+            {
+                var playerStats = _CurrentRountState.GetPlayerRoundStats(player.SteamID, player.PlayerName);
+
+                playerStats.ContributionScore = player.Score;
+            }
+
             var teamT = teamEntities.First(x => x.TeamNum == (int)Match.Contract.Team.Terrorist);
             var teamCT = teamEntities.First(x => x.TeamNum == (int)Match.Contract.Team.CounterTerrorist);
             var currentRound = teamT.Score + teamCT.Score;
@@ -1378,8 +1387,6 @@ public class PugSharp : BasePlugin, IMatchCallback
 
     #endregion
 
-
-
     #region Implementation of IMatchCallback
 
     public void SwitchMap(string selectedMap)
@@ -1411,8 +1418,6 @@ public class PugSharp : BasePlugin, IMatchCallback
     {
         _CsServer.PrintToChatAll(message);
     }
-
-
 
     public void PauseMatch()
     {

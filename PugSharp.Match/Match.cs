@@ -358,6 +358,9 @@ public class Match : IDisposable
             matchStats.FriendliesFlashed += playerResult.FriendliesFlashed;
             matchStats.TradeKill += playerResult.TradeKills;
 
+            // Score is the overall value, not reported per round
+            matchStats.ContributionScore = playerResult.ContributionScore;
+
             switch (playerResult.Kills)
             {
                 case Kill1:

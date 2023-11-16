@@ -25,5 +25,7 @@ public interface IPlayerRoundResults
     int UtilityDamage { get; }
     int TradeKills { get; }
 
+    int ContributionScore { get; }
+
     string Name { get; }
 }
