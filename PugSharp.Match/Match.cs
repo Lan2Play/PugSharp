@@ -20,7 +20,7 @@ public class Match : IDisposable
     private const int Kill4 = 4;
     private const int Kill5 = 5;
     private const int NumOfMatchLiveMessages = 10;
-    private const uint _TimeBetweenDelayMessages = 10;
+    private const int _TimeBetweenDelayMessages = 10;
     private static readonly ILogger<Match> _Logger = LogManager.CreateLogger<Match>();
 
     private readonly System.Timers.Timer _VoteTimer = new();
@@ -409,8 +409,6 @@ public class Match : IDisposable
             }
 
             // TODO Kast
-            // TODO ContributionScore
-
         }
     }
 
@@ -479,17 +477,17 @@ public class Match : IDisposable
     {
         _MatchCallback.StopDemoRecording();
 
-        var delay = 15u;
+        var delay = 15;
 
         if (_MatchCallback.GetConvar<bool>("tv_enable") || _MatchCallback.GetConvar<bool>("tv_enable1"))
         {
             // TV Delay in s
-            var tvDelaySeconds = Math.Max(_MatchCallback.GetConvar<uint>("tv_delay"), _MatchCallback.GetConvar<uint>("tv_delay1"));
+            var tvDelaySeconds = Math.Max(_MatchCallback.GetConvar<int>("tv_delay"), _MatchCallback.GetConvar<int>("tv_delay1"));
             _Logger.LogInformation("Waiting for sourceTV. Delay: {delay}s + 15s", tvDelaySeconds);
             delay += tvDelaySeconds;
         }
 
-        var seriesResultParams = new SeriesResultParams(MatchInfo.Config.MatchId, MatchInfo.MatchMaps.GroupBy(x => x.Winner).MaxBy(x => x.Count())!.Key!.TeamConfig.Name, Forfeit: true, delay * 1100, MatchInfo.MatchMaps.Count(x => x.Team1Points > x.Team2Points), MatchInfo.MatchMaps.Count(x => x.Team2Points > x.Team1Points));
+        var seriesResultParams = new SeriesResultParams(MatchInfo.Config.MatchId, MatchInfo.MatchMaps.GroupBy(x => x.Winner).MaxBy(x => x.Count())!.Key!.TeamConfig.Name, Forfeit: true, (uint)delay * 1100, MatchInfo.MatchMaps.Count(x => x.Team1Points > x.Team2Points), MatchInfo.MatchMaps.Count(x => x.Team2Points > x.Team1Points));
         await _ApiProvider.FinalizeAsync(seriesResultParams, CancellationToken.None).ConfigureAwait(false);
 
         while (delay > 0)

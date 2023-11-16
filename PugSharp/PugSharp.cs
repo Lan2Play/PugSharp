@@ -1453,7 +1453,7 @@ public class PugSharp : BasePlugin, IMatchCallback
         }
 
         var formattedDateTime = DateTime.UtcNow.ToString("yyyyMMddHHmmss", CultureInfo.InvariantCulture);
-        var demoFileName = $"PugSharp_Match_{_Match.MatchInfo.Config.MatchId}_{formattedDateTime}.dem";
+        var demoFileName = $"PugSharp_Match_{_Match.MatchInfo.Config.MatchId}_{formattedDateTime}";
         try
         {
             string directoryPath = Path.Join(PugSharpDirectory, "Demo");
@@ -1462,10 +1462,10 @@ public class PugSharp : BasePlugin, IMatchCallback
                 Directory.CreateDirectory(directoryPath);
             }
 
-            var fullDemoFileName = Path.Join(directoryPath, demoFileName);
+            var fullDemoFileName = Path.Join("PugSharp", "Demo", demoFileName);
             _Logger.LogInformation("Starting demo recording, path: {fullDemoFileName}", fullDemoFileName);
             _CsServer.ExecuteCommand($"tv_record {fullDemoFileName}");
-            return fullDemoFileName;
+            return Path.Combine(PugSharpDirectory, "Demo", demoFileName + ".dem");
         }
         catch (Exception e)
         {
