@@ -62,7 +62,7 @@ public class PugSharp : BasePlugin, IMatchCallback
             {
                 AddCommand(command.Name, command.Description, (p, c) =>
                 {
-                    HandleCommandAsync(() =>
+                    HandleCommand(() =>
                     {
                         var args = Enumerable.Range(0, c.ArgCount).Select(i => c.GetArg(i)).ToArray();
                         var results = command.commandCallBack(args);
@@ -285,7 +285,7 @@ public class PugSharp : BasePlugin, IMatchCallback
     [RequiresPermissions("@pugsharp/matchadmin")]
     public void OnCommandStopMatch(CCSPlayerController? player, CommandInfo command)
     {
-        HandleCommandAsync(() =>
+        HandleCommand(() =>
         {
             if (_Match == null)
             {
@@ -309,7 +309,7 @@ public class PugSharp : BasePlugin, IMatchCallback
     {
         const int requiredArgCount = 2;
 
-        _ = HandleCommandAsync(async () =>
+        HandleCommand(() =>
         {
 
             if (_Match != null)
@@ -330,14 +330,14 @@ public class PugSharp : BasePlugin, IMatchCallback
             var authToken = command.ArgCount > 2 ? command.ArgByIndex(2) : string.Empty;
 
             command.ReplyToCommand($"Loading Config from {url}");
-            var loadMatchConfigFromUrlResult = await _ConfigProvider.LoadMatchConfigFromUrlAsync(url, authToken).ConfigureAwait(false);
+            var loadMatchConfigFromUrlResult = _ConfigProvider.LoadMatchConfigFromUrlAsync(url, authToken).Result;
 
             loadMatchConfigFromUrlResult.Switch(
                 error =>
                 {
                     command.ReplyToCommand($"Loading config was not possible. Error: {error.Value}");
                 },
-                async matchConfig =>
+                matchConfig =>
                 {
                     // Use same token for APIstats if theres no token set in the matchconfig
                     if (string.IsNullOrEmpty(matchConfig.EventulaApistatsToken))
@@ -355,10 +355,9 @@ public class PugSharp : BasePlugin, IMatchCallback
 
                     var configFileName = Path.Combine(backupDir, $"Match_{matchConfig.MatchId}_Config.json");
 
-                    var configWriteStream = File.Open(configFileName, FileMode.Create);
-                    await using (configWriteStream.ConfigureAwait(false))
+                    using var configWriteStream = File.Open(configFileName, FileMode.Create);
                     {
-                        await JsonSerializer.SerializeAsync(configWriteStream, matchConfig).ConfigureAwait(false);
+                        JsonSerializer.Serialize(configWriteStream, matchConfig);
                     }
 
                     InitializeMatch(matchConfig);
@@ -510,7 +509,7 @@ public class PugSharp : BasePlugin, IMatchCallback
     [RequiresPermissions("@pugsharp/matchadmin")]
     public void OnCommandDumpMatch(CCSPlayerController? player, CommandInfo command)
     {
-        HandleCommandAsync(() =>
+        HandleCommand(() =>
         {
             _Logger.LogInformation("################ dump match ################");
             _Logger.LogInformation("{matchJson}", JsonSerializer.Serialize(_Match));
@@ -553,7 +552,7 @@ public class PugSharp : BasePlugin, IMatchCallback
     [ConsoleCommand("css_unpause", "Starts a match")]
     public void OnCommandUnpause(CCSPlayerController? player, CommandInfo command)
     {
-        HandleCommandAsync(() =>
+        HandleCommand(() =>
         {
             if (player == null)
             {
@@ -570,7 +569,7 @@ public class PugSharp : BasePlugin, IMatchCallback
     [ConsoleCommand("css_pause", "Pauses the current match")]
     public void OnCommandPause(CCSPlayerController? player, CommandInfo command)
     {
-        HandleCommandAsync(() =>
+        HandleCommand(() =>
         {
             if (player == null)
             {
@@ -590,7 +589,7 @@ public class PugSharp : BasePlugin, IMatchCallback
     [ConsoleCommand("ps_suicide", "Kills the calling player")]
     public void OnCommandKillCalled(CCSPlayerController? player, CommandInfo command)
     {
-        HandleCommandAsync(() =>
+        HandleCommand(() =>
         {
             if (player == null || !player.IsValid)
             {
@@ -612,7 +611,7 @@ public class PugSharp : BasePlugin, IMatchCallback
     }
 
 
-    private static void HandleCommandAsync(Action commandAction, CommandInfo command, CCSPlayerController? player = null, string? args = null, [CallerMemberName] string? commandMethod = null)
+    private static void HandleCommand(Action commandAction, CommandInfo command, CCSPlayerController? player = null, string? args = null, [CallerMemberName] string? commandMethod = null)
     {
         var commandName = commandMethod?.Replace("OnCommand", "", StringComparison.OrdinalIgnoreCase) ?? commandAction.Method.Name;
         try
