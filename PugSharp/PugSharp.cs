@@ -276,7 +276,7 @@ public class PugSharp : BasePlugin, IMatchCallback
 
         var configFilePath = $"PugSharp/{configFileName}";
 
-        _Logger.LogInformation("Loading {configFilePath} with absolute path {absoluteConfigFilePath}.", configFilePath, absoluteConfigFilePath);
+        _Logger.LogTrace("Loading {configFilePath} with absolute path {absoluteConfigFilePath}.", configFilePath, absoluteConfigFilePath);
         _CsServer.ExecuteCommand($"exec {configFilePath}");
     }
 
