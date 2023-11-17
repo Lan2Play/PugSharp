@@ -41,7 +41,7 @@ public class Match : IDisposable
 
     public MatchState CurrentState => _MatchStateMachine.State;
 
-    public MatchInfo? MatchInfo { get; private set; }
+    public MatchInfo MatchInfo { get; private set; }
 
     public IEnumerable<MatchPlayer> AllMatchPlayers => MatchInfo?.MatchTeam1.Players.Concat(MatchInfo.MatchTeam2.Players) ?? Enumerable.Empty<MatchPlayer>();
 

@@ -28,7 +28,7 @@ public class Application : IApplication
     private readonly ICsServer _CsServer;
     private readonly MultiApiProvider _ApiProvider;
     private readonly G5CommandProvider _G5CommandProvider;
-    private readonly TextHelper _TextHelper;
+    private readonly ITextHelper _TextHelper;
     private readonly IServiceProvider _ServiceProvider;
     private readonly ConfigProvider _ConfigProvider;
     private readonly PeriodicTimer _ConfigTimer = new(TimeSpan.FromSeconds(1));
@@ -49,7 +49,7 @@ public class Application : IApplication
         ICsServer csServer,
         MultiApiProvider apiProvider,
         G5CommandProvider g5CommandProvider,
-        TextHelper textHelper,
+        ITextHelper textHelper,
         IServiceProvider serviceProvider,
         ConfigProvider configProvider)
 #pragma warning restore S107 // Methods should not have too many parameters
