@@ -194,7 +194,7 @@ jobs:
       - name: copy sample configs
         run: cp -rf resources/cfg packagebuild/cfg
       - name: build package
-        run: zip -r PugSharp_linux_$PUGSHARPNETVER.zip addons
+        run: zip -r PugSharp_linux_$PUGSHARPNETVER.zip addons cfg
         working-directory: ./packagebuild
       - name: move package
         run: mv PugSharp_linux_$PUGSHARPNETVER.zip ../
@@ -206,7 +206,7 @@ jobs:
       - name: extract counterstrikesharp without runtime
         run: unzip -o counterstrikesharp.zip -d  packagebuild/
       - name: build package
-        run: zip -r PugSharp_with_cssharp_linux_$PUGSHARPNETVER.zip addons
+        run: zip -r PugSharp_with_cssharp_linux_$PUGSHARPNETVER.zip addons cfg
         working-directory: ./packagebuild
       - name: move package
         run: mv PugSharp_with_cssharp_linux_$PUGSHARPNETVER.zip ../
@@ -216,7 +216,7 @@ jobs:
       - name: extract counterstrikesharp with runtime
         run: unzip -o counterstrikesharp.zip -d  packagebuild/
       - name: build package
-        run: zip -r PugSharp_with_cssharp_and_runtime_linux_$PUGSHARPNETVER.zip addons
+        run: zip -r PugSharp_with_cssharp_and_runtime_linux_$PUGSHARPNETVER.zip addons cfg
         working-directory: ./packagebuild
       - name: move package
         run: mv PugSharp_with_cssharp_and_runtime_linux_$PUGSHARPNETVER.zip ../
@@ -284,7 +284,7 @@ jobs:
         run: cp -rf resources/cfg packagebuild/cfg
         shell: bash
       - name: build package
-        run: zip -r PugSharp_windows_$PUGSHARPNETVER.zip addons
+        run: zip -r PugSharp_windows_$PUGSHARPNETVER.zip addons cfg
         shell: bash
         working-directory: ./packagebuild
       - name: move package
@@ -298,7 +298,7 @@ jobs:
         run: unzip -o counterstrikesharp.zip -d  packagebuild/
         shell: bash
       - name: build package
-        run: zip -r PugSharp_with_cssharp_windows_$PUGSHARPNETVER.zip addons
+        run: zip -r PugSharp_with_cssharp_windows_$PUGSHARPNETVER.zip addons cfg
         shell: bash
         working-directory: ./packagebuild
       - name: move package
@@ -313,7 +313,7 @@ jobs:
         run: unzip -o counterstrikesharp.zip -d  packagebuild/
       - name: build package
         shell: bash
-        run: zip -r PugSharp_with_cssharp_and_runtime_windows_$PUGSHARPNETVER.zip addons
+        run: zip -r PugSharp_with_cssharp_and_runtime_windows_$PUGSHARPNETVER.zip addons cfg
         working-directory: ./packagebuild
       - name: move package
         shell: bash
