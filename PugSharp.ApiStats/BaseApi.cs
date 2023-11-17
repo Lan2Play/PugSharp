@@ -23,20 +23,27 @@ public class BaseApi : IDisposable
             return;
         }
 
-        if (!baseUrl.EndsWith('/'))
+        try
         {
-            baseUrl += "/";
+            if (!baseUrl.EndsWith('/'))
+            {
+                baseUrl += "/";
+            }
+
+            _Logger.LogInformation("Using BaseURL : \"{url}\" and authKey \"{authKey}\"", baseUrl, authKey);
+            HttpClient = new HttpClient()
+            {
+                BaseAddress = new Uri(baseUrl),
+            };
+
+            if (!string.IsNullOrEmpty(authKey))
+            {
+                HttpClient.DefaultRequestHeaders.Add(HeaderNames.Authorization, authKey);
+            }
         }
-
-        _Logger.LogInformation("Using BaseURL : \"{url}\" and authKey \"{authKey}\"", baseUrl, authKey);
-        HttpClient = new HttpClient()
+        catch (Exception ex)
         {
-            BaseAddress = new Uri(baseUrl),
-        };
-
-        if (!string.IsNullOrEmpty(authKey))
-        {
-            HttpClient.DefaultRequestHeaders.Add(HeaderNames.Authorization, authKey);
+            _Logger.LogError(ex, "Error initializing {type} some api features may not work correctly!", GetType().Name);
         }
     }
 
