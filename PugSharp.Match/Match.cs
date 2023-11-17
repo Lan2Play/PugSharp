@@ -25,7 +25,7 @@ public class Match : IDisposable
     private readonly ILogger<Match> _Logger;
 
     private readonly System.Timers.Timer _VoteTimer = new();
-    private readonly System.Timers.Timer _ReminderTimer = new(10000);
+    private readonly System.Timers.Timer _ReadyReminderTimer = new(10000);
     private readonly IApiProvider _ApiProvider;
     private readonly ITextHelper _TextHelper;
     private readonly ICsServer _CsServer;
@@ -66,7 +66,7 @@ public class Match : IDisposable
         MatchInfo = matchInfo;
         _VoteTimer.Interval = MatchInfo.Config.VoteTimeout;
         _VoteTimer.Elapsed += VoteTimer_Elapsed;
-        _ReminderTimer.Elapsed += ReminderTimer_Elapsed;
+        _ReadyReminderTimer.Elapsed += ReadyReminderTimer_Elapsed;
 
         MatchInfo.CurrentMap = matchInfo.MatchMaps.LastOrDefault(x => !string.IsNullOrEmpty(x.MapName)) ?? matchInfo.MatchMaps[matchInfo.MatchMaps.Count - 1];
         _Logger.LogInformation("Continue Match on map {mapNumber}({mapName})!", MatchInfo.CurrentMap.MapNumber, MatchInfo.CurrentMap.MapName);
@@ -120,23 +120,19 @@ public class Match : IDisposable
             .PermitDynamicIf(MatchCommand.PlayerReady, () => HasRestoredMatch() ? MatchState.MatchRunning : MatchState.MapVote, AllPlayersAreReady)
             .OnEntry(StartWarmup)
             .OnEntry(SetAllPlayersNotReady)
-            .OnEntry(StartReminder)
-            .OnExit(StopReminder);
+            .OnEntry(StartReadyReminder)
+            .OnExit(StopReadyReminder);
 
         _MatchStateMachine.Configure(MatchState.MapVote)
             .PermitReentryIf(MatchCommand.VoteMap, MapIsNotSelected)
             .PermitIf(MatchCommand.VoteMap, MatchState.TeamVote, MapIsSelected)
             .OnEntry(SendRemainingMapsToVotingTeam)
-            .OnExit(RemoveBannedMap)
-            .OnEntry(StartReminder)
-            .OnExit(StopReminder);
+            .OnExit(RemoveBannedMap);
 
         _MatchStateMachine.Configure(MatchState.TeamVote)
             .Permit(MatchCommand.VoteTeam, MatchState.SwitchMap)
             .OnEntry(SendTeamVoteToVotingteam)
-            .OnExit(SetSelectedTeamSite)
-            .OnEntry(StartReminder)
-            .OnExit(StopReminder);
+            .OnExit(SetSelectedTeamSite);
 
         _MatchStateMachine.Configure(MatchState.SwitchMap)
             .Permit(MatchCommand.SwitchMap, MatchState.WaitingForPlayersReady)
@@ -145,8 +141,8 @@ public class Match : IDisposable
         _MatchStateMachine.Configure(MatchState.WaitingForPlayersReady)
             .PermitIf(MatchCommand.PlayerReady, MatchState.MatchStarting, AllPlayersAreReady)
             .OnEntry(SetAllPlayersNotReady)
-            .OnEntry(StartReminder)
-            .OnExit(StopReminder);
+            .OnEntry(StartReadyReminder)
+            .OnExit(StopReadyReminder);
 
         _MatchStateMachine.Configure(MatchState.MatchStarting)
             .Permit(MatchCommand.StartMatch, MatchState.MatchRunning)
@@ -199,16 +195,16 @@ public class Match : IDisposable
         return !string.IsNullOrEmpty(MatchInfo.CurrentMap.MapName);
     }
 
-    private void StartReminder()
+    private void StartReadyReminder()
     {
         _Logger.LogInformation("Start ReadyReminder");
-        _ReminderTimer.Start();
+        _ReadyReminderTimer.Start();
     }
 
-    private void StopReminder()
+    private void StopReadyReminder()
     {
         _Logger.LogInformation("Stop ReadyReminder");
-        _ReminderTimer.Stop();
+        _ReadyReminderTimer.Stop();
     }
 
     private void UnpauseMatch()
@@ -596,9 +592,9 @@ public class Match : IDisposable
         }
     }
 
-    private void ReminderTimer_Elapsed(object? sender, System.Timers.ElapsedEventArgs e)
+    private void ReadyReminderTimer_Elapsed(object? sender, System.Timers.ElapsedEventArgs e)
     {
-        if (!_ReminderTimer.Enabled)
+        if (!_ReadyReminderTimer.Enabled)
         {
             return;
         }
@@ -606,29 +602,13 @@ public class Match : IDisposable
         try
         {
             _Logger.LogInformation("ReadyReminder Elapsed");
-            if (CurrentState == MatchState.WaitingForPlayersConnectedReady
-                || CurrentState == MatchState.WaitingForPlayersReady)
-            {
-                var readyPlayerIds = AllMatchPlayers.Where(p => p.IsReady).Select(x => x.Player.SteamID).ToList();
-                var notReadyPlayers = _CsServer.LoadAllPlayers().Where(p => !readyPlayerIds.Contains(p.SteamID));
+            var readyPlayerIds = AllMatchPlayers.Where(p => p.IsReady).Select(x => x.Player.SteamID).ToList();
+            var notReadyPlayers = _CsServer.LoadAllPlayers().Where(p => !readyPlayerIds.Contains(p.SteamID));
 
-                var remindMessage = _TextHelper.GetText(nameof(Resources.PugSharp_Match_RemindReady));
-                foreach (var player in notReadyPlayers)
-                {
-                    player.PrintToChat(remindMessage);
-                }
-            }
-            else if (CurrentState == MatchState.MapVote)
+            var remindMessage = _TextHelper.GetText(nameof(Resources.PugSharp_Match_RemindReady));
+            foreach (var player in notReadyPlayers)
             {
-                SendRemainingMapsToVotingTeam();
-            }
-            else if (CurrentState == MatchState.TeamVote)
-            {
-                SendTeamVoteToVotingteam();
-            }
-            else
-            {
-                // Do nothing
+                player.PrintToChat(remindMessage);
             }
         }
         catch (Exception ex)
@@ -652,11 +632,7 @@ public class Match : IDisposable
             return;
         }
 
-        if (_CurrentMatchTeamToVote == null)
-        {
-            _CurrentMatchTeamToVote = MatchInfo.MatchTeam1;
-        }
-
+        SwitchVotingTeam();
 
         _MapsToSelect.ForEach(m => m.Votes.Clear());
 
@@ -696,12 +672,11 @@ public class Match : IDisposable
             MatchInfo.CurrentMap.MapName = _MapsToSelect[0].Name;
             _MapsToSelect = MatchInfo.Config.Maplist.Select(x => new Vote(x)).ToList();
         }
-
-        SwitchVotingTeam();
     }
 
     private void SendTeamVoteToVotingteam()
     {
+        SwitchVotingTeam();
 
         var mapOptions = new List<MenuOption>()
         {
@@ -735,8 +710,6 @@ public class Match : IDisposable
         }
 
         _CsServer.PrintToChatAll(_TextHelper.GetText(nameof(Resources.PugSharp_Match_SelectedTeam), _CurrentMatchTeamToVote!.TeamConfig.Name, startTeam));
-
-        SwitchVotingTeam();
     }
 
     private MatchTeam GetOtherTeam(MatchTeam team)
@@ -746,17 +719,19 @@ public class Match : IDisposable
 
     private void ShowMenuToTeam(MatchTeam team, string title, IEnumerable<MenuOption> options)
     {
-        var playersThatHaveVoted = _TeamVotes.SelectMany(tv => tv.Votes).Select(x => x.SteamID).ToList();
-        var playersToSendMenu = team.Players.Select(p => p.Player).Where(x => !playersThatHaveVoted.Contains(x.SteamID)).ToList();
-        DoForAll(playersToSendMenu, p => p.ShowMenu(title, options));
-        DoForAll(_TeamVotes.SelectMany(tv => tv.Votes).ToList(), p => p.PrintToChat("Waiting fot other players in team to vote!"));
-    }
+        DoForAll(team.Players.Select(p => p.Player).ToList(), p => p.ShowMenu(title, options));
+    }   
 
     private void SwitchVotingTeam()
     {
-       
-       
+        if (_CurrentMatchTeamToVote == null)
+        {
+            _CurrentMatchTeamToVote = MatchInfo.MatchTeam1;
+        }
+        else
+        {
             _CurrentMatchTeamToVote = _CurrentMatchTeamToVote == MatchInfo.MatchTeam1 ? MatchInfo.MatchTeam2 : MatchInfo.MatchTeam1;
+        }
     }
 
     private bool AllPlayersAreConnected()
@@ -1139,8 +1114,8 @@ public class Match : IDisposable
                 _VoteTimer.Elapsed -= VoteTimer_Elapsed;
                 _VoteTimer.Dispose();
 
-                _ReminderTimer.Elapsed -= ReminderTimer_Elapsed;
-                _ReminderTimer.Dispose();
+                _ReadyReminderTimer.Elapsed -= ReadyReminderTimer_Elapsed;
+                _ReadyReminderTimer.Dispose();
             }
 
             disposedValue = true;
