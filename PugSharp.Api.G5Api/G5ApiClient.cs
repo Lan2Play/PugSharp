@@ -73,7 +73,10 @@ public sealed class G5ApiClient : IDisposable
                 Content = jsonContent,
             };
 
-            httpRequest.Headers.Add(_ApiHeader, _ApiHeadeValue);
+            if (!string.IsNullOrEmpty(_ApiHeader))
+            {
+                httpRequest.Headers.Add(_ApiHeader, _ApiHeadeValue);
+            }
 
             using var httpResponseMessage = await _RetryPolicy.ExecuteAsync(
                                                         () => _HttpClient.SendAsync(httpRequest, cancellationToken)).ConfigureAwait(false);

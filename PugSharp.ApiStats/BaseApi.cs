@@ -28,6 +28,7 @@ public class BaseApi : IDisposable
             baseUrl += "/";
         }
 
+        _Logger.LogInformation("Using BaseURL : \"{url}\" and authKey \"{authKey}\"", baseUrl, authKey);
         HttpClient = new HttpClient()
         {
             BaseAddress = new Uri(baseUrl),

@@ -13,10 +13,9 @@ namespace PugSharp.Match.Tests;
 
 public class MatchTests
 {
-    private IServiceProvider CreateTestProvider()
+    private static IServiceProvider CreateTestProvider()
     {
         var services = new ServiceCollection();
-
 
         services.AddSingleton(Substitute.For<ICsServer>());
         services.AddSingleton<IApiProvider, MultiApiProvider>();
