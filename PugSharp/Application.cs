@@ -503,7 +503,7 @@ public class Application : IApplication
             return HookResult.Continue;
         }
 
-        if (_Match.CurrentState == MatchState.MatchRunning)
+        if (_Match.CurrentState == MatchState.MatchRunning && eventPlayerHurt.Attacker.IsValid)
         {
             var attacker = eventPlayerHurt.Attacker;
 
@@ -563,7 +563,7 @@ public class Application : IApplication
 
             var attacker = eventPlayerDeath.Attacker;
 
-            var attackerSide = eventPlayerDeath.Attacker?.TeamNum == null ? TeamConstants.TEAM_INVALID : (TeamConstants)eventPlayerDeath.Attacker.TeamNum;
+            var attackerSide = eventPlayerDeath.Attacker == null || !eventPlayerDeath.Attacker.IsValid ? TeamConstants.TEAM_INVALID : (TeamConstants)eventPlayerDeath.Attacker.TeamNum;
 
             CCSPlayerController? assister = eventPlayerDeath.Assister;
 
@@ -584,7 +584,7 @@ public class Application : IApplication
             }
             else if (!killedByBomb)
             {
-                if (attacker != null)
+                if (attacker != null && attacker.IsValid)
                 {
                     var attackerStats = _CurrentRountState.GetPlayerRoundStats(attacker.SteamID, attacker.PlayerName);
 
