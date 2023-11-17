@@ -1,4 +1,5 @@
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using NSubstitute;
 using PugSharp.Api.Contract;
 using PugSharp.Api.Json;
@@ -6,6 +7,7 @@ using PugSharp.ApiStats;
 using PugSharp.Config;
 using PugSharp.Match.Contract;
 using PugSharp.Server.Contract;
+using PugSharp.Translation;
 
 namespace PugSharp.Match.Tests;
 
@@ -20,8 +22,10 @@ public class MatchTests
         services.AddSingleton<IApiProvider, MultiApiProvider>();
 
         services.AddSingleton(Substitute.For<ICsServer>());
-
-        //services.AddSingletn(Config);
+        services.AddLogging(options =>
+        {
+            options.AddConsole();
+        });
         services.AddSingleton<IApplication, Application>();
 
         services.AddSingleton<ConfigProvider>();
@@ -30,7 +34,7 @@ public class MatchTests
         services.AddSingleton<G5ApiProvider>();
         services.AddSingleton<ApiStats.ApiStats>();
         services.AddSingleton<JsonApiProvider>();
-        services.AddSingleton(Substitute.For<ICsServer>());
+        services.AddSingleton(Substitute.For<ITextHelper>());
         services.AddSingleton<DemoUploader>();
 
         // Build service provider
