@@ -277,6 +277,7 @@ public class Application : IApplication
             // Give players max money if no match is running
             _CsServer.NextFrame(() =>
             {
+                CheckMatchPlayerTeam(eventPlayerSpawn.Userid, eventPlayerSpawn.Userid.TeamNum);
 
                 try
                 {
@@ -308,7 +309,6 @@ public class Application : IApplication
             });
         }
 
-        CheckMatchPlayerTeam(eventPlayerSpawn.Userid, eventPlayerSpawn.Userid.TeamNum);
 
         return HookResult.Continue;
     }
