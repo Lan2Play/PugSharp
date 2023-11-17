@@ -3,12 +3,13 @@ using PugSharp.Api.Contract;
 using PugSharp.ApiStats;
 using PugSharp.Logging;
 using PugSharp.Match.Contract;
+using PugSharp.Server.Contract;
 using PugSharp.Translation;
 using PugSharp.Translation.Properties;
 using Stateless;
 using Stateless.Graph;
 using System.Globalization;
-using System.Text.Json;
+using static System.Net.Mime.MediaTypeNames;
 
 namespace PugSharp.Match;
 
@@ -25,32 +26,41 @@ public class Match : IDisposable
 
     private readonly System.Timers.Timer _VoteTimer = new();
     private readonly System.Timers.Timer _ReadyReminderTimer = new(10000);
-    private readonly IMatchCallback _MatchCallback;
     private readonly IApiProvider _ApiProvider;
     private readonly ITextHelper _TextHelper;
-    private readonly string _RoundBackupFile = string.Empty;
+    private readonly ICsServer _CsServer;
+    private string _RoundBackupFile = string.Empty;
     private readonly StateMachine<MatchState, MatchCommand> _MatchStateMachine;
 
-    private readonly DemoUploader? _DemoUploader;
+    private DemoUploader? _DemoUploader;
     private readonly List<Vote> _TeamVotes = new() { new("T"), new("CT") };
 
-    private List<Vote> _MapsToSelect;
+    private List<Vote>? _MapsToSelect;
     private MatchTeam? _CurrentMatchTeamToVote;
     private bool disposedValue;
 
     public MatchState CurrentState => _MatchStateMachine.State;
 
-    public MatchInfo MatchInfo { get; }
+    public MatchInfo? MatchInfo { get; private set; }
 
-    public IEnumerable<MatchPlayer> AllMatchPlayers => MatchInfo.MatchTeam1.Players.Concat(MatchInfo.MatchTeam2.Players);
+    public IEnumerable<MatchPlayer> AllMatchPlayers => MatchInfo?.MatchTeam1.Players.Concat(MatchInfo.MatchTeam2.Players) ?? Enumerable.Empty<MatchPlayer>();
 
-    private Match(IMatchCallback matchCallback, IApiProvider apiProvider, ITextHelper textHelper, MatchInfo matchInfo)
+    public Match(IApiProvider apiProvider, ITextHelper textHelper, ICsServer csServer)
     {
-        SetServerCulture(matchInfo.Config.ServerLocale);
-
-        _MatchCallback = matchCallback;
         _ApiProvider = apiProvider;
         _TextHelper = textHelper;
+        _CsServer = csServer;
+        _MatchStateMachine = new StateMachine<MatchState, MatchCommand>(MatchState.None);
+    }
+
+    private void Initialize(MatchInfo matchInfo)
+    {
+        if (MatchInfo != null)
+        {
+            throw new NotSupportedException("Initialize can onyl be called once!");
+        }
+
+        SetServerCulture(matchInfo.Config.ServerLocale);
         MatchInfo = matchInfo;
         _VoteTimer.Interval = MatchInfo.Config.VoteTimeout;
         _VoteTimer.Elapsed += VoteTimer_Elapsed;
@@ -66,7 +76,19 @@ public class Match : IDisposable
 
         _MapsToSelect = MatchInfo.Config.Maplist.Select(x => new Vote(x)).ToList();
 
-        _MatchStateMachine = new StateMachine<MatchState, MatchCommand>(MatchState.None);
+    }
+
+    public void Initialize(Config.MatchConfig matchConfig)
+    {
+        Initialize(new MatchInfo(matchConfig));
+        InitializeStateMachine();
+    }
+
+    public void Initialize(MatchInfo matchInfo, string roundBackupFile)
+    {
+        _RoundBackupFile = roundBackupFile;
+        Initialize(matchInfo);
+        _Logger.LogInformation("Continue Match on map {mapNumber}({mapName})!", MatchInfo!.CurrentMap.MapNumber, MatchInfo.CurrentMap.MapName);
     }
 
     private static void SetServerCulture(string locale)
@@ -82,22 +104,6 @@ public class Match : IDisposable
         {
             _Logger.LogError(ex, "Setting cultureInfo is not possible. Linux requires libicu-dev/libicu/icu-libs to support translations.");
         }
-    }
-
-    public Match(IMatchCallback matchCallback, IApiProvider apiProvider, ITextHelper textHelper, Config.MatchConfig matchConfig) : this(matchCallback, apiProvider, textHelper, new MatchInfo(matchConfig))
-    {
-        _MatchCallback = matchCallback;
-        _ApiProvider = apiProvider;
-        MatchInfo = new MatchInfo(matchConfig);
-        InitializeStateMachine();
-    }
-
-    public Match(IMatchCallback matchCallback, IApiProvider apiProvider, ITextHelper textHelper, MatchInfo matchInfo, string roundBackupFile) : this(matchCallback, apiProvider, textHelper, matchInfo)
-    {
-        _Logger.LogInformation("Create Match from existing MatchInfo!");
-        _Logger.LogInformation("{matchInfo}", JsonSerializer.Serialize(matchInfo));
-        _RoundBackupFile = roundBackupFile;
-        InitializeStateMachine();
     }
 
 #pragma warning disable MA0051 // Method is too long
@@ -158,7 +164,7 @@ public class Match : IDisposable
             {
                 if (HasRestoredMatch())
                 {
-                    _MatchCallback.RestoreBackup(_RoundBackupFile);
+                    _CsServer.RestoreBackup(_RoundBackupFile);
                 }
             })
             .OnExit(UnpauseMatch);
@@ -178,7 +184,7 @@ public class Match : IDisposable
 
     private void StartWarmup()
     {
-        _MatchCallback.StartWarmup();
+        _CsServer.LoadAndExecuteConfig("warmup.cfg");
     }
 
     private bool HasRestoredMatch()
@@ -200,24 +206,52 @@ public class Match : IDisposable
 
     private void UnpauseMatch()
     {
-        _MatchCallback.UnpauseMatch();
+        _CsServer.UnpauseMatch();
     }
 
     private void PauseMatch()
     {
+        if (MatchInfo == null)
+        {
+            _Logger.LogError("Can not pause match without a matchInfo!");
+            return;
+        }
+
         MatchInfo.MatchTeam1.IsPaused = true;
         MatchInfo.MatchTeam2.IsPaused = true;
 
-        _MatchCallback.PauseMatch();
+        _CsServer.PauseMatch();
     }
 
     private void StartMatch()
     {
-        _MatchCallback.StartingMatch();
-        _MatchCallback.SetupRoundBackup();
-        MatchInfo.DemoFile = _MatchCallback.StartDemoRecording();
+        if (MatchInfo == null)
+        {
+            _Logger.LogError("Can not start match without a matchInfo!");
+            return;
+        }
 
-        _MatchCallback.SendMessage(_TextHelper.GetText(nameof(Resources.PugSharp_Match_Info_StartMatch), MatchInfo.MatchTeam1.TeamConfig.Name, MatchInfo.MatchTeam1.CurrentTeamSite, MatchInfo.MatchTeam2.TeamConfig.Name, MatchInfo.MatchTeam2.CurrentTeamSite));
+        // Disable cheats
+        _CsServer.DisableCheats();
+
+        // End warmup
+        _CsServer.EndWarmup();
+
+        // Load live config
+        _CsServer.LoadAndExecuteConfig("live.cfg");
+
+        // Restart Game to reset everything
+        _CsServer.RestartGame();
+
+        string prefix = $"PugSharp_Match_{MatchInfo.Config.MatchId}";
+        _CsServer.SetupRoundBackup(prefix);
+
+        var formattedDateTime = DateTime.UtcNow.ToString("yyyyMMddHHmmss", CultureInfo.InvariantCulture);
+        var demoFileName = $"PugSharp_Match_{MatchInfo.Config.MatchId}_{formattedDateTime}";
+        string demoDirectory = Path.Combine(_CsServer.GameDirectory, "csgo", "PugSharp", "Demo");
+        MatchInfo.DemoFile = _CsServer.StartDemoRecording(demoDirectory, demoFileName);
+
+        _CsServer.PrintToChatAll(_TextHelper.GetText(nameof(Resources.PugSharp_Match_Info_StartMatch), MatchInfo.MatchTeam1.TeamConfig.Name, MatchInfo.MatchTeam1.CurrentTeamSite, MatchInfo.MatchTeam2.TeamConfig.Name, MatchInfo.MatchTeam2.CurrentTeamSite));
 
         _ = _ApiProvider.GoingLiveAsync(new GoingLiveParams(MatchInfo.Config.MatchId, MatchInfo.CurrentMap.MapName, MatchInfo.CurrentMap.MapNumber), CancellationToken.None);
 
@@ -475,14 +509,14 @@ public class Match : IDisposable
 
     private async Task CompleteMatchAsync()
     {
-        _MatchCallback.StopDemoRecording();
+        _CsServer.StopDemoRecording();
 
         var delay = 15;
 
-        if (_MatchCallback.GetConvar<bool>("tv_enable") || _MatchCallback.GetConvar<bool>("tv_enable1"))
+        if (_CsServer.GetConvar<bool>("tv_enable") || _CsServer.GetConvar<bool>("tv_enable1"))
         {
             // TV Delay in s
-            var tvDelaySeconds = Math.Max(_MatchCallback.GetConvar<int>("tv_delay"), _MatchCallback.GetConvar<int>("tv_delay1"));
+            var tvDelaySeconds = Math.Max(_CsServer.GetConvar<int>("tv_delay"), _CsServer.GetConvar<int>("tv_delay1"));
             _Logger.LogInformation("Waiting for sourceTV. Delay: {delay}s + 15s", tvDelaySeconds);
             delay += tvDelaySeconds;
         }
@@ -511,7 +545,9 @@ public class Match : IDisposable
         }
 
         await _ApiProvider.FreeServerAsync(CancellationToken.None).ConfigureAwait(false);
-        _MatchCallback.CleanUpMatch();
+
+        // TODO Application Melden, dass Match aufgeräumt werden kann (Dispose, abnullen)
+        //_Application.CleanUpMatch();
     }
 
     private void MatchLive()
@@ -521,7 +557,7 @@ public class Match : IDisposable
             var matchIsLiveMessage = _TextHelper.GetText(nameof(Resources.PugSharp_Match_Info_IsLive));
             for (int i = 0; i < NumOfMatchLiveMessages; i++)
             {
-                _MatchCallback.SendMessage(matchIsLiveMessage);
+                _CsServer.PrintToChatAll(matchIsLiveMessage);
 
                 await Task.Delay(TimeSpan.FromSeconds(1)).ConfigureAwait(false);
             }
@@ -535,7 +571,7 @@ public class Match : IDisposable
 
     private void SwitchToMatchMap()
     {
-        _MatchCallback.SwitchMap(MatchInfo.CurrentMap.MapName);
+        _CsServer.SwitchMap(MatchInfo.CurrentMap.MapName);
         TryFireState(MatchCommand.SwitchMap);
     }
 
@@ -567,7 +603,7 @@ public class Match : IDisposable
         {
             _Logger.LogInformation("ReadyReminder Elapsed");
             var readyPlayerIds = AllMatchPlayers.Where(p => p.IsReady).Select(x => x.Player.SteamID).ToList();
-            var notReadyPlayers = _MatchCallback.LoadAllPlayers().Where(p => !readyPlayerIds.Contains(p.SteamID));
+            var notReadyPlayers = _CsServer.LoadAllPlayers().Where(p => !readyPlayerIds.Contains(p.SteamID));
 
             var remindMessage = _TextHelper.GetText(nameof(Resources.PugSharp_Match_RemindReady));
             foreach (var player in notReadyPlayers)
@@ -628,7 +664,7 @@ public class Match : IDisposable
             _MapsToSelect.Remove(mapToBan!);
             _MapsToSelect.ForEach(x => x.Votes.Clear());
 
-            _MatchCallback.SendMessage(_TextHelper.GetText(nameof(Resources.PugSharp_Match_BannedMap), mapToBan!.Name, _CurrentMatchTeamToVote?.TeamConfig.Name));
+            _CsServer.PrintToChatAll(_TextHelper.GetText(nameof(Resources.PugSharp_Match_BannedMap), mapToBan!.Name, _CurrentMatchTeamToVote?.TeamConfig.Name));
         }
 
         if (_MapsToSelect.Count == 1)
@@ -673,7 +709,7 @@ public class Match : IDisposable
             _Logger.LogInformation("{team} starts as Team {startTeam}", otherTeam.TeamConfig.Name, otherTeam!.CurrentTeamSite.ToString());
         }
 
-        _MatchCallback.SendMessage(_TextHelper.GetText(nameof(Resources.PugSharp_Match_SelectedTeam), _CurrentMatchTeamToVote!.TeamConfig.Name, startTeam));
+        _CsServer.PrintToChatAll(_TextHelper.GetText(nameof(Resources.PugSharp_Match_SelectedTeam), _CurrentMatchTeamToVote!.TeamConfig.Name, startTeam));
     }
 
     private MatchTeam GetOtherTeam(MatchTeam team)
@@ -703,7 +739,7 @@ public class Match : IDisposable
 
     private bool AllPlayersAreConnected()
     {
-        var players = _MatchCallback.LoadAllPlayers();
+        var players = _CsServer.LoadAllPlayers();
         var connectedPlayerSteamIds = players.Select(p => p.SteamID).ToList();
         var allPlayerIds = MatchInfo.Config.Team1.Players.Keys.Concat(MatchInfo.Config.Team2.Players.Keys);
         if (allPlayerIds.All(p => connectedPlayerSteamIds.Contains(p)))
@@ -751,8 +787,8 @@ public class Match : IDisposable
             player.IsReady = false;
         }
 
-        _MatchCallback.SendMessage(_TextHelper.GetText(nameof(Resources.PugSharp_Match_Info_WaitingForAllPlayers)));
-        _MatchCallback.SendMessage(_TextHelper.GetText(nameof(Resources.PugSharp_Match_RemindReady)));
+        _CsServer.PrintToChatAll(_TextHelper.GetText(nameof(Resources.PugSharp_Match_Info_WaitingForAllPlayers)));
+        _CsServer.PrintToChatAll(_TextHelper.GetText(nameof(Resources.PugSharp_Match_RemindReady)));
     }
 
     private bool MapIsSelected()
@@ -911,12 +947,12 @@ public class Match : IDisposable
 
         if (matchPlayer.IsReady)
         {
-            _MatchCallback.SendMessage(_TextHelper.GetText(nameof(Resources.PugSharp_Match_Info_Ready), player.PlayerName, readyPlayers, requiredPlayers));
+            _CsServer.PrintToChatAll(_TextHelper.GetText(nameof(Resources.PugSharp_Match_Info_Ready), player.PlayerName, readyPlayers, requiredPlayers));
             await TryFireStateAsync(MatchCommand.PlayerReady).ConfigureAwait(false);
         }
         else
         {
-            _MatchCallback.SendMessage(_TextHelper.GetText(nameof(Resources.PugSharp_Match_Info_NotReady), player.PlayerName, readyPlayers, requiredPlayers));
+            _CsServer.PrintToChatAll(_TextHelper.GetText(nameof(Resources.PugSharp_Match_Info_NotReady), player.PlayerName, readyPlayers, requiredPlayers));
         }
     }
 
@@ -1124,6 +1160,7 @@ public class Match : IDisposable
         return MatchInfo.Config.Team1.Players.Any(x => x.Key.Equals(steamId))
                 || MatchInfo.Config.Team2.Players.Any(x => x.Key.Equals(steamId));
     }
+
 
     #endregion
 }

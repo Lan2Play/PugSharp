@@ -14,6 +14,7 @@
 		<ProjectReference Include="..\PugSharp.ApiStats\PugSharp.ApiStats.csproj" />
 		<ProjectReference Include="..\PugSharp.Config\PugSharp.Config.csproj" />
 		<ProjectReference Include="..\PugSharp.Match.Contract\PugSharp.Match.Contract.csproj" />
+		<ProjectReference Include="..\PugSharp.Server.Contract\PugSharp.Server.Contract.csproj" />
 		<ProjectReference Include="..\PugSharp.Translation\PugSharp.Translation.csproj" />
 	</ItemGroup>
 

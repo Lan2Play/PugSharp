@@ -14,24 +14,25 @@
 			<IncludeAssets>compile; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
 		</PackageReference>
 
-	  <PackageReference Include="OneOf" Version="3.0.263" />
+		<PackageReference Include="OneOf" Version="3.0.263" />
+		<PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="8.0.0" />
 	</ItemGroup>
 
 	<ItemGroup>
-	  <ProjectReference Include="..\PugSharp.Api.G5Api\PugSharp.Api.G5Api.csproj" />
-	  <ProjectReference Include="..\PugSharp.Api.Json\PugSharp.Api.Json.csproj" />
-	  <ProjectReference Include="..\PugSharp.Logging\PugSharp.Logging.csproj" />
-	  <ProjectReference Include="..\PugSharp.Match\PugSharp.Match.csproj" />
-	  <ProjectReference Include="..\PugSharp.Server.Contract\PugSharp.Server.Contract.csproj" />
-	  <ProjectReference Include="..\PugSharp.Shared\PugSharp.Shared.csproj" />
-	  <ProjectReference Include="..\PugSharp.Translation\PugSharp.Translation.csproj" />
+		<ProjectReference Include="..\PugSharp.Api.G5Api\PugSharp.Api.G5Api.csproj" />
+		<ProjectReference Include="..\PugSharp.Api.Json\PugSharp.Api.Json.csproj" />
+		<ProjectReference Include="..\PugSharp.Logging\PugSharp.Logging.csproj" />
+		<ProjectReference Include="..\PugSharp.Match\PugSharp.Match.csproj" />
+		<ProjectReference Include="..\PugSharp.Server.Contract\PugSharp.Server.Contract.csproj" />
+		<ProjectReference Include="..\PugSharp.Shared\PugSharp.Shared.csproj" />
+		<ProjectReference Include="..\PugSharp.Translation\PugSharp.Translation.csproj" />
 	</ItemGroup>
 
 	<ItemGroup>
-	  <PackageReference Update="Meziantou.Analyzer" Version="2.0.110">
-	    <PrivateAssets>all</PrivateAssets>
-	    <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
-	  </PackageReference>
+		<PackageReference Update="Meziantou.Analyzer" Version="2.0.110">
+			<PrivateAssets>all</PrivateAssets>
+			<IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
+		</PackageReference>
 	</ItemGroup>
 
 </Project>
