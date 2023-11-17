@@ -1,8 +1,6 @@
 ﻿using CounterStrikeSharp.API;
 using CounterStrikeSharp.API.Core;
 using CounterStrikeSharp.API.Modules.Menu;
-using Microsoft.Extensions.Logging;
-using PugSharp.Logging;
 using PugSharp.Match.Contract;
 using System.Globalization;
 
@@ -10,17 +8,11 @@ namespace PugSharp.Models;
 
 public class Player : IPlayer
 {
-    private static readonly ILogger<Player> _Logger = LogManager.CreateLogger<Player>();
     private readonly int _UserId;
     private CCSPlayerController _PlayerController;
 
     public Player(CCSPlayerController playerController)
     {
-        if (!playerController.IsValid)
-        {
-            _Logger.LogError("PlayerController is invalid!");
-        }
-
         _UserId = playerController.UserId!.Value;
         SteamID = playerController.SteamID;
         _PlayerController = playerController;
@@ -43,9 +35,7 @@ public class Player : IPlayer
     {
         if (_PlayerController == null || !_PlayerController.IsValid)
         {
-            _Logger.LogInformation("_PlayerController for SteamId {steamId} is Invalid. Reload with {userId} ", SteamID, _UserId);
             _PlayerController = Utilities.GetPlayerFromUserid(_UserId);
-            _Logger.LogInformation("_PlayerController for SteamId {steamId} reloaded. UserID: {userId}; PlayerName: {playerName}", SteamID, UserId, PlayerName);
         }
     }
 

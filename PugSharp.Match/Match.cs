@@ -1,7 +1,7 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using PugSharp.Api.Contract;
 using PugSharp.ApiStats;
-using PugSharp.Logging;
 using PugSharp.Match.Contract;
 using PugSharp.Server.Contract;
 using PugSharp.Translation;
@@ -22,7 +22,8 @@ public class Match : IDisposable
     private const int Kill5 = 5;
     private const int NumOfMatchLiveMessages = 10;
     private const int _TimeBetweenDelayMessages = 10;
-    private static readonly ILogger<Match> _Logger = LogManager.CreateLogger<Match>();
+    private readonly IServiceProvider _ServiceProvider;
+    private readonly ILogger<Match> _Logger;
 
     private readonly System.Timers.Timer _VoteTimer = new();
     private readonly System.Timers.Timer _ReadyReminderTimer = new(10000);
@@ -45,8 +46,10 @@ public class Match : IDisposable
 
     public IEnumerable<MatchPlayer> AllMatchPlayers => MatchInfo?.MatchTeam1.Players.Concat(MatchInfo.MatchTeam2.Players) ?? Enumerable.Empty<MatchPlayer>();
 
-    public Match(IApiProvider apiProvider, ITextHelper textHelper, ICsServer csServer)
+    public Match(IServiceProvider serviceProvider, ILogger<Match> logger, IApiProvider apiProvider, ITextHelper textHelper, ICsServer csServer)
     {
+        _ServiceProvider = serviceProvider;
+        _Logger = logger;
         _ApiProvider = apiProvider;
         _TextHelper = textHelper;
         _CsServer = csServer;
@@ -71,7 +74,8 @@ public class Match : IDisposable
 
         if (!string.IsNullOrEmpty(MatchInfo.Config.EventulaDemoUploadUrl) && !string.IsNullOrEmpty(MatchInfo.Config.EventulaApistatsToken))
         {
-            _DemoUploader = new DemoUploader(MatchInfo.Config.EventulaDemoUploadUrl, MatchInfo.Config.EventulaApistatsToken);
+            _DemoUploader = _ServiceProvider.GetRequiredService<DemoUploader>();
+            _DemoUploader.Initialize(MatchInfo.Config.EventulaDemoUploadUrl, MatchInfo.Config.EventulaApistatsToken);
         }
 
         _MapsToSelect = MatchInfo.Config.Maplist.Select(x => new Vote(x)).ToList();
@@ -91,7 +95,7 @@ public class Match : IDisposable
         _Logger.LogInformation("Continue Match on map {mapNumber}({mapName})!", MatchInfo!.CurrentMap.MapNumber, MatchInfo.CurrentMap.MapName);
     }
 
-    private static void SetServerCulture(string locale)
+    private void SetServerCulture(string locale)
     {
         try
         {
@@ -1100,6 +1104,8 @@ public class Match : IDisposable
 
     public void SwitchTeam()
     {
+        _Logger.LogInformation("Toggle TeamSites");
+
         MatchInfo.MatchTeam1.ToggleTeamSite();
         MatchInfo.MatchTeam2.ToggleTeamSite();
     }

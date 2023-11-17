@@ -8,11 +8,12 @@
 
 	<ItemGroup>
 	  <ProjectReference Include="..\PugSharp.Config\PugSharp.Config.csproj" />
-	  <ProjectReference Include="..\PugSharp.Logging\PugSharp.Logging.csproj" />
 	  <ProjectReference Include="..\PugSharp.Match.Contract\PugSharp.Match.Contract.csproj" />
 	</ItemGroup>
 
 	<ItemGroup>
+		<PackageReference Include="Microsoft.AspNetCore.WebUtilities" Version="2.2.0" />
+		<PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="8.0.0" />
 	  <PackageReference Update="Meziantou.Analyzer" Version="2.0.110">
 	    <PrivateAssets>all</PrivateAssets>
 	    <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>

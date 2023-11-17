@@ -1,19 +1,22 @@
 ﻿using Microsoft.Extensions.Logging;
 using Microsoft.Net.Http.Headers;
-using PugSharp.Logging;
-using System.Net.Http.Headers;
 
 namespace PugSharp.ApiStats;
 
 public class BaseApi : IDisposable
 {
-    private static readonly ILogger<BaseApi> _Logger = LogManager.CreateLogger<BaseApi>();
+    private readonly ILogger<BaseApi> _Logger;
 
     private bool _DisposedValue;
 
-    protected HttpClient? HttpClient { get; }
+    protected HttpClient? HttpClient { get; private set; }
 
-    protected BaseApi(string? baseUrl, string? authKey)
+    protected BaseApi(ILogger<BaseApi> logger)
+    {
+        _Logger = logger;
+    }
+
+    protected void InitializeBase(string? baseUrl, string? authKey)
     {
         if (string.IsNullOrEmpty(baseUrl))
         {
@@ -36,7 +39,7 @@ public class BaseApi : IDisposable
         }
     }
 
-    protected static async Task HandleResponseAsync(HttpResponseMessage? httpResponseMessage, CancellationToken cancellationToken)
+    protected async Task HandleResponseAsync(HttpResponseMessage? httpResponseMessage, CancellationToken cancellationToken)
     {
         if (httpResponseMessage == null)
         {

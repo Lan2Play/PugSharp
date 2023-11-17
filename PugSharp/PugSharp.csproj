@@ -16,12 +16,12 @@
 
 		<PackageReference Include="OneOf" Version="3.0.263" />
 		<PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="8.0.0" />
+		<PackageReference Include="Microsoft.Extensions.Logging.Console" Version="8.0.0" />
 	</ItemGroup>
 
 	<ItemGroup>
 		<ProjectReference Include="..\PugSharp.Api.G5Api\PugSharp.Api.G5Api.csproj" />
 		<ProjectReference Include="..\PugSharp.Api.Json\PugSharp.Api.Json.csproj" />
-		<ProjectReference Include="..\PugSharp.Logging\PugSharp.Logging.csproj" />
 		<ProjectReference Include="..\PugSharp.Match\PugSharp.Match.csproj" />
 		<ProjectReference Include="..\PugSharp.Server.Contract\PugSharp.Server.Contract.csproj" />
 		<ProjectReference Include="..\PugSharp.Shared\PugSharp.Shared.csproj" />

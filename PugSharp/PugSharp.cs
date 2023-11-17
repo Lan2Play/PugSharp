@@ -2,46 +2,29 @@
 using Microsoft.Extensions.Logging;
 using PugSharp.Api.Contract;
 using PugSharp.Config;
-using PugSharp.Logging;
 using PugSharp.Server.Contract;
 using Microsoft.Extensions.DependencyInjection;
+using PugSharp.Api.Json;
+using PugSharp.Translation;
+using CounterStrikeSharp.API.Modules.Utils;
+using PugSharp.ApiStats;
 
 namespace PugSharp;
 
 public class PugSharp : BasePlugin, IBasePlugin
 {
-    private static readonly ILogger<PugSharp> _Logger = LogManager.CreateLogger<PugSharp>();
-
-    private readonly ICsServer _CsServer;
-    private readonly ConfigProvider _ConfigProvider;
-
     private readonly CancellationTokenSource _CancellationTokenSource = new();
 
-    private ServiceProvider _ServiceProvider;
-    private IApplication _Application;
+    private ServiceProvider? _ServiceProvider;
+    private IApplication? _Application;
 
     public override string ModuleName => "PugSharp Plugin";
 
     public override string ModuleVersion => "0.0.1";
 
-    public string PugSharpDirectory { get; }
-
-    public PugSharp()
-    {
-        _CsServer = new CsServer();
-        PugSharpDirectory = Path.Combine(_CsServer.GameDirectory, "csgo", "PugSharp");
-        _ConfigProvider = new(Path.Join(PugSharpDirectory, "Config"));
-    }
-
     public override void Load(bool hotReload)
     {
-        _Logger.LogInformation("Loading PugSharp!");
         base.Load(hotReload);
-
-        //if (!Config.IsEnabled)
-        //{
-        //    return;
-        //}
 
         // Create DI container
         var services = new ServiceCollection();
@@ -57,19 +40,19 @@ public class PugSharp : BasePlugin, IBasePlugin
 
         services.AddSingleton<IBasePlugin>(this);
 
-        //services.AddSingleton(Config);
         services.AddSingleton<IApplication, Application>();
 
         services.AddSingleton<ConfigProvider>();
 
         services.AddTransient<Match.Match>();
 
-        // Register other services here
-        //services.AddSingleton<IPluginService, PluginService>();
-
-        // Register facades here (Services that have an httpclient)
-        services.AddHttpClient<IApiProvider, G5ApiProvider>("G5", (s, h) => { });
-        services.AddHttpClient<IApiProvider, ApiStats.ApiStats>("ApiStats", (s, h) => { });
+        // TODO Add HttpClients for ApiProviders
+        services.AddSingleton<G5ApiProvider>();
+        services.AddSingleton<ApiStats.ApiStats>();
+        services.AddSingleton<JsonApiProvider>();
+        services.AddSingleton<ITextHelper>(services => new TextHelper(services.GetRequiredService<ILogger<TextHelper>>(), ChatColors.Blue, ChatColors.Green, ChatColors.Red));
+        services.AddSingleton<DemoUploader>();
+        services.AddSingleton<G5CommandProvider>();
 
         // Build service provider
         _ServiceProvider = services.BuildServiceProvider();
@@ -103,8 +86,6 @@ public class PugSharp : BasePlugin, IBasePlugin
         {
             _CancellationTokenSource.Cancel();
             _CancellationTokenSource.Dispose();
-
-            _ConfigProvider.Dispose();
         }
     }
 }

@@ -29,10 +29,10 @@ public class Application : IApplication
     private readonly IBasePlugin _Plugin;
     private readonly ICsServer _CsServer;
     private readonly MultiApiProvider _ApiProvider;
+    private readonly G5CommandProvider _G5CommandProvider;
     private readonly TextHelper _TextHelper;
     private readonly IServiceProvider _ServiceProvider;
     private readonly ConfigProvider _ConfigProvider;
-    private readonly PluginConfig _Config;
     private readonly PeriodicTimer _ConfigTimer = new(TimeSpan.FromSeconds(1));
     private readonly CancellationTokenSource _CancellationTokenSource = new();
 
@@ -50,20 +50,20 @@ public class Application : IApplication
         IBasePlugin plugin,
         ICsServer csServer,
         MultiApiProvider apiProvider,
+        G5CommandProvider g5CommandProvider,
         TextHelper textHelper,
         IServiceProvider serviceProvider,
-        ConfigProvider configProvider,
-        PluginConfig config)
+        ConfigProvider configProvider)
 #pragma warning restore S107 // Methods should not have too many parameters
     {
         _Logger = logger;
         _Plugin = plugin;
         _CsServer = csServer;
         _ApiProvider = apiProvider;
+        _G5CommandProvider = g5CommandProvider;
         _TextHelper = textHelper;
         _ServiceProvider = serviceProvider;
         _ConfigProvider = configProvider;
-        _Config = config;
 
         PugSharpDirectory = Path.Combine(_CsServer.GameDirectory, "csgo", "PugSharp");
 
@@ -78,7 +78,7 @@ public class Application : IApplication
 
         if (!hotReload)
         {
-            var commands = new G5CommandProvider(_CsServer).LoadProviderCommands();
+            var commands = _G5CommandProvider.LoadProviderCommands();
             foreach (var command in commands)
             {
                 _Plugin.AddCommand(command.Name, command.Description, (p, c) =>
@@ -1256,23 +1256,27 @@ public class Application : IApplication
 
         if (!string.IsNullOrEmpty(matchConfig.EventulaApistatsUrl))
         {
-            var apiStats = new ApiStats.ApiStats(matchConfig.EventulaApistatsUrl, matchConfig.EventulaApistatsToken ?? string.Empty);
+            var apiStats = _ServiceProvider.GetRequiredService<ApiStats.ApiStats>();
+            apiStats.Initialize(matchConfig.EventulaApistatsUrl, matchConfig.EventulaApistatsToken ?? string.Empty);
             _ApiProvider.AddApiProvider(apiStats);
         }
 
         if (!string.IsNullOrEmpty(matchConfig.G5ApiUrl))
         {
-            var g5Stats = new Api.G5Api.G5ApiClient(matchConfig.G5ApiUrl, matchConfig.G5ApiHeader ?? string.Empty, matchConfig.G5ApiHeaderValue ?? string.Empty);
+            var g5Stats = _ServiceProvider.GetRequiredService<Api.G5Api.G5ApiClient>();
+            g5Stats.Initialize(matchConfig.G5ApiUrl, matchConfig.G5ApiHeader ?? string.Empty, matchConfig.G5ApiHeaderValue ?? string.Empty);
             var g5ApiProvider = new G5ApiProvider(g5Stats, _CsServer);
             _Plugin.RegisterConsoleCommandAttributeHandlers(g5ApiProvider);
             _ApiProvider.AddApiProvider(g5ApiProvider);
         }
 
-        _ApiProvider.AddApiProvider(new JsonApiProvider(Path.Combine(PugSharpDirectory, "Stats")));
+        var jsonProvider = _ServiceProvider.GetRequiredService<JsonApiProvider>();
+        jsonProvider.Initialize(Path.Combine(PugSharpDirectory, "Stats"));
+        _ApiProvider.AddApiProvider(jsonProvider);
 
         SetMatchVariable(matchConfig);
 
-        var players = LoadAllPlayers();
+        var players = _CsServer.LoadAllPlayers();
         foreach (var player in players.Where(x => x.UserId.HasValue && x.UserId >= 0))
         {
             if (player.UserId != null)
@@ -1287,16 +1291,9 @@ public class Application : IApplication
     private void ResetServer(string map)
     {
         _CsServer.StopDemoRecording();
-
-        _CsServer.ExecuteCommand($"changelevel {map}");
+        _CsServer.SwitchMap(map);
     }
 
-    public IReadOnlyList<IPlayer> LoadAllPlayers()
-    {
-        var playerEntities = Utilities.FindAllEntitiesByDesignerName<CCSPlayerController>("cs_player_controller");
-
-        return playerEntities.Where(x => x.PlayerState() == PlayerConnectedState.PlayerConnected).Select(p => new Player(p)).ToArray();
-    }
 
     #endregion
 }

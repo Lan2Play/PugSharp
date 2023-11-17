@@ -2,7 +2,6 @@
 using CounterStrikeSharp.API.Core;
 using CounterStrikeSharp.API.Modules.Cvars;
 using Microsoft.Extensions.Logging;
-using PugSharp.Logging;
 using PugSharp.Match.Contract;
 using PugSharp.Models;
 using PugSharp.Server.Contract;
@@ -12,7 +11,12 @@ namespace PugSharp;
 
 public class CsServer : ICsServer
 {
-    private static readonly ILogger<CsServer> _Logger = LogManager.CreateLogger<CsServer>();
+    private readonly ILogger<CsServer> _Logger;
+
+    public CsServer(ILogger<CsServer> logger)
+    {
+        _Logger = logger;
+    }
 
     public string GameDirectory => CounterStrikeSharp.API.Server.GameDirectory;
 

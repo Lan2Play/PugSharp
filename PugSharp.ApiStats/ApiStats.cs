@@ -1,17 +1,22 @@
 ﻿using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.Extensions.Logging;
 using PugSharp.Api.Contract;
-using PugSharp.Logging;
 using System.Globalization;
 namespace PugSharp.ApiStats;
 
 public class ApiStats : BaseApi, IApiProvider
 {
-    private static readonly ILogger<ApiStats> _Logger = LogManager.CreateLogger<ApiStats>();
+    private readonly ILogger<ApiStats> _Logger;
 
-    public ApiStats(string? apiStatsUrl, string? apiStatsKey) : base(apiStatsUrl, apiStatsKey)
+    public ApiStats(ILogger<ApiStats> logger) : base(logger)
     {
-        _Logger.LogInformation("Create Api Stats with BaseUrl: {url}", apiStatsUrl);
+        _Logger = logger;
+    }
+
+    public void Initialize(string? apiStatsUrl, string? apiStatsKey)
+    {
+        _Logger.LogInformation("Initialize Api Stats with BaseUrl: {url}", apiStatsUrl);
+        base.InitializeBase(apiStatsUrl, apiStatsKey);
     }
 
     public async Task GoingLiveAsync(GoingLiveParams goingLiveParams, CancellationToken cancellationToken)

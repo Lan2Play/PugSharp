@@ -1,5 +1,9 @@
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using NSubstitute;
 using PugSharp.Api.Contract;
+using PugSharp.Api.Json;
+using PugSharp.ApiStats;
 using PugSharp.Config;
 using PugSharp.Match.Contract;
 using PugSharp.Server.Contract;
@@ -10,15 +14,39 @@ namespace PugSharp.Match.Tests;
 
 public class MatchTests
 {
+    private IServiceProvider CreateTestProvider()
+    {
+        var services = new ServiceCollection();
+
+
+        services.AddSingleton(Substitute.For<ICsServer>());
+        services.AddSingleton<IApiProvider, MultiApiProvider>();
+
+        services.AddSingleton(Substitute.For<ICsServer>());
+
+        //services.AddSingletn(Config);
+        services.AddSingleton<IApplication, Application>();
+
+        services.AddSingleton<ConfigProvider>();
+        services.AddTransient<Match>();
+
+        services.AddSingleton<G5ApiProvider>();
+        services.AddSingleton<ApiStats.ApiStats>();
+        services.AddSingleton<JsonApiProvider>();
+        services.AddSingleton(Substitute.For<ICsServer>());
+        services.AddSingleton<DemoUploader>();
+
+        // Build service provider
+        return services.BuildServiceProvider();
+    }
+
     [Fact]
     public void CreateDotGraphTest()
     {
-        var apiProvider = Substitute.For<IApiProvider>();
-        var textHelper = Substitute.For<ITextHelper>();
-        var csServer = Substitute.For<ICsServer>();
         MatchConfig config = CreateExampleConfig();
 
-        var match = new Match(apiProvider, textHelper, csServer);
+        var serviceProvider = CreateTestProvider();
+        var match = serviceProvider.GetRequiredService<Match>();
         match.Initialize(config);
 
         var dotGraphString = match.CreateDotGraph();
@@ -28,12 +56,10 @@ public class MatchTests
     [Fact]
     public void WrongPlayerConnectTest()
     {
-        var apiProvider = Substitute.For<IApiProvider>();
-        var textHelper = Substitute.For<ITextHelper>();
-        var csServer = Substitute.For<ICsServer>();
         MatchConfig config = CreateExampleConfig();
 
-        var match = new Match(apiProvider, textHelper, csServer);
+        var serviceProvider = CreateTestProvider();
+        var match = serviceProvider.GetRequiredService<Match>();
         match.Initialize(config);
 
         Assert.Equal(MatchState.WaitingForPlayersConnectedReady, match.CurrentState);
@@ -46,12 +72,10 @@ public class MatchTests
     [Fact]
     public void CorrectPlayerConnectTest()
     {
-        var apiProvider = Substitute.For<IApiProvider>();
-        var textHelper = Substitute.For<ITextHelper>();
-        var csServer = Substitute.For<ICsServer>();
         MatchConfig config = CreateExampleConfig();
 
-        var match = new Match(apiProvider, textHelper, csServer);
+        var serviceProvider = CreateTestProvider();
+        var match = serviceProvider.GetRequiredService<Match>();
         match.Initialize(config);
 
         Assert.Equal(MatchState.WaitingForPlayersConnectedReady, match.CurrentState);
@@ -64,16 +88,15 @@ public class MatchTests
     [Fact]
     public async Task MatchTest()
     {
-        var matchPlayers = new List<IPlayer>();
-        var apiProvider = Substitute.For<IApiProvider>();
-        var textHelper = Substitute.For<ITextHelper>();
-        var csServer = Substitute.For<ICsServer>();
-
-        csServer.LoadAllPlayers().Returns(matchPlayers);
-
         MatchConfig config = CreateExampleConfig();
 
-        var match = new Match(apiProvider, textHelper, csServer);
+        var serviceProvider = CreateTestProvider();
+
+        var matchPlayers = new List<IPlayer>();
+        var csServer = serviceProvider.GetRequiredService<ICsServer>();
+        csServer.LoadAllPlayers().Returns(matchPlayers);
+
+        var match = serviceProvider.GetRequiredService<Match>();
         match.Initialize(config);
 
         Assert.Equal(MatchState.WaitingForPlayersConnectedReady, match.CurrentState);
@@ -91,16 +114,14 @@ public class MatchTests
     [Fact]
     public async Task MatchTestWithOneMap()
     {
-        var matchPlayers = new List<IPlayer>();
-        var apiProvider = Substitute.For<IApiProvider>();
-        var textHelper = Substitute.For<ITextHelper>();
-        var csServer = Substitute.For<ICsServer>();
+        MatchConfig config = CreateExampleConfig(new List<string> { "de_dust2" });
+        var serviceProvider = CreateTestProvider();
 
+        var matchPlayers = new List<IPlayer>();
+        var csServer = serviceProvider.GetRequiredService<ICsServer>();
         csServer.LoadAllPlayers().Returns(matchPlayers);
 
-        MatchConfig config = CreateExampleConfig(new List<string> { "de_dust2" });
-
-        var match = new Match(apiProvider, textHelper, csServer);
+        var match = serviceProvider.GetRequiredService<Match>();
         match.Initialize(config);
 
         Assert.Equal(MatchState.WaitingForPlayersConnectedReady, match.CurrentState);

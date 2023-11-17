@@ -1,6 +1,5 @@
 ﻿using PugSharp.Api.Contract;
 using Microsoft.Extensions.Logging;
-using PugSharp.Logging;
 using PugSharp.Server.Contract;
 using System.Text.RegularExpressions;
 using System.Text.Json;
@@ -11,11 +10,12 @@ namespace PugSharp;
 public sealed partial class G5CommandProvider : ICommandProvider
 {
     private const int _RegexTimeout = 1000;
-    private static readonly ILogger<G5ApiProvider> _Logger = LogManager.CreateLogger<G5ApiProvider>();
+    private readonly ILogger<G5ApiProvider> _Logger;
     private readonly ICsServer _CsServer;
 
-    public G5CommandProvider(ICsServer csServer)
+    public G5CommandProvider(ICsServer csServer, ILogger<G5ApiProvider> logger)
     {
+        _Logger = logger;
         _CsServer = csServer;
     }
 
