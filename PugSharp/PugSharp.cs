@@ -13,8 +13,6 @@ namespace PugSharp;
 
 public class PugSharp : BasePlugin, IBasePlugin
 {
-    private readonly CancellationTokenSource _CancellationTokenSource = new();
-
     private ServiceProvider? _ServiceProvider;
     private IApplication? _Application;
 
@@ -84,8 +82,12 @@ public class PugSharp : BasePlugin, IBasePlugin
 
         if (disposing)
         {
-            _CancellationTokenSource.Cancel();
-            _CancellationTokenSource.Dispose();
+            // Remove reference
+            _Application = null;
+
+            // Dispose service provider
+            _ServiceProvider?.Dispose();
+            _ServiceProvider = null;
         }
     }
 }
