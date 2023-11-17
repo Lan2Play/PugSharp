@@ -488,7 +488,7 @@ public class Match : IDisposable
         }
 
         var seriesResultParams = new SeriesResultParams(MatchInfo.Config.MatchId, MatchInfo.MatchMaps.GroupBy(x => x.Winner).MaxBy(x => x.Count())!.Key!.TeamConfig.Name, Forfeit: true, (uint)delay * 1100, MatchInfo.MatchMaps.Count(x => x.Team1Points > x.Team2Points), MatchInfo.MatchMaps.Count(x => x.Team2Points > x.Team1Points));
-        await _ApiProvider.FinalizeAsync(seriesResultParams, CancellationToken.None).ConfigureAwait(false);
+        var finalize = _ApiProvider.FinalizeAsync(seriesResultParams, CancellationToken.None);
 
         while (delay > 0)
         {
@@ -497,6 +497,8 @@ public class Match : IDisposable
             await Task.Delay(TimeSpan.FromSeconds(delayLoopTime)).ConfigureAwait(false);
             delay -= delayLoopTime;
         }
+
+        await finalize.ConfigureAwait(false);
 
         if (_DemoUploader != null)
         {
