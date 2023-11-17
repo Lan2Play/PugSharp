@@ -158,7 +158,7 @@ public class CsServer : ICsServer
                 Directory.CreateDirectory(demoDirectory);
             }
 
-            var relativeDemoDirectory = Path.GetRelativePath(GameDirectory, demoDirectory);
+            var relativeDemoDirectory = Path.GetRelativePath(Path.Combine(GameDirectory, "csgo"), demoDirectory);
             var relativeDemoFileName = Path.Join(relativeDemoDirectory, demoFileName);
             _Logger.LogInformation("Starting demo recording, path: {relativeDemoFileName}", relativeDemoFileName);
             ExecuteCommand($"tv_record {relativeDemoFileName}");
