@@ -28,21 +28,22 @@ public class PugSharp : BasePlugin, IBasePlugin
     {
         base.Load(hotReload);
 
-        var config = new LoggingConfiguration();
-        config.AddTarget(new FileTarget
-        {
-            Name = "PugSharpoLogger",
-            FileName = Path.Combine(CounterStrikeSharp.API.Server.GameDirectory, "csgo", "PugSharp", "Logs", nameof(PugSharp) + ".log"),
-        });
-        config.AddTarget(new ColoredConsoleTarget { Name = "PugSharpConsoleLogger", });
+        //var config = new LoggingConfiguration();
+        //config.AddTarget(new FileTarget
+        //{
+        //    Name = "PugSharpoLogger",
+        //    FileName = Path.Combine(CounterStrikeSharp.API.Server.GameDirectory, "csgo", "PugSharp", "Logs", nameof(PugSharp) + ".log"),
+        //});
+        //config.AddTarget(new ColoredConsoleTarget { Name = "PugSharpConsoleLogger", });
 
         // Create DI container
         var services = new ServiceCollection();
 
         services.AddLogging(options =>
         {
-            options.ClearProviders();
-            options.AddNLog(config);
+            options.AddConsole();
+            //options.ClearProviders();
+            //options.AddNLog(config);
         });
 
         services.AddSingleton<ICsServer, CsServer>();

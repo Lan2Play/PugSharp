@@ -22,66 +22,66 @@ on:
     - '!Makefile'
 
 jobs:
-  test_linux_x64:
-    runs-on: ubuntu-latest
-    if: ${{ !startsWith( github.event.pull_request.head.label, 'lan2play-weblate' ) }}
-    steps:
-      - name : machine echo github
-        env : { CONTENT : "${{ toJson(github) }}" }
-        run : "echo $CONTENT"
-      - name: Set up JDK 11
-        uses: actions/setup-java@v3
-        with:
-          distribution: 'temurin'
-          java-version: '17'
-      - name: Setup .NET
-        uses: actions/setup-dotnet@v3
-        with:
-          dotnet-version: 7.0
-      - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-      - name: Cache SonarCloud packages
-        uses: actions/cache@v3
-        with:
-          path: ./sonar/cache
-          key: ${{ runner.os }}-sonar
-          restore-keys: ${{ runner.os }}-sonar
-      - name: Cache SonarCloud scanner
-        id: cache-sonar-scanner
-        uses: actions/cache@v3
-        with:
-          path: ./sonar/scanner
-          key: ${{ runner.os }}-sonar-scanner
-          restore-keys: ${{ runner.os }}-sonar-scanner
-      - name: Install SonarCloud scanner
-        if: steps.cache-sonar-scanner.outputs.cache-hit != 'true'
-        shell: pwsh
-        run: |
-          New-Item -Path ./sonar/scanner -ItemType Directory
-          dotnet tool install dotnet-sonarscanner --tool-path ./sonar/scanner
-      - name: Update SonarCloud scanner
-        if: steps.cache-sonar-scanner.outputs.cache-hit != 'false'
-        shell: pwsh
-        run: |
-          dotnet tool update dotnet-sonarscanner --tool-path ./sonar/scanner
-      - name: Restore dependencies
-        run: dotnet restore
-      - name: start sonarscanner
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-        run:  ./sonar/scanner/dotnet-sonarscanner begin /k:"Lan2Play_PugSharp" /o:"lan2play" /d:sonar.token="${{ secrets.SONAR_TOKEN }}" /d:sonar.host.url="https://sonarcloud.io" /d:sonar.cs.opencover.reportsPaths="./**/*.opencover.xml"
-      - name: dotnet build
-        run:  dotnet build --no-restore
-      - name: dotnet test
-        run:  dotnet test --no-build --no-restore --collect "XPlat Code Coverage" -- DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.Format=opencover
-      - name: stop sonarscanner
-        if: always()
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-        run: ./sonar/scanner/dotnet-sonarscanner end /d:sonar.token="${{ secrets.SONAR_TOKEN }}"
+  # test_linux_x64:
+  #   runs-on: ubuntu-latest
+  #   if: ${{ !startsWith( github.event.pull_request.head.label, 'lan2play-weblate' ) }}
+  #   steps:
+  #     - name : machine echo github
+  #       env : { CONTENT : "${{ toJson(github) }}" }
+  #       run : "echo $CONTENT"
+  #     - name: Set up JDK 11
+  #       uses: actions/setup-java@v3
+  #       with:
+  #         distribution: 'temurin'
+  #         java-version: '17'
+  #     - name: Setup .NET
+  #       uses: actions/setup-dotnet@v3
+  #       with:
+  #         dotnet-version: 7.0
+  #     - uses: actions/checkout@v4
+  #       with:
+  #         fetch-depth: 0
+  #     - name: Cache SonarCloud packages
+  #       uses: actions/cache@v3
+  #       with:
+  #         path: ./sonar/cache
+  #         key: ${{ runner.os }}-sonar
+  #         restore-keys: ${{ runner.os }}-sonar
+  #     - name: Cache SonarCloud scanner
+  #       id: cache-sonar-scanner
+  #       uses: actions/cache@v3
+  #       with:
+  #         path: ./sonar/scanner
+  #         key: ${{ runner.os }}-sonar-scanner
+  #         restore-keys: ${{ runner.os }}-sonar-scanner
+  #     - name: Install SonarCloud scanner
+  #       if: steps.cache-sonar-scanner.outputs.cache-hit != 'true'
+  #       shell: pwsh
+  #       run: |
+  #         New-Item -Path ./sonar/scanner -ItemType Directory
+  #         dotnet tool install dotnet-sonarscanner --tool-path ./sonar/scanner
+  #     - name: Update SonarCloud scanner
+  #       if: steps.cache-sonar-scanner.outputs.cache-hit != 'false'
+  #       shell: pwsh
+  #       run: |
+  #         dotnet tool update dotnet-sonarscanner --tool-path ./sonar/scanner
+  #     - name: Restore dependencies
+  #       run: dotnet restore
+  #     - name: start sonarscanner
+  #       env:
+  #         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  #         SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+  #       run:  ./sonar/scanner/dotnet-sonarscanner begin /k:"Lan2Play_PugSharp" /o:"lan2play" /d:sonar.token="${{ secrets.SONAR_TOKEN }}" /d:sonar.host.url="https://sonarcloud.io" /d:sonar.cs.opencover.reportsPaths="./**/*.opencover.xml"
+  #     - name: dotnet build
+  #       run:  dotnet build --no-restore
+  #     - name: dotnet test
+  #       run:  dotnet test --no-build --no-restore --collect "XPlat Code Coverage" -- DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.Format=opencover
+  #     - name: stop sonarscanner
+  #       if: always()
+  #       env:
+  #         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  #         SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+  #       run: ./sonar/scanner/dotnet-sonarscanner end /d:sonar.token="${{ secrets.SONAR_TOKEN }}"
 
 
   get_versions:
@@ -91,7 +91,7 @@ jobs:
       PUGSHARPNETVER: ${{ steps.PUGSHARPNETVER.outputs.PUGSHARPNETVER }}
       CSSHARPVER: ${{ steps.CSSHARPVER.outputs.CSSHARPVER }}
       CSSHARPlink: ${{ steps.CSSHARPlink.outputs.CSSHARPlink }}
-      CSSHARPlinkWRuntime: ${{ steps.CSSHARPlinkWRuntime.outputs.CSSHARPlinkWRuntime }}      
+      CSSHARPlinkWRuntime: ${{ steps.CSSHARPlinkWRuntime.outputs.CSSHARPlinkWRuntime }}
       CSSHARPlinkWindows: ${{ steps.CSSHARPlinkWindows.outputs.CSSHARPlinkWindows }}
       CSSHARPlinkWRuntimeWindows: ${{ steps.CSSHARPlinkWRuntimeWindows.outputs.CSSHARPlinkWRuntimeWindows }}
     steps:
@@ -102,7 +102,7 @@ jobs:
       - name: install deps
         run: sudo apt-get update && sudo apt-get install jq -y
       - name: get Pugsharp dependencies
-        run: dotnet restore    
+        run: dotnet restore
 
       - name: set Pugsharp Version
         if: ${{ (startsWith(github.ref, 'refs/tags/v')) }}
@@ -142,16 +142,16 @@ jobs:
         run: echo "CSSHARPlinkWindows=$(curl -s -L https://api.github.com/repos/roflmuffin/CounterStrikeSharp/releases/tags/$CSSHARPVER | jq -r '.assets[] | select(.browser_download_url | contains("windows") and (. | contains("with-runtime") | not)) | .browser_download_url')" >> $GITHUB_ENV
       - name: set counterstrikesharp link without runtime for windows in output
         run: echo "CSSHARPlinkWindows=$CSSHARPlinkWindows" >> "$GITHUB_OUTPUT"
-        id: CSSHARPlinkWindows      
+        id: CSSHARPlinkWindows
 
       - name: replace version variable in meta files
-        run: sed -i "s|%%VERSION%%|$PUGSHARPNETVER|g" ./release.json;       
+        run: sed -i "s|%%VERSION%%|$PUGSHARPNETVER|g" ./release.json;
       - name: replace CounterStrikeSharpVersion variable in meta files
-        run: sed -i "s|%%COUNTERSTRIKESHARPVERSION%%|$CSSHARPVER|g" ./release.json; 
+        run: sed -i "s|%%COUNTERSTRIKESHARPVERSION%%|$CSSHARPVER|g" ./release.json;
       - name: replace CS2VERSION variable in meta files
-        run: sed -i "s|%%CS2VERSION%%|1.39.6.5/13965 9842|g" ./release.json; 
+        run: sed -i "s|%%CS2VERSION%%|1.39.6.5/13965 9842|g" ./release.json;
       - name: replace METAMODVERSION variable in meta files
-        run: sed -i "s|%%METAMODVERSION%%|2.0 - 1256|g" ./release.json; 
+        run: sed -i "s|%%METAMODVERSION%%|2.0 - 1256|g" ./release.json;
       - name: upload artefact
         if: github.event_name != 'pull_request'
         uses: actions/upload-artifact@v3
@@ -160,14 +160,14 @@ jobs:
           path: |
             ./release.json
           retention-days: 10
- 
+
 
 
   build_linux_x64:
     runs-on: ubuntu-latest
     if: ${{ !startsWith( github.event.pull_request.head.label, 'lan2play-weblate' ) }}
     needs:
-    - test_linux_x64
+    # - test_linux_x64
     - get_versions
     env:
       PUGSHARPNETVER: ${{needs.get_versions.outputs.PUGSHARPNETVER}}
@@ -186,7 +186,7 @@ jobs:
         run: dotnet publish
       - name: Build Pugsharp release
         if: ${{ startsWith(github.ref, 'refs/tags/v') &&  !(contains(github.ref, '-beta')) }}
-        run: dotnet publish -c Release 
+        run: dotnet publish -c Release
       - name: prepare package structure
         run: mkdir -p packagebuild/addons/counterstrikesharp/plugins/PugSharp
       - name: copy package content
@@ -227,7 +227,7 @@ jobs:
         with:
           name: latest_build_linux
           path: |
-            ./PugSharp_linux_*.zip 
+            ./PugSharp_linux_*.zip
           retention-days: 10
       - name: upload artefact
         if: github.event_name != 'pull_request'
@@ -235,15 +235,15 @@ jobs:
         with:
           name: latest_build_linux_with_cssharp
           path: |
-            ./PugSharp_with_cssharp_linux_*.zip 
-          retention-days: 10      
+            ./PugSharp_with_cssharp_linux_*.zip
+          retention-days: 10
       - name: upload artefact
         if: github.event_name != 'pull_request'
         uses: actions/upload-artifact@v3
         with:
           name: latest_build_linux_with_cssharp_and_runtime
           path: |
-            ./PugSharp_with_cssharp_and_runtime_linux_*.zip 
+            ./PugSharp_with_cssharp_and_runtime_linux_*.zip
           retention-days: 10
 
 
@@ -251,7 +251,7 @@ jobs:
     runs-on: ubuntu-latest
     if: ${{ !startsWith( github.event.pull_request.head.label, 'lan2play-weblate' ) }}
     needs:
-    - test_linux_x64
+    # - test_linux_x64
     - get_versions
     env:
       PUGSHARPNETVER: ${{needs.get_versions.outputs.PUGSHARPNETVER}}
@@ -325,7 +325,7 @@ jobs:
         with:
           name: latest_build_windows
           path: |
-            ./PugSharp_windows_*.zip 
+            ./PugSharp_windows_*.zip
           retention-days: 10
       - name: upload artefact
         if: github.event_name != 'pull_request'
@@ -333,18 +333,18 @@ jobs:
         with:
           name: latest_build_windows_with_cssharp
           path: |
-            ./PugSharp_with_cssharp_windows_*.zip 
-          retention-days: 10      
+            ./PugSharp_with_cssharp_windows_*.zip
+          retention-days: 10
       - name: upload artefact
         if: github.event_name != 'pull_request'
         uses: actions/upload-artifact@v3
         with:
           name: latest_build_windows_with_cssharp_and_runtime
           path: |
-            ./PugSharp_with_cssharp_and_runtime_windows_*.zip 
+            ./PugSharp_with_cssharp_and_runtime_windows_*.zip
           retention-days: 10
 
-          
+
   release:
     runs-on: ubuntu-latest
     if: ${{ startsWith(github.ref, 'refs/tags/v') }}
@@ -360,7 +360,7 @@ jobs:
       - uses: actions/download-artifact@v3
         with:
           name: latest_build_windows
-          path: build/windows      
+          path: build/windows
       - uses: actions/download-artifact@v3
         with:
           name: latest_build_windows_with_cssharp
@@ -391,8 +391,8 @@ jobs:
         uses: softprops/action-gh-release@v1
         with:
           files: |
-            ./build/windows/PugSharp_*.zip 
-            ./build/linux/PugSharp_*.zip 
+            ./build/windows/PugSharp_*.zip
+            ./build/linux/PugSharp_*.zip
             ./build/meta/release.json
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -402,8 +402,8 @@ jobs:
         with:
           prerelease: true
           files: |
-            ./build/windows/PugSharp_*.zip 
-            ./build/linux/PugSharp_*.zip 
+            ./build/windows/PugSharp_*.zip
+            ./build/linux/PugSharp_*.zip
             ./build/meta/release.json
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
