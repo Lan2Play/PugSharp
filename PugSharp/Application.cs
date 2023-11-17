@@ -268,20 +268,34 @@ public class Application : IApplication
             // Give players max money if no match is running
             _CsServer.NextFrame(() =>
             {
-                _Logger.LogInformation("Update Money on PlayerSpawn");
-                var player = new Player(userId);
 
-                int maxMoneyValue = 16000;
-
-                // Use value from server if possible
-                var maxMoneyCvar = ConVar.Find("mp_maxmoney");
-                if (maxMoneyCvar != null)
+                try
                 {
+                    _Logger.LogInformation("Update Money on PlayerSpawn");
+                    var player = new Player(userId);
 
-                    maxMoneyValue = maxMoneyCvar.GetPrimitiveValue<int>();
+                    int maxMoneyValue = 16000;
+                    try
+                    {
+                        // Use value from server if possible
+                        var maxMoneyCvar = ConVar.Find("mp_maxmoney");
+                        if (maxMoneyCvar != null)
+                        {
+
+                            maxMoneyValue = maxMoneyCvar.GetPrimitiveValue<int>();
+                        }
+                    }
+                    catch (Exception e)
+                    {
+                        _Logger.LogError(e, "Error loading mp_maxmoney!");
+                    }
+
+                    player.Money = maxMoneyValue;
                 }
-
-                player.Money = maxMoneyValue;
+                catch (Exception ex)
+                {
+                    _Logger.LogError(ex, "Error updating money!");
+                }
             });
         }
 
