@@ -652,7 +652,11 @@ public class Match : IDisposable
             return;
         }
 
-        SwitchVotingTeam();
+        if (_CurrentMatchTeamToVote == null)
+        {
+            _CurrentMatchTeamToVote = MatchInfo.MatchTeam1;
+        }
+
 
         _MapsToSelect.ForEach(m => m.Votes.Clear());
 
@@ -692,11 +696,12 @@ public class Match : IDisposable
             MatchInfo.CurrentMap.MapName = _MapsToSelect[0].Name;
             _MapsToSelect = MatchInfo.Config.Maplist.Select(x => new Vote(x)).ToList();
         }
+
+        SwitchVotingTeam();
     }
 
     private void SendTeamVoteToVotingteam()
     {
-        SwitchVotingTeam();
 
         var mapOptions = new List<MenuOption>()
         {
@@ -730,6 +735,8 @@ public class Match : IDisposable
         }
 
         _CsServer.PrintToChatAll(_TextHelper.GetText(nameof(Resources.PugSharp_Match_SelectedTeam), _CurrentMatchTeamToVote!.TeamConfig.Name, startTeam));
+
+        SwitchVotingTeam();
     }
 
     private MatchTeam GetOtherTeam(MatchTeam team)
@@ -747,14 +754,9 @@ public class Match : IDisposable
 
     private void SwitchVotingTeam()
     {
-        if (_CurrentMatchTeamToVote == null)
-        {
-            _CurrentMatchTeamToVote = MatchInfo.MatchTeam1;
-        }
-        else
-        {
+       
+       
             _CurrentMatchTeamToVote = _CurrentMatchTeamToVote == MatchInfo.MatchTeam1 ? MatchInfo.MatchTeam2 : MatchInfo.MatchTeam1;
-        }
     }
 
     private bool AllPlayersAreConnected()
