@@ -162,7 +162,9 @@ public class CsServer : ICsServer
             var relativeDemoFileName = Path.Join(relativeDemoDirectory, demoFileName);
             _Logger.LogInformation("Starting demo recording, path: {relativeDemoFileName}", relativeDemoFileName);
             ExecuteCommand($"tv_record {relativeDemoFileName}");
-            return Path.Combine(demoDirectory, demoFileName + ".dem");
+            var fullDemoPath = Path.Combine(demoDirectory, demoFileName + ".dem");
+            _Logger.LogInformation("Started demo recording, path: \"{relativeDemoFileName}\", full path: \"{fullPath}\"", relativeDemoFileName, fullDemoPath);
+            return fullDemoPath;
         }
         catch (Exception e)
         {
