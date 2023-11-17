@@ -27,14 +27,9 @@ public class DemoUploader : BaseApi
             await using (demoFileStream.ConfigureAwait(false))
             {
                 using var fileStreamContent = new StreamContent(demoFileStream);
-                using var formData = new MultipartFormDataContent
-                {
-                    fileStreamContent,
-                };
-
                 var request = new HttpRequestMessage(HttpMethod.Post, string.Empty)
                 {
-                    Content = formData,
+                    Content = fileStreamContent,
                 };
 
                 request.Headers.Add("PugSharp-DemoName", Path.GetFileName(demoFile));
