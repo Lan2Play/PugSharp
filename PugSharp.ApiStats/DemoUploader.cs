@@ -14,7 +14,7 @@ public class DemoUploader : BaseApi
     public void Initialize(string demoUploadUrl, string demoUploadKey)
     {
         _Logger.LogInformation("Initialize Api Stats with BaseUrl: {url}", demoUploadUrl);
-        InitializeBase(demoUploadKey, demoUploadUrl);
+        InitializeBase(demoUploadUrl, demoUploadKey);
     }
 
     public async Task UploadDemoAsync(string? demoFile, CancellationToken cancellationToken)
