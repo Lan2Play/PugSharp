@@ -8,6 +8,10 @@ using PugSharp.Api.Json;
 using PugSharp.Translation;
 using CounterStrikeSharp.API.Modules.Utils;
 using PugSharp.ApiStats;
+using NLog.Extensions.Logging;
+using Microsoft.Extensions.Configuration;
+using NLog.Config;
+using NLog.Targets;
 
 namespace PugSharp;
 
@@ -24,13 +28,17 @@ public class PugSharp : BasePlugin, IBasePlugin
     {
         base.Load(hotReload);
 
+        var config = new LoggingConfiguration();
+        config.AddTarget(new FileTarget { FileName = Path.Combine(CounterStrikeSharp.API.Server.GameDirectory, "csgo", "PugSharp", "Logs", nameof(PugSharp) + ".log") });
+        config.AddTarget(new ColoredConsoleTarget { });
+
         // Create DI container
         var services = new ServiceCollection();
 
         services.AddLogging(options =>
         {
-            options.AddConsole();
-            //options.AddSimpleConsole(o => o.SingleLine = true);
+            options.ClearProviders();
+            options.AddNLog(config);
         });
 
         services.AddSingleton<ICsServer, CsServer>();
