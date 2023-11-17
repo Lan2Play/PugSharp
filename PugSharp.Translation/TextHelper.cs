@@ -1,5 +1,4 @@
 ﻿using Microsoft.Extensions.Logging;
-using PugSharp.Logging;
 using PugSharp.Translation.Properties;
 using System.Globalization;
 using System.Text.RegularExpressions;
@@ -8,7 +7,7 @@ namespace PugSharp.Translation;
 
 public partial class TextHelper : ITextHelper
 {
-    private static readonly ILogger<Match> _Logger = LogManager.CreateLogger<Match>();
+    private readonly ILogger<TextHelper> _Logger;
 
     private const char _DefaultColor = '\u0001';
     private const int _RegexTimeout = 1000;
@@ -16,8 +15,9 @@ public partial class TextHelper : ITextHelper
     private readonly char _CommandColor;
     private readonly char _ErrorColor;
 
-    public TextHelper(char highlightColor, char commandColor, char errorColor)
+    public TextHelper(ILogger<TextHelper> logger, char highlightColor, char commandColor, char errorColor)
     {
+        _Logger = logger;
         _HighlightColor = highlightColor;
         _CommandColor = commandColor;
         _ErrorColor = errorColor;

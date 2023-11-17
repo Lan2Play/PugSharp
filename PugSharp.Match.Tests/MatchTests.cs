@@ -1,23 +1,53 @@
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using NSubstitute;
 using PugSharp.Api.Contract;
+using PugSharp.Api.Json;
+using PugSharp.ApiStats;
 using PugSharp.Config;
 using PugSharp.Match.Contract;
+using PugSharp.Server.Contract;
 using PugSharp.Translation;
-using System.Collections;
 
 namespace PugSharp.Match.Tests;
 
 public class MatchTests
 {
+    private static IServiceProvider CreateTestProvider()
+    {
+        var services = new ServiceCollection();
+
+        services.AddSingleton(Substitute.For<ICsServer>());
+        services.AddSingleton<IApiProvider, MultiApiProvider>();
+
+        services.AddSingleton(Substitute.For<ICsServer>());
+        services.AddLogging(options =>
+        {
+            options.AddConsole();
+        });
+        services.AddSingleton<IApplication, Application>();
+
+        services.AddSingleton<ConfigProvider>();
+        services.AddTransient<Match>();
+
+        services.AddSingleton<G5ApiProvider>();
+        services.AddSingleton<ApiStats.ApiStats>();
+        services.AddSingleton<JsonApiProvider>();
+        services.AddSingleton(Substitute.For<ITextHelper>());
+        services.AddSingleton<DemoUploader>();
+
+        // Build service provider
+        return services.BuildServiceProvider();
+    }
+
     [Fact]
     public void CreateDotGraphTest()
     {
-        var matchCallback = Substitute.For<IMatchCallback>();
-        var apiProvider = Substitute.For<IApiProvider>();
-        var textHelper = Substitute.For<ITextHelper>();
         MatchConfig config = CreateExampleConfig();
 
-        var match = new Match(matchCallback, apiProvider, textHelper, config);
+        var serviceProvider = CreateTestProvider();
+        var match = serviceProvider.GetRequiredService<Match>();
+        match.Initialize(config);
 
         var dotGraphString = match.CreateDotGraph();
         Assert.True(!string.IsNullOrEmpty(dotGraphString));
@@ -26,12 +56,11 @@ public class MatchTests
     [Fact]
     public void WrongPlayerConnectTest()
     {
-        var matchCallback = Substitute.For<IMatchCallback>();
-        var apiProvider = Substitute.For<IApiProvider>();
-        var textHelper = Substitute.For<ITextHelper>();
         MatchConfig config = CreateExampleConfig();
 
-        var match = new Match(matchCallback, apiProvider, textHelper, config);
+        var serviceProvider = CreateTestProvider();
+        var match = serviceProvider.GetRequiredService<Match>();
+        match.Initialize(config);
 
         Assert.Equal(MatchState.WaitingForPlayersConnectedReady, match.CurrentState);
 
@@ -43,12 +72,11 @@ public class MatchTests
     [Fact]
     public void CorrectPlayerConnectTest()
     {
-        var matchCallback = Substitute.For<IMatchCallback>();
-        var apiProvider = Substitute.For<IApiProvider>();
-        var textHelper = Substitute.For<ITextHelper>();
         MatchConfig config = CreateExampleConfig();
 
-        var match = new Match(matchCallback, apiProvider, textHelper, config);
+        var serviceProvider = CreateTestProvider();
+        var match = serviceProvider.GetRequiredService<Match>();
+        match.Initialize(config);
 
         Assert.Equal(MatchState.WaitingForPlayersConnectedReady, match.CurrentState);
 
@@ -60,16 +88,16 @@ public class MatchTests
     [Fact]
     public async Task MatchTest()
     {
-        var matchPlayers = new List<IPlayer>();
-        var apiProvider = Substitute.For<IApiProvider>();
-        var textHelper = Substitute.For<ITextHelper>();
-        var matchCallback = Substitute.For<IMatchCallback>();
-
-        matchCallback.LoadAllPlayers().Returns(matchPlayers);
-
         MatchConfig config = CreateExampleConfig();
 
-        var match = new Match(matchCallback, apiProvider, textHelper, config);
+        var serviceProvider = CreateTestProvider();
+
+        var matchPlayers = new List<IPlayer>();
+        var csServer = serviceProvider.GetRequiredService<ICsServer>();
+        csServer.LoadAllPlayers().Returns(matchPlayers);
+
+        var match = serviceProvider.GetRequiredService<Match>();
+        match.Initialize(config);
 
         Assert.Equal(MatchState.WaitingForPlayersConnectedReady, match.CurrentState);
 
@@ -79,23 +107,22 @@ public class MatchTests
         ConnectPlayers(matchPlayers, match, player1, player2);
         await SetPlayersReady(match, player1, player2, MatchState.MapVote);
         IPlayer votePlayer = VoteForMap(config, match, player1, player2);
-        await VoteTeam(matchCallback, config, match, player1, player2, votePlayer);
-        PauseUnpauseMatch(matchCallback, match, player1);
+        await VoteTeam(csServer, config, match, player1, player2, votePlayer);
+        PauseUnpauseMatch(csServer, match, player1);
     }
 
     [Fact]
     public async Task MatchTestWithOneMap()
     {
-        var matchPlayers = new List<IPlayer>();
-        var apiProvider = Substitute.For<IApiProvider>();
-        var textHelper = Substitute.For<ITextHelper>();
-        var matchCallback = Substitute.For<IMatchCallback>();
-
-        matchCallback.LoadAllPlayers().Returns(matchPlayers);
-
         MatchConfig config = CreateExampleConfig(new List<string> { "de_dust2" });
+        var serviceProvider = CreateTestProvider();
 
-        var match = new Match(matchCallback, apiProvider, textHelper, config);
+        var matchPlayers = new List<IPlayer>();
+        var csServer = serviceProvider.GetRequiredService<ICsServer>();
+        csServer.LoadAllPlayers().Returns(matchPlayers);
+
+        var match = serviceProvider.GetRequiredService<Match>();
+        match.Initialize(config);
 
         Assert.Equal(MatchState.WaitingForPlayersConnectedReady, match.CurrentState);
 
@@ -104,29 +131,29 @@ public class MatchTests
 
         ConnectPlayers(matchPlayers, match, player1, player2);
         await SetPlayersReady(match, player1, player2, MatchState.TeamVote);
-        await VoteTeam(matchCallback, config, match, player1, player2, player1);
-        PauseUnpauseMatch(matchCallback, match, player1);
+        await VoteTeam(csServer, config, match, player1, player2, player1);
+        PauseUnpauseMatch(csServer, match, player1);
     }
 
 
-    private static void PauseUnpauseMatch(IMatchCallback matchCallback, Match match, IPlayer player1)
+    private static void PauseUnpauseMatch(ICsServer csServer, Match match, IPlayer player1)
     {
         match.SetPlayerDisconnected(player1);
         Assert.Equal(MatchState.MatchPaused, match.CurrentState);
-        matchCallback.Received().PauseMatch();
+        csServer.Received().PauseMatch();
 
         match.TryAddPlayer(player1);
         Assert.Equal(MatchState.MatchRunning, match.CurrentState);
-        matchCallback.Received().UnpauseMatch();
+        csServer.Received().UnpauseMatch();
     }
 
-    private static async Task VoteTeam(IMatchCallback matchCallback, MatchConfig config, Match match, IPlayer player1, IPlayer player2, IPlayer votePlayer)
+    private static async Task VoteTeam(ICsServer csServer, MatchConfig config, Match match, IPlayer player1, IPlayer player2, IPlayer votePlayer)
     {
         Assert.False(match.VoteTeam(votePlayer, "pizza"));
         Assert.False(match.VoteTeam(votePlayer == player1 ? player2 : player1, "T"));
         Assert.True(match.VoteTeam(votePlayer, "T"));
 
-        matchCallback.Received().SwitchMap(config.Maplist[^1]);
+        csServer.Received().SwitchMap(config.Maplist[^1]);
 
         Assert.Equal(MatchState.WaitingForPlayersReady, match.CurrentState);
         await match.TogglePlayerIsReadyAsync(player1).ConfigureAwait(false);
@@ -197,7 +224,7 @@ public class MatchTests
             Team1 = new Config.Team
             {
                 Name = "Team1",
-                Players = new Dictionary<ulong,string>()
+                Players = new Dictionary<ulong, string>()
                 {
                     { 0,"Abc" },
                 },

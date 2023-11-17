@@ -8,10 +8,6 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-		<ProjectReference Include="..\PugSharp.Logging\PugSharp.Logging.csproj" />
-	</ItemGroup>
-
-	<ItemGroup>
 		<Compile Update="Properties\Resources.Designer.cs">
 			<DesignTime>True</DesignTime>
 			<AutoGen>True</AutoGen>

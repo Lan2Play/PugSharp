@@ -2,21 +2,25 @@
 using Microsoft.Net.Http.Headers;
 using OneOf;
 using OneOf.Types;
-using PugSharp.Logging;
 using System.Text.Json;
 
 namespace PugSharp.Config;
 
 public class ConfigProvider : IDisposable
 {
-    private static readonly ILogger<ConfigProvider> _Logger = LogManager.CreateLogger<ConfigProvider>();
+    private readonly ILogger<ConfigProvider> _Logger;
 
     private readonly HttpClient _HttpClient = new();
-    private readonly string _ConfigDirectory;
+    private string _ConfigDirectory = string.Empty;
     private bool disposedValue;
 
 
-    public ConfigProvider(string configDirectory)
+    public ConfigProvider(ILogger<ConfigProvider> logger)
+    {
+        _Logger = logger;
+    }
+
+    public void Initialize(string configDirectory)
     {
         _ConfigDirectory = configDirectory;
     }

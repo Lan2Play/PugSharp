@@ -1,15 +1,20 @@
 ﻿using Microsoft.Extensions.Logging;
-using PugSharp.Logging;
 
 namespace PugSharp.ApiStats;
 
 public class DemoUploader : BaseApi
 {
-    private static readonly ILogger<ApiStats> _Logger = LogManager.CreateLogger<ApiStats>();
+    private readonly ILogger<DemoUploader> _Logger;
 
-    public DemoUploader(string demoUploadUrl, string demoUploadKey) : base(demoUploadUrl, demoUploadKey)
+    public DemoUploader(ILogger<DemoUploader> logger) : base(logger)
     {
-        _Logger.LogInformation("Create Api Stats with BaseUrl: {url}", demoUploadUrl);
+        _Logger = logger;
+    }
+
+    public void Initialize(string demoUploadUrl, string demoUploadKey)
+    {
+        _Logger.LogInformation("Initialize Api Stats with BaseUrl: {url}", demoUploadUrl);
+        InitializeBase(demoUploadUrl, demoUploadKey);
     }
 
     public async Task UploadDemoAsync(string? demoFile, CancellationToken cancellationToken)

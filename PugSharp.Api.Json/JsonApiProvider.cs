@@ -1,6 +1,5 @@
 ﻿using Microsoft.Extensions.Logging;
 using PugSharp.Api.Contract;
-using PugSharp.Logging;
 using System.Globalization;
 using System.Text.Json;
 
@@ -8,11 +7,16 @@ namespace PugSharp.Api.Json;
 
 public class JsonApiProvider : IApiProvider
 {
-    private static readonly ILogger<JsonApiProvider> _Logger = LogManager.CreateLogger<JsonApiProvider>();
+    private readonly ILogger<JsonApiProvider> _Logger;
 
-    private readonly string? _ApiStatsDirectory;
+    private string? _ApiStatsDirectory;
 
-    public JsonApiProvider(string? apiStatsDirectory)
+    public JsonApiProvider(ILogger<JsonApiProvider> logger)
+    {
+        _Logger = logger;
+    }
+
+    public void Initialize(string? apiStatsDirectory)
     {
         _ApiStatsDirectory = apiStatsDirectory;
     }

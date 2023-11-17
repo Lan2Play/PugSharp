@@ -1,7 +1,6 @@
 ﻿using Microsoft.Extensions.Logging;
 using Polly;
 using Polly.Extensions.Http;
-using PugSharp.Logging;
 using System.Text;
 using System.Text.Json;
 
@@ -11,20 +10,24 @@ public sealed class G5ApiClient : IDisposable
 {
     private const int _RetryCount = 3;
     private const int _RetryDelayFactor = 2;
-    private static readonly ILogger<G5ApiClient> _Logger = LogManager.CreateLogger<G5ApiClient>();
+    private readonly ILogger<G5ApiClient> _Logger;
 
-    private readonly HttpClient? _HttpClient;
-    private readonly IAsyncPolicy<HttpResponseMessage>? _RetryPolicy;
+    private readonly HttpClient _HttpClient = new();
+    private IAsyncPolicy<HttpResponseMessage>? _RetryPolicy;
 
-    private string _ApiUrl;
-    private string _ApiHeader;
-    private string _ApiHeadeValue;
+    private string? _ApiUrl;
+    private string? _ApiHeader;
+    private string? _ApiHeadeValue;
     private bool _DisposedValue;
 
-    public G5ApiClient(string g5ApiUrl, string g5ApiHeader, string g5ApiHeaderValue)
+    public G5ApiClient(ILogger<G5ApiClient> logger)
     {
-        _Logger.LogInformation("Create G5Api with BaseUrl: {url}", g5ApiUrl);
+        _Logger = logger;
+    }
 
+    public void Initialize(string g5ApiUrl, string g5ApiHeader, string g5ApiHeaderValue)
+    {
+        _Logger.LogInformation("Initialize G5Api with BaseUrl: {url}", g5ApiUrl);
         _ApiUrl = g5ApiUrl;
         _ApiHeader = g5ApiHeader;
         _ApiHeadeValue = g5ApiHeaderValue;
@@ -34,16 +37,14 @@ public sealed class G5ApiClient : IDisposable
             return;
         }
 
-        _HttpClient = new HttpClient();
-
         _RetryPolicy = HttpPolicyExtensions
          .HandleTransientHttpError()
-         .WaitAndRetryAsync(_RetryCount,
-            retryAttempt => TimeSpan.FromSeconds(Math.Pow(_RetryDelayFactor, retryAttempt)),
-            onRetry: (response, calculatedWaitDuration) =>
-            {
-                _Logger.LogError(response.Exception, "G5Api failed attempt. Waited for {CalculatedWaitDuration}. Retrying.", calculatedWaitDuration);
-            });
+             .WaitAndRetryAsync(_RetryCount,
+                retryAttempt => TimeSpan.FromSeconds(Math.Pow(_RetryDelayFactor, retryAttempt)),
+                onRetry: (response, calculatedWaitDuration) =>
+                {
+                    _Logger.LogError(response.Exception, "G5Api failed attempt. Waited for {CalculatedWaitDuration}. Retrying.", calculatedWaitDuration);
+                });
     }
 
     public void UpdateConfig(string g5ApiUrl, string g5ApiHeader, string g5ApiHeaderValue)
@@ -72,7 +73,10 @@ public sealed class G5ApiClient : IDisposable
                 Content = jsonContent,
             };
 
-            httpRequest.Headers.Add(_ApiHeader, _ApiHeadeValue);
+            if (!string.IsNullOrEmpty(_ApiHeader))
+            {
+                httpRequest.Headers.Add(_ApiHeader, _ApiHeadeValue);
+            }
 
             using var httpResponseMessage = await _RetryPolicy.ExecuteAsync(
                                                         () => _HttpClient.SendAsync(httpRequest, cancellationToken)).ConfigureAwait(false);
