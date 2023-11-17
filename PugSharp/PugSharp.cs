@@ -36,7 +36,7 @@ public class PugSharp : BasePlugin, IBasePlugin
         });
 
         services.AddSingleton<ICsServer, CsServer>();
-        services.AddSingleton<IApiProvider, MultiApiProvider>();
+        services.AddSingleton<MultiApiProvider>();
 
         services.AddSingleton<IBasePlugin>(this);
 
