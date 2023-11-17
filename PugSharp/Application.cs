@@ -211,22 +211,7 @@ public class Application : IApplication
 
         if (_Match != null)
         {
-            if (_Match.CurrentState == MatchState.WaitingForPlayersConnectedReady || _Match.CurrentState == MatchState.WaitingForPlayersReady)
-            {
-                var configTeam = _Match.GetPlayerTeam(eventPlayerTeam.Userid.SteamID);
-
-                if ((int)configTeam != eventPlayerTeam.Team)
-                {
-                    _Logger.LogInformation("Player {playerName} tried to join {team} but is not allowed!", eventPlayerTeam.Userid.PlayerName, eventPlayerTeam.Team);
-                    var player = new Player(eventPlayerTeam.Userid);
-
-                    _CsServer.NextFrame(() =>
-                    {
-                        _Logger.LogInformation("Switch {playerName} to team {team}!", player.PlayerName, configTeam);
-                        player.SwitchTeam(configTeam);
-                    });
-                }
-            }
+            CheckMatchPlayerTeam(eventPlayerTeam.Userid, eventPlayerTeam.Team);
         }
         else
         {
@@ -237,6 +222,30 @@ public class Application : IApplication
         return HookResult.Continue;
     }
 
+    private void CheckMatchPlayerTeam(CCSPlayerController playerController, int team)
+    {
+        if (_Match == null)
+        {
+            return;
+        }
+
+        if (_Match.CurrentState == MatchState.WaitingForPlayersConnectedReady || _Match.CurrentState == MatchState.WaitingForPlayersReady)
+        {
+            var configTeam = _Match.GetPlayerTeam(playerController.SteamID);
+
+            if ((int)configTeam != team)
+            {
+                _Logger.LogInformation("Player {playerName} tried to join {team} but is not allowed!", playerController.PlayerName, team);
+                var player = new Player(playerController);
+
+                _CsServer.NextFrame(() =>
+                {
+                    _Logger.LogInformation("Switch {playerName} to team {team}!", player.PlayerName, configTeam);
+                    player.SwitchTeam(configTeam);
+                });
+            }
+        }
+    }
 
     public HookResult OnPlayerDisconnect(EventPlayerDisconnect eventPlayerDisconnect, GameEventInfo info)
     {
@@ -298,6 +307,8 @@ public class Application : IApplication
                 }
             });
         }
+
+        CheckMatchPlayerTeam(eventPlayerSpawn.Userid, eventPlayerSpawn.Userid.TeamNum);
 
         return HookResult.Continue;
     }
