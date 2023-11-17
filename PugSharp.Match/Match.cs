@@ -9,7 +9,6 @@ using PugSharp.Translation.Properties;
 using Stateless;
 using Stateless.Graph;
 using System.Globalization;
-using static System.Net.Mime.MediaTypeNames;
 
 namespace PugSharp.Match;
 

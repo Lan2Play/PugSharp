@@ -1,5 +1,4 @@
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
 using NSubstitute;
 using PugSharp.Api.Contract;
 using PugSharp.Api.Json;
@@ -7,8 +6,6 @@ using PugSharp.ApiStats;
 using PugSharp.Config;
 using PugSharp.Match.Contract;
 using PugSharp.Server.Contract;
-using PugSharp.Translation;
-using System.Collections;
 
 namespace PugSharp.Match.Tests;
 

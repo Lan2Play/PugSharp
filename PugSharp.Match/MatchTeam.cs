@@ -1,5 +1,4 @@
-﻿using Microsoft.Extensions.Logging;
-using PugSharp.Match.Contract;
+﻿using PugSharp.Match.Contract;
 using System.Text.Json.Serialization;
 
 namespace PugSharp.Match;
