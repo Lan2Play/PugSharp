@@ -268,6 +268,7 @@ public class Application : IApplication
             // Give players max money if no match is running
             _CsServer.NextFrame(() =>
             {
+                _Logger.LogInformation("Update Money on PlayerSpawn");
                 var player = new Player(userId);
 
                 int maxMoneyValue = 16000;
