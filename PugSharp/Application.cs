@@ -235,7 +235,7 @@ public class Application : IApplication
 
             if ((int)configTeam != team)
             {
-                _Logger.LogInformation("Player {playerName} tried to join {team} but is not allowed!", playerController.PlayerName, team);
+                _Logger.LogInformation("Player {playerName} tried to join {team} but shoudl be in {configTeam}!", playerController.PlayerName, team, configTeam);
                 var player = new Player(playerController);
 
                 _CsServer.NextFrame(() =>
@@ -277,7 +277,7 @@ public class Application : IApplication
             // Give players max money if no match is running
             _CsServer.NextFrame(() =>
             {
-                CheckMatchPlayerTeam(userId, userId.TeamNum);
+                CheckMatchPlayerTeam(userId, userId.TeamNum + 2);
 
                 try
                 {
