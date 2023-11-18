@@ -3,16 +3,15 @@ using Microsoft.Net.Http.Headers;
 
 namespace PugSharp.ApiStats;
 
-public class BaseApi : IDisposable
+public class BaseApi
 {
     private readonly ILogger<BaseApi> _Logger;
 
-    private bool _DisposedValue;
+    protected readonly HttpClient HttpClient;
 
-    protected HttpClient? HttpClient { get; private set; }
-
-    protected BaseApi(ILogger<BaseApi> logger)
+    protected BaseApi(HttpClient httpClient, ILogger<BaseApi> logger)
     {
+        HttpClient = httpClient;
         _Logger = logger;
     }
 
@@ -31,10 +30,8 @@ public class BaseApi : IDisposable
             }
 
             _Logger.LogInformation("Using BaseURL : \"{url}\" and authKey \"{authKey}\"", baseUrl, authKey);
-            HttpClient = new HttpClient()
-            {
-                BaseAddress = new Uri(baseUrl),
-            };
+
+            HttpClient.BaseAddress = new Uri(baseUrl);
 
             if (!string.IsNullOrEmpty(authKey))
             {
@@ -77,25 +74,5 @@ public class BaseApi : IDisposable
         {
             _Logger.LogError(e, "Error handling response");
         }
-    }
-
-    protected virtual void Dispose(bool disposing)
-    {
-        if (!_DisposedValue)
-        {
-            if (disposing)
-            {
-                HttpClient?.Dispose();
-            }
-
-            _DisposedValue = true;
-        }
-    }
-
-    public void Dispose()
-    {
-        // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
-        Dispose(disposing: true);
-        GC.SuppressFinalize(this);
     }
 }

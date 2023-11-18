@@ -1308,7 +1308,7 @@ public class Application : IApplication
         {
             var g5Stats = _ServiceProvider.GetRequiredService<Api.G5Api.G5ApiClient>();
             g5Stats.Initialize(matchConfig.G5ApiUrl, matchConfig.G5ApiHeader ?? string.Empty, matchConfig.G5ApiHeaderValue ?? string.Empty);
-            var g5ApiProvider = new G5ApiProvider(g5Stats, _CsServer);
+            var g5ApiProvider = _ServiceProvider.GetRequiredService<G5ApiProvider>();
             _Plugin.RegisterConsoleCommandAttributeHandlers(g5ApiProvider);
             _ApiProvider.AddApiProvider(g5ApiProvider);
         }
