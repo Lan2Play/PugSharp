@@ -277,7 +277,7 @@ public class Application : IApplication
             // Give players max money if no match is running
             _CsServer.NextFrame(() =>
             {
-                CheckMatchPlayerTeam(userId, userId.TeamNum + 2);
+                CheckMatchPlayerTeam(userId, userId.TeamNum);
 
                 try
                 {
