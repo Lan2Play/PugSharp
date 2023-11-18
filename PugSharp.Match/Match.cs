@@ -64,6 +64,11 @@ public class Match : IDisposable
             throw new NotSupportedException("Initialize can onyl be called once!");
         }
 
+        if (matchInfo.Config.Maplist.Length <= 0)
+        {
+            throw new NotSupportedException("Can not create Match without any maps!");
+        }
+
         SetServerCulture(matchInfo.Config.ServerLocale);
         MatchInfo = matchInfo;
         _VoteTimer.Interval = MatchInfo.Config.VoteTimeout;
