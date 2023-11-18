@@ -1273,24 +1273,23 @@ public class Application : IApplication
     private void InitializeMatch(MatchConfig matchConfig)
     {
         ResetForMatch(matchConfig);
-        _Match = _ServiceProvider.GetRequiredService<Match.Match>();
+        var matchFactory = _ServiceProvider.GetRequiredService<MatchFactory>();
+        _Match = matchFactory.CreateMatch(matchConfig);
         _Match.MatchFinalized += OnMatchFinalized;
-        _Match.Initialize(matchConfig);
     }
 
     private void InitializeMatch(MatchInfo matchInfo, string roundBackupFile)
     {
         ResetForMatch(matchInfo.Config);
-        _Match = _ServiceProvider.GetRequiredService<Match.Match>();
+        var matchFactory = _ServiceProvider.GetRequiredService<MatchFactory>();
+        _Match = matchFactory.CreateMatch(matchInfo, roundBackupFile);
         _Match.MatchFinalized += OnMatchFinalized;
-        _Match.Initialize(matchInfo, roundBackupFile);
     }
 
     private void OnMatchFinalized(object? sender, MatchFinalizedEventArgs e)
     {
         StopMatch();
     }
-
 
     private void ResetForMatch(MatchConfig matchConfig)
     {

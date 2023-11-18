@@ -35,19 +35,34 @@ public class Match : IDisposable
     private DemoUploader? _DemoUploader;
     private readonly List<Vote> _TeamVotes = new() { new("T"), new("CT") };
 
-    private List<Vote>? _MapsToSelect;
+    private List<Vote> _MapsToSelect = new List<Vote>();
     private MatchTeam? _CurrentMatchTeamToVote;
     private bool disposedValue;
 
     public MatchState CurrentState => _MatchStateMachine.State;
 
-    public MatchInfo MatchInfo { get; private set; } = default!;
+    public MatchInfo MatchInfo { get; private set; }
 
     public event EventHandler<MatchFinalizedEventArgs>? MatchFinalized;
 
     public IEnumerable<MatchPlayer> AllMatchPlayers => MatchInfo?.MatchTeam1.Players.Concat(MatchInfo.MatchTeam2.Players) ?? Enumerable.Empty<MatchPlayer>();
 
-    public Match(IServiceProvider serviceProvider, ILogger<Match> logger, IApiProvider apiProvider, ITextHelper textHelper, ICsServer csServer)
+    internal Match(IServiceProvider serviceProvider, ILogger<Match> logger, IApiProvider apiProvider, ITextHelper textHelper, ICsServer csServer, Config.MatchConfig matchConfig) :
+        this(serviceProvider, logger, apiProvider, textHelper, csServer)
+    {
+        Initialize(new MatchInfo(matchConfig));
+        InitializeStateMachine();
+    }
+
+    internal Match(IServiceProvider serviceProvider, ILogger<Match> logger, IApiProvider apiProvider, ITextHelper textHelper, ICsServer csServer, MatchInfo matchInfo, string roundBackupFile) :
+        this(serviceProvider, logger, apiProvider, textHelper, csServer)
+    {
+        _RoundBackupFile = roundBackupFile;
+        Initialize(matchInfo);
+        _Logger.LogInformation("Continue Match on map {mapNumber}({mapName})!", MatchInfo!.CurrentMap.MapNumber, MatchInfo.CurrentMap.MapName);
+    }
+
+    private Match(IServiceProvider serviceProvider, ILogger<Match> logger, IApiProvider apiProvider, ITextHelper textHelper, ICsServer csServer)
     {
         _ServiceProvider = serviceProvider;
         _Logger = logger;
@@ -55,6 +70,8 @@ public class Match : IDisposable
         _TextHelper = textHelper;
         _CsServer = csServer;
         _MatchStateMachine = new StateMachine<MatchState, MatchCommand>(MatchState.None);
+
+        MatchInfo ??= default!;
     }
 
     private void Initialize(MatchInfo matchInfo)
@@ -83,19 +100,6 @@ public class Match : IDisposable
             _DemoUploader = _ServiceProvider.GetRequiredService<DemoUploader>();
             _DemoUploader.Initialize(MatchInfo.Config.EventulaDemoUploadUrl, MatchInfo.Config.EventulaApistatsToken);
         }
-    }
-
-    public void Initialize(Config.MatchConfig matchConfig)
-    {
-        Initialize(new MatchInfo(matchConfig));
-        InitializeStateMachine();
-    }
-
-    public void Initialize(MatchInfo matchInfo, string roundBackupFile)
-    {
-        _RoundBackupFile = roundBackupFile;
-        Initialize(matchInfo);
-        _Logger.LogInformation("Continue Match on map {mapNumber}({mapName})!", MatchInfo!.CurrentMap.MapNumber, MatchInfo.CurrentMap.MapName);
     }
 
     private void SetServerCulture(string locale)

@@ -8,10 +8,7 @@ using PugSharp.Api.Json;
 using PugSharp.Translation;
 using CounterStrikeSharp.API.Modules.Utils;
 using PugSharp.ApiStats;
-using NLog.Extensions.Logging;
-using Microsoft.Extensions.Configuration;
-using NLog.Config;
-using NLog.Targets;
+using PugSharp.Match;
 
 namespace PugSharp;
 
@@ -56,13 +53,13 @@ public class PugSharp : BasePlugin, IBasePlugin
 
         services.AddSingleton<ConfigProvider>();
 
-        services.AddTransient<Match.Match>();
+        services.AddTransient<MatchFactory>();
 
         // TODO Add HttpClients for ApiProviders
         services.AddSingleton<G5ApiProvider>();
         services.AddSingleton<ApiStats.ApiStats>();
         services.AddSingleton<JsonApiProvider>();
-        services.AddSingleton<ITextHelper>(services => new TextHelper(services.GetRequiredService<ILogger<TextHelper>>(), ChatColors.Blue, ChatColors.Green, ChatColors.Red));
+        services.AddSingleton<ITextHelper>(sp => new TextHelper(sp.GetRequiredService<ILogger<TextHelper>>(), ChatColors.Blue, ChatColors.Green, ChatColors.Red));
         services.AddSingleton<DemoUploader>();
         services.AddSingleton<G5CommandProvider>();
 

@@ -28,7 +28,7 @@ public class MatchTests
         services.AddSingleton<IApplication, Application>();
 
         services.AddSingleton<ConfigProvider>();
-        services.AddTransient<Match>();
+        services.AddTransient<MatchFactory>();
 
         services.AddSingleton<G5ApiProvider>();
         services.AddSingleton<ApiStats.ApiStats>();
@@ -46,8 +46,8 @@ public class MatchTests
         MatchConfig config = CreateExampleConfig();
 
         var serviceProvider = CreateTestProvider();
-        var match = serviceProvider.GetRequiredService<Match>();
-        match.Initialize(config);
+        var matchFactory = serviceProvider.GetRequiredService<MatchFactory>();
+        var match = matchFactory.CreateMatch(config);
 
         var dotGraphString = match.CreateDotGraph();
         Assert.True(!string.IsNullOrEmpty(dotGraphString));
@@ -59,8 +59,8 @@ public class MatchTests
         MatchConfig config = CreateExampleConfig();
 
         var serviceProvider = CreateTestProvider();
-        var match = serviceProvider.GetRequiredService<Match>();
-        match.Initialize(config);
+        var matchFactory = serviceProvider.GetRequiredService<MatchFactory>();
+        var match = matchFactory.CreateMatch(config);
 
         Assert.Equal(MatchState.WaitingForPlayersConnectedReady, match.CurrentState);
 
@@ -75,8 +75,8 @@ public class MatchTests
         MatchConfig config = CreateExampleConfig();
 
         var serviceProvider = CreateTestProvider();
-        var match = serviceProvider.GetRequiredService<Match>();
-        match.Initialize(config);
+        var matchFactory = serviceProvider.GetRequiredService<MatchFactory>();
+        var match = matchFactory.CreateMatch(config);
 
         Assert.Equal(MatchState.WaitingForPlayersConnectedReady, match.CurrentState);
 
@@ -96,8 +96,8 @@ public class MatchTests
         var csServer = serviceProvider.GetRequiredService<ICsServer>();
         csServer.LoadAllPlayers().Returns(matchPlayers);
 
-        var match = serviceProvider.GetRequiredService<Match>();
-        match.Initialize(config);
+        var matchFactory = serviceProvider.GetRequiredService<MatchFactory>();
+        var match = matchFactory.CreateMatch(config);
 
         Assert.Equal(MatchState.WaitingForPlayersConnectedReady, match.CurrentState);
 
@@ -121,8 +121,8 @@ public class MatchTests
         var csServer = serviceProvider.GetRequiredService<ICsServer>();
         csServer.LoadAllPlayers().Returns(matchPlayers);
 
-        var match = serviceProvider.GetRequiredService<Match>();
-        match.Initialize(config);
+        var matchFactory = serviceProvider.GetRequiredService<MatchFactory>();
+        var match = matchFactory.CreateMatch(config);
 
         Assert.Equal(MatchState.WaitingForPlayersConnectedReady, match.CurrentState);
 
