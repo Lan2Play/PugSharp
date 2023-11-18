@@ -64,9 +64,9 @@ public class Match : IDisposable
             throw new NotSupportedException("Initialize can onyl be called once!");
         }
 
-        if (matchInfo.Config.Maplist.Length <= 0)
+        if (matchInfo.Config.Maplist.Length < matchInfo.Config.NumMaps)
         {
-            throw new NotSupportedException("Can not create Match without any maps!");
+            throw new NotSupportedException($"Can not create Match without the required number of maps! At lease {matchInfo.Config.NumMaps} are required!");
         }
 
         SetServerCulture(matchInfo.Config.ServerLocale);
