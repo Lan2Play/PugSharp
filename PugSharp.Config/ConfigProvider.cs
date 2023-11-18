@@ -12,7 +12,7 @@ public class ConfigProvider : IDisposable
 
     private readonly HttpClient _HttpClient = new();
     private string _ConfigDirectory = string.Empty;
-    private bool disposedValue;
+    private bool _DisposedValue;
 
 
     public ConfigProvider(ILogger<ConfigProvider> logger)
@@ -120,14 +120,14 @@ public class ConfigProvider : IDisposable
 
     protected virtual void Dispose(bool disposing)
     {
-        if (!disposedValue)
+        if (!_DisposedValue)
         {
             if (disposing)
             {
                 _HttpClient.Dispose();
             }
 
-            disposedValue = true;
+            _DisposedValue = true;
         }
     }
 

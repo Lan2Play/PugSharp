@@ -80,7 +80,6 @@ public class Match : IDisposable
         }
 
         _MapsToSelect = MatchInfo.Config.Maplist.Select(x => new Vote(x)).ToList();
-
     }
 
     public void Initialize(Config.MatchConfig matchConfig)
@@ -635,6 +634,12 @@ public class Match : IDisposable
 
     private void SendRemainingMapsToVotingTeam()
     {
+        if (_MapsToSelect == null)
+        {
+            _Logger.LogError("There are no maps configured! Map Selection is not possible!");
+            return;
+        }
+
         // If only one map is configured
         if (MatchInfo.Config.Maplist.Length == 1)
         {
@@ -666,6 +671,11 @@ public class Match : IDisposable
         if (_VoteTimer.Enabled)
         {
             _VoteTimer.Stop();
+        }
+
+        if (_MapsToSelect == null)
+        {
+            return;
         }
 
         //Only ban map if theres more than one
