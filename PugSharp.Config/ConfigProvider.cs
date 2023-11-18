@@ -6,17 +6,18 @@ using System.Text.Json;
 
 namespace PugSharp.Config;
 
-public class ConfigProvider : IDisposable
+public class ConfigProvider
 {
+    private readonly HttpClient _HttpClient;
     private readonly ILogger<ConfigProvider> _Logger;
 
-    private readonly HttpClient _HttpClient = new();
     private string _ConfigDirectory = string.Empty;
     private bool _DisposedValue;
 
 
-    public ConfigProvider(ILogger<ConfigProvider> logger)
+    public ConfigProvider(HttpClient httpClient, ILogger<ConfigProvider> logger)
     {
+        _HttpClient = httpClient;
         _Logger = logger;
     }
 
@@ -68,7 +69,6 @@ public class ConfigProvider : IDisposable
                 RequestUri = new Uri(url),
             };
 
-
             if (!string.IsNullOrEmpty(authToken))
             {
                 httpRequestMessage.Headers.Add(HeaderNames.Authorization, authToken);
@@ -115,28 +115,4 @@ public class ConfigProvider : IDisposable
             return new Error<string>($"Failed loading config from {url}.");
         }
     }
-
-    #region IDisposable
-
-    protected virtual void Dispose(bool disposing)
-    {
-        if (!_DisposedValue)
-        {
-            if (disposing)
-            {
-                _HttpClient.Dispose();
-            }
-
-            _DisposedValue = true;
-        }
-    }
-
-    public void Dispose()
-    {
-        // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
-        Dispose(disposing: true);
-        GC.SuppressFinalize(this);
-    }
-
-    #endregion
 }

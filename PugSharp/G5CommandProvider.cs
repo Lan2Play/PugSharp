@@ -88,6 +88,7 @@ public sealed partial class G5CommandProvider : ICommandProvider
 
     private IEnumerable<string> CommandLoadMatchUrl(string[] args)
     {
+        // TODO reply from G5Api is different than the callback from eventula! All the cvars are ignored
         _CsServer.ExecuteCommand($"ps_loadconfig {string.Join(' ', args.Skip(1).Where(x => !x.Contains("Authorization", StringComparison.OrdinalIgnoreCase)).Select(x => $"\"{x}\""))}");
         return Enumerable.Empty<string>();
     }

@@ -57,14 +57,17 @@ public class PugSharp : BasePlugin, IBasePlugin
 
         services.AddSingleton<IApplication, Application>();
 
-        services.AddSingleton<ConfigProvider>();
-
-        services.AddTransient<MatchFactory>();
-
         var retryPolicy = HttpPolicyExtensions
          .HandleTransientHttpError()
              .WaitAndRetryAsync(_RetryCount,
                 retryAttempt => TimeSpan.FromSeconds(Math.Pow(_RetryDelayFactor, retryAttempt)));
+
+        services.AddHttpClient<ConfigProvider>()
+                .AddPolicyHandler(retryPolicy);
+
+        services.AddSingleton<ConfigProvider>();
+
+        services.AddTransient<MatchFactory>();
 
         services.AddHttpClient<G5ApiClient>()
                 .AddPolicyHandler(retryPolicy);
