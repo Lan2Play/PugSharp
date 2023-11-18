@@ -640,9 +640,10 @@ public class Match : IDisposable
 
     private void InitializeMapsToVote(StateMachine<MatchState, MatchCommand>.Transition transition)
     {
-        if(transition.Source == MatchState.WaitingForPlayersConnectedReady)
+        if (transition.Source == MatchState.WaitingForPlayersConnectedReady)
         {
-            _MapsToSelect = MatchInfo.Config.Maplist.Select(x => new Vote(x)).ToList();
+            var playedMaps = MatchInfo.MatchMaps.Select(x => x.MapName).Where(x => !string.IsNullOrEmpty(x));
+            _MapsToSelect = MatchInfo.Config.Maplist.Except(playedMaps!, StringComparer.Ordinal).Select(x => new Vote(x)).ToList();
         }
     }
 
