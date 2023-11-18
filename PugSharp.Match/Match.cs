@@ -64,6 +64,11 @@ public class Match : IDisposable
             throw new NotSupportedException("Initialize can onyl be called once!");
         }
 
+        if (matchInfo.Config.Maplist.Length < matchInfo.Config.NumMaps)
+        {
+            throw new NotSupportedException($"Can not create Match without the required number of maps! At lease {matchInfo.Config.NumMaps} are required!");
+        }
+
         SetServerCulture(matchInfo.Config.ServerLocale);
         MatchInfo = matchInfo;
         _VoteTimer.Interval = MatchInfo.Config.VoteTimeout;
@@ -78,8 +83,6 @@ public class Match : IDisposable
             _DemoUploader = _ServiceProvider.GetRequiredService<DemoUploader>();
             _DemoUploader.Initialize(MatchInfo.Config.EventulaDemoUploadUrl, MatchInfo.Config.EventulaApistatsToken);
         }
-
-        _MapsToSelect = MatchInfo.Config.Maplist.Select(x => new Vote(x)).ToList();
     }
 
     public void Initialize(Config.MatchConfig matchConfig)
@@ -127,6 +130,7 @@ public class Match : IDisposable
         _MatchStateMachine.Configure(MatchState.MapVote)
             .PermitReentryIf(MatchCommand.VoteMap, MapIsNotSelected)
             .PermitIf(MatchCommand.VoteMap, MatchState.TeamVote, MapIsSelected)
+            .OnEntry(InitializeMapsToVote)
             .OnEntry(SendRemainingMapsToVotingTeam)
             .OnExit(RemoveBannedMap);
 
@@ -174,9 +178,11 @@ public class Match : IDisposable
             .OnExit(UnpauseMatch);
 
         _MatchStateMachine.Configure(MatchState.MapCompleted)
-            .PermitDynamic(MatchCommand.CompleteMatch, () => AllMapsArePlayed() ? MatchState.MatchCompleted : MatchState.WaitingForPlayersConnectedReady)
+            .PermitIf(MatchCommand.CompleteMatch, MatchState.MatchCompleted, AllMapsArePlayed)
+            .PermitIf(MatchCommand.CompleteMatch, MatchState.WaitingForPlayersConnectedReady, NotAllMapsArePlayed)
             .OnEntry(SendMapResults)
             .OnEntry(TryCompleteMatch);
+
 
         _MatchStateMachine.Configure(MatchState.MatchCompleted)
             .OnEntryAsync(CompleteMatchAsync);
@@ -632,6 +638,15 @@ public class Match : IDisposable
         return UmlDotGraph.Format(_MatchStateMachine.GetInfo());
     }
 
+    private void InitializeMapsToVote(StateMachine<MatchState, MatchCommand>.Transition transition)
+    {
+        if (transition.Source == MatchState.WaitingForPlayersConnectedReady)
+        {
+            var playedMaps = MatchInfo.MatchMaps.Select(x => x.MapName).Where(x => !string.IsNullOrEmpty(x));
+            _MapsToSelect = MatchInfo.Config.Maplist.Except(playedMaps!, StringComparer.Ordinal).Select(x => new Vote(x)).ToList();
+        }
+    }
+
     private void SendRemainingMapsToVotingTeam()
     {
         if (_MapsToSelect == null)
@@ -780,6 +795,8 @@ public class Match : IDisposable
 
     private bool AllTeamsUnpaused() => !MatchInfo.MatchTeam1.IsPaused && !MatchInfo.MatchTeam2.IsPaused;
 
+    private bool NotAllMapsArePlayed() => !AllMapsArePlayed();
+
     private bool AllMapsArePlayed()
     {
         var teamWithMostWins = MatchInfo.MatchMaps.Where(x => x.Winner != null).GroupBy(x => x.Winner).MaxBy(x => x.Count());
@@ -791,8 +808,6 @@ public class Match : IDisposable
 
         var wins = teamWithMostWins.Count();
         var requiredWins = Math.Ceiling(MatchInfo.Config.NumMaps / 2d);
-        _Logger.LogInformation("{team} has most wins: {wins} of {requiredWins}", teamWithMostWins.Key.TeamConfig.Name, wins, requiredWins);
-
         return wins >= requiredWins;
     }
 
