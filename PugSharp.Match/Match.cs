@@ -43,6 +43,8 @@ public class Match : IDisposable
 
     public MatchInfo MatchInfo { get; private set; } = default!;
 
+    public event EventHandler<MatchFinalizedEventArgs>? MatchFinalized;
+
     public IEnumerable<MatchPlayer> AllMatchPlayers => MatchInfo?.MatchTeam1.Players.Concat(MatchInfo.MatchTeam2.Players) ?? Enumerable.Empty<MatchPlayer>();
 
     public Match(IServiceProvider serviceProvider, ILogger<Match> logger, IApiProvider apiProvider, ITextHelper textHelper, ICsServer csServer)
@@ -546,8 +548,7 @@ public class Match : IDisposable
 
         await _ApiProvider.FreeServerAsync(CancellationToken.None).ConfigureAwait(false);
 
-        // TODO Application Melden, dass Match aufgeräumt werden kann (Dispose, abnullen)
-        //_Application.CleanUpMatch();
+        MatchFinalized?.Invoke(this, new MatchFinalizedEventArgs());
     }
 
     private void MatchLive()

@@ -37,6 +37,7 @@ public class Application : IApplication
     public string PugSharpDirectory { get; }
 
     private Match.Match? _Match;
+    private bool _DisposedValue;
     private readonly CurrentRoundState _CurrentRountState = new();
 
     /// <summary>
@@ -824,13 +825,24 @@ public class Application : IApplication
             }
 
             var resetMap = _Match.MatchInfo.Config.VoteMap;
-            _Match.Dispose();
-            _Match = null;
+            StopMatch();
             ResetServer(resetMap);
             command.ReplyToCommand("Match stopped!");
         },
         command,
         player);
+    }
+
+    private void StopMatch()
+    {
+        if (_Match == null)
+        {
+            return;
+        }
+
+        _Match.MatchFinalized -= OnMatchFinalized;
+        _Match.Dispose();
+        _Match = null;
     }
 
     [ConsoleCommand("css_loadconfig", "Load a match config")]
@@ -1262,6 +1274,7 @@ public class Application : IApplication
     {
         ResetForMatch(matchConfig);
         _Match = _ServiceProvider.GetRequiredService<Match.Match>();
+        _Match.MatchFinalized += OnMatchFinalized;
         _Match.Initialize(matchConfig);
     }
 
@@ -1269,8 +1282,15 @@ public class Application : IApplication
     {
         ResetForMatch(matchInfo.Config);
         _Match = _ServiceProvider.GetRequiredService<Match.Match>();
+        _Match.MatchFinalized += OnMatchFinalized;
         _Match.Initialize(matchInfo, roundBackupFile);
     }
+
+    private void OnMatchFinalized(object? sender, MatchFinalizedEventArgs e)
+    {
+        StopMatch();
+    }
+
 
     private void ResetForMatch(MatchConfig matchConfig)
     {
@@ -1316,6 +1336,26 @@ public class Application : IApplication
     {
         _CsServer.StopDemoRecording();
         _CsServer.SwitchMap(map);
+    }
+
+    protected virtual void Dispose(bool disposing)
+    {
+        if (!_DisposedValue)
+        {
+            if (disposing)
+            {
+                StopMatch();
+            }
+
+            _DisposedValue = true;
+        }
+    }
+
+    public void Dispose()
+    {
+        // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
+        Dispose(disposing: true);
+        GC.SuppressFinalize(this);
     }
 
 
