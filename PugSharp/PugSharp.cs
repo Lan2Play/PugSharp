@@ -81,6 +81,7 @@ public class PugSharp : BasePlugin, IBasePlugin
     public override void Unload(bool hotReload)
     {
         // Remove reference
+        _Application?.Dispose();
         _Application = null;
 
         // Dispose service provider

@@ -43,6 +43,8 @@ public class Match : IDisposable
 
     public MatchInfo MatchInfo { get; private set; } = default!;
 
+    public event EventHandler<MatchFinalizedEventArgs>? MatchFinalized;
+
     public IEnumerable<MatchPlayer> AllMatchPlayers => MatchInfo?.MatchTeam1.Players.Concat(MatchInfo.MatchTeam2.Players) ?? Enumerable.Empty<MatchPlayer>();
 
     public Match(IServiceProvider serviceProvider, ILogger<Match> logger, IApiProvider apiProvider, ITextHelper textHelper, ICsServer csServer)
@@ -546,8 +548,7 @@ public class Match : IDisposable
 
         await _ApiProvider.FreeServerAsync(CancellationToken.None).ConfigureAwait(false);
 
-        // TODO Application Melden, dass Match aufgeräumt werden kann (Dispose, abnullen)
-        //_Application.CleanUpMatch();
+        MatchFinalized?.Invoke(this, new MatchFinalizedEventArgs());
     }
 
     private void MatchLive()
@@ -728,7 +729,7 @@ public class Match : IDisposable
     private void ShowMenuToTeam(MatchTeam team, string title, IEnumerable<MenuOption> options)
     {
         DoForAll(team.Players.Select(p => p.Player).ToList(), p => p.ShowMenu(title, options));
-    }   
+    }
 
     private void SwitchVotingTeam()
     {
@@ -1038,6 +1039,7 @@ public class Match : IDisposable
 
     public bool VoteTeam(IPlayer player, string teamName)
     {
+        // Not in correct state
         if (CurrentState != MatchState.TeamVote)
         {
             player.PrintToChat(_TextHelper.GetText(nameof(Resources.PugSharp_Match_Error_NoTeamVoteExpected)));
@@ -1050,12 +1052,14 @@ public class Match : IDisposable
             return false;
         }
 
+        // Player not permitted to vote for this team
         if (!_CurrentMatchTeamToVote.Players.Select(x => x.Player.UserId).Contains(player.UserId))
         {
             player.PrintToChat(_TextHelper.GetText(nameof(Resources.PugSharp_Match_Error_NotPermittedToVoteForTeam)));
             return false;
         }
 
+        // Player already voted for this team
         var votedTeam = _TeamVotes.Find(x => x.Votes.Any(x => x.UserId == player.UserId));
         if (votedTeam != null)
         {
@@ -1063,16 +1067,18 @@ public class Match : IDisposable
             return false;
         }
 
+        // No team found
         var teamToVote = _TeamVotes.Find(x => x.Name.Equals(teamName, StringComparison.OrdinalIgnoreCase));
         if (teamToVote == null)
         {
-            player.PrintToChat(_TextHelper.GetText(nameof(Resources.PugSharp_Match_Error_AlreadyVotedForTeam), teamName));
+            player.PrintToChat(_TextHelper.GetText(nameof(Resources.PugSharp_Match_Error_TeamNotAvailable), teamName));
             return false;
         }
 
         teamToVote.Votes.Add(player);
 
-        player.PrintToChat(_TextHelper.GetText(nameof(Resources.PugSharp_Match_Error_AlreadyVotedForTeam), teamToVote.Name));
+        // Successful vote
+        player.PrintToChat(_TextHelper.GetText(nameof(Resources.PugSharp_Match_VotedForTeam), teamToVote.Name));
 
         if (_TeamVotes.Sum(x => x.Votes.Count) >= MatchInfo.Config.PlayersPerTeam)
         {

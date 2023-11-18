@@ -1,9 +1,11 @@
-﻿namespace PugSharp;
+﻿using System;
+
+namespace PugSharp;
 
 /// <summary>
 /// Application interface
 /// </summary>
-public interface IApplication
+public interface IApplication : IDisposable
 {
     /// <summary>
     /// Initialize event registrations and more
