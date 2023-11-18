@@ -514,41 +514,51 @@ public class Match : IDisposable
 
     private async Task CompleteMatchAsync()
     {
-        _CsServer.StopDemoRecording();
-
-        var delay = 15;
-
-        if (_CsServer.GetConvar<bool>("tv_enable") || _CsServer.GetConvar<bool>("tv_enable1"))
+        try
         {
-            // TV Delay in s
-            var tvDelaySeconds = Math.Max(_CsServer.GetConvar<int>("tv_delay"), _CsServer.GetConvar<int>("tv_delay1"));
-            _Logger.LogInformation("Waiting for sourceTV. Delay: {delay}s + 15s", tvDelaySeconds);
-            delay += tvDelaySeconds;
+            _CsServer.StopDemoRecording();
+
+            var delay = 15;
+
+            if (_CsServer.GetConvar<bool>("tv_enable") || _CsServer.GetConvar<bool>("tv_enable1"))
+            {
+                // TV Delay in s
+                var tvDelaySeconds = Math.Max(_CsServer.GetConvar<int>("tv_delay"), _CsServer.GetConvar<int>("tv_delay1"));
+                _Logger.LogInformation("Waiting for sourceTV. Delay: {delay}s + 15s", tvDelaySeconds);
+                delay += tvDelaySeconds;
+            }
+
+            var seriesResultParams = new SeriesResultParams(MatchInfo.Config.MatchId, MatchInfo.MatchMaps.GroupBy(x => x.Winner).MaxBy(x => x.Count())!.Key!.TeamConfig.Name, Forfeit: true, (uint)delay * 1100, MatchInfo.MatchMaps.Count(x => x.Team1Points > x.Team2Points), MatchInfo.MatchMaps.Count(x => x.Team2Points > x.Team1Points));
+            var finalize = _ApiProvider.FinalizeAsync(seriesResultParams, CancellationToken.None);
+
+            while (delay > 0)
+            {
+                _Logger.LogInformation("Waiting for sourceTV. Remaining Delay: {delay}s", delay);
+                var delayLoopTime = Math.Min(_TimeBetweenDelayMessages, delay);
+                await Task.Delay(TimeSpan.FromSeconds(delayLoopTime)).ConfigureAwait(false);
+                delay -= delayLoopTime;
+            }
+
+            await finalize.ConfigureAwait(false);
+
+            if (_DemoUploader != null)
+            {
+                await _DemoUploader.UploadDemoAsync(MatchInfo.DemoFile, CancellationToken.None).ConfigureAwait(false);
+            }
+
+            DoForAll(AllMatchPlayers.ToList(), p => p.Player.Kick());
+
+            await _ApiProvider.FreeServerAsync(CancellationToken.None).ConfigureAwait(false);
+
         }
-
-        var seriesResultParams = new SeriesResultParams(MatchInfo.Config.MatchId, MatchInfo.MatchMaps.GroupBy(x => x.Winner).MaxBy(x => x.Count())!.Key!.TeamConfig.Name, Forfeit: true, (uint)delay * 1100, MatchInfo.MatchMaps.Count(x => x.Team1Points > x.Team2Points), MatchInfo.MatchMaps.Count(x => x.Team2Points > x.Team1Points));
-        var finalize = _ApiProvider.FinalizeAsync(seriesResultParams, CancellationToken.None);
-
-        while (delay > 0)
+        catch (Exception ex)
         {
-            _Logger.LogInformation("Waiting for sourceTV. Remaining Delay: {delay}s", delay);
-            var delayLoopTime = Math.Min(_TimeBetweenDelayMessages, delay);
-            await Task.Delay(TimeSpan.FromSeconds(delayLoopTime)).ConfigureAwait(false);
-            delay -= delayLoopTime;
+            _Logger.LogError(ex, "Unexpected error during finalize.");
         }
-
-        await finalize.ConfigureAwait(false);
-
-        if (_DemoUploader != null)
+        finally
         {
-            await _DemoUploader.UploadDemoAsync(MatchInfo.DemoFile, CancellationToken.None).ConfigureAwait(false);
+            MatchFinalized?.Invoke(this, new MatchFinalizedEventArgs());
         }
-
-        DoForAll(AllMatchPlayers.ToList(), p => p.Player.Kick());
-
-        await _ApiProvider.FreeServerAsync(CancellationToken.None).ConfigureAwait(false);
-
-        MatchFinalized?.Invoke(this, new MatchFinalizedEventArgs());
     }
 
     private void MatchLive()
