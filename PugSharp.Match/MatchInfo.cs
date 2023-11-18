@@ -11,8 +11,8 @@ public class MatchInfo
         CurrentMap = MatchMaps[0];
         Config = config;
 
-        MatchTeam1 = new MatchTeam(Config.Team1);
-        MatchTeam2 = new MatchTeam(Config.Team2);
+        MatchTeam1 = new MatchTeam(Config.Team1) { CurrentTeamSite = Contract.Team.Terrorist };
+        MatchTeam2 = new MatchTeam(Config.Team2) { CurrentTeamSite = Contract.Team.CounterTerrorist};
     }
 
     [JsonIgnore]
