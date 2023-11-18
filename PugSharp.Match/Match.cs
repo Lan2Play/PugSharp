@@ -720,7 +720,7 @@ public class Match : IDisposable
     private void ShowMenuToTeam(MatchTeam team, string title, IEnumerable<MenuOption> options)
     {
         DoForAll(team.Players.Select(p => p.Player).ToList(), p => p.ShowMenu(title, options));
-    }   
+    }
 
     private void SwitchVotingTeam()
     {
@@ -1030,6 +1030,7 @@ public class Match : IDisposable
 
     public bool VoteTeam(IPlayer player, string teamName)
     {
+        // Not in correct state
         if (CurrentState != MatchState.TeamVote)
         {
             player.PrintToChat(_TextHelper.GetText(nameof(Resources.PugSharp_Match_Error_NoTeamVoteExpected)));
@@ -1042,12 +1043,14 @@ public class Match : IDisposable
             return false;
         }
 
+        // Player not permitted to vote for this team
         if (!_CurrentMatchTeamToVote.Players.Select(x => x.Player.UserId).Contains(player.UserId))
         {
             player.PrintToChat(_TextHelper.GetText(nameof(Resources.PugSharp_Match_Error_NotPermittedToVoteForTeam)));
             return false;
         }
 
+        // Player already voted for this team
         var votedTeam = _TeamVotes.Find(x => x.Votes.Any(x => x.UserId == player.UserId));
         if (votedTeam != null)
         {
@@ -1055,16 +1058,18 @@ public class Match : IDisposable
             return false;
         }
 
+        // No team found
         var teamToVote = _TeamVotes.Find(x => x.Name.Equals(teamName, StringComparison.OrdinalIgnoreCase));
         if (teamToVote == null)
         {
-            player.PrintToChat(_TextHelper.GetText(nameof(Resources.PugSharp_Match_Error_AlreadyVotedForTeam), teamName));
+            player.PrintToChat(_TextHelper.GetText(nameof(Resources.PugSharp_Match_Error_TeamNotAvailable), teamName));
             return false;
         }
 
         teamToVote.Votes.Add(player);
 
-        player.PrintToChat(_TextHelper.GetText(nameof(Resources.PugSharp_Match_Error_AlreadyVotedForTeam), teamToVote.Name));
+        // Successful vote
+        player.PrintToChat(_TextHelper.GetText(nameof(Resources.PugSharp_Match_VotedForTeam), teamToVote.Name));
 
         if (_TeamVotes.Sum(x => x.Votes.Count) >= MatchInfo.Config.PlayersPerTeam)
         {
