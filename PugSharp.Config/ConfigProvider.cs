@@ -12,8 +12,6 @@ public class ConfigProvider
     private readonly ILogger<ConfigProvider> _Logger;
 
     private string _ConfigDirectory = string.Empty;
-    private bool _DisposedValue;
-
 
     public ConfigProvider(HttpClient httpClient, ILogger<ConfigProvider> logger)
     {
