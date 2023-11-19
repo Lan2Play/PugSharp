@@ -1273,24 +1273,23 @@ public class Application : IApplication
     private void InitializeMatch(MatchConfig matchConfig)
     {
         ResetForMatch(matchConfig);
-        _Match = _ServiceProvider.GetRequiredService<Match.Match>();
+        var matchFactory = _ServiceProvider.GetRequiredService<MatchFactory>();
+        _Match = matchFactory.CreateMatch(matchConfig);
         _Match.MatchFinalized += OnMatchFinalized;
-        _Match.Initialize(matchConfig);
     }
 
     private void InitializeMatch(MatchInfo matchInfo, string roundBackupFile)
     {
         ResetForMatch(matchInfo.Config);
-        _Match = _ServiceProvider.GetRequiredService<Match.Match>();
+        var matchFactory = _ServiceProvider.GetRequiredService<MatchFactory>();
+        _Match = matchFactory.CreateMatch(matchInfo, roundBackupFile);
         _Match.MatchFinalized += OnMatchFinalized;
-        _Match.Initialize(matchInfo, roundBackupFile);
     }
 
     private void OnMatchFinalized(object? sender, MatchFinalizedEventArgs e)
     {
         StopMatch();
     }
-
 
     private void ResetForMatch(MatchConfig matchConfig)
     {
@@ -1309,7 +1308,7 @@ public class Application : IApplication
         {
             var g5Stats = _ServiceProvider.GetRequiredService<Api.G5Api.G5ApiClient>();
             g5Stats.Initialize(matchConfig.G5ApiUrl, matchConfig.G5ApiHeader ?? string.Empty, matchConfig.G5ApiHeaderValue ?? string.Empty);
-            var g5ApiProvider = new G5ApiProvider(g5Stats, _CsServer);
+            var g5ApiProvider = _ServiceProvider.GetRequiredService<G5ApiProvider>();
             _Plugin.RegisterConsoleCommandAttributeHandlers(g5ApiProvider);
             _ApiProvider.AddApiProvider(g5ApiProvider);
         }

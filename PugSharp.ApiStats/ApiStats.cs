@@ -8,7 +8,7 @@ public class ApiStats : BaseApi, IApiProvider
 {
     private readonly ILogger<ApiStats> _Logger;
 
-    public ApiStats(ILogger<ApiStats> logger) : base(logger)
+    public ApiStats(HttpClient httpClient, ILogger<ApiStats> logger) : base(httpClient, logger)
     {
         _Logger = logger;
     }
@@ -21,11 +21,6 @@ public class ApiStats : BaseApi, IApiProvider
 
     public async Task GoingLiveAsync(GoingLiveParams goingLiveParams, CancellationToken cancellationToken)
     {
-        if (HttpClient == null)
-        {
-            return;
-        }
-
         try
         {
             var queryParams = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
@@ -187,11 +182,6 @@ public class ApiStats : BaseApi, IApiProvider
 
     public async Task FinalizeAsync(SeriesResultParams seriesResultParams, CancellationToken cancellationToken)
     {
-        if (HttpClient == null)
-        {
-            return;
-        }
-
         if (HttpClient == null)
         {
             return;

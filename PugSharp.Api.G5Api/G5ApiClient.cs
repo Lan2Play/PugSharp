@@ -1,27 +1,22 @@
 ﻿using Microsoft.Extensions.Logging;
-using Polly;
-using Polly.Extensions.Http;
 using System.Text;
 using System.Text.Json;
 
 namespace PugSharp.Api.G5Api;
 
-public sealed class G5ApiClient : IDisposable
+public sealed class G5ApiClient
 {
-    private const int _RetryCount = 3;
-    private const int _RetryDelayFactor = 2;
     private readonly ILogger<G5ApiClient> _Logger;
 
-    private readonly HttpClient _HttpClient = new();
-    private IAsyncPolicy<HttpResponseMessage>? _RetryPolicy;
+    private readonly HttpClient _HttpClient;
 
     private string? _ApiUrl;
     private string? _ApiHeader;
     private string? _ApiHeadeValue;
-    private bool _DisposedValue;
 
-    public G5ApiClient(ILogger<G5ApiClient> logger)
+    public G5ApiClient(HttpClient httpClient,ILogger<G5ApiClient> logger)
     {
+        _HttpClient = httpClient;
         _Logger = logger;
     }
 
@@ -31,20 +26,6 @@ public sealed class G5ApiClient : IDisposable
         _ApiUrl = g5ApiUrl;
         _ApiHeader = g5ApiHeader;
         _ApiHeadeValue = g5ApiHeaderValue;
-
-        if (string.IsNullOrEmpty(g5ApiUrl))
-        {
-            return;
-        }
-
-        _RetryPolicy = HttpPolicyExtensions
-         .HandleTransientHttpError()
-             .WaitAndRetryAsync(_RetryCount,
-                retryAttempt => TimeSpan.FromSeconds(Math.Pow(_RetryDelayFactor, retryAttempt)),
-                onRetry: (response, calculatedWaitDuration) =>
-                {
-                    _Logger.LogError(response.Exception, "G5Api failed attempt. Waited for {CalculatedWaitDuration}. Retrying.", calculatedWaitDuration);
-                });
     }
 
     public void UpdateConfig(string g5ApiUrl, string g5ApiHeader, string g5ApiHeaderValue)
@@ -56,11 +37,6 @@ public sealed class G5ApiClient : IDisposable
 
     public async Task SendEventAsync(EventBase eventToSend, CancellationToken cancellationToken)
     {
-        if (_HttpClient == null || _RetryPolicy == null)
-        {
-            return;
-        }
-
         try
         {
             using var jsonContent = new StringContent(
@@ -78,8 +54,7 @@ public sealed class G5ApiClient : IDisposable
                 httpRequest.Headers.Add(_ApiHeader, _ApiHeadeValue);
             }
 
-            using var httpResponseMessage = await _RetryPolicy.ExecuteAsync(
-                                                        () => _HttpClient.SendAsync(httpRequest, cancellationToken)).ConfigureAwait(false);
+            using var httpResponseMessage = await _HttpClient.SendAsync(httpRequest, cancellationToken).ConfigureAwait(false);
 
             if (httpResponseMessage == null)
             {
@@ -99,24 +74,5 @@ public sealed class G5ApiClient : IDisposable
         {
             _Logger.LogError(ex, "Error sending event to G5 API. EventName {EventName}", eventToSend.EventName);
         }
-    }
-
-    private void Dispose(bool disposing)
-    {
-        if (!_DisposedValue)
-        {
-            if (disposing)
-            {
-                _HttpClient?.Dispose();
-            }
-
-            _DisposedValue = true;
-        }
-    }
-
-    public void Dispose()
-    {
-        // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
-        Dispose(disposing: true);
     }
 }

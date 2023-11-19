@@ -6,7 +6,7 @@ public class DemoUploader : BaseApi
 {
     private readonly ILogger<DemoUploader> _Logger;
 
-    public DemoUploader(ILogger<DemoUploader> logger) : base(logger)
+    public DemoUploader(HttpClient httpClient, ILogger<DemoUploader> logger) : base(httpClient, logger)
     {
         _Logger = logger;
     }

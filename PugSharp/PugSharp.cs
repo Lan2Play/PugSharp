@@ -8,15 +8,18 @@ using PugSharp.Api.Json;
 using PugSharp.Translation;
 using CounterStrikeSharp.API.Modules.Utils;
 using PugSharp.ApiStats;
-using NLog.Extensions.Logging;
-using Microsoft.Extensions.Configuration;
-using NLog.Config;
-using NLog.Targets;
+using PugSharp.Match;
+using Polly.Extensions.Http;
+using Polly;
+using PugSharp.Api.G5Api;
 
 namespace PugSharp;
 
 public class PugSharp : BasePlugin, IBasePlugin
 {
+    private const int _RetryCount = 3;
+    private const int _RetryDelayFactor = 2;
+
     private ServiceProvider? _ServiceProvider;
     private IApplication? _Application;
 
@@ -54,16 +57,35 @@ public class PugSharp : BasePlugin, IBasePlugin
 
         services.AddSingleton<IApplication, Application>();
 
+        var retryPolicy = HttpPolicyExtensions
+         .HandleTransientHttpError()
+             .WaitAndRetryAsync(_RetryCount,
+                retryAttempt => TimeSpan.FromSeconds(Math.Pow(_RetryDelayFactor, retryAttempt)));
+
+        services.AddHttpClient<ConfigProvider>()
+                .AddPolicyHandler(retryPolicy);
+
         services.AddSingleton<ConfigProvider>();
 
-        services.AddTransient<Match.Match>();
+        services.AddTransient<MatchFactory>();
 
-        // TODO Add HttpClients for ApiProviders
+        services.AddHttpClient<G5ApiClient>()
+                .AddPolicyHandler(retryPolicy);
+        services.AddSingleton<G5ApiClient>();
         services.AddSingleton<G5ApiProvider>();
+
+        services.AddHttpClient<ApiStats.ApiStats>()
+               .AddPolicyHandler(retryPolicy);
         services.AddSingleton<ApiStats.ApiStats>();
+
         services.AddSingleton<JsonApiProvider>();
-        services.AddSingleton<ITextHelper>(services => new TextHelper(services.GetRequiredService<ILogger<TextHelper>>(), ChatColors.Blue, ChatColors.Green, ChatColors.Red));
+
+        services.AddSingleton<ITextHelper>(sp => new TextHelper(sp.GetRequiredService<ILogger<TextHelper>>(), ChatColors.Blue, ChatColors.Green, ChatColors.Red));
+
+        services.AddHttpClient<DemoUploader>()
+               .AddPolicyHandler(retryPolicy);
         services.AddSingleton<DemoUploader>();
+
         services.AddSingleton<G5CommandProvider>();
 
         // Build service provider
