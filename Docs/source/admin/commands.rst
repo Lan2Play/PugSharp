@@ -27,6 +27,8 @@ Player Commands
 Admin/Rcon Commands
 -------------------
 
+These commands are available through rcon or to users with the `Permission <https://docs.cssharp.dev/admin-framework/defining-admins/#standard-permissions>` ``pugsharp/matchadmin``.
+
 ``<requiredParameter>`` marks parameters that are required for commands
 
 ``[optionalParameter]`` marks parameters that can be optionally be added to commands
@@ -44,4 +46,3 @@ Admin/Rcon Commands
 +----------------------------------------+---------------------------------------------------------------------------------------------------------------------------------------------------+
 | ``!ps_dumpmatch``                      | Dumps the current matchstate and config to console                                                                                                |
 +----------------------------------------+---------------------------------------------------------------------------------------------------------------------------------------------------+
-
