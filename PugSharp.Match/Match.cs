@@ -29,7 +29,7 @@ public class Match : IDisposable
     private readonly IApiProvider _ApiProvider;
     private readonly ITextHelper _TextHelper;
     private readonly ICsServer _CsServer;
-    private string _RoundBackupFile = string.Empty;
+    private readonly string _RoundBackupFile = string.Empty;
     private readonly StateMachine<MatchState, MatchCommand> _MatchStateMachine;
 
     private DemoUploader? _DemoUploader;
@@ -59,6 +59,7 @@ public class Match : IDisposable
     {
         _RoundBackupFile = roundBackupFile;
         Initialize(matchInfo);
+        InitializeStateMachine();
         _Logger.LogInformation("Continue Match on map {mapNumber}({mapName})!", MatchInfo!.CurrentMap.MapNumber, MatchInfo.CurrentMap.MapName);
     }
 

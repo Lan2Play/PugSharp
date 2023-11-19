@@ -187,11 +187,6 @@ public class ApiStats : BaseApi, IApiProvider
             return;
         }
 
-        if (HttpClient == null)
-        {
-            return;
-        }
-
         var queryParams = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
             {ApiStatsConstants.StatsSeriesWinner, seriesResultParams.WinnerTeamName},

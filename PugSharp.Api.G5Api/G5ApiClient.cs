@@ -26,11 +26,6 @@ public sealed class G5ApiClient
         _ApiUrl = g5ApiUrl;
         _ApiHeader = g5ApiHeader;
         _ApiHeadeValue = g5ApiHeaderValue;
-
-        if (string.IsNullOrEmpty(g5ApiUrl))
-        {
-            return;
-        }
     }
 
     public void UpdateConfig(string g5ApiUrl, string g5ApiHeader, string g5ApiHeaderValue)
