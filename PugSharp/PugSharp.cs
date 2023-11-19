@@ -12,9 +12,11 @@ using PugSharp.Match;
 using Polly.Extensions.Http;
 using Polly;
 using PugSharp.Api.G5Api;
+using CounterStrikeSharp.API.Core.Attributes;
 
 namespace PugSharp;
 
+[MinimumApiVersion(60)]
 public class PugSharp : BasePlugin, IBasePlugin
 {
     private const int _RetryCount = 3;
