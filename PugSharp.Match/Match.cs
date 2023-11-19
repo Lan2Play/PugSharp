@@ -7,6 +7,7 @@ using PugSharp.Api.Contract;
 using PugSharp.ApiStats;
 using PugSharp.Match.Contract;
 using PugSharp.Server.Contract;
+using PugSharp.Shared;
 using PugSharp.Translation;
 using PugSharp.Translation.Properties;
 
@@ -85,7 +86,7 @@ public class Match : IDisposable
             throw new NotSupportedException("Initialize can onyl be called once!");
         }
 
-        if (matchInfo.Config.Maplist.Length < matchInfo.Config.NumMaps)
+        if (matchInfo.Config.Maplist.Count < matchInfo.Config.NumMaps)
         {
             throw new NotSupportedException($"Can not create Match without the required number of maps! At lease {matchInfo.Config.NumMaps} are required!");
         }
@@ -129,11 +130,16 @@ public class Match : IDisposable
             .PermitDynamicIf(MatchCommand.LoadMatch, () => HasRestoredMatch() ? MatchState.RestoreMatch : MatchState.WaitingForPlayersConnectedReady);
 
         _MatchStateMachine.Configure(MatchState.WaitingForPlayersConnectedReady)
-            .PermitDynamicIf(MatchCommand.PlayerReady, () => HasRestoredMatch() ? MatchState.MatchRunning : MatchState.MapVote, AllPlayersAreReady)
+            .PermitDynamicIf(MatchCommand.PlayerReady, () => HasRestoredMatch() ? MatchState.MatchRunning : MatchState.DefineTeams, AllPlayersAreReady)
             .OnEntry(StartWarmup)
             .OnEntry(SetAllPlayersNotReady)
             .OnEntry(StartReadyReminder)
             .OnExit(StopReadyReminder);
+
+        _MatchStateMachine.Configure(MatchState.DefineTeams)
+            .Permit(MatchCommand.TeamsDefined, MatchState.MapVote)
+            .OnEntry(ContinueIfDefault)
+            .OnEntry(ScrambleTeams);
 
         _MatchStateMachine.Configure(MatchState.MapVote)
             .PermitReentryIf(MatchCommand.VoteMap, MapIsNotSelected)
@@ -198,6 +204,30 @@ public class Match : IDisposable
         _MatchStateMachine.OnTransitioned(OnMatchStateChanged);
 
         _MatchStateMachine.Fire(MatchCommand.LoadMatch);
+    }
+
+    private void ScrambleTeams()
+    {
+        if (MatchInfo.Config.TeamMode == Config.TeamMode.Scramble)
+        {
+            var randomizedPlayers = AllMatchPlayers.Randomize().ToList();
+
+            MatchInfo.MatchTeam1.Players.Clear();
+            MatchInfo.MatchTeam1.Players.AddRange(randomizedPlayers.Take(randomizedPlayers.Count.Half()));
+
+            MatchInfo.MatchTeam2.Players.Clear();
+            MatchInfo.MatchTeam2.Players.AddRange(randomizedPlayers.Skip(randomizedPlayers.Count.Half()));
+
+            TryFireState(MatchCommand.TeamsDefined);
+        }
+    }
+
+    private void ContinueIfDefault()
+    {
+        if (MatchInfo.Config.TeamMode == Config.TeamMode.Default)
+        {
+            TryFireState(MatchCommand.TeamsDefined);
+        }
     }
 
     private void StartWarmup()
@@ -664,7 +694,7 @@ public class Match : IDisposable
         }
 
         // If only one map is configured
-        if (MatchInfo.Config.Maplist.Length == 1)
+        if (MatchInfo.Config.Maplist.Count == 1)
         {
             _MapsToSelect = MatchInfo.Config.Maplist.Select(x => new Vote(x)).ToList();
             TryFireState(MatchCommand.VoteMap);
@@ -900,12 +930,18 @@ public class Match : IDisposable
 
     public bool TryAddPlayer(IPlayer player)
     {
+        if (!PlayerBelongsToMatch(player.SteamID))
+        {
+            _Logger.LogInformation("Player with steam id {steamId} is no member of this match!", player.SteamID);
+            return false;
+        }
+
         var isTeam1 = MatchInfo.Config.Team1.Players.ContainsKey(player.SteamID);
         var isTeam2 = !isTeam1 && MatchInfo.Config.Team2.Players.ContainsKey(player.SteamID);
         if (!isTeam1 && !isTeam2)
         {
-            _Logger.LogInformation("Player with steam id {steamId} is no member of this match!", player.SteamID);
-            return false;
+            // if no team is configured add player to team with less players
+            isTeam1 = MatchInfo.MatchTeam1.Players.Count < MatchInfo.MatchTeam2.Players.Count;
         }
 
         var team = isTeam1 ? MatchInfo.MatchTeam1 : MatchInfo.MatchTeam2;
@@ -1205,6 +1241,12 @@ public class Match : IDisposable
 
     public bool PlayerBelongsToMatch(ulong steamId)
     {
+        if (MatchInfo.Config.Team1.Players.Count == 0 && MatchInfo.Config.Team2.Players.Count == 0)
+        {
+            // Allow matches without player configuration wait for the first 10 players
+            return true;
+        }
+
         return MatchInfo.Config.Team1.Players.Any(x => x.Key.Equals(steamId))
                 || MatchInfo.Config.Team2.Players.Any(x => x.Key.Equals(steamId));
     }

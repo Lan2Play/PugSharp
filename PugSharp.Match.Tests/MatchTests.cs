@@ -160,7 +160,7 @@ public class MatchTests
 
     private static IPlayer VoteForMap(MatchConfig config, Match match, IPlayer player1, IPlayer player2)
     {
-        var matchCount = config.Maplist.Length;
+        var matchCount = config.Maplist.Count;
         var votePlayer = player1;
 
         Assert.False(match.BanMap(votePlayer, matchCount));
@@ -210,7 +210,7 @@ public class MatchTests
             mapListInternal = mapList;
         }
 
-        return new MatchConfig
+        var matchConfig = new MatchConfig
         {
             MatchId = "1337",
             PlayersPerTeam = 1,
@@ -232,8 +232,14 @@ public class MatchTests
                     { 1,"Def" },
                 },
             },
-            Maplist = mapListInternal.ToArray(),
         };
+
+        foreach (var map in mapListInternal)
+        {
+            matchConfig.Maplist.Add(map);
+        }
+
+        return matchConfig;
     }
 
     private static IPlayer CreatePlayerSub(ulong steamId, int playerId)

@@ -5,7 +5,7 @@ namespace PugSharp.Config;
 public class MatchConfig
 {
     [JsonPropertyName("maplist")]
-    public required string[] Maplist { get; init; }
+    public IList<string> Maplist { get; } = new List<string>();
 
     [JsonPropertyName("team1")]
     public required Team Team1 { get; init; }
@@ -60,4 +60,7 @@ public class MatchConfig
 
     [JsonPropertyName("server_locale")]
     public string ServerLocale { get; init; } = "en";
+
+    [JsonPropertyName("team_mode")]
+    public TeamMode TeamMode { get; set; }
 }

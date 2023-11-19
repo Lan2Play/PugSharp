@@ -41,6 +41,7 @@ public class Application : IApplication
 
     private Match.Match? _Match;
     private bool _DisposedValue;
+    private ConfigCreator _ConfigCreator;
     private readonly CurrentRoundState _CurrentRountState = new();
 
     /// <summary>
@@ -1050,8 +1051,133 @@ public class Application : IApplication
         player).ConfigureAwait(false);
     }
 
+    [ConsoleCommand("css_creatematch", "Create a match without predefined config")]
+    [ConsoleCommand("ps_creatematch", "Create a match without predefined config")]
+    [RequiresPermissions("@pugsharp/matchadmin")]
+    public void OnCommandCreateMatch(CCSPlayerController? player, CommandInfo command)
+    {
+        HandleCommand(() =>
+        {
+            if (_Match != null)
+            {
+                command.ReplyToCommand("Currently Match {match} is running. To stop it call ps_stopmatch");
+                return;
+            }
+
+            _ConfigCreator = new ConfigCreator();
+        },
+        command,
+        player);
+    }
+
+    [ConsoleCommand("css_startmatch", "Create a match without predefined config")]
+    [ConsoleCommand("ps_startmatch", "Create a match without predefined config")]
+    [RequiresPermissions("@pugsharp/matchadmin")]
+    public void OnCommandStartMatch(CCSPlayerController? player, CommandInfo command)
+    {
+        HandleCommand(() =>
+        {
+            if (_Match != null)
+            {
+                command.ReplyToCommand("Currently Match {match} is running. To stop it call ps_stopmatch");
+                return;
+            }
+
+            var matchConfig = _ConfigCreator.Config;
+            if (matchConfig.Maplist.Count == 0)
+            {
+                command.ReplyToCommand("Can not start match. At least one map is required!");
+                return;
+            }
+
+            ResetForMatch(matchConfig);
+            var matchFactory = _ServiceProvider.GetRequiredService<MatchFactory>();
+            _Match = matchFactory.CreateMatch(matchConfig);
+        },
+        command,
+        player);
+    }
+
+    [ConsoleCommand("css_addmap", "Adds a map to the map pool")]
+    [ConsoleCommand("ps_addmap", "Adds a map to the map pool")]
+    [RequiresPermissions("@pugsharp/matchadmin")]
+    public void OnCommandAddMap(CCSPlayerController? player, CommandInfo command)
+    {
+        const int requiredArgCount = 2;
+        HandleCommand(() =>
+        {
+            if (_Match != null)
+            {
+                command.ReplyToCommand("Currently Match {match} is running. To stop it call ps_stopmatch");
+                return;
+            }
+
+            if (_ConfigCreator == null)
+            {
+                command.ReplyToCommand("To Configure a new match you have to call ps_creatematch first");
+                return;
+            }
+
+            if (command.ArgCount != requiredArgCount)
+            {
+                command.ReplyToCommand("A map name is required to be added!");
+                return;
+            }
+
+            var mapName = command.ArgByIndex(1);
+            if (!_ConfigCreator.Config.Maplist.Contains(mapName, StringComparer.OrdinalIgnoreCase))
+            {
+                _ConfigCreator.Config.Maplist.Add(mapName);
+            }
+
+            command.ReplyToCommand($"Added {mapName}. Current maps are {string.Join(", ", _ConfigCreator.Config.Maplist)}");
+        },
+        command,
+        player);
+    }
+
+    [ConsoleCommand("css_removemap", "Removes a map to the map pool")]
+    [ConsoleCommand("ps_removemap", "Removes a map to the map pool")]
+    [RequiresPermissions("@pugsharp/matchadmin")]
+    public void OnCommandRemoveMap(CCSPlayerController? player, CommandInfo command)
+    {
+        const int requiredArgCount = 2;
+        HandleCommand(() =>
+        {
+            if (_Match != null)
+            {
+                command.ReplyToCommand("Currently Match {match} is running. To stop it call ps_stopmatch");
+                return;
+            }
+
+            if (_ConfigCreator == null)
+            {
+                command.ReplyToCommand("To Configure a new match you have to call ps_creatematch first");
+                return;
+            }
+
+            if (command.ArgCount != requiredArgCount)
+            {
+                command.ReplyToCommand("A map name is required to be removed!");
+                return;
+            }
+
+            var mapName = command.ArgByIndex(1);
+            if (_ConfigCreator.Config.Maplist.Remove(mapName))
+            {
+                command.ReplyToCommand($"Removed {mapName}. Current maps are {string.Join(", ", _ConfigCreator.Config.Maplist)}");
+            }
+            else
+            {
+                command.ReplyToCommand($"Could not remove {mapName}. Current maps are {string.Join(", ", _ConfigCreator.Config.Maplist)}");
+            }
+        },
+        command,
+        player);
+    }
+
     [ConsoleCommand("css_dumpmatch", "Serialize match to JSON on console")]
-    [ConsoleCommand("ps_dumpmatch", "Load a match config")]
+    [ConsoleCommand("ps_dumpmatch", "Serialize match to JSON on console")]
     [RequiresPermissions("@pugsharp/matchadmin")]
     public void OnCommandDumpMatch(CCSPlayerController? player, CommandInfo command)
     {
