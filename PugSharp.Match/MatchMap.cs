@@ -1,6 +1,4 @@
-﻿using PugSharp.ApiStats;
-
-namespace PugSharp.Match;
+﻿namespace PugSharp.Match;
 
 public class MatchMap
 {

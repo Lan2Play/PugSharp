@@ -1,6 +1,6 @@
 ﻿using PugSharp.Match.Contract;
 
-namespace PugSharp.ApiStats;
+namespace PugSharp.Match;
 
 public class PlayerMatchStatistics : IPlayerMatchStatistics
 {

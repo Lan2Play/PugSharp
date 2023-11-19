@@ -10,7 +10,7 @@ public sealed class PlayerSayEvent : PlayerTimedRoundEvent
     [JsonPropertyName("message")]
     public required string Message { get; init; }
 
-    public PlayerSayEvent() : base( "player_say")
+    public PlayerSayEvent() : base("player_say")
     {
     }
 }

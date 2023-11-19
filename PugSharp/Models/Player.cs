@@ -1,8 +1,10 @@
-﻿using CounterStrikeSharp.API;
+﻿using System.Globalization;
+
+using CounterStrikeSharp.API;
 using CounterStrikeSharp.API.Core;
 using CounterStrikeSharp.API.Modules.Menu;
+
 using PugSharp.Match.Contract;
-using System.Globalization;
 
 namespace PugSharp.Models;
 

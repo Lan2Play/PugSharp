@@ -1,7 +1,9 @@
-﻿using Microsoft.Extensions.Logging;
-using PugSharp.Translation.Properties;
-using System.Globalization;
+﻿using System.Globalization;
 using System.Text.RegularExpressions;
+
+using Microsoft.Extensions.Logging;
+
+using PugSharp.Translation.Properties;
 
 namespace PugSharp.Translation;
 

@@ -1,7 +1,8 @@
-﻿using CounterStrikeSharp.API.Core;
+﻿using System.Globalization;
+
+using CounterStrikeSharp.API.Core;
 using CounterStrikeSharp.API.Modules.Admin;
 using CounterStrikeSharp.API.Modules.Memory;
-using System.Globalization;
 
 namespace PugSharp;
 

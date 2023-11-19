@@ -1,5 +1,6 @@
-﻿using PugSharp.Config;
-using System.Text.Json.Serialization;
+﻿using System.Text.Json.Serialization;
+
+using PugSharp.Config;
 
 namespace PugSharp.Match;
 
@@ -12,7 +13,7 @@ public class MatchInfo
         Config = config;
 
         MatchTeam1 = new MatchTeam(Config.Team1) { CurrentTeamSite = Contract.Team.Terrorist };
-        MatchTeam2 = new MatchTeam(Config.Team2) { CurrentTeamSite = Contract.Team.CounterTerrorist};
+        MatchTeam2 = new MatchTeam(Config.Team2) { CurrentTeamSite = Contract.Team.CounterTerrorist };
     }
 
     [JsonIgnore]

@@ -1,6 +1,8 @@
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+
 using NSubstitute;
+
 using PugSharp.Api.Contract;
 using PugSharp.Config;
 using PugSharp.Match.Contract;

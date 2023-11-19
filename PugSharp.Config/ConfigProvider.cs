@@ -1,8 +1,10 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using System.Text.Json;
+
+using Microsoft.Extensions.Logging;
 using Microsoft.Net.Http.Headers;
+
 using OneOf;
 using OneOf.Types;
-using System.Text.Json;
 
 namespace PugSharp.Config;
 

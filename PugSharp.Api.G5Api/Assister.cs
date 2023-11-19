@@ -2,8 +2,9 @@
 
 namespace PugSharp.Api.G5Api;
 
-public class Assister  {
-    
+public class Assister
+{
+
     [JsonPropertyName("player")]
     public Player Player { get; set; }
 

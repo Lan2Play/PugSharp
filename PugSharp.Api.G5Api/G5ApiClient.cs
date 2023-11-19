@@ -1,6 +1,7 @@
-﻿using Microsoft.Extensions.Logging;
-using System.Text;
+﻿using System.Text;
 using System.Text.Json;
+
+using Microsoft.Extensions.Logging;
 
 namespace PugSharp.Api.G5Api;
 
@@ -14,7 +15,7 @@ public sealed class G5ApiClient
     private string? _ApiHeader;
     private string? _ApiHeadeValue;
 
-    public G5ApiClient(HttpClient httpClient,ILogger<G5ApiClient> logger)
+    public G5ApiClient(HttpClient httpClient, ILogger<G5ApiClient> logger)
     {
         _HttpClient = httpClient;
         _Logger = logger;

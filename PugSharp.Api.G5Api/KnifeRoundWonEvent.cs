@@ -12,6 +12,6 @@ public sealed class KnifeRoundWonEvent : MapTeamEvent
 
     public KnifeRoundWonEvent() : base("knife_won")
     {
-       
+
     }
 }

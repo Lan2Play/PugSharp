@@ -1,4 +1,5 @@
 ﻿using System.Text.Json.Serialization;
+
 using PugSharp.Shared;
 
 namespace PugSharp.Api.G5Api;

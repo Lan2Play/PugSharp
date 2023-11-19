@@ -1,7 +1,8 @@
-﻿using PugSharp.Api.Contract;
+﻿using System.Globalization;
+
+using PugSharp.Api.Contract;
 using PugSharp.Api.G5Api;
 using PugSharp.Server.Contract;
-using System.Globalization;
 
 namespace PugSharp;
 
