@@ -1,4 +1,5 @@
 ﻿using CounterStrikeSharp.API.Core;
+using CounterStrikeSharp.API.Core.Attributes;
 using CounterStrikeSharp.API.Modules.Utils;
 
 using Microsoft.Extensions.DependencyInjection;
@@ -18,6 +19,7 @@ using PugSharp.Translation;
 
 namespace PugSharp;
 
+[MinimumApiVersion(60)]
 public class PugSharp : BasePlugin, IBasePlugin
 {
     private const int _RetryCount = 3;
