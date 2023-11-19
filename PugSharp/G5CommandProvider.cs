@@ -1,9 +1,11 @@
-﻿using PugSharp.Api.Contract;
-using Microsoft.Extensions.Logging;
-using PugSharp.Server.Contract;
-using System.Text.RegularExpressions;
-using System.Text.Json;
+﻿using System.Text.Json;
 using System.Text.Json.Serialization;
+using System.Text.RegularExpressions;
+
+using Microsoft.Extensions.Logging;
+
+using PugSharp.Api.Contract;
+using PugSharp.Server.Contract;
 
 namespace PugSharp;
 

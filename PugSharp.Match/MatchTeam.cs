@@ -1,5 +1,6 @@
-﻿using PugSharp.Match.Contract;
-using System.Text.Json.Serialization;
+﻿using System.Text.Json.Serialization;
+
+using PugSharp.Match.Contract;
 
 namespace PugSharp.Match;
 

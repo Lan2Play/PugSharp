@@ -1,5 +1,6 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+
 using PugSharp.Api.Contract;
 using PugSharp.Config;
 using PugSharp.Server.Contract;

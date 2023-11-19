@@ -1,7 +1,9 @@
-﻿using Microsoft.Extensions.Logging;
-using PugSharp.Api.Contract;
-using System.Globalization;
+﻿using System.Globalization;
 using System.Text.Json;
+
+using Microsoft.Extensions.Logging;
+
+using PugSharp.Api.Contract;
 
 namespace PugSharp.Api.Json;
 

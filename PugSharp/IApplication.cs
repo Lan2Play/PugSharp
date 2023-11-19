@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace PugSharp;
+﻿namespace PugSharp;
 
 /// <summary>
 /// Application interface

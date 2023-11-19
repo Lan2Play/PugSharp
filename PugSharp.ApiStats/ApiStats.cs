@@ -1,7 +1,9 @@
-﻿using Microsoft.AspNetCore.WebUtilities;
+﻿using System.Globalization;
+
+using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.Extensions.Logging;
+
 using PugSharp.Api.Contract;
-using System.Globalization;
 namespace PugSharp.ApiStats;
 
 public class ApiStats : BaseApi, IApiProvider

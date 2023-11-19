@@ -2,7 +2,7 @@
 
 public interface IPlayerStatistics
 {
-    int Assists { get;  }
+    int Assists { get; }
     int BombDefuses { get; }
     int BombPlants { get; }
     bool Coaching { get; }

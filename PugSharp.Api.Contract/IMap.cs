@@ -6,7 +6,7 @@ public interface IMap
 
     string Name { get; }
 
-    IMapTeamInfo Team1 { get;  }
+    IMapTeamInfo Team1 { get; }
 
     IMapTeamInfo Team2 { get; }
 

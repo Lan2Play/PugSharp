@@ -1,11 +1,17 @@
-﻿using CounterStrikeSharp.API;
+﻿using System.Globalization;
+using System.Runtime.CompilerServices;
+using System.Text.Json;
+
+using CounterStrikeSharp.API;
 using CounterStrikeSharp.API.Core;
 using CounterStrikeSharp.API.Core.Attributes.Registration;
 using CounterStrikeSharp.API.Modules.Admin;
 using CounterStrikeSharp.API.Modules.Commands;
 using CounterStrikeSharp.API.Modules.Cvars;
+
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+
 using PugSharp.Api.Contract;
 using PugSharp.Api.Json;
 using PugSharp.Config;
@@ -16,9 +22,6 @@ using PugSharp.Server.Contract;
 using PugSharp.Shared;
 using PugSharp.Translation;
 using PugSharp.Translation.Properties;
-using System.Globalization;
-using System.Runtime.CompilerServices;
-using System.Text.Json;
 
 namespace PugSharp;
 public class Application : IApplication
@@ -85,7 +88,7 @@ public class Application : IApplication
                     HandleCommand(() =>
                     {
                         var args = Enumerable.Range(0, c.ArgCount).Select(i => c.GetArg(i)).ToArray();
-                        var results = command.commandCallBack(args);
+                        var results = command.CommandCallBack(args);
                         foreach (var result in results)
                         {
                             c.ReplyToCommand(result);

@@ -1,25 +1,28 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+﻿using System.Globalization;
+
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+
 using PugSharp.Api.Contract;
 using PugSharp.ApiStats;
 using PugSharp.Match.Contract;
 using PugSharp.Server.Contract;
 using PugSharp.Translation;
 using PugSharp.Translation.Properties;
+
 using Stateless;
 using Stateless.Graph;
-using System.Globalization;
 
 namespace PugSharp.Match;
 
 public class Match : IDisposable
 {
-    private const int Kill1 = 1;
-    private const int Kill2 = 2;
-    private const int Kill3 = 3;
-    private const int Kill4 = 4;
-    private const int Kill5 = 5;
-    private const int NumOfMatchLiveMessages = 10;
+    private const int _Kill1 = 1;
+    private const int _Kill2 = 2;
+    private const int _Kill3 = 3;
+    private const int _Kill4 = 4;
+    private const int _Kill5 = 5;
+    private const int _NumOfMatchLiveMessages = 10;
     private const int _TimeBetweenDelayMessages = 10;
     private readonly IServiceProvider _ServiceProvider;
     private readonly ILogger<Match> _Logger;
@@ -37,7 +40,7 @@ public class Match : IDisposable
 
     private List<Vote> _MapsToSelect = new List<Vote>();
     private MatchTeam? _CurrentMatchTeamToVote;
-    private bool disposedValue;
+    private bool _DisposedValue;
 
     public MatchState CurrentState => _MatchStateMachine.State;
 
@@ -412,19 +415,19 @@ public class Match : IDisposable
 
             switch (playerResult.Kills)
             {
-                case Kill1:
+                case _Kill1:
                     matchStats.Count1K++;
                     break;
-                case Kill2:
+                case _Kill2:
                     matchStats.Count2K++;
                     break;
-                case Kill3:
+                case _Kill3:
                     matchStats.Count3K++;
                     break;
-                case Kill4:
+                case _Kill4:
                     matchStats.Count4K++;
                     break;
-                case Kill5:
+                case _Kill5:
                     matchStats.Count5K++;
                     break;
                 default:
@@ -436,19 +439,19 @@ public class Match : IDisposable
             {
                 switch (playerResult.ClutchKills)
                 {
-                    case Kill1:
+                    case _Kill1:
                         matchStats.V1++;
                         break;
-                    case Kill2:
+                    case _Kill2:
                         matchStats.V2++;
                         break;
-                    case Kill3:
+                    case _Kill3:
                         matchStats.V3++;
                         break;
-                    case Kill4:
+                    case _Kill4:
                         matchStats.V4++;
                         break;
-                    case Kill5:
+                    case _Kill5:
                         matchStats.V5++;
                         break;
                     default:
@@ -576,7 +579,7 @@ public class Match : IDisposable
         _ = Task.Run(async () =>
         {
             var matchIsLiveMessage = _TextHelper.GetText(nameof(Resources.PugSharp_Match_Info_IsLive));
-            for (int i = 0; i < NumOfMatchLiveMessages; i++)
+            for (int i = 0; i < _NumOfMatchLiveMessages; i++)
             {
                 _CsServer.PrintToChatAll(matchIsLiveMessage);
 
@@ -1153,7 +1156,7 @@ public class Match : IDisposable
 
     protected virtual void Dispose(bool disposing)
     {
-        if (!disposedValue)
+        if (!_DisposedValue)
         {
             if (disposing)
             {
@@ -1164,7 +1167,7 @@ public class Match : IDisposable
                 _ReadyReminderTimer.Dispose();
             }
 
-            disposedValue = true;
+            _DisposedValue = true;
         }
     }
 
