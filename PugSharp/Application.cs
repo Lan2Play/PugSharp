@@ -88,7 +88,7 @@ public class Application : IApplication
                     HandleCommand(() =>
                     {
                         var args = Enumerable.Range(0, c.ArgCount).Select(i => c.GetArg(i)).ToArray();
-                        var results = command.commandCallBack(args);
+                        var results = command.CommandCallBack(args);
                         foreach (var result in results)
                         {
                             c.ReplyToCommand(result);
