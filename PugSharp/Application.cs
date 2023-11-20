@@ -197,15 +197,7 @@ public class Application : IApplication
             }
             else
             {
-                var user = eventPlayerConnectFull.Userid;
-                _CsServer.NextFrame(() =>
-                {
-                    if (!user.IsAdmin())
-                    {
-                        _Logger.LogInformation("No match is loaded. Kick Player {player}!", userId.PlayerName);
-                        userId.Kick();
-                    }
-                });
+                // Do nothign if no match is loaded
             }
         }
         else
@@ -232,8 +224,7 @@ public class Application : IApplication
         }
         else
         {
-            _Logger.LogInformation("No match is loaded. Kick Player {player}!", eventPlayerTeam.Userid.PlayerName);
-            eventPlayerTeam.Userid.Kick();
+            // Do nothing
         }
 
         return HookResult.Continue;
