@@ -1189,21 +1189,6 @@ public class Application : IApplication
         player);
     }
 
-    [ConsoleCommand("css_dumpmatch", "Serialize match to JSON on console")]
-    [ConsoleCommand("ps_dumpmatch", "Serialize match to JSON on console")]
-    [RequiresPermissions("@pugsharp/matchadmin")]
-    public void OnCommandDumpMatch(CCSPlayerController? player, CommandInfo command)
-    {
-        HandleCommand(() =>
-        {
-            _Logger.LogInformation("################ dump match ################");
-            _Logger.LogInformation("{matchJson}", JsonSerializer.Serialize(_Match));
-            _Logger.LogInformation("################ dump match ################");
-        },
-        command,
-        player);
-    }
-
     [ConsoleCommand("css_matchinfo", "Serialize match to JSON on console")]
     [ConsoleCommand("ps_matchinfo", "Serialize match to JSON on console")]
     [RequiresPermissions("@pugsharp/matchadmin")]
@@ -1228,6 +1213,21 @@ public class Application : IApplication
             command.ReplyToCommand($"Vote timeout: {config.MaxOvertimeRounds}");
             command.ReplyToCommand($"Allow suicide: {config.AllowSuicide}");
             command.ReplyToCommand($"Team mode: {config.TeamMode}");
+        },
+        command,
+        player);
+    }
+
+    [ConsoleCommand("css_dumpmatch", "Serialize match to JSON on console")]
+    [ConsoleCommand("ps_dumpmatch", "Serialize match to JSON on console")]
+    [RequiresPermissions("@pugsharp/matchadmin")]
+    public void OnCommandDumpMatch(CCSPlayerController? player, CommandInfo command)
+    {
+        HandleCommand(() =>
+        {
+            _Logger.LogInformation("################ dump match ################");
+            _Logger.LogInformation("{matchJson}", JsonSerializer.Serialize(_Match));
+            _Logger.LogInformation("################ dump match ################");
         },
         command,
         player);
