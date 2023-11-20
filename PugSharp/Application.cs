@@ -1073,6 +1073,7 @@ public class Application : IApplication
             }
 
             _ConfigCreator = new ConfigCreator();
+            _ConfigCreator.Config.Maplist.Add(_CsServer.CurrentMap);
 
             command.ReplyToCommand("Creating a match started!");
             command.ReplyToCommand("!addmap <mapname> to add a map!");
@@ -1106,6 +1107,7 @@ public class Application : IApplication
             ResetForMatch(matchConfig);
             var matchFactory = _ServiceProvider.GetRequiredService<MatchFactory>();
             _Match = matchFactory.CreateMatch(matchConfig);
+            KickNonMatchPlayers();
         },
         command,
         player);
@@ -1447,6 +1449,7 @@ public class Application : IApplication
         var matchFactory = _ServiceProvider.GetRequiredService<MatchFactory>();
         _Match = matchFactory.CreateMatch(matchConfig);
         _Match.MatchFinalized += OnMatchFinalized;
+        KickNonMatchPlayers();
     }
 
     private void InitializeMatch(MatchInfo matchInfo, string roundBackupFile)
@@ -1455,6 +1458,7 @@ public class Application : IApplication
         var matchFactory = _ServiceProvider.GetRequiredService<MatchFactory>();
         _Match = matchFactory.CreateMatch(matchInfo, roundBackupFile);
         _Match.MatchFinalized += OnMatchFinalized;
+        KickNonMatchPlayers();
     }
 
     private void OnMatchFinalized(object? sender, MatchFinalizedEventArgs e)
@@ -1490,16 +1494,24 @@ public class Application : IApplication
 
         SetMatchVariable(matchConfig);
 
-        var players = _CsServer.LoadAllPlayers();
-        foreach (var player in players.Where(x => x.UserId.HasValue && x.UserId >= 0))
+        _Match?.Dispose();
+    }
+
+    private void KickNonMatchPlayers()
+    {
+        if (_Match == null)
         {
-            if (player.UserId != null)
+            return;
+        }
+
+        var players = Utilities.GetPlayers().Where(x => x.IsValid && !x.IsHLTV);
+        foreach (var player in players)
+        {
+            if (!_Match.TryAddPlayer(new Player(player)))
             {
                 player.Kick();
             }
         }
-
-        _Match?.Dispose();
     }
 
     private void ResetServer(string map)

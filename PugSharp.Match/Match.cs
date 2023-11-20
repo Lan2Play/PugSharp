@@ -936,12 +936,19 @@ public class Match : IDisposable
             return false;
         }
 
+        if (MatchInfo.MatchTeam1.Players.Any(x => x.Player.SteamID == player.SteamID)
+            || MatchInfo.MatchTeam2.Players.Any(x => x.Player.SteamID == player.SteamID))
+        {
+            // Player is already part of this match
+            return true;
+        }
+
         var isTeam1 = MatchInfo.Config.Team1.Players.ContainsKey(player.SteamID);
         var isTeam2 = !isTeam1 && MatchInfo.Config.Team2.Players.ContainsKey(player.SteamID);
         if (!isTeam1 && !isTeam2)
         {
             // if no team is configured add player to team with less players
-            isTeam1 = MatchInfo.MatchTeam1.Players.Count < MatchInfo.MatchTeam2.Players.Count;
+            isTeam1 = MatchInfo.MatchTeam1.Players.Count <= MatchInfo.MatchTeam2.Players.Count;
         }
 
         var team = isTeam1 ? MatchInfo.MatchTeam1 : MatchInfo.MatchTeam2;
@@ -958,12 +965,6 @@ public class Match : IDisposable
             _Logger.LogInformation("Player {playerName} should be on {startSite} but is {currentTeam}", player.PlayerName, startSite, player.Team);
 
             player.SwitchTeam(startSite);
-        }
-
-        var existingPlayer = team.Players.FirstOrDefault(x => x.Player.SteamID.Equals(player.SteamID));
-        if (existingPlayer != null)
-        {
-            team.Players.Remove(existingPlayer);
         }
 
         team.Players.Add(new MatchPlayer(player));
@@ -1056,6 +1057,11 @@ public class Match : IDisposable
         if (MatchInfo.Config.Team2.Players.ContainsKey(steamID))
         {
             return Team.CounterTerrorist;
+        }
+
+        if (MatchInfo.Config.Team1.Players.Count == 0 && MatchInfo.Config.Team2.Players.Count == 0)
+        {
+            return MatchInfo.MatchTeam1.Players.Count < MatchInfo.MatchTeam2.Players.Count ? Team.Terrorist : Team.CounterTerrorist;
         }
 
         return Team.None;
