@@ -805,6 +805,11 @@ public class Application : IApplication
 
     private HookResult OnClientCommandJoinTeam(CCSPlayerController? player, CommandInfo commandInfo)
     {
+        if (_Match == null)
+        {
+            return HookResult.Continue;
+        }
+
         _Logger.LogInformation("OnClientCommandJoinTeam was called!");
         if (player != null && player.IsValid)
         {
@@ -1068,6 +1073,11 @@ public class Application : IApplication
             }
 
             _ConfigCreator = new ConfigCreator();
+
+            command.ReplyToCommand("Creating a match started!");
+            command.ReplyToCommand("!addmap <mapname> to add a map!");
+            command.ReplyToCommand("!removemap <mapname> to remove a map!");
+            command.ReplyToCommand("!startmatch <mapname> to start the match!");
         },
         command,
         player);
@@ -1189,6 +1199,35 @@ public class Application : IApplication
             _Logger.LogInformation("################ dump match ################");
             _Logger.LogInformation("{matchJson}", JsonSerializer.Serialize(_Match));
             _Logger.LogInformation("################ dump match ################");
+        },
+        command,
+        player);
+    }
+
+    [ConsoleCommand("css_matchinfo", "Serialize match to JSON on console")]
+    [ConsoleCommand("ps_matchinfo", "Serialize match to JSON on console")]
+    [RequiresPermissions("@pugsharp/matchadmin")]
+    public void OnCommandMatchInfo(CCSPlayerController? player, CommandInfo command)
+    {
+        HandleCommand(() =>
+        {
+            if (_Match == null && _ConfigCreator == null)
+            {
+                command.ReplyToCommand("Currently no match is running. Matchinfo is unavailable!");
+                return;
+            }
+
+            var config = _Match?.MatchInfo?.Config ?? _ConfigCreator.Config;
+
+            command.ReplyToCommand($"Info Match {config.MatchId}");
+            command.ReplyToCommand($"Maplist: {string.Join(", ", config.Maplist)}");
+            command.ReplyToCommand($"Number of Maps: {config.NumMaps}");
+            command.ReplyToCommand($"Players per Team: {config.NumMaps}");
+            command.ReplyToCommand($"Max rounds: {config.MaxRounds}");
+            command.ReplyToCommand($"Max overtime rounds: {config.MaxOvertimeRounds}");
+            command.ReplyToCommand($"Vote timeout: {config.MaxOvertimeRounds}");
+            command.ReplyToCommand($"Allow suicide: {config.AllowSuicide}");
+            command.ReplyToCommand($"Team mode: {config.TeamMode}");
         },
         command,
         player);
@@ -1339,7 +1378,7 @@ public class Application : IApplication
     {
         while (await _ConfigTimer.WaitForNextTickAsync(_CancellationTokenSource.Token).ConfigureAwait(false))
         {
-            if (_Match != null && (_Match.CurrentState == MatchState.WaitingForPlayersConnectedReady || _Match.CurrentState == MatchState.WaitingForPlayersReady) && Utilities.GetPlayers().Count(x => !x.IsBot) == 0)
+            if ((_Match == null || _Match.CurrentState == MatchState.WaitingForPlayersConnectedReady || _Match.CurrentState == MatchState.WaitingForPlayersReady) && Utilities.GetPlayers().Count(x => !x.IsBot) == 0)
             {
                 // TODO Besseren Platz suchen!
                 _CsServer.LoadAndExecuteConfig("warmup.cfg");
