@@ -164,6 +164,11 @@ public class Application : IApplication
             // // Userid will give you a reference to a CCSPlayerController class
             _Logger.LogInformation("Player {playerName} has connected!", userId.PlayerName);
 
+            if (userId.IsHLTV)
+            {
+                return HookResult.Continue;
+            }
+
             if (_Match != null)
             {
                 if (!_Match.PlayerBelongsToMatch(eventPlayerConnectFull.Userid.SteamID))
