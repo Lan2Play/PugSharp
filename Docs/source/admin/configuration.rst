@@ -3,7 +3,7 @@ Configuration
 
 Introduction
 ----------------------------------------
-There are two types of configurations that are relevant for PugSharp. 
+There are three types of configurations that are relevant for PugSharp. 
 
 
 PugSharp Configs
@@ -105,12 +105,11 @@ The Serverconfig defines server wide PugSharp settings for your server. It is lo
 
 Serverconfig Fields
 '''''''''''''''''''''
-+--------+--------------------------------------------------------------------------------------------+
-| Field  |                                        Description                                         |
-+========+============================================================================================+
-| admins | List of admins with the steamId and a                                                      |
-|        | Name (enables the execution of the :ref:`admin/commands:Admin/Rcon Commands` for a player) |
-+--------+--------------------------------------------------------------------------------------------+
++-------+-------------+
+| Field | Description |
++=======+=============+
+| none  | none        |
++-------+-------------+
 
 Serverconfig Example
 '''''''''''''''''''''
@@ -118,12 +117,15 @@ Serverconfig Example
 .. code-block:: json
 
    {
-     "admins": {
-       "12345678901234569": "BOT R00st3r",
-       "12345678901234567": "Apfelwurm"
-     }
+     "none": ""
    }
 
+
+CounterstrikeSharp Configs
+----------------------------------------
+
+For the administration permissions, we are using `the CounterstrikeSharp admin framework <https://docs.cssharp.dev/admin-framework/defining-admins/#adding-admins>`_ .
+Currently all :ref:`admin/commands:Admin/Rcon Commands` are using the permission ``@pugsharp/matchadmin`` 
 
 
 CS2 Server Configs
