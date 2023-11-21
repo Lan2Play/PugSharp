@@ -39,10 +39,20 @@ public class PugSharp : BasePlugin, IBasePlugin
         // Create DI container
         var services = new ServiceCollection();
 
+
         services.AddLogging(options =>
         {
-            options.AddConsole();
+            //options.AddConsole();
         });
+
+        var serviceDescriptor = services.FirstOrDefault(descriptor => descriptor.ServiceType == typeof(ILoggerFactory));
+        if (serviceDescriptor != null)
+        {
+            services.Remove(serviceDescriptor);
+        }
+
+        services.AddSingleton(CounterStrikeSharp.API.Core.Logging.CoreLogging.Factory);
+
 
         services.AddSingleton<ICsServer, CsServer>();
         services.AddSingleton<MultiApiProvider>();

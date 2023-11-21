@@ -26,6 +26,7 @@ using PugSharp.Translation.Properties;
 namespace PugSharp;
 public class Application : IApplication
 {
+    private const int _SwitchPlayerDelay = 1000;
     private readonly ILogger<Application> _Logger;
     private readonly IBasePlugin _Plugin;
     private readonly ICsServer _CsServer;
@@ -230,9 +231,9 @@ public class Application : IApplication
         return HookResult.Continue;
     }
 
-    private void CheckMatchPlayerTeam(CCSPlayerController playerController, int team)
+    private async void CheckMatchPlayerTeam(CCSPlayerController playerController, int team)
     {
-        if (_Match == null)
+        if (_Match == null || !playerController.IsValid)
         {
             return;
         }
@@ -243,14 +244,17 @@ public class Application : IApplication
 
             if ((int)configTeam != team)
             {
-                _Logger.LogInformation("Player {playerName} tried to join {team} but shoudl be in {configTeam}!", playerController.PlayerName, team, configTeam);
-                var player = new Player(playerController);
+                var localPlayer = playerController;
+                await Task.Delay(_SwitchPlayerDelay, _CancellationTokenSource.Token).ConfigureAwait(false);
 
-                _CsServer.NextFrame(() =>
-                {
-                    _Logger.LogInformation("Switch {playerName} to team {team}!", player.PlayerName, configTeam);
-                    player.SwitchTeam(configTeam);
-                });
+                _Logger.LogInformation("Player {playerName} tried to join {team} but should be in {configTeam}!", localPlayer.PlayerName, team, configTeam);
+                var player = new Player(localPlayer);
+
+                //_CsServer.NextFrame(() =>
+                //{
+                _Logger.LogInformation("Switch {playerName} to team {team}!", player.PlayerName, configTeam);
+                player.SwitchTeam(configTeam);
+                //});
             }
         }
     }
@@ -977,7 +981,6 @@ public class Application : IApplication
 
         await HandleCommandAsync(async () =>
         {
-
             if (_Match != null)
             {
                 command.ReplyToCommand("Currently Match {match} is running. To stop it call ps_stopmatch");
@@ -1104,10 +1107,7 @@ public class Application : IApplication
                 return;
             }
 
-            ResetForMatch(matchConfig);
-            var matchFactory = _ServiceProvider.GetRequiredService<MatchFactory>();
-            _Match = matchFactory.CreateMatch(matchConfig);
-            KickNonMatchPlayers();
+            InitializeMatch(matchConfig);
         },
         command,
         player);
@@ -1121,15 +1121,8 @@ public class Application : IApplication
         const int requiredArgCount = 2;
         HandleCommand(() =>
         {
-            if (_Match != null)
+            if (!IsConfigCreatorAvailable(command))
             {
-                command.ReplyToCommand("Currently Match {match} is running. To stop it call ps_stopmatch");
-                return;
-            }
-
-            if (_ConfigCreator == null)
-            {
-                command.ReplyToCommand("To Configure a new match you have to call ps_creatematch first");
                 return;
             }
 
@@ -1159,15 +1152,8 @@ public class Application : IApplication
         const int requiredArgCount = 2;
         HandleCommand(() =>
         {
-            if (_Match != null)
+            if (!IsConfigCreatorAvailable(command))
             {
-                command.ReplyToCommand("Currently Match {match} is running. To stop it call ps_stopmatch");
-                return;
-            }
-
-            if (_ConfigCreator == null)
-            {
-                command.ReplyToCommand("To Configure a new match you have to call ps_creatematch first");
                 return;
             }
 
@@ -1189,6 +1175,141 @@ public class Application : IApplication
         },
         command,
         player);
+    }
+
+    [ConsoleCommand("css_maxrounds", "Sets max rounds for the match")]
+    [ConsoleCommand("ps_maxrounds", "Sets max rounds for the match")]
+    [RequiresPermissions("@pugsharp/matchadmin")]
+    public void OnCommandMaxRounds(CCSPlayerController? player, CommandInfo command)
+    {
+        const int requiredArgCount = 2;
+        HandleCommand(() =>
+        {
+            if (!IsConfigCreatorAvailable(command))
+            {
+                return;
+            }
+
+            if (command.ArgCount != requiredArgCount)
+            {
+                command.ReplyToCommand("A number of rounds is required!");
+                return;
+            }
+
+            if (!int.TryParse(command.ArgByIndex(1), CultureInfo.InvariantCulture, out var maxRounds))
+            {
+                command.ReplyToCommand("Max rounds have to be an number!");
+                return;
+            }
+
+            if (maxRounds <= 0)
+            {
+                command.ReplyToCommand("Max rounds have to be greater than 0!");
+                return;
+            }
+
+            var oldMaxRounds = _ConfigCreator.Config.MaxRounds;
+            _ConfigCreator.Config.MaxRounds = maxRounds;
+            command.ReplyToCommand($"Changed max rounds from {oldMaxRounds} to {maxRounds}");
+        },
+        command,
+        player);
+    }
+
+    [ConsoleCommand("css_maxovertimerounds", "Sets max overtime rounds for the match")]
+    [ConsoleCommand("ps_maxovertimerounds", "Sets max overtime rounds for the match")]
+    [RequiresPermissions("@pugsharp/matchadmin")]
+    public void OnCommandMaxOvertimeRounds(CCSPlayerController? player, CommandInfo command)
+    {
+        const int requiredArgCount = 2;
+        HandleCommand(() =>
+        {
+            if (!IsConfigCreatorAvailable(command))
+            {
+                return;
+            }
+
+            if (command.ArgCount != requiredArgCount)
+            {
+                command.ReplyToCommand("A number of rounds is required!");
+                return;
+            }
+
+            if (!int.TryParse(command.ArgByIndex(1), CultureInfo.InvariantCulture, out var maxOvertimeRounds))
+            {
+                command.ReplyToCommand("Max overtime rounds have to be an number!");
+                return;
+            }
+
+            if (maxOvertimeRounds <= 0)
+            {
+                command.ReplyToCommand("Max overtime rounds have to be greater than 0!");
+                return;
+            }
+
+            var oldMaxRounds = _ConfigCreator.Config.MaxOvertimeRounds;
+            _ConfigCreator.Config.MaxOvertimeRounds = maxOvertimeRounds;
+            command.ReplyToCommand($"Changed max overtime rounds from {oldMaxRounds} to {maxOvertimeRounds}");
+        },
+        command,
+        player);
+    }
+
+    [ConsoleCommand("css_playersperteam", "Sets number of players per team for the match")]
+    [ConsoleCommand("ps_playersperteam", "Sets number of players per team for the match")]
+    [RequiresPermissions("@pugsharp/matchadmin")]
+    public void OnCommandPlayersPerTeam(CCSPlayerController? player, CommandInfo command)
+    {
+        const int requiredArgCount = 2;
+        HandleCommand(() =>
+        {
+            if (!IsConfigCreatorAvailable(command))
+            {
+                return;
+            }
+
+            if (command.ArgCount != requiredArgCount)
+            {
+                command.ReplyToCommand("Players per team is required!");
+                return;
+            }
+
+            if (!int.TryParse(command.ArgByIndex(1), CultureInfo.InvariantCulture, out var playersPerTeam))
+            {
+                command.ReplyToCommand("Players per team have to be an number!");
+                return;
+            }
+
+            if (playersPerTeam <= 0)
+            {
+                command.ReplyToCommand("Players per team have to be greater than 0!");
+                return;
+            }
+
+            var oldPlayersPerTeam = _ConfigCreator.Config.PlayersPerTeam;
+            _ConfigCreator.Config.PlayersPerTeam = playersPerTeam;
+            _ConfigCreator.Config.MinPlayersToReady = playersPerTeam;
+            command.ReplyToCommand($"Changed players per team from {oldPlayersPerTeam} to {playersPerTeam}");
+        },
+        command,
+        player);
+    }
+
+    private bool IsConfigCreatorAvailable(CommandInfo command)
+    {
+        if (_Match != null)
+        {
+            command.ReplyToCommand("Currently Match {match} is running. To stop it call ps_stopmatch");
+            return false;
+        }
+
+        if (_ConfigCreator == null)
+        {
+            command.ReplyToCommand("To Configure a new match you have to call ps_creatematch first");
+            return false;
+        }
+
+        return true;
     }
 
     [ConsoleCommand("css_matchinfo", "Serialize match to JSON on console")]
@@ -1238,31 +1359,31 @@ public class Application : IApplication
     [ConsoleCommand("css_ready", "Mark player as ready")]
     public void OnCommandReady(CCSPlayerController? player, CommandInfo command)
     {
-        _ = HandleCommandAsync(async () =>
-        {
-            if (player == null)
-            {
-                _Logger.LogInformation("Command Start has been called by the server. Player is required to be marked as ready");
-                return;
-            }
+        HandleCommand(() =>
+       {
+           if (player == null)
+           {
+               _Logger.LogInformation("Command Start has been called by the server. Player is required to be marked as ready");
+               return;
+           }
 
-            if (_Match == null)
-            {
-                return;
-            }
+           if (_Match == null)
+           {
+               return;
+           }
 
-            var matchPlayer = new Player(player);
-            if (!_Match.TryAddPlayer(matchPlayer))
-            {
-                _Logger.LogError("Can not toggle ready state. Player is not part of this match!");
-                player.Kick();
-                return;
-            }
+           var matchPlayer = new Player(player);
+           if (!_Match.TryAddPlayer(matchPlayer))
+           {
+               _Logger.LogError("Can not toggle ready state. Player is not part of this match!");
+               player.Kick();
+               return;
+           }
 
-            await _Match.TogglePlayerIsReadyAsync(matchPlayer).ConfigureAwait(false);
-        },
-        command,
-        player);
+           _Match.TogglePlayerIsReady(matchPlayer);
+       },
+       command,
+       player);
     }
 
     [ConsoleCommand("css_unpause", "Starts a match")]
@@ -1369,7 +1490,6 @@ public class Application : IApplication
         catch (Exception e)
         {
             _Logger.LogError(e, "Error executing command {command}", commandName);
-            command.ReplyToCommand($"Error executing command \"{commandName}\"!");
         }
     }
 

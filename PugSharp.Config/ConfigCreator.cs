@@ -11,7 +11,6 @@ public class ConfigCreator
             Team1 = new Team
             {
                 Name = "Team 1",
-
             },
             Team2 = new Team
             {

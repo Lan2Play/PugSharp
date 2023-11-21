@@ -83,7 +83,7 @@ public class Match : IDisposable
     {
         if (MatchInfo != null)
         {
-            throw new NotSupportedException("Initialize can onyl be called once!");
+            throw new NotSupportedException("Initialize can only be called once!");
         }
 
         if (matchInfo.Config.Maplist.Count < matchInfo.Config.NumMaps)
@@ -678,7 +678,7 @@ public class Match : IDisposable
 
     private void InitializeMapsToVote(StateMachine<MatchState, MatchCommand>.Transition transition)
     {
-        if (transition.Source == MatchState.WaitingForPlayersConnectedReady)
+        if (transition.Source == MatchState.DefineTeams)
         {
             var playedMaps = MatchInfo.MatchMaps.Select(x => x.MapName).Where(x => !string.IsNullOrEmpty(x));
             _MapsToSelect = MatchInfo.Config.Maplist.Except(playedMaps!, StringComparer.Ordinal).Select(x => new Vote(x)).ToList();
@@ -715,7 +715,9 @@ public class Match : IDisposable
         }
 
         ShowMenuToTeam(_CurrentMatchTeamToVote!, _TextHelper.GetText(nameof(Resources.PugSharp_Match_VoteMapMenuHeader)), mapOptions);
-        GetOtherTeam(_CurrentMatchTeamToVote!).PrintToChat(_TextHelper.GetText(nameof(Resources.PugSharp_Match_WaitForOtherTeam)));
+
+        //GetOtherTeam(_CurrentMatchTeamToVote!).PrintToChat(_TextHelper.GetText(nameof(Resources.PugSharp_Match_WaitForOtherTeam)));
+
         _VoteTimer.Start();
     }
 
@@ -759,7 +761,7 @@ public class Match : IDisposable
         };
 
         ShowMenuToTeam(_CurrentMatchTeamToVote!, _TextHelper.GetText(nameof(Resources.PugSharp_Match_VoteTeamMenuHeader)), mapOptions);
-        GetOtherTeam(_CurrentMatchTeamToVote!).PrintToChat(_TextHelper.GetText(nameof(Resources.PugSharp_Match_WaitForOtherTeam)));
+        //GetOtherTeam(_CurrentMatchTeamToVote!).PrintToChat(_TextHelper.GetText(nameof(Resources.PugSharp_Match_WaitForOtherTeam)));
 
         _VoteTimer.Start();
     }
@@ -826,7 +828,7 @@ public class Match : IDisposable
         var readyPlayers = AllMatchPlayers.Where(p => p.IsReady);
         var requiredPlayers = MatchInfo.Config.PlayersPerTeam * 2;
 
-        _Logger.LogInformation("Match has {readyPlayers} of {rquiredPlayers} ready players: {readyPlayers}", readyPlayers.Count(), requiredPlayers, string.Join("; ", readyPlayers.Select(a => $"{a.Player.PlayerName}[{a.IsReady}]")));
+        //_Logger.LogInformation("Match has {readyPlayers} of {requiredPlayers} ready players: {readyPlayers}", readyPlayers.Count(), requiredPlayers, string.Join("; ", readyPlayers.Select(a => $"{a.Player.PlayerName}[{a.IsReady}]").ToList()));
 
         return readyPlayers.Take(requiredPlayers + 1).Count() == requiredPlayers;
     }
@@ -945,10 +947,18 @@ public class Match : IDisposable
 
         var isTeam1 = MatchInfo.Config.Team1.Players.ContainsKey(player.SteamID);
         var isTeam2 = !isTeam1 && MatchInfo.Config.Team2.Players.ContainsKey(player.SteamID);
-        if (!isTeam1 && !isTeam2)
+        if (MatchInfo.RandomPlayersAllowed && !isTeam1 && !isTeam2)
         {
             // if no team is configured add player to team with less players
             isTeam1 = MatchInfo.MatchTeam1.Players.Count <= MatchInfo.MatchTeam2.Players.Count;
+            if (isTeam1)
+            {
+                MatchInfo.Config.Team1.Players.Add(player.SteamID, player.PlayerName);
+            }
+            else
+            {
+                MatchInfo.Config.Team2.Players.Add(player.SteamID, player.PlayerName);
+            }
         }
 
         var team = isTeam1 ? MatchInfo.MatchTeam1 : MatchInfo.MatchTeam2;
@@ -1007,7 +1017,7 @@ public class Match : IDisposable
         }
     }
 
-    public async Task TogglePlayerIsReadyAsync(IPlayer player)
+    public void TogglePlayerIsReady(IPlayer player)
     {
         if (CurrentState != MatchState.WaitingForPlayersConnectedReady && CurrentState != MatchState.WaitingForPlayersReady)
         {
@@ -1026,7 +1036,7 @@ public class Match : IDisposable
         if (matchPlayer.IsReady)
         {
             _CsServer.PrintToChatAll(_TextHelper.GetText(nameof(Resources.PugSharp_Match_Info_Ready), player.PlayerName, readyPlayers, requiredPlayers));
-            await TryFireStateAsync(MatchCommand.PlayerReady).ConfigureAwait(false);
+            TryFireState(MatchCommand.PlayerReady);
         }
         else
         {
@@ -1247,7 +1257,7 @@ public class Match : IDisposable
 
     public bool PlayerBelongsToMatch(ulong steamId)
     {
-        if (MatchInfo.Config.Team1.Players.Count == 0 && MatchInfo.Config.Team2.Players.Count == 0)
+        if (MatchInfo.RandomPlayersAllowed)
         {
             // Allow matches without player configuration wait for the first 10 players
             return true;

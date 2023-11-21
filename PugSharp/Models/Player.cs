@@ -77,31 +77,51 @@ public class Player : IPlayer
 
     public void PrintToChat(string message)
     {
-        _PlayerController.PrintToChat(message);
+        try
+        {
+            if (_PlayerController.IsValid)
+            {
+                _PlayerController.PrintToChat(message);
+            }
+        }
+        catch (Exception ex)
+        {
+            // TODO Logging
+        }
     }
 
     public void ShowMenu(string title, IEnumerable<MenuOption> menuOptions)
     {
-        var menu = new ChatMenu(title);
-
-        foreach (var menuOption in menuOptions)
+        try
         {
-            menu.AddMenuOption(menuOption.DisplayName, (player, opt) => menuOption.Action.Invoke(menuOption, this));
-        }
+            var menu = new ChatMenu(title);
 
-        ChatMenus.OpenMenu(_PlayerController, menu);
+            foreach (var menuOption in menuOptions)
+            {
+                menu.AddMenuOption(menuOption.DisplayName, (player, opt) => menuOption.Action.Invoke(menuOption, this));
+            }
+
+            if (_PlayerController.IsValid)
+            {
+                ChatMenus.OpenMenu(_PlayerController, menu);
+            }
+        }
+        catch (Exception e)
+        {
+        }
     }
 
     public void SwitchTeam(Team team)
     {
         if (_PlayerController.IsValid)
         {
-            _PlayerController.SwitchTeam((CounterStrikeSharp.API.Modules.Utils.CsTeam)(int)team);
-            CounterStrikeSharp.API.Server.NextFrame(() =>
-            {
-                _PlayerController.PlayerPawn.Value.CommitSuicide(explode: true, force: true);
-                ResetScoreboard();
-            });
+            _PlayerController.ChangeTeam((CounterStrikeSharp.API.Modules.Utils.CsTeam)(int)team);
+            //_PlayerController.SwitchTeam((CounterStrikeSharp.API.Modules.Utils.CsTeam)(int)team);
+            //CounterStrikeSharp.API.Server.NextFrame(() =>
+            //{
+            //    _PlayerController.PlayerPawn.Value.CommitSuicide(explode: true, force: true);
+            //    ResetScoreboard();
+            //});
         }
     }
 

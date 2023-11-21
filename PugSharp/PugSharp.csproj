@@ -8,15 +8,19 @@
 
 	<ItemGroup>
 
-		<PackageReference Include="CounterStrikeSharp.API" Version="1.0.61">
+		<PackageReference Include="CounterStrikeSharp.API" Version="1.0.65">
 			<PrivateAssets>none</PrivateAssets>
 			<ExcludeAssets>runtime</ExcludeAssets>
 			<IncludeAssets>compile; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
 		</PackageReference>
 
+		<PackageReference Include="Microsoft.Extensions.Http.Polly" Version="7.0.14" />
+
 		<PackageReference Include="OneOf" Version="3.0.263" />
-		<PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="8.0.0" />
-		<PackageReference Include="Microsoft.Extensions.Logging.Console" Version="8.0.0" />
+		<PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="7.0.0" />
+		<!--<PackageReference Include="Microsoft.Extensions.Logging" Version="8.0.0" />
+		<PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="8.0.0" />-->
+
 	</ItemGroup>
 
 	<ItemGroup>
