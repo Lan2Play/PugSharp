@@ -35,6 +35,7 @@ public class Player : IPlayer
 
     private void ReloadPlayerController()
     {
+        _PlayerController = Utilities.GetPlayers().Find(x => x.SteamID == SteamID) ?? _PlayerController;
         if (_PlayerController == null || !_PlayerController.IsValid)
         {
             _PlayerController = Utilities.GetPlayerFromUserid(_UserId);
@@ -53,6 +54,7 @@ public class Player : IPlayer
     {
         get
         {
+            ReloadPlayerController();
             if (!_PlayerController.IsValid)
             {
                 return null;
@@ -63,6 +65,7 @@ public class Player : IPlayer
 
         set
         {
+            ReloadPlayerController();
             if (_PlayerController.IsValid)
             {
 #pragma warning disable S1854 // Unused assignments should be removed
@@ -79,6 +82,7 @@ public class Player : IPlayer
     {
         try
         {
+            ReloadPlayerController();
             if (_PlayerController.IsValid)
             {
                 _PlayerController.PrintToChat(message);
@@ -94,6 +98,7 @@ public class Player : IPlayer
     {
         try
         {
+            ReloadPlayerController();
             var menu = new ChatMenu(title);
 
             foreach (var menuOption in menuOptions)
@@ -113,6 +118,7 @@ public class Player : IPlayer
 
     public void SwitchTeam(Team team)
     {
+        ReloadPlayerController();
         if (_PlayerController.IsValid)
         {
             _PlayerController.ChangeTeam((CounterStrikeSharp.API.Modules.Utils.CsTeam)(int)team);
@@ -128,16 +134,5 @@ public class Player : IPlayer
     public void Kick()
     {
         CounterStrikeSharp.API.Server.ExecuteCommand(string.Create(CultureInfo.InvariantCulture, $"kickid {UserId!.Value} \"You are not part of the current match!\""));
-    }
-
-    private void ResetScoreboard()
-    {
-        var matchStats = _PlayerController.ActionTrackingServices?.MatchStats;
-
-        if (matchStats != null)
-        {
-            matchStats.Kills = 0;
-            matchStats.Deaths = 0;
-        }
     }
 }

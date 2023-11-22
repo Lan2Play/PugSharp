@@ -555,21 +555,15 @@ public class Match : IDisposable
         _ = TryFireStateAsync(MatchCommand.CompleteMatch);
     }
 
+
+
     private async Task CompleteMatchAsync()
     {
         try
         {
             _CsServer.StopDemoRecording();
 
-            var delay = 15;
-
-            if (_CsServer.GetConvar<bool>("tv_enable") || _CsServer.GetConvar<bool>("tv_enable1"))
-            {
-                // TV Delay in s
-                var tvDelaySeconds = Math.Max(_CsServer.GetConvar<int>("tv_delay"), _CsServer.GetConvar<int>("tv_delay1"));
-                _Logger.LogInformation("Waiting for sourceTV. Delay: {delay}s + 15s", tvDelaySeconds);
-                delay += tvDelaySeconds;
-            }
+            int delay = GetSourceTvDelay();
 
             var seriesResultParams = new SeriesResultParams(MatchInfo.Config.MatchId, MatchInfo.MatchMaps.GroupBy(x => x.Winner).MaxBy(x => x.Count())!.Key!.TeamConfig.Name, Forfeit: true, (uint)delay * 1100, MatchInfo.MatchMaps.Count(x => x.Team1Points > x.Team2Points), MatchInfo.MatchMaps.Count(x => x.Team2Points > x.Team1Points));
             var finalize = _ApiProvider.FinalizeAsync(seriesResultParams, CancellationToken.None);
@@ -602,6 +596,21 @@ public class Match : IDisposable
         {
             MatchFinalized?.Invoke(this, new MatchFinalizedEventArgs());
         }
+    }
+
+    private int GetSourceTvDelay()
+    {
+        var delay = 15;
+
+        if (_CsServer.GetConvar<bool>("tv_enable") || _CsServer.GetConvar<bool>("tv_enable1"))
+        {
+            // TV Delay in s
+            var tvDelaySeconds = Math.Max(_CsServer.GetConvar<int>("tv_delay"), _CsServer.GetConvar<int>("tv_delay1"));
+            _Logger.LogInformation("Waiting for sourceTV. Delay: {delay}s + 15s", tvDelaySeconds);
+            delay += tvDelaySeconds;
+        }
+
+        return delay;
     }
 
     private void MatchLive()
@@ -714,6 +723,7 @@ public class Match : IDisposable
             mapOptions.Add(new MenuOption(map, (opt, player) => BanMap(player, mapNumber)));
         }
 
+
         ShowMenuToTeam(_CurrentMatchTeamToVote!, _TextHelper.GetText(nameof(Resources.PugSharp_Match_VoteMapMenuHeader)), mapOptions);
 
         //GetOtherTeam(_CurrentMatchTeamToVote!).PrintToChat(_TextHelper.GetText(nameof(Resources.PugSharp_Match_WaitForOtherTeam)));
@@ -795,7 +805,7 @@ public class Match : IDisposable
 
     private void ShowMenuToTeam(MatchTeam team, string title, IEnumerable<MenuOption> options)
     {
-        DoForAll(team.Players.Select(p => p.Player).ToList(), p => p.ShowMenu(title, options));
+        DoForAll(team.Players.Select(x => x.Player), p => p.ShowMenu(title, options));
     }
 
     private void SwitchVotingTeam()
@@ -1232,6 +1242,9 @@ public class Match : IDisposable
 
     public void CompleteMap(int tPoints, int ctPoints)
     {
+        int delay = GetSourceTvDelay();
+        _CsServer.UpdateConvar("mp_win_panel_display_time", delay);
+
         var winner = tPoints > ctPoints ? Team.Terrorist : Team.CounterTerrorist;
 
         var winnerTeam = GetMatchTeam(winner) ?? throw new NotSupportedException("Winner Team could not be found!");
