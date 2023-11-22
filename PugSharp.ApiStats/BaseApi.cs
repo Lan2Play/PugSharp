@@ -33,6 +33,8 @@ public class BaseApi
 
             HttpClient.BaseAddress = new Uri(baseUrl);
 
+            HttpClient.DefaultRequestHeaders.Remove(HeaderNames.Authorization);
+
             if (!string.IsNullOrEmpty(authKey))
             {
                 HttpClient.DefaultRequestHeaders.Add(HeaderNames.Authorization, authKey);

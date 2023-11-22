@@ -66,53 +66,35 @@ public class Player : IPlayer
         set
         {
             ReloadPlayerController();
-            if (_PlayerController.IsValid)
+            if (_PlayerController.IsValid && _PlayerController.InGameMoneyServices != null && value != null)
             {
-#pragma warning disable S1854 // Unused assignments should be removed
-#pragma warning disable IDE0059 // Unnecessary assignment of a value
-                var money = _PlayerController.InGameMoneyServices?.Account;
-                money = value;
-#pragma warning restore IDE0059 // Unnecessary assignment of a value
-#pragma warning restore S1854 // Unused assignments should be removed
+                _PlayerController.InGameMoneyServices.Account = value.Value;
             }
         }
     }
 
     public void PrintToChat(string message)
     {
-        try
+        ReloadPlayerController();
+        if (_PlayerController.IsValid)
         {
-            ReloadPlayerController();
-            if (_PlayerController.IsValid)
-            {
-                _PlayerController.PrintToChat(message);
-            }
-        }
-        catch (Exception ex)
-        {
-            // TODO Logging
+            _PlayerController.PrintToChat(message);
         }
     }
 
     public void ShowMenu(string title, IEnumerable<MenuOption> menuOptions)
     {
-        try
+        ReloadPlayerController();
+        var menu = new ChatMenu(title);
+
+        foreach (var menuOption in menuOptions)
         {
-            ReloadPlayerController();
-            var menu = new ChatMenu(title);
-
-            foreach (var menuOption in menuOptions)
-            {
-                menu.AddMenuOption(menuOption.DisplayName, (player, opt) => menuOption.Action.Invoke(menuOption, this));
-            }
-
-            if (_PlayerController.IsValid)
-            {
-                ChatMenus.OpenMenu(_PlayerController, menu);
-            }
+            menu.AddMenuOption(menuOption.DisplayName, (player, opt) => menuOption.Action.Invoke(menuOption, this));
         }
-        catch (Exception e)
+
+        if (_PlayerController.IsValid)
         {
+            ChatMenus.OpenMenu(_PlayerController, menu);
         }
     }
 
@@ -122,12 +104,6 @@ public class Player : IPlayer
         if (_PlayerController.IsValid)
         {
             _PlayerController.ChangeTeam((CounterStrikeSharp.API.Modules.Utils.CsTeam)(int)team);
-            //_PlayerController.SwitchTeam((CounterStrikeSharp.API.Modules.Utils.CsTeam)(int)team);
-            //CounterStrikeSharp.API.Server.NextFrame(() =>
-            //{
-            //    _PlayerController.PlayerPawn.Value.CommitSuicide(explode: true, force: true);
-            //    ResetScoreboard();
-            //});
         }
     }
 

@@ -7,7 +7,6 @@ using CounterStrikeSharp.API.Core;
 using CounterStrikeSharp.API.Core.Attributes.Registration;
 using CounterStrikeSharp.API.Modules.Admin;
 using CounterStrikeSharp.API.Modules.Commands;
-using CounterStrikeSharp.API.Modules.Cvars;
 
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -241,20 +240,17 @@ public class Application : IApplication
         if (_Match.CurrentState == MatchState.WaitingForPlayersConnectedReady || _Match.CurrentState == MatchState.WaitingForPlayersReady)
         {
             var configTeam = _Match.GetPlayerTeam(playerController.SteamID);
+            var localPlayer = playerController;
 
             if ((int)configTeam != team)
             {
-                var localPlayer = playerController;
                 await Task.Delay(_SwitchPlayerDelay, _CancellationTokenSource.Token).ConfigureAwait(false);
 
                 _Logger.LogInformation("Player {playerName} tried to join {team} but should be in {configTeam}!", localPlayer.PlayerName, team, configTeam);
                 var player = new Player(localPlayer);
 
-                //_CsServer.NextFrame(() =>
-                //{
                 _Logger.LogInformation("Switch {playerName} to team {team}!", player.PlayerName, configTeam);
                 player.SwitchTeam(configTeam);
-                //});
             }
         }
     }
@@ -291,33 +287,33 @@ public class Application : IApplication
             {
                 CheckMatchPlayerTeam(userId, userId.TeamNum);
 
-                try
-                {
-                    _Logger.LogInformation("Update Money on PlayerSpawn");
-                    var player = new Player(userId);
+                //try
+                //{
+                //    _Logger.LogInformation("Update Money on PlayerSpawn");
+                //    var player = new Player(userId);
 
-                    int maxMoneyValue = 16000;
-                    try
-                    {
-                        // Use value from server if possible
-                        var maxMoneyCvar = ConVar.Find("mp_maxmoney");
-                        if (maxMoneyCvar != null)
-                        {
+                //    int maxMoneyValue = 16000;
+                //    try
+                //    {
+                //        // Use value from server if possible
+                //        var maxMoneyCvar = ConVar.Find("mp_maxmoney");
+                //        if (maxMoneyCvar != null)
+                //        {
 
-                            maxMoneyValue = maxMoneyCvar.GetPrimitiveValue<int>();
-                        }
-                    }
-                    catch (Exception e)
-                    {
-                        _Logger.LogError(e, "Error loading mp_maxmoney!");
-                    }
+                //            maxMoneyValue = maxMoneyCvar.GetPrimitiveValue<int>();
+                //        }
+                //    }
+                //    catch (Exception e)
+                //    {
+                //        _Logger.LogError(e, "Error loading mp_maxmoney!");
+                //    }
 
-                    player.Money = maxMoneyValue;
-                }
-                catch (Exception ex)
-                {
-                    _Logger.LogError(ex, "Error updating money!");
-                }
+                //    player.Money = maxMoneyValue;
+                //}
+                //catch (Exception ex)
+                //{
+                //    _Logger.LogError(ex, "Error updating money!");
+                //}
             });
         }
 
@@ -565,6 +561,30 @@ public class Application : IApplication
         if (_Match.CurrentState == MatchState.None)
         {
             return HookResult.Continue;
+        }
+
+        if (_Match.CurrentState <= MatchState.WaitingForPlayersReady)
+        {
+            if (eventPlayerDeath.Userid.InGameMoneyServices != null)
+            {
+                int maxMoneyValue = 16000;
+                //try
+                //{
+                //    // Use value from server if possible
+                //    var maxMoneyCvar = ConVar.Find("mp_maxmoney");
+                //    if (maxMoneyCvar != null)
+                //    {
+
+                //        maxMoneyValue = maxMoneyCvar.GetPrimitiveValue<int>();
+                //    }
+                //}
+                //catch (Exception e)
+                //{
+                //    _Logger.LogError(e, "Error loading mp_maxmoney!");
+                //}
+
+                eventPlayerDeath.Userid.InGameMoneyServices.Account = maxMoneyValue;
+            }
         }
 
         if (_Match.CurrentState == MatchState.MatchRunning)
