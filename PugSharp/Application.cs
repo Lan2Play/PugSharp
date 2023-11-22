@@ -124,7 +124,6 @@ public class Application : IApplication
         _Plugin.RegisterEventHandler<EventBombDefused>(OnBombDefused);
         _Plugin.RegisterEventHandler<EventBombPlanted>(OnBombPlanted);
 
-
         _Plugin.AddCommandListener("jointeam", OnClientCommandJoinTeam);
 
         _Logger.LogInformation("End RegisterEventHandlers");
@@ -286,34 +285,6 @@ public class Application : IApplication
             _CsServer.NextFrame(() =>
             {
                 CheckMatchPlayerTeam(userId, userId.TeamNum);
-
-                //try
-                //{
-                //    _Logger.LogInformation("Update Money on PlayerSpawn");
-                //    var player = new Player(userId);
-
-                //    int maxMoneyValue = 16000;
-                //    try
-                //    {
-                //        // Use value from server if possible
-                //        var maxMoneyCvar = ConVar.Find("mp_maxmoney");
-                //        if (maxMoneyCvar != null)
-                //        {
-
-                //            maxMoneyValue = maxMoneyCvar.GetPrimitiveValue<int>();
-                //        }
-                //    }
-                //    catch (Exception e)
-                //    {
-                //        _Logger.LogError(e, "Error loading mp_maxmoney!");
-                //    }
-
-                //    player.Money = maxMoneyValue;
-                //}
-                //catch (Exception ex)
-                //{
-                //    _Logger.LogError(ex, "Error updating money!");
-                //}
             });
         }
 
@@ -1102,6 +1073,10 @@ public class Application : IApplication
             command.ReplyToCommand("!addmap <mapname> to add a map!");
             command.ReplyToCommand("!removemap <mapname> to remove a map!");
             command.ReplyToCommand("!startmatch <mapname> to start the match!");
+            command.ReplyToCommand("!maxrounds <rounds> to set max match rounds!");
+            command.ReplyToCommand("!maxovertimerounds <rounds> to set max overtime rounds!");
+            command.ReplyToCommand("!playersperteam <players> to set players per team!");
+            command.ReplyToCommand("!matchinfo to show current match configuration!");
         },
         command,
         player);
