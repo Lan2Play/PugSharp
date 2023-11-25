@@ -27,6 +27,8 @@ Player Commands
 Admin/Rcon Commands
 -------------------
 
+These commands are available through rcon or to users with the required permissions. See :ref:`admin/configuration:CounterstrikeSharp Configs` 
+
 ``<requiredParameter>`` marks parameters that are required for commands
 
 ``[optionalParameter]`` marks parameters that can be optionally be added to commands
