@@ -59,7 +59,9 @@ Matchconfig Fields
 +--------------------------+-----------------+-------------------------------------------------------------------------------------------+
 | server_locale            | en              | This is the language that will be used for the messages that are printed to the users     |
 +--------------------------+-----------------+-------------------------------------------------------------------------------------------+
-    
+| team_mode                | 0               | Change how teams are defined. 0: Default (Teams are fix defined) 1: Scramble (Teams are scrambled when all players are ready) |
++--------------------------+-----------------+-------------------------------------------------------------------------------------------+
+
 Matchconfig Example
 '''''''''''''''''''''
 

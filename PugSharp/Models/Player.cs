@@ -35,6 +35,7 @@ public class Player : IPlayer
 
     private void ReloadPlayerController()
     {
+        _PlayerController = Utilities.GetPlayers().Find(x => x.SteamID == SteamID) ?? _PlayerController;
         if (_PlayerController == null || !_PlayerController.IsValid)
         {
             _PlayerController = Utilities.GetPlayerFromUserid(_UserId);
@@ -53,6 +54,7 @@ public class Player : IPlayer
     {
         get
         {
+            ReloadPlayerController();
             if (!_PlayerController.IsValid)
             {
                 return null;
@@ -63,25 +65,26 @@ public class Player : IPlayer
 
         set
         {
-            if (_PlayerController.IsValid)
+            ReloadPlayerController();
+            if (_PlayerController.IsValid && _PlayerController.InGameMoneyServices != null && value != null)
             {
-#pragma warning disable S1854 // Unused assignments should be removed
-#pragma warning disable IDE0059 // Unnecessary assignment of a value
-                var money = _PlayerController.InGameMoneyServices?.Account;
-                money = value;
-#pragma warning restore IDE0059 // Unnecessary assignment of a value
-#pragma warning restore S1854 // Unused assignments should be removed
+                _PlayerController.InGameMoneyServices.Account = value.Value;
             }
         }
     }
 
     public void PrintToChat(string message)
     {
-        _PlayerController.PrintToChat(message);
+        ReloadPlayerController();
+        if (_PlayerController.IsValid)
+        {
+            _PlayerController.PrintToChat(message);
+        }
     }
 
     public void ShowMenu(string title, IEnumerable<MenuOption> menuOptions)
     {
+        ReloadPlayerController();
         var menu = new ChatMenu(title);
 
         foreach (var menuOption in menuOptions)
@@ -89,35 +92,23 @@ public class Player : IPlayer
             menu.AddMenuOption(menuOption.DisplayName, (player, opt) => menuOption.Action.Invoke(menuOption, this));
         }
 
-        ChatMenus.OpenMenu(_PlayerController, menu);
+        if (_PlayerController.IsValid)
+        {
+            ChatMenus.OpenMenu(_PlayerController, menu);
+        }
     }
 
     public void SwitchTeam(Team team)
     {
+        ReloadPlayerController();
         if (_PlayerController.IsValid)
         {
-            _PlayerController.SwitchTeam((CounterStrikeSharp.API.Modules.Utils.CsTeam)(int)team);
-            CounterStrikeSharp.API.Server.NextFrame(() =>
-            {
-                _PlayerController.PlayerPawn.Value.CommitSuicide(explode: true, force: true);
-                ResetScoreboard();
-            });
+            _PlayerController.ChangeTeam((CounterStrikeSharp.API.Modules.Utils.CsTeam)(int)team);
         }
     }
 
     public void Kick()
     {
         CounterStrikeSharp.API.Server.ExecuteCommand(string.Create(CultureInfo.InvariantCulture, $"kickid {UserId!.Value} \"You are not part of the current match!\""));
-    }
-
-    private void ResetScoreboard()
-    {
-        var matchStats = _PlayerController.ActionTrackingServices?.MatchStats;
-
-        if (matchStats != null)
-        {
-            matchStats.Kills = 0;
-            matchStats.Deaths = 0;
-        }
     }
 }

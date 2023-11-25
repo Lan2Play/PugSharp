@@ -1,5 +1,4 @@
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
 
 using NSubstitute;
 
@@ -23,7 +22,7 @@ public class MatchTests
         services.AddSingleton(Substitute.For<ICsServer>());
         services.AddLogging(options =>
         {
-            options.AddConsole();
+            //options.AddConsole();
         });
         services.AddSingleton<IApplication, Application>();
 
@@ -151,16 +150,16 @@ public class MatchTests
         csServer.Received().SwitchMap(config.Maplist[^1]);
 
         Assert.Equal(MatchState.WaitingForPlayersReady, match.CurrentState);
-        await match.TogglePlayerIsReadyAsync(player1).ConfigureAwait(false);
+        match.TogglePlayerIsReady(player1);
         Assert.Equal(MatchState.WaitingForPlayersReady, match.CurrentState);
-        await match.TogglePlayerIsReadyAsync(player2).ConfigureAwait(false);
+        match.TogglePlayerIsReady(player2);
 
         Assert.Equal(MatchState.MatchRunning, match.CurrentState);
     }
 
     private static IPlayer VoteForMap(MatchConfig config, Match match, IPlayer player1, IPlayer player2)
     {
-        var matchCount = config.Maplist.Length;
+        var matchCount = config.Maplist.Count;
         var votePlayer = player1;
 
         Assert.False(match.BanMap(votePlayer, matchCount));
@@ -184,9 +183,9 @@ public class MatchTests
 
     private static async Task SetPlayersReady(Match match, IPlayer player1, IPlayer player2, MatchState expectedMatchStateAfterReady)
     {
-        await match.TogglePlayerIsReadyAsync(player1).ConfigureAwait(false);
+        match.TogglePlayerIsReady(player1);
         Assert.Equal(MatchState.WaitingForPlayersConnectedReady, match.CurrentState);
-        await match.TogglePlayerIsReadyAsync(player2).ConfigureAwait(false);
+        match.TogglePlayerIsReady(player2);
         Assert.Equal(expectedMatchStateAfterReady, match.CurrentState);
     }
 
@@ -210,7 +209,7 @@ public class MatchTests
             mapListInternal = mapList;
         }
 
-        return new MatchConfig
+        var matchConfig = new MatchConfig
         {
             MatchId = "1337",
             PlayersPerTeam = 1,
@@ -232,8 +231,14 @@ public class MatchTests
                     { 1,"Def" },
                 },
             },
-            Maplist = mapListInternal.ToArray(),
         };
+
+        foreach (var map in mapListInternal)
+        {
+            matchConfig.Maplist.Add(map);
+        }
+
+        return matchConfig;
     }
 
     private static IPlayer CreatePlayerSub(ulong steamId, int playerId)

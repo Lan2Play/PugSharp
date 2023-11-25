@@ -218,6 +218,6 @@ public class CsServer : ICsServer
     {
         return Utilities.GetPlayers().Where(x => x.PlayerState() == PlayerConnectedState.PlayerConnected).Select(p => new Player(p)).ToList();
     }
+
+    public string CurrentMap => CounterStrikeSharp.API.Server.MapName;
 }
-
-
