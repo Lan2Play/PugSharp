@@ -38,7 +38,6 @@ public class PugSharp : BasePlugin, IBasePlugin
     {
         Console.WriteLine("Ctor PugSharp");
     }
-
     public override void Load(bool hotReload)
     {
         Console.WriteLine("Start Loading PugSharp");
