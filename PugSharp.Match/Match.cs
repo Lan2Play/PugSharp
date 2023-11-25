@@ -952,6 +952,7 @@ public class Match : IDisposable
             || MatchInfo.MatchTeam2.Players.Any(x => x.Player.SteamID == player.SteamID))
         {
             // Player is already part of this match
+            _ = TryFireStateAsync(MatchCommand.ConnectPlayer);
             return true;
         }
 
