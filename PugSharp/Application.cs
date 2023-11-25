@@ -1325,10 +1325,10 @@ public class Application : IApplication
             command.ReplyToCommand($"Info Match {config.MatchId}");
             command.ReplyToCommand($"Maplist: {string.Join(", ", config.Maplist)}");
             command.ReplyToCommand($"Number of Maps: {config.NumMaps}");
-            command.ReplyToCommand($"Players per Team: {config.NumMaps}");
+            command.ReplyToCommand($"Players per Team: {config.PlayersPerTeam}");
             command.ReplyToCommand($"Max rounds: {config.MaxRounds}");
             command.ReplyToCommand($"Max overtime rounds: {config.MaxOvertimeRounds}");
-            command.ReplyToCommand($"Vote timeout: {config.MaxOvertimeRounds}");
+            command.ReplyToCommand($"Vote timeout: {config.VoteTimeout}");
             command.ReplyToCommand($"Allow suicide: {config.AllowSuicide}");
             command.ReplyToCommand($"Team mode: {config.TeamMode}");
         },

@@ -109,6 +109,17 @@ public class Player : IPlayer
 
     public void Kick()
     {
-        CounterStrikeSharp.API.Server.ExecuteCommand(string.Create(CultureInfo.InvariantCulture, $"kickid {UserId!.Value} \"You are not part of the current match!\""));
+        try
+        {
+            ReloadPlayerController();
+            if (UserId != null)
+            {
+                CounterStrikeSharp.API.Server.ExecuteCommand(string.Create(CultureInfo.InvariantCulture, $"kickid {UserId.Value} \"You are not part of the current match!\""));
+            }
+        }
+        catch (Exception)
+        {
+            // TODO Logging?
+        }
     }
 }
