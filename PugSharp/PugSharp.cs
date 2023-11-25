@@ -32,11 +32,6 @@ public class PugSharp : BasePlugin, IBasePlugin
 
     public override string ModuleVersion => "0.0.1";
 
-    public PugSharp()
-    {
-        Logger.LogInformation("Ctor PugSharp");
-    }
-
     public override void Load(bool hotReload)
     {
         Logger.LogInformation("Start Loading PugSharp");
