@@ -24,14 +24,15 @@ public sealed class G5ApiClient
     public void Initialize(string g5ApiUrl, string g5ApiHeader, string g5ApiHeaderValue)
     {
         _Logger.LogInformation("Initialize G5Api with BaseUrl: {url}", g5ApiUrl);
-        _ApiUrl = g5ApiUrl;
-        _ApiHeader = g5ApiHeader;
-        _ApiHeadeValue = g5ApiHeaderValue;
-    }
 
-    public void UpdateConfig(string g5ApiUrl, string g5ApiHeader, string g5ApiHeaderValue)
-    {
-        _ApiUrl = g5ApiUrl;
+        var modifiedApiUrl = g5ApiUrl;
+
+        if(!g5ApiUrl.EndsWith("v2", StringComparison.OrdinalIgnoreCase) && !g5ApiUrl.EndsWith("v2/", StringComparison.OrdinalIgnoreCase))
+        {
+            modifiedApiUrl = $"{g5ApiUrl.TrimEnd('/')}/v2";
+        }
+        
+        _ApiUrl = modifiedApiUrl;
         _ApiHeader = g5ApiHeader;
         _ApiHeadeValue = g5ApiHeaderValue;
     }

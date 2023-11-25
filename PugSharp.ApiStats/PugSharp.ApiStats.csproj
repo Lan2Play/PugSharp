@@ -12,7 +12,6 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<PackageReference Include="Microsoft.AspNetCore.WebUtilities" Version="2.2.0" />
 		<PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="8.0.0" />
 	  <PackageReference Update="Meziantou.Analyzer" Version="2.0.110">
 	    <PrivateAssets>all</PrivateAssets>
