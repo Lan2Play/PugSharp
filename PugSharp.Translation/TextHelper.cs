@@ -37,6 +37,11 @@ public partial class TextHelper : ITextHelper
 
     public string GetTranslatedText(string key, CultureInfo cultureInfo, params object?[] arguments)
     {
+        return GetTranslatedText(key, cultureInfo, true, arguments);
+    }
+
+    public string GetTranslatedText(string key, CultureInfo cultureInfo, bool withColors, params object?[] arguments)
+    {
         var text = Resources.ResourceManager.GetString(key.Replace('_', '.'), cultureInfo);
         if (text == null)
         {
@@ -56,19 +61,28 @@ public partial class TextHelper : ITextHelper
             }
         }
 
-        if (HighlightRegex().IsMatch(text)
-            || CommandRegex().IsMatch(text)
-            || ErrorRegex().IsMatch(text))
+        if (withColors)
         {
-            text = $" {_DefaultColor}{text}";
+            if (HighlightRegex().IsMatch(text)
+                || CommandRegex().IsMatch(text)
+                || ErrorRegex().IsMatch(text))
+            {
+                text = $" {_DefaultColor}{text}";
+            }
+
+            text = HighlightRegex().Replace(text, match => $"{_HighlightColor}{match.Groups["highlight"].Value}{_DefaultColor}");
+            text = CommandRegex().Replace(text, match => $"{_CommandColor}{match.Groups["command"].Value}{_DefaultColor}");
+            text = ErrorRegex().Replace(text, match => $"{_ErrorColor}{match.Groups["error"].Value}{_DefaultColor}");
         }
-
-        text = HighlightRegex().Replace(text, match => $"{_HighlightColor}{match.Groups["highlight"].Value}{_DefaultColor}");
-        text = CommandRegex().Replace(text, match => $"{_CommandColor}{match.Groups["command"].Value}{_DefaultColor}");
-        text = ErrorRegex().Replace(text, match => $"{_ErrorColor}{match.Groups["error"].Value}{_DefaultColor}");
-
+        else
+        {
+            text = HighlightRegex().Replace(text, match => match.Groups["highlight"].Value);
+            text = CommandRegex().Replace(text, match => match.Groups["command"].Value);
+            text = ErrorRegex().Replace(text, match => match.Groups["error"].Value);
+        }
         return text;
     }
+
 
     public string GetText(string key, params object?[] arguments) => GetTranslatedText(key, CultureInfo.CurrentUICulture, arguments);
 

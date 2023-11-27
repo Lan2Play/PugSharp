@@ -14,6 +14,7 @@ using Microsoft.Extensions.Logging;
 using PugSharp.Api.Contract;
 using PugSharp.Api.Json;
 using PugSharp.Config;
+using PugSharp.Extensions;
 using PugSharp.Match;
 using PugSharp.Match.Contract;
 using PugSharp.Models;
@@ -42,7 +43,7 @@ public class Application : IApplication
     private Match.Match? _Match;
     private bool _DisposedValue;
     private ConfigCreator _ConfigCreator;
-    private readonly CurrentRoundState _CurrentRountState = new();
+    private readonly CurrentRoundState _CurrentRoundState = new();
 
     /// <summary>
     /// Create instance of Application
@@ -92,6 +93,7 @@ public class Application : IApplication
                         var results = command.CommandCallBack(args);
                         foreach (var result in results)
                         {
+                            // TODO Translation?
                             c.ReplyToCommand(result);
                         }
                     }, c, p, c.GetCommandString, c.ArgString);
@@ -309,7 +311,7 @@ public class Application : IApplication
     {
         _Logger.LogInformation("OnRoundPreStart called");
 
-        _CurrentRountState.Reset();
+        _CurrentRoundState.Reset();
 
         return HookResult.Continue;
     }
@@ -354,7 +356,7 @@ public class Application : IApplication
 
             foreach (var player in players)
             {
-                var playerStats = _CurrentRountState.GetPlayerRoundStats(player.SteamID, player.PlayerName);
+                var playerStats = _CurrentRoundState.GetPlayerRoundStats(player.SteamID, player.PlayerName);
 
                 playerStats.ContributionScore = player.Score;
             }
@@ -430,7 +432,7 @@ public class Application : IApplication
         if (_Match.CurrentState == MatchState.MatchRunning)
         {
             var mvp = eventRoundMvp.Userid;
-            var mvpStats = _CurrentRountState.GetPlayerRoundStats(mvp.SteamID, mvp.PlayerName);
+            var mvpStats = _CurrentRoundState.GetPlayerRoundStats(mvp.SteamID, mvp.PlayerName);
 
             mvpStats.Mvp = true;
 
@@ -502,7 +504,7 @@ public class Application : IApplication
 
             var isUtility = CounterStrikeSharpExtensions.IsUtility(weapon);
 
-            var attackerStats = _CurrentRountState.GetPlayerRoundStats(attacker.SteamID, attacker.PlayerName);
+            var attackerStats = _CurrentRoundState.GetPlayerRoundStats(attacker.SteamID, attacker.PlayerName);
 
             var victimHealth = victim.Health;
 
@@ -576,7 +578,7 @@ public class Application : IApplication
             var isHeadshot = eventPlayerDeath.Headshot;
             var isClutcher = false; // TODO
 
-            var victimStats = _CurrentRountState.GetPlayerRoundStats(victim.SteamID, victim.PlayerName);
+            var victimStats = _CurrentRoundState.GetPlayerRoundStats(victim.SteamID, victim.PlayerName);
 
             victimStats.Dead = true;
 
@@ -590,7 +592,7 @@ public class Application : IApplication
             {
                 if (attacker != null && attacker.IsValid)
                 {
-                    var attackerStats = _CurrentRountState.GetPlayerRoundStats(attacker.SteamID, attacker.PlayerName);
+                    var attackerStats = _CurrentRoundState.GetPlayerRoundStats(attacker.SteamID, attacker.PlayerName);
 
                     if (attackerSide == victimSide)
                     {
@@ -598,9 +600,9 @@ public class Application : IApplication
                     }
                     else
                     {
-                        if (!_CurrentRountState.FirstKillDone)
+                        if (!_CurrentRoundState.FirstKillDone)
                         {
-                            _CurrentRountState.FirstKillDone = true;
+                            _CurrentRoundState.FirstKillDone = true;
 
                             switch (attackerSide)
                             {
@@ -630,10 +632,10 @@ public class Application : IApplication
                             switch (attackerSide)
                             {
                                 case TeamConstants.TEAM_CT:
-                                    _CurrentRountState.CounterTerroristsClutching = true;
+                                    _CurrentRoundState.CounterTerroristsClutching = true;
                                     break;
                                 case TeamConstants.TEAM_T:
-                                    _CurrentRountState.TerroristsClutching = true;
+                                    _CurrentRoundState.TerroristsClutching = true;
                                     break;
                                 default:
                                     // Do nothing
@@ -672,7 +674,7 @@ public class Application : IApplication
                     // Assists should only count towards opposite team
                     if (!friendlyFire)
                     {
-                        var assisterStats = _CurrentRountState.GetPlayerRoundStats(assister.SteamID, assister.PlayerName);
+                        var assisterStats = _CurrentRoundState.GetPlayerRoundStats(assister.SteamID, assister.PlayerName);
 
                         // You cannot flash-assist and regular-assist for the same kill.
                         if (assistedFlash)
@@ -736,7 +738,7 @@ public class Application : IApplication
             const double requieredenemiesFlashedDuration = 2.5;
             if (eventPlayerBlind.BlindDuration >= requieredenemiesFlashedDuration)
             {
-                var attackerStats = _CurrentRountState.GetPlayerRoundStats(attacker.SteamID, attacker.PlayerName);
+                var attackerStats = _CurrentRoundState.GetPlayerRoundStats(attacker.SteamID, attacker.PlayerName);
 
                 if (isFriendlyFire)
                 {
@@ -768,7 +770,7 @@ public class Application : IApplication
         if (_Match.CurrentState == MatchState.MatchRunning)
         {
             var planter = eventBombPlanted.Userid;
-            var planterStats = _CurrentRountState.GetPlayerRoundStats(planter.SteamID, planter.PlayerName);
+            var planterStats = _CurrentRoundState.GetPlayerRoundStats(planter.SteamID, planter.PlayerName);
 
             planterStats.BombPlanted = true;
         }
@@ -791,7 +793,7 @@ public class Application : IApplication
         if (_Match.CurrentState == MatchState.MatchRunning)
         {
             var defuser = eventBombDefused.Userid;
-            var defuserStats = _CurrentRountState.GetPlayerRoundStats(defuser.SteamID, defuser.PlayerName);
+            var defuserStats = _CurrentRoundState.GetPlayerRoundStats(defuser.SteamID, defuser.PlayerName);
 
             defuserStats.BombDefused = true;
         }
@@ -824,18 +826,18 @@ public class Application : IApplication
     [RequiresPermissions("@pugsharp/matchadmin")]
     public void OnCommandStopMatch(CCSPlayerController? player, CommandInfo command)
     {
-        HandleCommand((_, _) =>
+        HandleCommand((_, c) =>
         {
             if (_Match == null)
             {
-                command.ReplyToCommand("Currently no Match is running. ");
+                c.ReplyToCommand(_TextHelper, nameof(Resources.PugSharp_Command_Error_NoMatchRunning));
                 return;
             }
 
             var resetMap = _Match.MatchInfo.Config.VoteMap;
             StopMatch();
             ResetServer(resetMap);
-            command.ReplyToCommand("Match stopped!");
+            c.ReplyToCommand(_TextHelper, nameof(Resources.PugSharp_Command_MatchStopped));
         },
         command,
         player);
@@ -860,18 +862,18 @@ public class Application : IApplication
     {
         const int requiredArgCount = 2;
 
-        HandleCommand((_, c) =>
+        HandleCommand((p, c) =>
         {
 
             if (_Match != null)
             {
-                c.ReplyToCommand("Currently Match {match} is running. To stop it call ps_stopmatch");
+                c.ReplyToCommand(_TextHelper, nameof(Resources.PugSharp_Command_Error_MatchRunning), _Match.MatchInfo.Config.MatchId, p != null ? "!stopmatch" : "ps_stopmatch");
                 return;
             }
 
             if (c.ArgCount < requiredArgCount)
             {
-                c.ReplyToCommand("Url is required as Argument!");
+                c.ReplyToCommand(_TextHelper, nameof(Resources.PugSharp_Command_Error_UrlRequired));
                 return;
             }
 
@@ -880,13 +882,13 @@ public class Application : IApplication
             var url = c.ArgByIndex(1);
             var authToken = c.ArgCount > 2 ? c.ArgByIndex(2) : string.Empty;
 
-            c.ReplyToCommand($"Loading Config from {url}");
+            c.ReplyToCommand(_TextHelper, nameof(Resources.PugSharp_Command_LoadingConfigFromUrl), url);
             var loadMatchConfigFromUrlResult = _ConfigProvider.LoadMatchConfigFromUrlAsync(url, authToken).GetAwaiter().GetResult();
 
             loadMatchConfigFromUrlResult.Switch(
                 error =>
                 {
-                    c.ReplyToCommand($"Loading config was not possible. Error: {error.Value}");
+                    c.ReplyToCommand(_TextHelper, nameof(Resources.PugSharp_Command_Error_LoadingConfig), error.Value);
                 },
                 matchConfig =>
                 {
@@ -896,7 +898,7 @@ public class Application : IApplication
                         matchConfig.EventulaApistatsToken = authToken;
                     }
 
-                    c.ReplyToCommand("Matchconfig loaded!");
+                    c.ReplyToCommand(_TextHelper, nameof(Resources.PugSharp_Command_ConfigLoaded));
 
                     var backupDir = Path.Combine(PugSharpDirectory, "Backup");
                     if (!Directory.Exists(backupDir))
@@ -931,30 +933,30 @@ public class Application : IApplication
 
             if (_Match != null)
             {
-                c.ReplyToCommand("Currently Match {match} is running. To stop it call ps_stopmatch");
+                c.ReplyToCommand(_TextHelper, nameof(Resources.PugSharp_Command_Error_MatchRunning), _Match.MatchInfo.Config.MatchId, p != null ? "!stopmatch" : "ps_stopmatch");
                 return;
             }
 
             if (c.ArgCount != requiredArgCount)
             {
-                c.ReplyToCommand("FileName is required as Argument! Path have to be put in \"pathToConfig\"");
+                c.ReplyToCommand(_TextHelper, nameof(Resources.PugSharp_Command_Error_FileNameRequired));
                 return;
             }
 
             _Logger.LogInformation("Start loading match config!");
             var fileName = c.ArgByIndex(1);
 
-            c.ReplyToCommand($"Loading Config from file {fileName}");
+            c.ReplyToCommand(_TextHelper, nameof(Resources.PugSharp_Command_LoadingConfigFromFile), fileName);
             var loadMatchConfigFromFileResult = await _ConfigProvider.LoadMatchConfigFromFileAsync(fileName).ConfigureAwait(false);
 
             loadMatchConfigFromFileResult.Switch(
                 error =>
                 {
-                    c.ReplyToCommand($"Loading config was not possible. Error: {error.Value}");
+                    c.ReplyToCommand(_TextHelper, nameof(Resources.PugSharp_Command_Error_LoadingConfig), error.Value);
                 },
                 matchConfig =>
                 {
-                    c.ReplyToCommand("Matchconfig loaded!");
+                    c.ReplyToCommand(_TextHelper, nameof(Resources.PugSharp_Command_ConfigLoaded));
                     InitializeMatch(matchConfig);
                 }
             );
@@ -976,13 +978,13 @@ public class Application : IApplication
         {
             if (_Match != null)
             {
-                c.ReplyToCommand("Currently Match {match} is running. To stop it call ps_stopmatch");
+                c.ReplyToCommand(_TextHelper, nameof(Resources.PugSharp_Command_Error_MatchRunning), _Match.MatchInfo.Config.MatchId, p != null ? "!stopmatch" : "ps_stopmatch");
                 return;
             }
 
             if (c.ArgCount < requiredArgCount)
             {
-                c.ReplyToCommand("MatchId is required as Argument!");
+                c.ReplyToCommand(_TextHelper, nameof(Resources.PugSharp_Command_Error_MatchIdRequired));
                 return;
             }
 
@@ -992,7 +994,7 @@ public class Application : IApplication
             var csgoDirectory = Path.GetDirectoryName(PugSharpDirectory);
             if (csgoDirectory == null)
             {
-                c.ReplyToCommand("Csgo directory not found!");
+                c.ReplyToCommand(_TextHelper, nameof(Resources.PugSharp_Command_Error_CsgoDirNotFound));
                 return;
             }
 
@@ -1014,7 +1016,7 @@ public class Application : IApplication
             {
                 if (!int.TryParse(c.ArgByIndex(argRoundNumberIndex), CultureInfo.InvariantCulture, out roundToRestore))
                 {
-                    c.ReplyToCommand("second argument for round index has to be numeric");
+                    c.ReplyToCommand(_TextHelper, nameof(Resources.PugSharp_Command_Error_ArgumentRoundIndexNotNumeric));
                     return;
                 }
             }
@@ -1026,14 +1028,14 @@ public class Application : IApplication
 
             if (!File.Exists(Path.Combine(_CsServer.GameDirectory, "csgo", roundBackupFile)))
             {
-                c.ReplyToCommand($"RoundBackupFile {roundBackupFile} not found");
+                c.ReplyToCommand(_TextHelper, nameof(Resources.PugSharp_Command_Error_RoundBackupFileNotFound), roundBackupFile);
                 return;
             }
 
             var matchInfoFileName = Path.Combine(PugSharpDirectory, "Backup", string.Create(CultureInfo.InvariantCulture, $"Match_{matchId}_Round_{roundToRestore}.json"));
             if (!File.Exists(matchInfoFileName))
             {
-                c.ReplyToCommand($"MatchInfoFile {matchInfoFileName} not found");
+                c.ReplyToCommand(_TextHelper, nameof(Resources.PugSharp_Command_Error_MatchInfoFileNotFound), matchInfoFileName);
                 return;
             }
 
@@ -1044,7 +1046,7 @@ public class Application : IApplication
 
                 if (matchInfo == null)
                 {
-                    c.ReplyToCommand($"MatchInfoFile {matchInfoFileName} could not be loaded!");
+                    c.ReplyToCommand(_TextHelper, nameof(Resources.PugSharp_Command_Error_MatchInfoFileCouldNotBeLoaded), matchInfoFileName);
                     return;
                 }
 
@@ -1060,25 +1062,25 @@ public class Application : IApplication
     [RequiresPermissions("@pugsharp/matchadmin")]
     public void OnCommandCreateMatch(CCSPlayerController? player, CommandInfo command)
     {
-        HandleCommand((_, c) =>
+        HandleCommand((p, c) =>
         {
             if (_Match != null)
             {
-                c.ReplyToCommand("Currently Match {match} is running. To stop it call ps_stopmatch");
+                c.ReplyToCommand(_TextHelper, nameof(Resources.PugSharp_Command_Error_MatchRunning), _Match.MatchInfo.Config.MatchId, p != null ? "!stopmatch" : "ps_stopmatch");
                 return;
             }
 
             _ConfigCreator = new ConfigCreator();
             _ConfigCreator.Config.Maplist.Add(_CsServer.CurrentMap);
 
-            c.ReplyToCommand("Creating a match started!");
-            c.ReplyToCommand("!addmap <mapname> to add a map!");
-            c.ReplyToCommand("!removemap <mapname> to remove a map!");
-            c.ReplyToCommand("!startmatch <mapname> to start the match!");
-            c.ReplyToCommand("!maxrounds <rounds> to set max match rounds!");
-            c.ReplyToCommand("!maxovertimerounds <rounds> to set max overtime rounds!");
-            c.ReplyToCommand("!playersperteam <players> to set players per team!");
-            c.ReplyToCommand("!matchinfo to show current match configuration!");
+            c.ReplyToCommand(_TextHelper, nameof(Resources.PugSharp_Command_CreatingMatchStarted));
+            c.ReplyToCommand(_TextHelper, nameof(Resources.PugSharp_Command_CreatingMatchAddMap));
+            c.ReplyToCommand(_TextHelper, nameof(Resources.PugSharp_Command_CreatingMatchRemoveMap));
+            c.ReplyToCommand(_TextHelper, nameof(Resources.PugSharp_Command_CreatingMatchStartMatch));
+            c.ReplyToCommand(_TextHelper, nameof(Resources.PugSharp_Command_CreatingMatchMaxRounds));
+            c.ReplyToCommand(_TextHelper, nameof(Resources.PugSharp_Command_CreatingMatchMaxOvertimeRounds));
+            c.ReplyToCommand(_TextHelper, nameof(Resources.PugSharp_Command_CreatingMatchPlayersPerTeam));
+            c.ReplyToCommand(_TextHelper, nameof(Resources.PugSharp_Command_CreatingMatchMatchInfo));
         },
         command,
         player);
@@ -1089,18 +1091,18 @@ public class Application : IApplication
     [RequiresPermissions("@pugsharp/matchadmin")]
     public void OnCommandStartMatch(CCSPlayerController? player, CommandInfo command)
     {
-        HandleCommand((_, c) =>
+        HandleCommand((p, c) =>
         {
             if (_Match != null)
             {
-                c.ReplyToCommand("Currently Match {match} is running. To stop it call ps_stopmatch");
+                c.ReplyToCommand(_TextHelper, nameof(Resources.PugSharp_Command_Error_MatchRunning), _Match.MatchInfo.Config.MatchId, p != null ? "!stopmatch" : "ps_stopmatch");
                 return;
             }
 
             var matchConfig = _ConfigCreator.Config;
             if (matchConfig.Maplist.Count == 0)
             {
-                c.ReplyToCommand("Can not start match. At least one map is required!");
+                c.ReplyToCommand(_TextHelper, nameof(Resources.PugSharp_Command_Error_OneMapRequired));
                 return;
             }
 
@@ -1116,16 +1118,16 @@ public class Application : IApplication
     public void OnCommandAddMap(CCSPlayerController? player, CommandInfo command)
     {
         const int requiredArgCount = 2;
-        HandleCommand((_, c) =>
+        HandleCommand((p, c) =>
         {
-            if (!IsConfigCreatorAvailable(command))
+            if (!IsConfigCreatorAvailable(c, p))
             {
                 return;
             }
 
             if (c.ArgCount != requiredArgCount)
             {
-                c.ReplyToCommand("A map name is required to be added!");
+                c.ReplyToCommand(_TextHelper, nameof(Resources.PugSharp_Command_Error_MapNameRequired));
                 return;
             }
 
@@ -1135,7 +1137,7 @@ public class Application : IApplication
                 _ConfigCreator.Config.Maplist.Add(mapName);
             }
 
-            c.ReplyToCommand($"Added {mapName}. Current maps are {string.Join(", ", _ConfigCreator.Config.Maplist)}");
+            c.ReplyToCommand(_TextHelper, nameof(Resources.PugSharp_Command_MapAdded), mapName, string.Join(", ", _ConfigCreator.Config.Maplist));
         },
         command,
         player);
@@ -1147,27 +1149,27 @@ public class Application : IApplication
     public void OnCommandRemoveMap(CCSPlayerController? player, CommandInfo command)
     {
         const int requiredArgCount = 2;
-        HandleCommand((_, c) =>
+        HandleCommand((p, c) =>
         {
-            if (!IsConfigCreatorAvailable(command))
+            if (!IsConfigCreatorAvailable(c, p))
             {
                 return;
             }
 
             if (c.ArgCount != requiredArgCount)
             {
-                c.ReplyToCommand("A map name is required to be removed!");
+                c.ReplyToCommand(_TextHelper, nameof(Resources.PugSharp_Command_Error_MapNameRequired));
                 return;
             }
 
             var mapName = c.ArgByIndex(1);
             if (_ConfigCreator.Config.Maplist.Remove(mapName))
             {
-                c.ReplyToCommand($"Removed {mapName}. Current maps are {string.Join(", ", _ConfigCreator.Config.Maplist)}");
+                c.ReplyToCommand(_TextHelper, nameof(Resources.PugSharp_Command_MapRemoved), mapName, string.Join(", ", _ConfigCreator.Config.Maplist));
             }
             else
             {
-                command.ReplyToCommand($"Could not remove {mapName}. Current maps are {string.Join(", ", _ConfigCreator.Config.Maplist)}");
+                c.ReplyToCommand(_TextHelper, nameof(Resources.PugSharp_Command_Error_MapNotRemoved), mapName, string.Join(", ", _ConfigCreator.Config.Maplist));
             }
         },
         command,
@@ -1180,34 +1182,34 @@ public class Application : IApplication
     public void OnCommandMaxRounds(CCSPlayerController? player, CommandInfo command)
     {
         const int requiredArgCount = 2;
-        HandleCommand((_, c) =>
+        HandleCommand((p, c) =>
         {
-            if (!IsConfigCreatorAvailable(command))
+            if (!IsConfigCreatorAvailable(c, p))
             {
                 return;
             }
 
             if (c.ArgCount != requiredArgCount)
             {
-                c.ReplyToCommand("A number of rounds is required!");
+                c.ReplyToCommand(_TextHelper, nameof(Resources.PugSharp_Command_Error_NumberOfRoundsRequired));
                 return;
             }
 
             if (!int.TryParse(c.ArgByIndex(1), CultureInfo.InvariantCulture, out var maxRounds))
             {
-                c.ReplyToCommand("Max rounds have to be an number!");
+                c.ReplyToCommand(_TextHelper, nameof(Resources.PugSharp_Command_Error_NumberOfRoundsNotNumeric));
                 return;
             }
 
             if (maxRounds <= 0)
             {
-                c.ReplyToCommand("Max rounds have to be greater than 0!");
+                c.ReplyToCommand(_TextHelper, nameof(Resources.PugSharp_Command_Error_NumberOfRoundsLessThanZero));
                 return;
             }
 
             var oldMaxRounds = _ConfigCreator.Config.MaxRounds;
             _ConfigCreator.Config.MaxRounds = maxRounds;
-            c.ReplyToCommand($"Changed max rounds from {oldMaxRounds} to {maxRounds}");
+            c.ReplyToCommand(_TextHelper, nameof(Resources.PugSharp_Command_ChangedMaxRounds), oldMaxRounds, maxRounds);
         },
         command,
         player);
@@ -1219,34 +1221,34 @@ public class Application : IApplication
     public void OnCommandMaxOvertimeRounds(CCSPlayerController? player, CommandInfo command)
     {
         const int requiredArgCount = 2;
-        HandleCommand((_, c) =>
+        HandleCommand((p, c) =>
         {
-            if (!IsConfigCreatorAvailable(c))
+            if (!IsConfigCreatorAvailable(c, p))
             {
                 return;
             }
 
             if (c.ArgCount != requiredArgCount)
             {
-                c.ReplyToCommand("A number of rounds is required!");
+                c.ReplyToCommand(_TextHelper, nameof(Resources.PugSharp_Command_Error_NumberOfRoundsRequired));
                 return;
             }
 
             if (!int.TryParse(c.ArgByIndex(1), CultureInfo.InvariantCulture, out var maxOvertimeRounds))
             {
-                c.ReplyToCommand("Max overtime rounds have to be an number!");
+                c.ReplyToCommand(_TextHelper, nameof(Resources.PugSharp_Command_Error_NumberOfOvertimeRoundsNotNumeric));
                 return;
             }
 
             if (maxOvertimeRounds <= 0)
             {
-                c.ReplyToCommand("Max overtime rounds have to be greater than 0!");
+                c.ReplyToCommand(_TextHelper, nameof(Resources.PugSharp_Command_Error_NumberOfOvertimeRoundsLessThanZero));
                 return;
             }
 
             var oldMaxRounds = _ConfigCreator.Config.MaxOvertimeRounds;
             _ConfigCreator.Config.MaxOvertimeRounds = maxOvertimeRounds;
-            c.ReplyToCommand($"Changed max overtime rounds from {oldMaxRounds} to {maxOvertimeRounds}");
+            c.ReplyToCommand(_TextHelper, nameof(Resources.PugSharp_Command_ChangedMaxOvertimeRounds), oldMaxRounds, maxOvertimeRounds);
         },
         command,
         player);
@@ -1258,9 +1260,9 @@ public class Application : IApplication
     public void OnCommandPlayersPerTeam(CCSPlayerController? player, CommandInfo command)
     {
         const int requiredArgCount = 2;
-        HandleCommand((_, c) =>
+        HandleCommand((p, c) =>
         {
-            if (!IsConfigCreatorAvailable(c))
+            if (!IsConfigCreatorAvailable(c, p))
             {
                 return;
             }
@@ -1292,11 +1294,11 @@ public class Application : IApplication
         player);
     }
 
-    private bool IsConfigCreatorAvailable(CommandInfo command)
+    private bool IsConfigCreatorAvailable(CommandInfo command, CCSPlayerController? playerController)
     {
         if (_Match != null)
         {
-            command.ReplyToCommand("Currently Match {match} is running. To stop it call ps_stopmatch");
+            command.ReplyToCommand(_TextHelper, nameof(Resources.PugSharp_Command_Error_MatchRunning), _Match.MatchInfo.Config.MatchId, playerController != null ? "!stopmatch" : "ps_stopmatch");
             return false;
         }
 
@@ -1522,7 +1524,7 @@ public class Application : IApplication
     {
         var dict = new Dictionary<ulong, IPlayerRoundResults>();
 
-        foreach (var kvp in _CurrentRountState.PlayerStats)
+        foreach (var kvp in _CurrentRoundState.PlayerStats)
         {
             dict[kvp.Key] = kvp.Value;
         }
@@ -1533,9 +1535,9 @@ public class Application : IApplication
 
     private void OnPlayerDeathHandleFirstKill(TeamConstants victimSide, PlayerRoundStats victimStats)
     {
-        if (!_CurrentRountState.FirstDeathDone)
+        if (!_CurrentRoundState.FirstDeathDone)
         {
-            _CurrentRountState.FirstDeathDone = true;
+            _CurrentRoundState.FirstDeathDone = true;
 
             switch (victimSide)
             {
