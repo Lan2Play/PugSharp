@@ -187,7 +187,7 @@ public class Application : IApplication
                 else if (_Match.CurrentState == MatchState.MatchPaused
                       || _Match.CurrentState == MatchState.RestoreMatch)
                 {
-                    _Match.TryAddPlayer(new Player(userId));
+                    _Match.TryAddPlayer(new Player(userId.SteamID));
                 }
                 else
                 {
@@ -239,14 +239,15 @@ public class Application : IApplication
         if (_Match.CurrentState == MatchState.WaitingForPlayersConnectedReady || _Match.CurrentState == MatchState.WaitingForPlayersReady)
         {
             var configTeam = _Match.GetPlayerTeam(playerController.SteamID);
-            var localPlayer = playerController;
+            var steamId = playerController.SteamID;
+            var userName = playerController.PlayerName;
 
             if ((int)configTeam != team)
             {
                 await Task.Delay(_SwitchPlayerDelay, _CancellationTokenSource.Token).ConfigureAwait(false);
 
-                _Logger.LogInformation("Player {playerName} tried to join {team} but should be in {configTeam}!", localPlayer.PlayerName, team, configTeam);
-                var player = new Player(localPlayer);
+                _Logger.LogInformation("Player {playerName} tried to join {team} but should be in {configTeam}!", userName, team, configTeam);
+                var player = new Player(steamId);
 
                 _Logger.LogInformation("Switch {playerName} to team {team}!", player.PlayerName, configTeam);
                 player.SwitchTeam(configTeam);
@@ -261,7 +262,7 @@ public class Application : IApplication
         // Userid will give you a reference to a CCSPlayerController class
         _Logger.LogInformation("Player {playerName} has disconnected!", userId.PlayerName);
 
-        _Match?.SetPlayerDisconnected(new Player(userId));
+        _Match?.SetPlayerDisconnected(new Player(userId.SteamID));
 
         return HookResult.Continue;
     }
@@ -1355,28 +1356,28 @@ public class Application : IApplication
     public void OnCommandReady(CCSPlayerController? player, CommandInfo command)
     {
         HandleCommand(() =>
-       {
-           if (player == null)
-           {
-               _Logger.LogInformation("Command Start has been called by the server. Player is required to be marked as ready");
-               return;
-           }
+        {
+            if (player == null)
+            {
+                _Logger.LogInformation("Command Start has been called by the server. Player is required to be marked as ready");
+                return;
+            }
 
-           if (_Match == null)
-           {
-               return;
-           }
+            if (_Match == null)
+            {
+                return;
+            }
 
-           var matchPlayer = new Player(player);
-           if (!_Match.TryAddPlayer(matchPlayer))
-           {
-               _Logger.LogError("Can not toggle ready state. Player is not part of this match!");
-               player.Kick();
-               return;
-           }
+            var matchPlayer = new Player(player.SteamID);
+            if (!_Match.TryAddPlayer(matchPlayer))
+            {
+                _Logger.LogError("Can not toggle ready state. Player is not part of this match!");
+                player.Kick();
+                return;
+            }
 
-           _Match.TogglePlayerIsReady(matchPlayer);
-       },
+            _Match.TogglePlayerIsReady(matchPlayer);
+        },
        command,
        player);
     }
@@ -1392,7 +1393,7 @@ public class Application : IApplication
                 return;
             }
 
-            _Match?.Unpause(new Player(player));
+            _Match?.Unpause(new Player(player.SteamID));
         },
         command,
         player);
@@ -1409,7 +1410,7 @@ public class Application : IApplication
                 return;
             }
 
-            _Match?.Pause(new Player(player));
+            _Match?.Pause(new Player(player.SteamID));
         },
         command,
         player);
@@ -1495,10 +1496,20 @@ public class Application : IApplication
     {
         while (await _ConfigTimer.WaitForNextTickAsync(_CancellationTokenSource.Token).ConfigureAwait(false))
         {
-            if ((_Match == null || _Match.CurrentState == MatchState.WaitingForPlayersConnectedReady || _Match.CurrentState == MatchState.WaitingForPlayersReady) && Utilities.GetPlayers().Count(x => !x.IsBot) == 0)
+            if (_Match == null || _Match.CurrentState == MatchState.WaitingForPlayersConnectedReady || _Match.CurrentState == MatchState.WaitingForPlayersReady)
             {
-                // TODO Besseren Platz suchen!
-                _CsServer.LoadAndExecuteConfig("warmup.cfg");
+                try
+                {
+                    if (!Utilities.GetPlayers().Any(x => !x.IsBot && !x.IsHLTV))
+                    {
+                        _CsServer.LoadAndExecuteConfig("warmup.cfg");
+                    }
+                }
+                catch (Exception e)
+                {
+                    _Logger.LogError(e, "Error Loading warmup.cfg");
+                    // TODO Besseren Platz suchen!
+                }
             }
         }
     }
@@ -1622,7 +1633,7 @@ public class Application : IApplication
         var players = Utilities.GetPlayers().Where(x => x.IsValid && !x.IsHLTV);
         foreach (var player in players)
         {
-            if (!_Match.TryAddPlayer(new Player(player)))
+            if (!_Match.TryAddPlayer(new Player(player.SteamID)))
             {
                 player.Kick();
             }
