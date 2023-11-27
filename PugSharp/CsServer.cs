@@ -4,6 +4,7 @@ using CounterStrikeSharp.API.Modules.Cvars;
 
 using Microsoft.Extensions.Logging;
 
+using PugSharp.Extensions;
 using PugSharp.Match.Contract;
 using PugSharp.Models;
 using PugSharp.Server.Contract;
