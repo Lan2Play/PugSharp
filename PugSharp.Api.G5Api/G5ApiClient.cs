@@ -64,7 +64,7 @@ public sealed class G5ApiClient
 
             if (httpResponseMessage.IsSuccessStatusCode)
             {
-                _Logger.LogInformation("G5 API request was succesful, HTTP status code = {statusCode}", httpResponseMessage.StatusCode);
+                _Logger.LogInformation("G5 API request was successful, HTTP status code = {statusCode}", httpResponseMessage.StatusCode);
             }
             else
             {

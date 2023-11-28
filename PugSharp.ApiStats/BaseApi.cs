@@ -57,7 +57,7 @@ public class BaseApi
         {
             if (httpResponseMessage.IsSuccessStatusCode)
             {
-                _Logger.LogInformation("API request was succesful, HTTP status code = {statusCode}", httpResponseMessage.StatusCode);
+                _Logger.LogInformation("API request was successful, HTTP status code = {statusCode}", httpResponseMessage.StatusCode);
 
                 var responseContent = await httpResponseMessage.Content.ReadAsStringAsync(cancellationToken).ConfigureAwait(false);
 
