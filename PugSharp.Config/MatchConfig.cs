@@ -58,9 +58,6 @@ public class MatchConfig
     [JsonPropertyName("vote_map")]
     public string VoteMap { get; init; } = "de_dust2";
 
-    [JsonPropertyName("server_locale")]
-    public string ServerLocale { get; init; } = "en";
-
     [JsonPropertyName("team_mode")]
     public TeamMode TeamMode { get; set; }
 }

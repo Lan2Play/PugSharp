@@ -91,7 +91,6 @@ public class Match : IDisposable
             throw new NotSupportedException($"Can not create Match without the required number of maps! At lease {matchInfo.Config.NumMaps} are required!");
         }
 
-        SetServerCulture(matchInfo.Config.ServerLocale);
         MatchInfo = matchInfo;
         _VoteTimer.Interval = MatchInfo.Config.VoteTimeout;
         _VoteTimer.Elapsed += VoteTimer_Elapsed;
@@ -104,21 +103,6 @@ public class Match : IDisposable
         {
             _DemoUploader = _ServiceProvider.GetRequiredService<DemoUploader>();
             _DemoUploader.Initialize(MatchInfo.Config.EventulaDemoUploadUrl, MatchInfo.Config.EventulaApistatsToken);
-        }
-    }
-
-    private void SetServerCulture(string locale)
-    {
-        try
-        {
-            CultureInfo.DefaultThreadCurrentCulture = CultureInfo.GetCultureInfo(locale);
-            CultureInfo.DefaultThreadCurrentUICulture = CultureInfo.DefaultThreadCurrentCulture;
-            CultureInfo.CurrentCulture = CultureInfo.DefaultThreadCurrentCulture;
-            CultureInfo.CurrentUICulture = CultureInfo.DefaultThreadCurrentCulture;
-        }
-        catch (Exception ex)
-        {
-            _Logger.LogError(ex, "Setting cultureInfo is not possible. Linux requires libicu-dev/libicu/icu-libs to support translations.");
         }
     }
 
