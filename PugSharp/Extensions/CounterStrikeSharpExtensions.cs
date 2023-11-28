@@ -4,7 +4,7 @@ using CounterStrikeSharp.API.Core;
 using CounterStrikeSharp.API.Modules.Admin;
 using CounterStrikeSharp.API.Modules.Memory;
 
-namespace PugSharp;
+namespace PugSharp.Extensions;
 
 public static class CounterStrikeSharpExtensions
 {
@@ -30,7 +30,7 @@ public static class CounterStrikeSharpExtensions
             return PlayerConnectedState.PlayerNeverConnected;
         }
 
-        var statusRef = Schema.GetRef<UInt32>(player.Handle, "CBasePlayerController", "m_iConnected");
+        var statusRef = Schema.GetRef<uint>(player.Handle, "CBasePlayerController", "m_iConnected");
 
         return (PlayerConnectedState)statusRef;
     }

@@ -14,7 +14,10 @@ public class MatchInfo
 
         MatchTeam1 = new MatchTeam(Config.Team1) { CurrentTeamSite = Contract.Team.Terrorist };
         MatchTeam2 = new MatchTeam(Config.Team2) { CurrentTeamSite = Contract.Team.CounterTerrorist };
+        RandomPlayersAllowed = Config.Team1.Players.Count == 0 && Config.Team2.Players.Count == 0;
     }
+
+    public bool RandomPlayersAllowed { get; }
 
     [JsonIgnore]
     public MatchMap CurrentMap { get; set; }

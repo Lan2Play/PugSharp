@@ -4,6 +4,7 @@ using CounterStrikeSharp.API.Modules.Cvars;
 
 using Microsoft.Extensions.Logging;
 
+using PugSharp.Extensions;
 using PugSharp.Match.Contract;
 using PugSharp.Models;
 using PugSharp.Server.Contract;
@@ -216,8 +217,8 @@ public class CsServer : ICsServer
 
     public IReadOnlyList<IPlayer> LoadAllPlayers()
     {
-        return Utilities.GetPlayers().Where(x => x.PlayerState() == PlayerConnectedState.PlayerConnected).Select(p => new Player(p)).ToList();
+        return Utilities.GetPlayers().Where(x => x.PlayerState() == PlayerConnectedState.PlayerConnected).Select(p => new Player(p.SteamID)).ToList();
     }
+
+    public string CurrentMap => CounterStrikeSharp.API.Server.MapName;
 }
-
-

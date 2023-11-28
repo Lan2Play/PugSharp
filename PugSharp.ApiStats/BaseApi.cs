@@ -33,6 +33,8 @@ public class BaseApi
 
             HttpClient.BaseAddress = new Uri(baseUrl);
 
+            HttpClient.DefaultRequestHeaders.Remove(HeaderNames.Authorization);
+
             if (!string.IsNullOrEmpty(authKey))
             {
                 HttpClient.DefaultRequestHeaders.Add(HeaderNames.Authorization, authKey);
@@ -55,7 +57,7 @@ public class BaseApi
         {
             if (httpResponseMessage.IsSuccessStatusCode)
             {
-                _Logger.LogInformation("API request was succesful, HTTP status code = {statusCode}", httpResponseMessage.StatusCode);
+                _Logger.LogInformation("API request was successful, HTTP status code = {statusCode}", httpResponseMessage.StatusCode);
 
                 var responseContent = await httpResponseMessage.Content.ReadAsStringAsync(cancellationToken).ConfigureAwait(false);
 

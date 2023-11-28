@@ -27,7 +27,7 @@ Player Commands
 Admin/Rcon Commands
 -------------------
 
-These commands are available through rcon or to users with the `Permission <https://docs.cssharp.dev/admin-framework/defining-admins/#standard-permissions>` ``pugsharp/matchadmin``.
+These commands are available through rcon or to users with the required permissions. See :ref:`admin/configuration:CounterstrikeSharp Configs`
 
 ``<requiredParameter>`` marks parameters that are required for commands
 
@@ -45,4 +45,22 @@ These commands are available through rcon or to users with the `Permission <http
 | ``!ps_stopmatch``                      | Danger! Stops the current match immediately and resets the server.                                                                                |
 +----------------------------------------+---------------------------------------------------------------------------------------------------------------------------------------------------+
 | ``!ps_dumpmatch``                      | Dumps the current matchstate and config to console                                                                                                |
++----------------------------------------+---------------------------------------------------------------------------------------------------------------------------------------------------+
+| ``!ps_creatematch``                    | Creates a new match without preloaded configuration.                                                                                              |
++----------------------------------------+---------------------------------------------------------------------------------------------------------------------------------------------------+
+| ``!ps_addmap``                         | Add a map to the map pool during match creation.                                                                                                  |
++----------------------------------------+---------------------------------------------------------------------------------------------------------------------------------------------------+
+| ``!ps_removemap``                      | Remove a map from the map pool during match creation.                                                                                             |
++----------------------------------------+---------------------------------------------------------------------------------------------------------------------------------------------------+
+| ``!ps_playersperteam <players>``       | Sets the number of players per team.                                                                                                              |
++----------------------------------------+---------------------------------------------------------------------------------------------------------------------------------------------------+
+| ``!ps_maxrounds <rounds>``             | Sets the max number of rounds.                                                                                                                    |
++----------------------------------------+---------------------------------------------------------------------------------------------------------------------------------------------------+
+| ``!ps_maxovertimerounds <rounds>``     | Sets the max number of overtime rounds.                                                                                                           |
++----------------------------------------+---------------------------------------------------------------------------------------------------------------------------------------------------+
+| ``!ps_teammode <teammode>``            | Sets the teammode.                                                                                                                                |
++----------------------------------------+---------------------------------------------------------------------------------------------------------------------------------------------------+
+| ``!ps_startmatch``                     | After match configuration is done with ``!ps_creatematch`` the match can be started.                                                              |
++----------------------------------------+---------------------------------------------------------------------------------------------------------------------------------------------------+
+| ``!ps_matchinfo``                      | Shows the match configuration for the current match or matchcreation.                                                                             |
 +----------------------------------------+---------------------------------------------------------------------------------------------------------------------------------------------------+

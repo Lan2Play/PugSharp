@@ -6,6 +6,7 @@ namespace PugSharp.Server.Contract;
 public interface ICsServer
 {
     string GameDirectory { get; }
+    string CurrentMap { get; }
 
     void DisableCheats();
     void EndWarmup();

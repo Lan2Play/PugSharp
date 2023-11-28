@@ -32,17 +32,31 @@ public class PugSharp : BasePlugin, IBasePlugin
 
     public override string ModuleVersion => "0.0.1";
 
+    public PugSharp()
+    {
+        Console.WriteLine("Ctor PugSharp");
+    }
     public override void Load(bool hotReload)
     {
+        Console.WriteLine("Start Loading PugSharp");
         base.Load(hotReload);
 
         // Create DI container
         var services = new ServiceCollection();
 
+
         services.AddLogging(options =>
         {
-            options.AddConsole();
+            //options.AddConsole();
         });
+
+        var serviceDescriptor = services.FirstOrDefault(descriptor => descriptor.ServiceType == typeof(ILoggerFactory));
+        if (serviceDescriptor != null)
+        {
+            services.Remove(serviceDescriptor);
+        }
+
+        services.AddSingleton(CounterStrikeSharp.API.Core.Logging.CoreLogging.Factory);
 
         services.AddSingleton<ICsServer, CsServer>();
         services.AddSingleton<MultiApiProvider>();
@@ -88,7 +102,11 @@ public class PugSharp : BasePlugin, IBasePlugin
 
         // Instantiate Application class where event handlers and other things will be declared
         _Application = _ServiceProvider.GetRequiredService<IApplication>();
+
+        Console.WriteLine("Start initialize PugSharp Application");
         _Application.Initialize(hotReload);
+
+        Console.WriteLine("PugSharp Loaded");
     }
 
     /// <summary>
@@ -97,6 +115,7 @@ public class PugSharp : BasePlugin, IBasePlugin
     /// <param name="hotReload">Is called from hot reload</param>
     public override void Unload(bool hotReload)
     {
+        Console.WriteLine("Start Unloading PugSharp");
         // Remove reference
         _Application?.Dispose();
         _Application = null;
@@ -106,6 +125,7 @@ public class PugSharp : BasePlugin, IBasePlugin
         _ServiceProvider = null;
 
         base.Unload(hotReload);
+        Console.WriteLine("PugSharp Unloaded");
     }
 
     protected override void Dispose(bool disposing)

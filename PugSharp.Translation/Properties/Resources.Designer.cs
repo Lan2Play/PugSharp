@@ -61,6 +61,357 @@ namespace PugSharp.Translation.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Changed max overtime rounds from {0:oldMaxRounds} to {1:maxOvertimeRounds}.
+        /// </summary>
+        public static string PugSharp_Command_ChangedMaxOvertimeRounds {
+            get {
+                return ResourceManager.GetString("PugSharp.Command.ChangedMaxOvertimeRounds", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Changed max rounds from {0:oldMaxRounds} to {1:maxRounds}.
+        /// </summary>
+        public static string PugSharp_Command_ChangedMaxRounds {
+            get {
+                return ResourceManager.GetString("PugSharp.Command.ChangedMaxRounds", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Changed Teammode from {0:oldTeamMode} to {1:newTeamMode}.
+        /// </summary>
+        public static string PugSharp_Command_ChangedTeamMode {
+            get {
+                return ResourceManager.GetString("PugSharp.Command.ChangedTeamMode", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Matchconfig loaded!.
+        /// </summary>
+        public static string PugSharp_Command_ConfigLoaded {
+            get {
+                return ResourceManager.GetString("PugSharp.Command.ConfigLoaded", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to `!addmap &lt;mapname&gt; to add a map!.
+        /// </summary>
+        public static string PugSharp_Command_CreatingMatchAddMap {
+            get {
+                return ResourceManager.GetString("PugSharp.Command.CreatingMatchAddMap", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to `!matchinfo` to show current match configuration!.
+        /// </summary>
+        public static string PugSharp_Command_CreatingMatchMatchInfo {
+            get {
+                return ResourceManager.GetString("PugSharp.Command.CreatingMatchMatchInfo", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to `!maxovertimerounds &lt;rounds&gt;` to set max overtime rounds!.
+        /// </summary>
+        public static string PugSharp_Command_CreatingMatchMaxOvertimeRounds {
+            get {
+                return ResourceManager.GetString("PugSharp.Command.CreatingMatchMaxOvertimeRounds", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to `!maxrounds &lt;rounds&gt;` to set max match rounds!.
+        /// </summary>
+        public static string PugSharp_Command_CreatingMatchMaxRounds {
+            get {
+                return ResourceManager.GetString("PugSharp.Command.CreatingMatchMaxRounds", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to `!playersperteam &lt;players&gt;` to set players per team!.
+        /// </summary>
+        public static string PugSharp_Command_CreatingMatchPlayersPerTeam {
+            get {
+                return ResourceManager.GetString("PugSharp.Command.CreatingMatchPlayersPerTeam", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to `!removemap &lt;mapname&gt;` to remove a map!.
+        /// </summary>
+        public static string PugSharp_Command_CreatingMatchRemoveMap {
+            get {
+                return ResourceManager.GetString("PugSharp.Command.CreatingMatchRemoveMap", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Creating a match started!.
+        /// </summary>
+        public static string PugSharp_Command_CreatingMatchStarted {
+            get {
+                return ResourceManager.GetString("PugSharp.Command.CreatingMatchStarted", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to `!startmatch` to start the match!.
+        /// </summary>
+        public static string PugSharp_Command_CreatingMatchStartMatch {
+            get {
+                return ResourceManager.GetString("PugSharp.Command.CreatingMatchStartMatch", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to `!teammode &lt;mode&gt;` to set the team mode!.
+        /// </summary>
+        public static string PugSharp_Command_CreatingMatchTeamMode {
+            get {
+                return ResourceManager.GetString("PugSharp.Command.CreatingMatchTeamMode", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The argument for round index has to be numeric..
+        /// </summary>
+        public static string PugSharp_Command_Error_ArgumentRoundIndexNotNumeric {
+            get {
+                return ResourceManager.GetString("PugSharp.Command.Error.ArgumentRoundIndexNotNumeric", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Csgo directory not found!.
+        /// </summary>
+        public static string PugSharp_Command_Error_CsgoDirNotFound {
+            get {
+                return ResourceManager.GetString("PugSharp.Command.Error.CsgoDirNotFound", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to FileName is required as Argument!.
+        /// </summary>
+        public static string PugSharp_Command_Error_FileNameRequired {
+            get {
+                return ResourceManager.GetString("PugSharp.Command.Error.FileNameRequired", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Loading config was not possible. Error: {0:error.Value}.
+        /// </summary>
+        public static string PugSharp_Command_Error_LoadingConfig {
+            get {
+                return ResourceManager.GetString("PugSharp.Command.Error.LoadingConfig", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Mapname is required!.
+        /// </summary>
+        public static string PugSharp_Command_Error_MapNameRequired {
+            get {
+                return ResourceManager.GetString("PugSharp.Command.Error.MapNameRequired", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to could not remove **{0:mapName}**. Current maps are {1:maps}.
+        /// </summary>
+        public static string PugSharp_Command_Error_MapNotRemoved {
+            get {
+                return ResourceManager.GetString("PugSharp.Command.Error.MapNotRemoved", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to MatchId is required as Argument!.
+        /// </summary>
+        public static string PugSharp_Command_Error_MatchIdRequired {
+            get {
+                return ResourceManager.GetString("PugSharp.Command.Error.MatchIdRequired", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to MatchInfoFile &quot;{matchInfoFileName}&quot; could not be loaded!.
+        /// </summary>
+        public static string PugSharp_Command_Error_MatchInfoFileCouldNotBeLoaded {
+            get {
+                return ResourceManager.GetString("PugSharp.Command.Error.MatchInfoFileCouldNotBeLoaded", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to MatchInfoFile &quot;{matchInfoFileName}&quot; not found!.
+        /// </summary>
+        public static string PugSharp_Command_Error_MatchInfoFileNotFound {
+            get {
+                return ResourceManager.GetString("PugSharp.Command.Error.MatchInfoFileNotFound", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Currently Match {0:match} is running. To stop it call `{1:stopCommand}`!.
+        /// </summary>
+        public static string PugSharp_Command_Error_MatchRunning {
+            get {
+                return ResourceManager.GetString("PugSharp.Command.Error.MatchRunning", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Currently no Match is running.
+        /// </summary>
+        public static string PugSharp_Command_Error_NoMatchRunning {
+            get {
+                return ResourceManager.GetString("PugSharp.Command.Error.NoMatchRunning", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Max overtime rounds have to be greater than 0!.
+        /// </summary>
+        public static string PugSharp_Command_Error_NumberOfOvertimeRoundsLessThanZero {
+            get {
+                return ResourceManager.GetString("PugSharp.Command.Error.NumberOfOvertimeRoundsLessThanZero", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Max overtime rounds have to be an number!.
+        /// </summary>
+        public static string PugSharp_Command_Error_NumberOfOvertimeRoundsNotNumeric {
+            get {
+                return ResourceManager.GetString("PugSharp.Command.Error.NumberOfOvertimeRoundsNotNumeric", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Max rounds have to be greater than 0!.
+        /// </summary>
+        public static string PugSharp_Command_Error_NumberOfRoundsLessThanZero {
+            get {
+                return ResourceManager.GetString("PugSharp.Command.Error.NumberOfRoundsLessThanZero", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Max rounds have to be an number!.
+        /// </summary>
+        public static string PugSharp_Command_Error_NumberOfRoundsNotNumeric {
+            get {
+                return ResourceManager.GetString("PugSharp.Command.Error.NumberOfRoundsNotNumeric", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Number of rounds is required!.
+        /// </summary>
+        public static string PugSharp_Command_Error_NumberOfRoundsRequired {
+            get {
+                return ResourceManager.GetString("PugSharp.Command.Error.NumberOfRoundsRequired", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Can not start match. At least one map is required!.
+        /// </summary>
+        public static string PugSharp_Command_Error_OneMapRequired {
+            get {
+                return ResourceManager.GetString("PugSharp.Command.Error.OneMapRequired", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to RoundBackupFile &quot;{0:roundBackupFile}&quot; not found!.
+        /// </summary>
+        public static string PugSharp_Command_Error_RoundBackupFileNotFound {
+            get {
+                return ResourceManager.GetString("PugSharp.Command.Error.RoundBackupFileNotFound", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to PossibleValues for TeamMode: {0:possibleValues}.
+        /// </summary>
+        public static string PugSharp_Command_Error_TeammodePossibleValues {
+            get {
+                return ResourceManager.GetString("PugSharp.Command.Error.TeammodePossibleValues", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Teammode is required!.
+        /// </summary>
+        public static string PugSharp_Command_Error_TeammodeRequired {
+            get {
+                return ResourceManager.GetString("PugSharp.Command.Error.TeammodeRequired", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Url is required as Argument!.
+        /// </summary>
+        public static string PugSharp_Command_Error_UrlRequired {
+            get {
+                return ResourceManager.GetString("PugSharp.Command.Error.UrlRequired", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Loading Config from file {0:fileName}.
+        /// </summary>
+        public static string PugSharp_Command_LoadingConfigFromFile {
+            get {
+                return ResourceManager.GetString("PugSharp.Command.LoadingConfigFromFile", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Loading Config from {0:url}.
+        /// </summary>
+        public static string PugSharp_Command_LoadingConfigFromUrl {
+            get {
+                return ResourceManager.GetString("PugSharp.Command.LoadingConfigFromUrl", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Added **{0:mapName}**. Current maps are {1:maps}.
+        /// </summary>
+        public static string PugSharp_Command_MapAdded {
+            get {
+                return ResourceManager.GetString("PugSharp.Command.MapAdded", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Removed **{0:mapName}**. Current maps are {1:maps}.
+        /// </summary>
+        public static string PugSharp_Command_MapRemoved {
+            get {
+                return ResourceManager.GetString("PugSharp.Command.MapRemoved", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Match stopped!.
+        /// </summary>
+        public static string PugSharp_Command_MatchStopped {
+            get {
+                return ResourceManager.GetString("PugSharp.Command.MatchStopped", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Hello **{0:playerName}**, welcome to match {1:matchId}.
         /// </summary>
         public static string PugSharp_Hello {

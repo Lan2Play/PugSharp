@@ -5,7 +5,7 @@ namespace PugSharp.Config;
 public class MatchConfig
 {
     [JsonPropertyName("maplist")]
-    public required string[] Maplist { get; init; }
+    public IList<string> Maplist { get; init; } = new List<string>();
 
     [JsonPropertyName("team1")]
     public required Team Team1 { get; init; }
@@ -20,16 +20,16 @@ public class MatchConfig
     public int NumMaps { get; init; } = 1;
 
     [JsonPropertyName("players_per_team")]
-    public int PlayersPerTeam { get; init; } = 5;
+    public int PlayersPerTeam { get; set; } = 5;
 
     [JsonPropertyName("min_players_to_ready")]
-    public int MinPlayersToReady { get; init; } = 5;
+    public int MinPlayersToReady { get; set; } = 5;
 
     [JsonPropertyName("max_rounds")]
-    public int MaxRounds { get; init; } = 24;
+    public int MaxRounds { get; set; } = 24;
 
     [JsonPropertyName("max_overtime_rounds")]
-    public int MaxOvertimeRounds { get; init; } = 6;
+    public int MaxOvertimeRounds { get; set; } = 6;
 
     [JsonPropertyName("vote_timeout")]
     public long VoteTimeout { get; init; } = 60000;
@@ -58,6 +58,6 @@ public class MatchConfig
     [JsonPropertyName("vote_map")]
     public string VoteMap { get; init; } = "de_dust2";
 
-    [JsonPropertyName("server_locale")]
-    public string ServerLocale { get; init; } = "en";
+    [JsonPropertyName("team_mode")]
+    public TeamMode TeamMode { get; set; }
 }
