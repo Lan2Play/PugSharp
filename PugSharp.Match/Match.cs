@@ -1228,7 +1228,7 @@ public class Match : IDisposable
     public void CompleteMap(int tPoints, int ctPoints)
     {
         int delay = GetSourceTvDelay();
-        _CsServer.UpdateConvar("mp_win_panel_display_time", delay);
+        _CsServer.UpdateConvar("mp_win_panel_display_time", (float)delay);
 
         var winner = tPoints > ctPoints ? Team.Terrorist : Team.CounterTerrorist;
 
