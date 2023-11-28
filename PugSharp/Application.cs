@@ -35,6 +35,7 @@ public class Application : IApplication
     private readonly ITextHelper _TextHelper;
     private readonly IServiceProvider _ServiceProvider;
     private readonly ConfigProvider _ConfigProvider;
+    private readonly ServerConfig _ServerConfig;
     private readonly PeriodicTimer _ConfigTimer = new(TimeSpan.FromSeconds(1));
     private readonly CancellationTokenSource _CancellationTokenSource = new();
 
@@ -68,14 +69,24 @@ public class Application : IApplication
         _TextHelper = textHelper;
         _ServiceProvider = serviceProvider;
         _ConfigProvider = configProvider;
-
         PugSharpDirectory = Path.Combine(_CsServer.GameDirectory, "csgo", "PugSharp");
+        _ConfigProvider.Initialize(Path.Join(PugSharpDirectory, "Config"));
+
+
+
 
         _ = Task.Run(ConfigLoaderTask, _CancellationTokenSource.Token);
     }
 
     public void Initialize(bool hotReload)
     {
+        var serverConfigResult = _ConfigProvider.LoadServerConfig();
+
+        serverConfigResult.Switch(
+            error => { }, // Do nothing - Error already logged
+            serverConfig => SetServerCulture(serverConfig.Locale)
+        );
+
         RegisterEventHandlers();
 
         _Plugin.RegisterConsoleCommandAttributeHandlers(this);
@@ -1687,6 +1698,21 @@ public class Application : IApplication
     {
         _CsServer.StopDemoRecording();
         _CsServer.SwitchMap(map);
+    }
+
+    private void SetServerCulture(string locale)
+    {
+        try
+        {
+            CultureInfo.DefaultThreadCurrentCulture = CultureInfo.GetCultureInfo(locale);
+            CultureInfo.DefaultThreadCurrentUICulture = CultureInfo.DefaultThreadCurrentCulture;
+            CultureInfo.CurrentCulture = CultureInfo.DefaultThreadCurrentCulture;
+            CultureInfo.CurrentUICulture = CultureInfo.DefaultThreadCurrentCulture;
+        }
+        catch (Exception ex)
+        {
+            _Logger.LogError(ex, "Setting cultureInfo is not possible. Linux requires libicu-dev/libicu/icu-libs to support translations.");
+        }
     }
 
     protected virtual void Dispose(bool disposing)

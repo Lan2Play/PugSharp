@@ -14,6 +14,7 @@ public class ConfigProvider
     private readonly ILogger<ConfigProvider> _Logger;
 
     private string _ConfigDirectory = string.Empty;
+    private ServerConfig? _ServerConfig;
 
     public ConfigProvider(HttpClient httpClient, ILogger<ConfigProvider> logger)
     {
@@ -115,4 +116,49 @@ public class ConfigProvider
             return new Error<string>($"Failed loading config from {url}.");
         }
     }
+
+    public OneOf<Error<string>, ServerConfig> LoadServerConfig()
+    {
+        try
+        {
+            if (_ServerConfig != null)
+            {
+                return _ServerConfig;
+            }
+
+            var configPath = Path.Join(_ConfigDirectory, "server.json");
+
+            if (!File.Exists(configPath))
+            {
+                var directoryName = Path.GetDirectoryName(configPath);
+                if (directoryName != null && !Directory.Exists(directoryName))
+                {
+                    Directory.CreateDirectory(directoryName);
+                }
+
+                // Create default config
+                _ServerConfig = new ServerConfig();
+                using FileStream createStream = File.Create(configPath);
+                JsonSerializer.Serialize(createStream, _ServerConfig);
+                return _ServerConfig;
+            }
+
+            using var loadingStream = File.OpenRead(configPath);
+            _ServerConfig = JsonSerializer.Deserialize<ServerConfig>(loadingStream);
+
+            if (_ServerConfig == null)
+            {
+                _Logger.LogError("ServerConfig was deserialized to null");
+                return new Error<string>("ServerConfig couldn't be deserialized");
+            }
+
+            return _ServerConfig;
+        }
+        catch (Exception ex)
+        {
+            _Logger.LogError(ex, "Error loading server config");
+            return new Error<string>("Error loading server config");
+        }
+    }
+
 }

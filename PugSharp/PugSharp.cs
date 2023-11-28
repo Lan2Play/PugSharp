@@ -1,6 +1,4 @@
-﻿using System;
-
-using CounterStrikeSharp.API.Core;
+﻿using CounterStrikeSharp.API.Core;
 using CounterStrikeSharp.API.Core.Attributes;
 using CounterStrikeSharp.API.Modules.Utils;
 
@@ -59,7 +57,6 @@ public class PugSharp : BasePlugin, IBasePlugin
         }
 
         services.AddSingleton(CounterStrikeSharp.API.Core.Logging.CoreLogging.Factory);
-
 
         services.AddSingleton<ICsServer, CsServer>();
         services.AddSingleton<MultiApiProvider>();
