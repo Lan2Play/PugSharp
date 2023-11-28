@@ -803,7 +803,8 @@ public class Application : IApplication
 
     private HookResult OnClientCommandJoinTeam(CCSPlayerController? player, CommandInfo commandInfo)
     {
-        if (_Match == null)
+        if (_Match == null
+            || (_Match.MatchInfo.RandomPlayersAllowed && _Match.CurrentState <= MatchState.WaitingForPlayersConnectedReady))
         {
             return HookResult.Continue;
         }
