@@ -68,7 +68,7 @@ public sealed class G5ApiClient
             }
             else
             {
-                _Logger.LogError("G5 API request failed, HTTP status code = {statusCode}", httpResponseMessage.StatusCode);
+                _Logger.LogError("G5 API request failed, HTTP status code = {statusCode} content: {content}", httpResponseMessage.StatusCode, httpResponseMessage.Content.ToString());
             }
         }
         catch (Exception ex)
