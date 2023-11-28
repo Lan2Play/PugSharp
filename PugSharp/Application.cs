@@ -1081,6 +1081,7 @@ public class Application : IApplication
             c.ReplyToCommand(_TextHelper, nameof(Resources.PugSharp_Command_CreatingMatchMaxRounds));
             c.ReplyToCommand(_TextHelper, nameof(Resources.PugSharp_Command_CreatingMatchMaxOvertimeRounds));
             c.ReplyToCommand(_TextHelper, nameof(Resources.PugSharp_Command_CreatingMatchPlayersPerTeam));
+            c.ReplyToCommand(_TextHelper, nameof(Resources.PugSharp_Command_CreatingMatchTeamMode));
             c.ReplyToCommand(_TextHelper, nameof(Resources.PugSharp_Command_CreatingMatchMatchInfo));
         },
         command,
@@ -1290,6 +1291,44 @@ public class Application : IApplication
             _ConfigCreator.Config.PlayersPerTeam = playersPerTeam;
             _ConfigCreator.Config.MinPlayersToReady = playersPerTeam;
             c.ReplyToCommand($"Changed players per team from {oldPlayersPerTeam} to {playersPerTeam}");
+        },
+        command,
+        player);
+    }
+
+    [ConsoleCommand("css_teammode", "Sets the team mode for the match")]
+    [ConsoleCommand("ps_teammode", "Sets the team mode for the match")]
+    [RequiresPermissions("@pugsharp/matchadmin")]
+    public void OnCommandTeamMode(CCSPlayerController? player, CommandInfo command)
+    {
+        const int requiredArgCount = 2;
+        HandleCommand((p, c) =>
+        {
+            if (!IsConfigCreatorAvailable(c, p))
+            {
+                return;
+            }
+
+            if (c.ArgCount != requiredArgCount)
+            {
+                c.ReplyToCommand(_TextHelper, nameof(Resources.PugSharp_Command_Error_TeammodeRequired));
+                return;
+            }
+
+            if (!Enum.TryParse<TeamMode>(c.ArgByIndex(1), out var teamMode))
+            {
+                if (!int.TryParse(c.ArgByIndex(1), CultureInfo.InvariantCulture, out var teamModeNumber) || !Enum.GetValues<TeamMode>().Cast<int>().Contains(teamModeNumber))
+                {
+                    c.ReplyToCommand(_TextHelper, nameof(Resources.PugSharp_Command_Error_TeammodePossibleValues), string.Join(", ", Enum.GetValues<TeamMode>()));
+                    return;
+                }
+
+                teamMode = (TeamMode)teamModeNumber;
+            }
+
+            var oldTeamMode = _ConfigCreator.Config.TeamMode;
+            _ConfigCreator.Config.TeamMode = teamMode;
+            c.ReplyToCommand(_TextHelper, nameof(Resources.PugSharp_Command_ChangedTeamMode), oldTeamMode, teamMode);
         },
         command,
         player);
@@ -1669,7 +1708,6 @@ public class Application : IApplication
         Dispose(disposing: true);
         GC.SuppressFinalize(this);
     }
-
 
     #endregion
 }

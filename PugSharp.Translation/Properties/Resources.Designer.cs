@@ -79,6 +79,15 @@ namespace PugSharp.Translation.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Changed Teammode from {0:oldTeamMode} to {1:newTeamMode}.
+        /// </summary>
+        public static string PugSharp_Command_ChangedTeamMode {
+            get {
+                return ResourceManager.GetString("PugSharp.Command.ChangedTeamMode", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Matchconfig loaded!.
         /// </summary>
         public static string PugSharp_Command_ConfigLoaded {
@@ -156,6 +165,15 @@ namespace PugSharp.Translation.Properties {
         public static string PugSharp_Command_CreatingMatchStartMatch {
             get {
                 return ResourceManager.GetString("PugSharp.Command.CreatingMatchStartMatch", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to `!teammode &lt;mode&gt;` to set the team mode!.
+        /// </summary>
+        public static string PugSharp_Command_CreatingMatchTeamMode {
+            get {
+                return ResourceManager.GetString("PugSharp.Command.CreatingMatchTeamMode", resourceCulture);
             }
         }
         
@@ -318,6 +336,24 @@ namespace PugSharp.Translation.Properties {
         public static string PugSharp_Command_Error_RoundBackupFileNotFound {
             get {
                 return ResourceManager.GetString("PugSharp.Command.Error.RoundBackupFileNotFound", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to PossibleValues for TeamMode: {0:possibleValues}.
+        /// </summary>
+        public static string PugSharp_Command_Error_TeammodePossibleValues {
+            get {
+                return ResourceManager.GetString("PugSharp.Command.Error.TeammodePossibleValues", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Teammode is required!.
+        /// </summary>
+        public static string PugSharp_Command_Error_TeammodeRequired {
+            get {
+                return ResourceManager.GetString("PugSharp.Command.Error.TeammodeRequired", resourceCulture);
             }
         }
         
