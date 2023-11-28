@@ -1,7 +1,4 @@
-﻿using System.Net.Http.Json;
-
-using PugSharp.Api.G5Api.Tests.Fixtures;
-using PugSharp.Api.G5Api.Tests.Models;
+﻿using PugSharp.Api.G5Api.Tests.Fixtures;
 
 using Xunit;
 using Xunit.Abstractions;
@@ -20,9 +17,12 @@ public partial class G5ApiTests : ApiTestBase
         // Arrange
         var g5ApiClient = await Api.CreateClientAsync();
 
-        
+
 
         // Act
+        await g5ApiClient.SendEventAsync(new MapVetoedEvent() { TeamNumber = 1, MapName = "de_dust2", MatchId = "1" }, CancellationToken.None);
+        await g5ApiClient.SendEventAsync(new MapVetoedEvent() { TeamNumber = 2, MapName = "de_cache", MatchId = "1" }, CancellationToken.None);
+        await g5ApiClient.SendEventAsync(new MapPickedEvent() { TeamNumber = 2, MapName = "de_mirage", MatchId = "1", MapNumber = 1 }, CancellationToken.None);
         await g5ApiClient.SendEventAsync(new GoingLiveEvent() { MapNumber = 1, MatchId = "1" }, CancellationToken.None);
 
         // Assert

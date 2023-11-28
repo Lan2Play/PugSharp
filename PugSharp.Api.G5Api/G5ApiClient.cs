@@ -27,11 +27,11 @@ public sealed class G5ApiClient
 
         var modifiedApiUrl = g5ApiUrl;
 
-        if(!g5ApiUrl.EndsWith("v2", StringComparison.OrdinalIgnoreCase) && !g5ApiUrl.EndsWith("v2/", StringComparison.OrdinalIgnoreCase))
+        if (!g5ApiUrl.EndsWith("v2", StringComparison.OrdinalIgnoreCase) && !g5ApiUrl.EndsWith("v2/", StringComparison.OrdinalIgnoreCase))
         {
             modifiedApiUrl = $"{g5ApiUrl.TrimEnd('/')}/v2";
         }
-        
+
         _ApiUrl = modifiedApiUrl;
         _ApiHeader = g5ApiHeader;
         _ApiHeadeValue = g5ApiHeaderValue;
@@ -58,6 +58,7 @@ public sealed class G5ApiClient
 
             using var httpResponseMessage = await _HttpClient.SendAsync(httpRequest, cancellationToken).ConfigureAwait(false);
 
+            var content = await httpResponseMessage.Content.ReadAsStringAsync().ConfigureAwait(false);
             if (httpResponseMessage == null)
             {
                 return;
