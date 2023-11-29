@@ -26,6 +26,7 @@ public partial class G5ApiProvider : IApiProvider
 
         var mapResultEvent = new MapResultEvent
         {
+            event = "map_result",
             MatchId = finalizeMapParams.MatchId,
             MapNumber = finalizeMapParams.MapNumber,
             Winner = new Winner(CtScore > TScore ? Side.CT : Side.T, finalizeMapParams.Team1Score > finalizeMapParams.Team2Score ? 1 : 2),
@@ -40,6 +41,7 @@ public partial class G5ApiProvider : IApiProvider
     {
         var goingLiveEvent = new GoingLiveEvent
         {
+            event = "going_live",
             MatchId = goingLiveParams.MatchId,
             MapNumber = goingLiveParams.MapNumber,
         };
@@ -51,6 +53,7 @@ public partial class G5ApiProvider : IApiProvider
         var (CtScore, TScore) = _CsServer.LoadTeamsScore();
         var seriesResultEvent = new SeriesResultEvent()
         {
+            event = "series_end",
             MatchId = seriesResultParams.MatchId,
             Winner = new Winner(CtScore > TScore ? Side.CT : Side.T, seriesResultParams.Team1SeriesScore > seriesResultParams.Team2SeriesScore ? 1 : 2),
             Team1SeriesScore = seriesResultParams.Team1SeriesScore,
