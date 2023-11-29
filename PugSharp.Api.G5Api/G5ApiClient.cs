@@ -37,12 +37,12 @@ public sealed class G5ApiClient
         _ApiHeadeValue = g5ApiHeaderValue;
     }
 
-    public async Task SendEventAsync(EventBase eventToSend, CancellationToken cancellationToken)
+    public async Task<bool> SendEventAsync(EventBase eventToSend, CancellationToken cancellationToken)
     {
         try
         {
             using var jsonContent = new StringContent(
-                JsonSerializer.Serialize(eventToSend),
+                JsonSerializer.Serialize(eventToSend, eventToSend.GetType()),
                 Encoding.UTF8,
                 "application/json");
 
@@ -58,24 +58,26 @@ public sealed class G5ApiClient
 
             using var httpResponseMessage = await _HttpClient.SendAsync(httpRequest, cancellationToken).ConfigureAwait(false);
 
-            var content = await httpResponseMessage.Content.ReadAsStringAsync().ConfigureAwait(false);
             if (httpResponseMessage == null)
             {
-                return;
+                return false;
             }
 
             if (httpResponseMessage.IsSuccessStatusCode)
             {
                 _Logger.LogInformation("G5 API request was successful, HTTP status code = {statusCode}", httpResponseMessage.StatusCode);
+                return true;
             }
-            else
-            {
-                _Logger.LogError("G5 API request failed, HTTP status code = {statusCode} content: {content}", httpResponseMessage.StatusCode, httpResponseMessage.Content.ToString());
-            }
+
+            _Logger.LogError("G5 API request failed, HTTP status code = {statusCode} content: {content}", httpResponseMessage.StatusCode, httpResponseMessage.Content.ToString());
+
+            return false;
         }
         catch (Exception ex)
         {
             _Logger.LogError(ex, "Error sending event to G5 API. EventName {EventName}", eventToSend.EventName);
         }
+
+        return false;
     }
 }

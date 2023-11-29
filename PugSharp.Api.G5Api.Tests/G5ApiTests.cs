@@ -20,10 +20,10 @@ public partial class G5ApiTests : ApiTestBase
 
 
         // Act
-        await g5ApiClient.SendEventAsync(new MapVetoedEvent() { TeamNumber = 1, MapName = "de_dust2", MatchId = "1" }, CancellationToken.None);
-        await g5ApiClient.SendEventAsync(new MapVetoedEvent() { TeamNumber = 2, MapName = "de_cache", MatchId = "1" }, CancellationToken.None);
-        await g5ApiClient.SendEventAsync(new MapPickedEvent() { TeamNumber = 2, MapName = "de_mirage", MatchId = "1", MapNumber = 1 }, CancellationToken.None);
-        await g5ApiClient.SendEventAsync(new GoingLiveEvent() { MapNumber = 1, MatchId = "1" }, CancellationToken.None);
+        Assert.True(await g5ApiClient.SendEventAsync(new MapVetoedEvent() { Team = "team1", MapName = "de_dust2", MatchId = "1" }, CancellationToken.None));
+        Assert.True(await g5ApiClient.SendEventAsync(new MapVetoedEvent() { Team = "team2", MapName = "de_cache", MatchId = "1" }, CancellationToken.None));
+        Assert.True(await g5ApiClient.SendEventAsync(new MapPickedEvent() { Team = "team2", MapName = "de_mirage", MatchId = "1", MapNumber = 1 }, CancellationToken.None));
+        Assert.True(await g5ApiClient.SendEventAsync(new GoingLiveEvent() { MapNumber = 1, MatchId = "1" }, CancellationToken.None));
 
         // Assert
     }

@@ -48,9 +48,30 @@ public class JsonApiProvider : IApiProvider
         }
     }
 
+    public Task MapVetoedAsync(MapVetoedParams mapVetoedParams, CancellationToken cancellationToken)
+    {
+        return SerializeAndSaveData($"Match_{mapVetoedParams.MatchId}_mapvetoed.json", mapVetoedParams, cancellationToken);
+    }
+
+    public Task MapPickedAsync(MapPickedParams mapPickedParams, CancellationToken cancellationToken)
+    {
+        return SerializeAndSaveData($"Match_{mapPickedParams.MatchId}_mappicked.json", mapPickedParams, cancellationToken);
+    }
+
     public Task GoingLiveAsync(GoingLiveParams goingLiveParams, CancellationToken cancellationToken)
     {
         return SerializeAndSaveData($"Match_{goingLiveParams.MatchId}_golive.json", goingLiveParams, cancellationToken);
+    }
+
+    public Task RoundStatsUpdateAsync(RoundStatusUpdateParams roundStatusUpdateParams, CancellationToken cancellationToken)
+    {
+        var round = roundStatusUpdateParams.CurrentMap.Team1.Score + roundStatusUpdateParams.CurrentMap.Team2.Score;
+        return SerializeAndSaveData(string.Create(CultureInfo.InvariantCulture, $"Match_{roundStatusUpdateParams.MatchId}_roundresult_{round}.json"), roundStatusUpdateParams, cancellationToken);
+    }
+
+    public Task RoundMvpAsync(RoundMvpParams roundMvpParams, CancellationToken cancellationToken)
+    {
+        return Task.CompletedTask;
     }
 
     public Task FinalizeMapAsync(MapResultParams finalizeMapParams, CancellationToken cancellationToken)
@@ -68,11 +89,6 @@ public class JsonApiProvider : IApiProvider
         return Task.CompletedTask;
     }
 
-    public Task RoundStatsUpdateAsync(RoundStatusUpdateParams roundStatusUpdateParams, CancellationToken cancellationToken)
-    {
-        var round = roundStatusUpdateParams.CurrentMap.Team1.Score + roundStatusUpdateParams.CurrentMap.Team2.Score;
-        return SerializeAndSaveData(string.Create(CultureInfo.InvariantCulture, $"Match_{roundStatusUpdateParams.MatchId}_roundresult_{round}.json"), roundStatusUpdateParams, cancellationToken);
-    }
 
     private void CreateStatsDirectoryIfNotExists()
     {
@@ -80,10 +96,5 @@ public class JsonApiProvider : IApiProvider
         {
             Directory.CreateDirectory(_ApiStatsDirectory);
         }
-    }
-
-    public Task RoundMvpAsync(RoundMvpParams roundMvpParams, CancellationToken cancellationToken)
-    {
-        return Task.CompletedTask;
     }
 }

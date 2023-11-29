@@ -21,6 +21,18 @@ public class ApiStats : BaseApi, IApiProvider
         base.InitializeBase(apiStatsUrl, apiStatsKey);
     }
 
+    #region IApiProvider
+
+    public Task MapVetoedAsync(MapVetoedParams mapVetoedParams, CancellationToken cancellationToken)
+    {
+        return Task.CompletedTask;
+    }
+
+    public Task MapPickedAsync(MapPickedParams mapPickedParams, CancellationToken cancellationToken)
+    {
+        return Task.CompletedTask;
+    }
+
     public async Task GoingLiveAsync(GoingLiveParams goingLiveParams, CancellationToken cancellationToken)
     {
         try
@@ -41,35 +53,6 @@ public class ApiStats : BaseApi, IApiProvider
             _Logger.LogError(ex, "Error sending going live!");
         }
     }
-
-    public async Task FinalizeMapAsync(MapResultParams finalizeMapParams, CancellationToken cancellationToken)
-    {
-        if (HttpClient == null)
-        {
-            return;
-        }
-
-        try
-        {
-            var queryParams = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
-            {
-                {"team1score", CreateIntParam(finalizeMapParams.Team1Score)},
-                {"team2score", CreateIntParam(finalizeMapParams.Team2Score)},
-                {ApiStatsConstants.StatsMapWinner, finalizeMapParams.WinnerTeamName},
-            };
-
-            var uri = QueryHelpers.AddQueryString(string.Create(CultureInfo.InvariantCulture, $"finalize/{finalizeMapParams.MapNumber}"), queryParams);
-
-            var response = await HttpClient.PostAsync(uri, content: null, cancellationToken).ConfigureAwait(false);
-
-            await HandleResponseAsync(response, cancellationToken).ConfigureAwait(false);
-        }
-        catch (Exception ex)
-        {
-            _Logger.LogError(ex, "Error sending map result!");
-        }
-    }
-
 
     public async Task RoundStatsUpdateAsync(RoundStatusUpdateParams roundStatusUpdateParams, CancellationToken cancellationToken)
     {
@@ -100,6 +83,76 @@ public class ApiStats : BaseApi, IApiProvider
             _Logger.LogError(ex, "Error sending round results!");
         }
     }
+
+    public Task RoundMvpAsync(RoundMvpParams roundMvpParams, CancellationToken cancellationToken)
+    {
+        return Task.CompletedTask;
+    }
+
+    public async Task FinalizeMapAsync(MapResultParams finalizeMapParams, CancellationToken cancellationToken)
+    {
+        if (HttpClient == null)
+        {
+            return;
+        }
+
+        try
+        {
+            var queryParams = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+            {
+                {"team1score", CreateIntParam(finalizeMapParams.Team1Score)},
+                {"team2score", CreateIntParam(finalizeMapParams.Team2Score)},
+                {ApiStatsConstants.StatsMapWinner, finalizeMapParams.WinnerTeamName},
+            };
+
+            var uri = QueryHelpers.AddQueryString(string.Create(CultureInfo.InvariantCulture, $"finalize/{finalizeMapParams.MapNumber}"), queryParams);
+
+            var response = await HttpClient.PostAsync(uri, content: null, cancellationToken).ConfigureAwait(false);
+
+            await HandleResponseAsync(response, cancellationToken).ConfigureAwait(false);
+        }
+        catch (Exception ex)
+        {
+            _Logger.LogError(ex, "Error sending map result!");
+        }
+    }
+
+    public async Task FinalizeAsync(SeriesResultParams seriesResultParams, CancellationToken cancellationToken)
+    {
+        if (HttpClient == null)
+        {
+            return;
+        }
+
+        var queryParams = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            {ApiStatsConstants.StatsSeriesWinner, seriesResultParams.WinnerTeamName},
+            {ApiStatsConstants.StatsSeriesForfeit, CreateIntParam(Convert.ToInt32(seriesResultParams.Forfeit))},
+        };
+
+        var uri = QueryHelpers.AddQueryString($"finalize", queryParams);
+
+        var response = await HttpClient.PostAsync(uri, content: null, cancellationToken).ConfigureAwait(false);
+
+        await HandleResponseAsync(response, cancellationToken).ConfigureAwait(false);
+
+        // Wait before freeing server
+        await Task.Delay(TimeSpan.FromMilliseconds(seriesResultParams.TimeBeforeFreeingServerMs), cancellationToken).ConfigureAwait(false);
+    }
+
+    public async Task FreeServerAsync(CancellationToken cancellationToken)
+    {
+        if (HttpClient == null)
+        {
+            return;
+        }
+
+        var response = await HttpClient.PostAsync("freeserver", content: null, cancellationToken).ConfigureAwait(false);
+
+        await HandleResponseAsync(response, cancellationToken).ConfigureAwait(false);
+    }
+
+    #endregion
 
     private async Task UpdatePlayerStatsInternalAsync(int mapNumber, ITeamInfo teamInfo1, ITeamInfo teamInfo2, IMap currentMap, CancellationToken cancellationToken)
     {
@@ -180,46 +233,6 @@ public class ApiStats : BaseApi, IApiProvider
     internal static string CreateIntParam(int param)
     {
         return param.ToString(CultureInfo.InvariantCulture);
-    }
-
-    public async Task FinalizeAsync(SeriesResultParams seriesResultParams, CancellationToken cancellationToken)
-    {
-        if (HttpClient == null)
-        {
-            return;
-        }
-
-        var queryParams = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
-        {
-            {ApiStatsConstants.StatsSeriesWinner, seriesResultParams.WinnerTeamName},
-            {ApiStatsConstants.StatsSeriesForfeit, CreateIntParam(Convert.ToInt32(seriesResultParams.Forfeit))},
-        };
-
-        var uri = QueryHelpers.AddQueryString($"finalize", queryParams);
-
-        var response = await HttpClient.PostAsync(uri, content: null, cancellationToken).ConfigureAwait(false);
-
-        await HandleResponseAsync(response, cancellationToken).ConfigureAwait(false);
-
-        // Wait before freeing server
-        await Task.Delay(TimeSpan.FromMilliseconds(seriesResultParams.TimeBeforeFreeingServerMs), cancellationToken).ConfigureAwait(false);
-    }
-
-    public async Task FreeServerAsync(CancellationToken cancellationToken)
-    {
-        if (HttpClient == null)
-        {
-            return;
-        }
-
-        var response = await HttpClient.PostAsync("freeserver", content: null, cancellationToken).ConfigureAwait(false);
-
-        await HandleResponseAsync(response, cancellationToken).ConfigureAwait(false);
-    }
-
-    public Task RoundMvpAsync(RoundMvpParams roundMvpParams, CancellationToken cancellationToken)
-    {
-        return Task.CompletedTask;
     }
 
     private static class ApiStatsConstants
