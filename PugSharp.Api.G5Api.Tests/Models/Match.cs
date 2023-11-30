@@ -2,7 +2,7 @@
 
 namespace PugSharp.Api.G5Api.Tests.Models;
 
-internal class Match
+internal sealed class Match
 {
     [JsonPropertyName("server_id")]
     public required int ServerId { get; init; }
@@ -23,7 +23,7 @@ internal class Match
     public required bool SkipVeto { get; init; }
 
     [JsonPropertyName("veto_mappool")]
-    public required string VetoMappool { get; init; }
+    public required string VetoMapPool { get; init; }
 
     [JsonPropertyName("ignore_server")]
     public required bool IgnoreServer { get; init; }
