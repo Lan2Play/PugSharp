@@ -27,6 +27,7 @@ namespace PugSharp;
 public class Application : IApplication
 {
     private const int _SwitchPlayerDelay = 1000;
+    private const int _ConfigLoadDelay = 10000;
     private readonly ILogger<Application> _Logger;
     private readonly IBasePlugin _Plugin;
     private readonly ICsServer _CsServer;
@@ -35,11 +36,12 @@ public class Application : IApplication
     private readonly ITextHelper _TextHelper;
     private readonly IServiceProvider _ServiceProvider;
     private readonly ConfigProvider _ConfigProvider;
-    private readonly ServerConfig _ServerConfig;
     private readonly PeriodicTimer _ConfigTimer = new(TimeSpan.FromSeconds(1));
     private readonly CancellationTokenSource _CancellationTokenSource = new();
 
+
     public string PugSharpDirectory { get; }
+    private bool _WarmupConfigLoaded = false;
 
     private Match.Match? _Match;
     private bool _DisposedValue;
@@ -315,6 +317,8 @@ public class Application : IApplication
                 SetMatchVariable(_Match.MatchInfo.Config);
             });
         }
+
+        _WarmupConfigLoaded = false;
     }
 
     // TODO Add Round Events to RoundService?
@@ -1548,15 +1552,24 @@ public class Application : IApplication
 
     private async Task ConfigLoaderTask()
     {
+        // Delay before first call. Otherwise it crashes sometimes during GetPlayers
+        await Task.Delay(_ConfigLoadDelay).ConfigureAwait(false);
         while (await _ConfigTimer.WaitForNextTickAsync(_CancellationTokenSource.Token).ConfigureAwait(false))
         {
             if (_Match == null || _Match.CurrentState == MatchState.WaitingForPlayersConnectedReady || _Match.CurrentState == MatchState.WaitingForPlayersReady)
             {
                 try
                 {
-                    if (!Utilities.GetPlayers().Any(x => !x.IsBot && !x.IsHLTV))
+                    var gameRules = CounterStrikeSharp.API.Utilities.FindAllEntitiesByDesignerName<CCSGameRulesProxy>("cs_gamerules").First().GameRules;
+                    if (gameRules != null && gameRules.WarmupPeriod && _WarmupConfigLoaded)
+                    {
+                        return;
+                    }
+
+                    if (!Utilities.GetPlayers().Exists(x => !x.IsBot && !x.IsHLTV))
                     {
                         _CsServer.LoadAndExecuteConfig("warmup.cfg");
+                        _WarmupConfigLoaded = true;
                     }
                 }
                 catch (Exception e)
