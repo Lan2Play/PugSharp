@@ -68,7 +68,7 @@ public class StatsPlayer
     [JsonPropertyName("1v1")]
     public int OneV1s { get; set; }
 
-    [JsonPropertyName("1v1")]
+    [JsonPropertyName("1v2")]
     public int OneV2s { get; set; }
 
     [JsonPropertyName("1v3")]
