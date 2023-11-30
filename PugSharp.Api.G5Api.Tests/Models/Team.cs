@@ -1,7 +1,7 @@
 ﻿using System.Text.Json.Serialization;
 
 namespace PugSharp.Api.G5Api.Tests.Models;
-internal class Team
+internal sealed class Team
 {
     [JsonPropertyName("name")]
     public required string Name { get; init; }
