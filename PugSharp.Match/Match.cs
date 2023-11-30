@@ -134,7 +134,7 @@ public class Match : IDisposable
 
         _MatchStateMachine.Configure(MatchState.TeamVote)
             .Permit(MatchCommand.VoteTeam, MatchState.SwitchMap)
-            .OnEntry(SendTeamVoteToVotingteam)
+            .OnEntry(SendTeamVoteToVotingTeam)
             .OnExit(SetSelectedTeamSite);
 
         _MatchStateMachine.Configure(MatchState.SwitchMap)
@@ -727,24 +727,28 @@ public class Match : IDisposable
             return;
         }
 
-        //Only ban map if theres more than one
+        var team = _CurrentMatchTeamToVote == null || MatchInfo.Config.Team1 == _CurrentMatchTeamToVote.TeamConfig ? "team1" : "team2";
+
+        //Only ban map if there is more than one
         if (_MapsToSelect.Count > 1)
         {
             var mapToBan = _MapsToSelect.MaxBy(m => m.Votes.Count);
             _MapsToSelect.Remove(mapToBan!);
             _MapsToSelect.ForEach(x => x.Votes.Clear());
 
-            _CsServer.PrintToChatAll(_TextHelper.GetText(nameof(Resources.PugSharp_Match_BannedMap), mapToBan!.Name, _CurrentMatchTeamToVote?.TeamConfig.Name));
+            _CsServer.PrintToChatAll(_TextHelper.GetText(nameof(Resources.PugSharp_Match_BannedMap), mapToBan!.Name, _CurrentMatchTeamToVote!.TeamConfig.Name));
+            _ = _ApiProvider.MapVetoedAsync(new MapVetoedParams(MatchInfo.Config.MatchId, mapToBan.Name, team), CancellationToken.None);
         }
 
         if (_MapsToSelect.Count == 1)
         {
             MatchInfo.CurrentMap.MapName = _MapsToSelect[0].Name;
             _MapsToSelect = MatchInfo.Config.Maplist.Select(x => new Vote(x)).ToList();
+            _ = _ApiProvider.MapVetoedAsync(new MapVetoedParams(MatchInfo.Config.MatchId, MatchInfo.CurrentMap.MapName, team), CancellationToken.None);
         }
     }
 
-    private void SendTeamVoteToVotingteam()
+    private void SendTeamVoteToVotingTeam()
     {
         SwitchVotingTeam();
 

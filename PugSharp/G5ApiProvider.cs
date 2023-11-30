@@ -19,21 +19,29 @@ public partial class G5ApiProvider : IApiProvider
 
     #region IApiProvider
 
-    public Task FinalizeMapAsync(MapResultParams finalizeMapParams, CancellationToken cancellationToken)
+    public Task MapVetoedAsync(MapVetoedParams mapVetoedParams, CancellationToken cancellationToken)
     {
-        var (CtScore, TScore) = _CsServer.LoadTeamsScore();
-        var emptyStatsTeam = new StatsTeam(string.Empty, string.Empty, 0, 0, 0, 0, Enumerable.Empty<StatsPlayer>());
-
-        var mapResultEvent = new MapResultEvent
+        var mapVetoedEvent = new MapVetoedEvent
         {
-            MatchId = finalizeMapParams.MatchId,
-            MapNumber = finalizeMapParams.MapNumber,
-            Winner = new Winner(CtScore > TScore ? Side.CT : Side.T, finalizeMapParams.Team1Score > finalizeMapParams.Team2Score ? 1 : 2),
-            StatsTeam1 = emptyStatsTeam,
-            StatsTeam2 = emptyStatsTeam,
+            MatchId = mapVetoedParams.MatchId,
+            MapName = mapVetoedParams.MapName,
+            Team = mapVetoedParams.Team,
         };
 
-        return _G5Stats.SendEventAsync(mapResultEvent, cancellationToken);
+        return _G5Stats.SendEventAsync(mapVetoedEvent, cancellationToken);
+    }
+
+    public Task MapPickedAsync(MapPickedParams mapPickedParams, CancellationToken cancellationToken)
+    {
+        var mapPickedEvent = new MapPickedEvent
+        {
+            MatchId = mapPickedParams.MatchId,
+            MapName = mapPickedParams.MapName,
+            MapNumber = mapPickedParams.MapNumber,
+            Team = mapPickedParams.Team,
+        };
+
+        return _G5Stats.SendEventAsync(mapPickedEvent, cancellationToken);
     }
 
     public Task GoingLiveAsync(GoingLiveParams goingLiveParams, CancellationToken cancellationToken)
@@ -44,26 +52,6 @@ public partial class G5ApiProvider : IApiProvider
             MapNumber = goingLiveParams.MapNumber,
         };
         return _G5Stats.SendEventAsync(goingLiveEvent, cancellationToken);
-    }
-
-    public Task FinalizeAsync(SeriesResultParams seriesResultParams, CancellationToken cancellationToken)
-    {
-        var (CtScore, TScore) = _CsServer.LoadTeamsScore();
-        var seriesResultEvent = new SeriesResultEvent()
-        {
-            MatchId = seriesResultParams.MatchId,
-            Winner = new Winner(CtScore > TScore ? Side.CT : Side.T, seriesResultParams.Team1SeriesScore > seriesResultParams.Team2SeriesScore ? 1 : 2),
-            Team1SeriesScore = seriesResultParams.Team1SeriesScore,
-            Team2SeriesScore = seriesResultParams.Team2SeriesScore,
-            TimeUntilRestore = (int)seriesResultParams.TimeBeforeFreeingServerMs,
-        };
-        return _G5Stats.SendEventAsync(seriesResultEvent, cancellationToken);
-    }
-
-    public Task FreeServerAsync(CancellationToken cancellationToken)
-    {
-        // Not Required. Handled via TimeUntilRestore of in the Finalize event
-        return Task.CompletedTask;
     }
 
     public Task RoundStatsUpdateAsync(RoundStatusUpdateParams roundStatusUpdateParams, CancellationToken cancellationToken)
@@ -86,6 +74,44 @@ public partial class G5ApiProvider : IApiProvider
 
         return _G5Stats.SendEventAsync(roundMvpEvent, cancellationToken);
     }
+
+    public Task FinalizeMapAsync(MapResultParams finalizeMapParams, CancellationToken cancellationToken)
+    {
+        var (CtScore, TScore) = _CsServer.LoadTeamsScore();
+        var emptyStatsTeam = new StatsTeam(string.Empty, string.Empty, 0, 0, 0, 0, Enumerable.Empty<StatsPlayer>());
+
+        var mapResultEvent = new MapResultEvent
+        {
+            MatchId = finalizeMapParams.MatchId,
+            MapNumber = finalizeMapParams.MapNumber,
+            Winner = new Winner(CtScore > TScore ? Side.CT : Side.T, finalizeMapParams.Team1Score > finalizeMapParams.Team2Score ? 1 : 2),
+            StatsTeam1 = emptyStatsTeam,
+            StatsTeam2 = emptyStatsTeam,
+        };
+
+        return _G5Stats.SendEventAsync(mapResultEvent, cancellationToken);
+    }
+
+    public Task FinalizeAsync(SeriesResultParams seriesResultParams, CancellationToken cancellationToken)
+    {
+        var (CtScore, TScore) = _CsServer.LoadTeamsScore();
+        var seriesResultEvent = new SeriesResultEvent()
+        {
+            MatchId = seriesResultParams.MatchId,
+            Winner = new Winner(CtScore > TScore ? Side.CT : Side.T, seriesResultParams.Team1SeriesScore > seriesResultParams.Team2SeriesScore ? 1 : 2),
+            Team1SeriesScore = seriesResultParams.Team1SeriesScore,
+            Team2SeriesScore = seriesResultParams.Team2SeriesScore,
+            TimeUntilRestore = (int)seriesResultParams.TimeBeforeFreeingServerMs,
+        };
+        return _G5Stats.SendEventAsync(seriesResultEvent, cancellationToken);
+    }
+
+    public Task FreeServerAsync(CancellationToken cancellationToken)
+    {
+        // Not Required. Handled via TimeUntilRestore of in the Finalize event
+        return Task.CompletedTask;
+    }
+
 
 
     #endregion

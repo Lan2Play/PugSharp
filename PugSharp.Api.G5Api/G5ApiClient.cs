@@ -24,24 +24,25 @@ public sealed class G5ApiClient
     public void Initialize(string g5ApiUrl, string g5ApiHeader, string g5ApiHeaderValue)
     {
         _Logger.LogInformation("Initialize G5Api with BaseUrl: {url}", g5ApiUrl);
-        _ApiUrl = g5ApiUrl;
+
+        var modifiedApiUrl = g5ApiUrl;
+
+        if (!g5ApiUrl.EndsWith("v2", StringComparison.OrdinalIgnoreCase) && !g5ApiUrl.EndsWith("v2/", StringComparison.OrdinalIgnoreCase))
+        {
+            modifiedApiUrl = $"{g5ApiUrl.TrimEnd('/')}/v2";
+        }
+
+        _ApiUrl = modifiedApiUrl;
         _ApiHeader = g5ApiHeader;
         _ApiHeadeValue = g5ApiHeaderValue;
     }
 
-    public void UpdateConfig(string g5ApiUrl, string g5ApiHeader, string g5ApiHeaderValue)
-    {
-        _ApiUrl = g5ApiUrl;
-        _ApiHeader = g5ApiHeader;
-        _ApiHeadeValue = g5ApiHeaderValue;
-    }
-
-    public async Task SendEventAsync(EventBase eventToSend, CancellationToken cancellationToken)
+    public async Task<bool> SendEventAsync(EventBase eventToSend, CancellationToken cancellationToken)
     {
         try
         {
             using var jsonContent = new StringContent(
-                JsonSerializer.Serialize(eventToSend),
+                JsonSerializer.Serialize(eventToSend, eventToSend.GetType()),
                 Encoding.UTF8,
                 "application/json");
 
@@ -59,21 +60,24 @@ public sealed class G5ApiClient
 
             if (httpResponseMessage == null)
             {
-                return;
+                return false;
             }
 
             if (httpResponseMessage.IsSuccessStatusCode)
             {
-                _Logger.LogInformation("G5 API request was succesful, HTTP status code = {statusCode}", httpResponseMessage.StatusCode);
+                _Logger.LogInformation("G5 API request was successful, HTTP status code = {statusCode}", httpResponseMessage.StatusCode);
+                return true;
             }
-            else
-            {
-                _Logger.LogError("G5 API request failed, HTTP status code = {statusCode} content: {content}", httpResponseMessage.StatusCode, httpResponseMessage.Content.ToString());
-            }
+
+            _Logger.LogError("G5 API request failed, HTTP status code = {statusCode} content: {content}", httpResponseMessage.StatusCode, httpResponseMessage.Content.ToString());
+
+            return false;
         }
         catch (Exception ex)
         {
             _Logger.LogError(ex, "Error sending event to G5 API. EventName {EventName}", eventToSend.EventName);
         }
+
+        return false;
     }
 }
