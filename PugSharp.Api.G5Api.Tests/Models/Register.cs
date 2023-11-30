@@ -1,10 +1,10 @@
 ﻿using System.Text.Json.Serialization;
 
-namespace PugSharp.Api.G5Api.Tests;
+namespace PugSharp.Api.G5Api.Tests.Models;
 
 
-    internal class Register
-    {
-        [JsonPropertyName("steam_id")]
-        public required string SteamId { get; init; }
-    }
+internal sealed class Register
+{
+    [JsonPropertyName("steam_id")]
+    public required string SteamId { get; init; }
+}
