@@ -172,7 +172,7 @@ public class G5ApiFixture : IAsyncLifetime
 
     public async Task<G5ApiClient> CreateClientAsync()
     {
-        var httpClient = new HttpClient();
+        var httpClient = new HttpClient { Timeout = TimeSpan.FromMinutes(3) };
 
         var registerHttpRequest = new HttpRequestMessage(HttpMethod.Post, $"{PublicApiUrl}/register?username=test&password=supersecure")
         {
