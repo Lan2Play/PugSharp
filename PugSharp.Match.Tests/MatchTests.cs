@@ -80,7 +80,7 @@ public class MatchTests
     }
 
     [Fact]
-    public async Task MatchTest()
+    public void MatchTest()
     {
         MatchConfig config = CreateExampleConfig();
 
@@ -99,14 +99,14 @@ public class MatchTests
         IPlayer player2 = CreatePlayerSub(1, 1);
 
         ConnectPlayers(matchPlayers, match, player1, player2);
-        await SetPlayersReady(match, player1, player2, MatchState.MapVote);
+        SetPlayersReady(match, player1, player2, MatchState.MapVote);
         IPlayer votePlayer = VoteForMap(config, match, player1, player2);
-        await VoteTeam(csServer, config, match, player1, player2, votePlayer);
+        VoteTeam(csServer, config, match, player1, player2, votePlayer);
         PauseUnpauseMatch(csServer, match, player1);
     }
 
     [Fact]
-    public async Task MatchTestWithOneMap()
+    public void MatchTestWithOneMap()
     {
         MatchConfig config = CreateExampleConfig(new List<string> { "de_dust2" });
         var serviceProvider = CreateTestProvider();
@@ -124,8 +124,8 @@ public class MatchTests
         IPlayer player2 = CreatePlayerSub(1, 1);
 
         ConnectPlayers(matchPlayers, match, player1, player2);
-        await SetPlayersReady(match, player1, player2, MatchState.TeamVote);
-        await VoteTeam(csServer, config, match, player1, player2, player1);
+        SetPlayersReady(match, player1, player2, MatchState.TeamVote);
+        VoteTeam(csServer, config, match, player1, player2, player1);
         PauseUnpauseMatch(csServer, match, player1);
     }
 
@@ -141,7 +141,7 @@ public class MatchTests
         csServer.Received().UnpauseMatch();
     }
 
-    private static async Task VoteTeam(ICsServer csServer, MatchConfig config, Match match, IPlayer player1, IPlayer player2, IPlayer votePlayer)
+    private static void VoteTeam(ICsServer csServer, MatchConfig config, Match match, IPlayer player1, IPlayer player2, IPlayer votePlayer)
     {
         Assert.False(match.VoteTeam(votePlayer, "pizza"));
         Assert.False(match.VoteTeam(votePlayer == player1 ? player2 : player1, "T"));
@@ -181,7 +181,7 @@ public class MatchTests
         return votePlayer;
     }
 
-    private static async Task SetPlayersReady(Match match, IPlayer player1, IPlayer player2, MatchState expectedMatchStateAfterReady)
+    private static void SetPlayersReady(Match match, IPlayer player1, IPlayer player2, MatchState expectedMatchStateAfterReady)
     {
         match.TogglePlayerIsReady(player1);
         Assert.Equal(MatchState.WaitingForPlayersConnectedReady, match.CurrentState);
