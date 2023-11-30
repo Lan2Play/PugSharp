@@ -30,7 +30,7 @@
 
 
 	<ItemGroup>
-	  <PackageReference Update="Meziantou.Analyzer" Version="2.0.110">
+	  <PackageReference Update="Meziantou.Analyzer" Version="2.0.116">
 	    <PrivateAssets>all</PrivateAssets>
 	    <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
 	  </PackageReference>
