@@ -103,13 +103,19 @@ Serverconfig
 ........................
 The Serverconfig defines server wide PugSharp settings for your server. It is loaded automatically when PugSharp is loaded.
 
+Location: /game/csgo/PugSharp/Config/server.json
+
+
+
 Serverconfig Fields
 '''''''''''''''''''''
-+--------+---------+---------------------------------------------------------------------------------------+
-| Field  | Default |                                      Description                                      |
-+========+=========+=======================================================================================+
-| locale | en      | This is the language that will be used for the messages that are printed to the users |
-+--------+---------+---------------------------------------------------------------------------------------+
++-----------------------------+---------+---------------------------------------------------------------------------------------+
+|            Field            | Default |                                      Description                                      |
++=============================+=========+=======================================================================================+
+| locale                      | en      | This is the language that will be used for the messages that are printed to the users |
++-----------------------------+---------+---------------------------------------------------------------------------------------+
+| allow_players_without_match | true    | Defines if players can join the server when no match is loaded.                       |
++-----------------------------+---------+---------------------------------------------------------------------------------------+
 
 Serverconfig Example
 '''''''''''''''''''''
@@ -117,7 +123,8 @@ Serverconfig Example
 .. code-block:: json
 
    {
-     "none": ""
+       "locale": "en",
+       "allow_players_without_match": true
    }
 
 
