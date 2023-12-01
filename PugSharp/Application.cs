@@ -45,6 +45,7 @@ public class Application : IApplication
     private Match.Match? _Match;
     private bool _DisposedValue;
     private ConfigCreator _ConfigCreator;
+    private ServerConfig _ServerConfig;
     private readonly CurrentRoundState _CurrentRoundState = new();
 
     /// <summary>
@@ -73,9 +74,6 @@ public class Application : IApplication
         PugSharpDirectory = Path.Combine(_CsServer.GameDirectory, "csgo", "PugSharp");
         _ConfigProvider.Initialize(Path.Join(PugSharpDirectory, "Config"));
 
-
-
-
         _ = Task.Run(ConfigLoaderTask, _CancellationTokenSource.Token);
     }
 
@@ -85,7 +83,11 @@ public class Application : IApplication
 
         serverConfigResult.Switch(
             error => { }, // Do nothing - Error already logged
-            serverConfig => SetServerCulture(serverConfig.Locale)
+            serverConfig =>
+            {
+                _ServerConfig = serverConfig;
+                SetServerCulture(serverConfig.Locale);
+            }
         );
 
         RegisterEventHandlers();
@@ -174,7 +176,7 @@ public class Application : IApplication
 
         if (userId != null && userId.IsValid)
         {
-            // // Userid will give you a reference to a CCSPlayerController class
+            // Userid will give you a reference to a CCSPlayerController class
             _Logger.LogInformation("Player {playerName} has connected!", userId.PlayerName);
 
             if (userId.IsHLTV)
@@ -207,6 +209,11 @@ public class Application : IApplication
                 {
                     // do nothing
                 }
+            }
+            else if (_ServerConfig?.AllowPlayersWithoutMatch == false)
+            {
+                eventPlayerConnectFull.Userid.PrintToCenter("Joining without a match is not allowed!");
+                eventPlayerConnectFull.Userid.Kick();
             }
             else
             {

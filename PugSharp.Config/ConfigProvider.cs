@@ -138,20 +138,21 @@ public class ConfigProvider
 
                 // Create default config
                 _ServerConfig = new ServerConfig();
-                using FileStream createStream = File.Create(configPath);
-                JsonSerializer.Serialize(createStream, _ServerConfig);
-                return _ServerConfig;
             }
-
-            using var loadingStream = File.OpenRead(configPath);
-            _ServerConfig = JsonSerializer.Deserialize<ServerConfig>(loadingStream);
-
-            if (_ServerConfig == null)
+            else
             {
-                _Logger.LogError("ServerConfig was deserialized to null");
-                return new Error<string>("ServerConfig couldn't be deserialized");
+                using var loadingStream = File.OpenRead(configPath);
+                _ServerConfig = JsonSerializer.Deserialize<ServerConfig>(loadingStream);
+
+                if (_ServerConfig == null)
+                {
+                    _Logger.LogError("ServerConfig was deserialized to null");
+                    return new Error<string>("ServerConfig couldn't be deserialized");
+                }
             }
 
+            using FileStream createStream = File.Create(configPath);
+            JsonSerializer.Serialize(createStream, _ServerConfig);
             return _ServerConfig;
         }
         catch (Exception ex)
