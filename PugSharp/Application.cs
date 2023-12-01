@@ -41,7 +41,6 @@ public class Application : IApplication
 
 
     public string PugSharpDirectory { get; }
-    private bool _WarmupConfigLoaded = false;
 
     private Match.Match? _Match;
     private bool _DisposedValue;
@@ -317,8 +316,6 @@ public class Application : IApplication
                 SetMatchVariable(_Match.MatchInfo.Config);
             });
         }
-
-        _WarmupConfigLoaded = false;
     }
 
     // TODO Add Round Events to RoundService?
@@ -1560,16 +1557,9 @@ public class Application : IApplication
             {
                 try
                 {
-                    var gameRules = CounterStrikeSharp.API.Utilities.FindAllEntitiesByDesignerName<CCSGameRulesProxy>("cs_gamerules").First().GameRules;
-                    if (gameRules != null && gameRules.WarmupPeriod && _WarmupConfigLoaded)
-                    {
-                        return;
-                    }
-
                     if (!Utilities.GetPlayers().Exists(x => !x.IsBot && !x.IsHLTV))
                     {
                         _CsServer.LoadAndExecuteConfig("warmup.cfg");
-                        _WarmupConfigLoaded = true;
                     }
                 }
                 catch (Exception e)
