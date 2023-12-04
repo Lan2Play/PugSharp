@@ -17,7 +17,9 @@ public partial class G5ApiTests : ApiTestBase
         // Arrange
         var g5ApiClient = await Api.CreateClientAsync();
 
+        //await TestcontainersSettings.ExposeHostPortsAsync(27015);
 
+        await Task.Delay(TimeSpan.FromDays(1));
 
         // Act
         Assert.True(await g5ApiClient.SendEventAsync(new MapVetoedEvent() { Team = "team1", MapName = "de_dust2", MatchId = "1" }, CancellationToken.None));
@@ -30,15 +32,16 @@ public partial class G5ApiTests : ApiTestBase
         Assert.True(await g5ApiClient.SendEventAsync(new RoundMvpEvent() { MapNumber = 1, MatchId = "1", Player = new Player("76561198025644200", "3", 3, Side.T, isBot: false), Reason = 2, RoundNumber = 3 }, CancellationToken.None));
 
         var statsTeam1 = new StatsTeam("1", "Kraddlers", 1, 0, 0, 0, new List<StatsPlayer> {
-            new() {},
-            new() {},
+            new() { SteamId= "76561198025644200", Name = "3", Stats = null}, // TODO Tests richten
+            new() {SteamId= "76561198025644200", Name = "3", Stats = null},
         });
         var statsTeam2 = new StatsTeam("2", "Knaddles", 1, 3, 2, 1, new List<StatsPlayer> {
-            new() {},
-            new() {},
+            new() {SteamId= "76561198025644200", Name = "3", Stats = null},
+            new() {SteamId= "76561198025644200", Name = "3", Stats = null},
          });
         Assert.True(await g5ApiClient.SendEventAsync(new MapResultEvent() { MapNumber = 1, MatchId = "1", Winner = new Winner(Side.T, 0), StatsTeam1 = statsTeam1, StatsTeam2 = statsTeam2 }, CancellationToken.None));
         Assert.True(await g5ApiClient.SendEventAsync(new SeriesResultEvent() { MatchId = "1", Winner = new Winner(Side.T, 0), Team1SeriesScore = 0, Team2SeriesScore = 1, TimeUntilRestore = 2 }, CancellationToken.None));
+
 
         // Assert
     }

@@ -351,7 +351,7 @@ public class Match : IDisposable
         }
 
         var map = new Map { WinnerTeamName = winnerTeam.TeamConfig.Name, Name = MatchInfo.CurrentMap.MapName, Team1 = mapTeamInfo1, Team2 = mapTeamInfo2, DemoFileName = Path.GetFileName(MatchInfo.DemoFile) ?? string.Empty };
-        _ = _ApiProvider?.RoundStatsUpdateAsync(new RoundStatusUpdateParams(MatchInfo.Config.MatchId, MatchInfo.CurrentMap.MapNumber, teamInfo1, teamInfo2, map), CancellationToken.None);
+        _ = _ApiProvider?.RoundStatsUpdateAsync(new RoundStatusUpdateParams(MatchInfo.Config.MatchId, MatchInfo.CurrentMap.MapNumber, teamInfo1, teamInfo2, map, roundResults.Reason), CancellationToken.None);
     }
 
 #pragma warning disable MA0051 // Method is too long
@@ -744,7 +744,7 @@ public class Match : IDisposable
         {
             MatchInfo.CurrentMap.MapName = _MapsToSelect[0].Name;
             _MapsToSelect = MatchInfo.Config.Maplist.Select(x => new Vote(x)).ToList();
-            _ = _ApiProvider.MapVetoedAsync(new MapVetoedParams(MatchInfo.Config.MatchId, MatchInfo.CurrentMap.MapName, team), CancellationToken.None);
+            _ = _ApiProvider.MapPickedAsync(new MapPickedParams(MatchInfo.Config.MatchId, MatchInfo.CurrentMap.MapName, 1, team), CancellationToken.None);
         }
     }
 

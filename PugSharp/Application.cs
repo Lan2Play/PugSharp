@@ -36,7 +36,7 @@ public class Application : IApplication
     private readonly ITextHelper _TextHelper;
     private readonly IServiceProvider _ServiceProvider;
     private readonly ConfigProvider _ConfigProvider;
-    private readonly PeriodicTimer _ConfigTimer = new(TimeSpan.FromSeconds(1));
+    private readonly PeriodicTimer _ConfigTimer = new(TimeSpan.FromSeconds(10));
     private readonly CancellationTokenSource _CancellationTokenSource = new();
 
 
@@ -107,10 +107,11 @@ public class Application : IApplication
                         var results = command.CommandCallBack(args);
                         foreach (var result in results)
                         {
+                            Console.WriteLine(result);
                             // TODO Translation?
                             c.ReplyToCommand(result);
                         }
-                    }, c, p, c.GetCommandString, c.ArgString);
+                    }, c, p, c.ArgString, c.GetCommandString);
                 });
             }
         }
@@ -401,6 +402,7 @@ public class Application : IApplication
                     ScoreCT = isFirstHalf ? teamCT.ScoreFirstHalf : teamCT.ScoreSecondHalf,
                 },
                 PlayerResults = CreatePlayerResults(),
+                Reason = eventRoundEnd.Reason,
             });
 
             var backupDir = Path.Combine(PugSharpDirectory, "Backup");

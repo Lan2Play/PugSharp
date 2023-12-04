@@ -27,6 +27,7 @@ public sealed partial class G5CommandProvider : ICommandProvider
         {
             new("version","Return the cs server version", CommandVersion),
             new("get5_status","Return the get 5 status", CommandGet5Status),
+            new("get5_web_available","Return if g5 is availbale", CommandGet5WebAvailable),
             new("get5_loadmatch_url","Load a match with the given URL and API key for a match", CommandLoadMatchUrl),
             new("get5_endmatch","Ends the match", CommandEndMatch),
             new("sm_pause","Pauses the match", CommandSmPause),
@@ -38,6 +39,11 @@ public sealed partial class G5CommandProvider : ICommandProvider
             new("get5_loadbackup","Load a backup", CommandLoadBackUp),
             new("get5_loadbackup_url","Loac a backup", CommandLoadBackUpUrl),
         };
+    }
+
+    private IEnumerable<string> CommandGet5WebAvailable(string[] arg)
+    {
+        yield return JsonSerializer.Serialize(new G5WebAvailable());
     }
 
     private IEnumerable<string> CommandLoadBackUpUrl(string[] arg)
@@ -171,5 +177,17 @@ public sealed partial class G5CommandProvider : ICommandProvider
         }
 
         return Enumerable.Empty<string>();
+    }
+
+    private class G5WebAvailable
+    {
+        [JsonPropertyName("gamestate")]
+        public int GameState { get; init; } = 0;
+
+        [JsonPropertyName("available")]
+        public int Available { get; } = 1;
+
+        [JsonPropertyName("plugin_version")]
+        public string PluginVersion { get; } = "0.15.0";
     }
 }

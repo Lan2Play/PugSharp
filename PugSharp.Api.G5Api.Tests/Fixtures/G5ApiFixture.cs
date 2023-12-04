@@ -39,6 +39,7 @@ public class G5ApiFixture : IAsyncLifetime
     public G5ApiFixture()
     {
         _Network = new NetworkBuilder()
+            //.WithDriver(DotNet.Testcontainers.Configurations.NetworkDriver.Host)
             .Build();
 
         _DatabaseContainer = new MariaDbBuilder()
@@ -59,10 +60,10 @@ public class G5ApiFixture : IAsyncLifetime
             .WithEnvironment("PORT", _ApiPort.ToString(CultureInfo.InvariantCulture))
             .WithEnvironment("DBKEY", "de84096947c7860ea6c1479573492f23")
             .WithEnvironment("STEAMAPIKEY", "")
-            .WithEnvironment("HOSTNAME", "http://localhost")
+            .WithEnvironment("HOSTNAME", "http://192.168.178.52")
             .WithEnvironment("SHAREDSECRET", $"{_ManagementKey}")
-            .WithEnvironment("CLIENTHOME", $"http://localhost")
-            .WithEnvironment("APIURL", $"http://localhost")
+            .WithEnvironment("CLIENTHOME", $"http://192.168.178.52")
+            .WithEnvironment("APIURL", $"http://192.168.178.52")
             .WithEnvironment("SQLUSER", $"{MariaDbBuilder.DefaultUsername}")
             .WithEnvironment("SQLPASSWORD", $"{MariaDbBuilder.DefaultPassword}")
             .WithEnvironment("SQLPORT", $"{MariaDbBuilder.MariaDbPort}")
@@ -200,7 +201,7 @@ public class G5ApiFixture : IAsyncLifetime
             {
                 new()
                 {
-                    IpString = "192.168.0.1",
+                    IpString = "192.168.178.52",
                     Port = 27015,
                     DisplayName = "Phlex's Temp Server",
                     RconPassword = "password",
