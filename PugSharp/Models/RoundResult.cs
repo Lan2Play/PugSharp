@@ -13,4 +13,6 @@ internal sealed class RoundResult : IRoundResults
     public required IReadOnlyDictionary<ulong, IPlayerRoundResults> PlayerResults { get; set; }
 
     public int Reason { get; internal set; }
+
+    public int RoundTime { get; internal set; }
 }

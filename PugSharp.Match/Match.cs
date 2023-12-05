@@ -324,7 +324,7 @@ public class Match : IDisposable
 
         var mapTeamInfo1 = new MapTeamInfo
         {
-            StartingSide = MatchInfo.MatchTeam1.StartingTeamSite == Team.Terrorist ? StartingSide.T : StartingSide.CT,
+            StartingSide = MatchInfo.MatchTeam1.StartingTeamSite == Team.Terrorist ? TeamSide.T : TeamSide.CT,
             Score = team1Results.Score,
             ScoreT = team1Results.ScoreT,
             ScoreCT = team1Results.ScoreCT,
@@ -335,7 +335,7 @@ public class Match : IDisposable
 
         var mapTeamInfo2 = new MapTeamInfo
         {
-            StartingSide = MatchInfo.MatchTeam2.StartingTeamSite == Team.Terrorist ? StartingSide.T : StartingSide.CT,
+            StartingSide = MatchInfo.MatchTeam2.StartingTeamSite == Team.Terrorist ? TeamSide.T : TeamSide.CT,
             Score = team2Results.Score,
             ScoreT = team2Results.ScoreT,
             ScoreCT = team2Results.ScoreCT,
@@ -352,8 +352,8 @@ public class Match : IDisposable
             return;
         }
 
-        var map = new Map { WinnerTeamName = winnerTeam.TeamConfig.Name, Name = MatchInfo.CurrentMap.MapName, Team1 = mapTeamInfo1, Team2 = mapTeamInfo2, DemoFileName = Path.GetFileName(MatchInfo.DemoFile) ?? string.Empty };
-        _ = _ApiProvider?.RoundStatsUpdateAsync(new RoundStatusUpdateParams(MatchInfo.Config.MatchId, MatchInfo.CurrentMap.MapNumber, teamInfo1, teamInfo2, map, roundResults.Reason), CancellationToken.None);
+        var map = new Map { WinnerTeamName = winnerTeam.TeamConfig.Name, WinnerTeamSide = (TeamSide)(int)winnerTeam.CurrentTeamSite, Name = MatchInfo.CurrentMap.MapName, Team1 = mapTeamInfo1, Team2 = mapTeamInfo2, DemoFileName = Path.GetFileName(MatchInfo.DemoFile) ?? string.Empty };
+        _ = _ApiProvider?.RoundStatsUpdateAsync(new RoundStatusUpdateParams(MatchInfo.Config.MatchId, MatchInfo.CurrentMap.MapNumber, teamInfo1, teamInfo2, map, roundResults.Reason, roundResults.RoundTime), CancellationToken.None);
     }
 
 #pragma warning disable MA0051 // Method is too long

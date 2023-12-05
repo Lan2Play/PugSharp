@@ -8,5 +8,5 @@ public interface IMapTeamInfo
     int Score { get; }
     int ScoreCT { get; }
     int ScoreT { get; }
-    StartingSide StartingSide { get; }
+    TeamSide StartingSide { get; }
 }

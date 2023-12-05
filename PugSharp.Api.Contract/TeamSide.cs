@@ -1,6 +1,6 @@
 ﻿namespace PugSharp.Api.Contract;
 
-public enum StartingSide
+public enum TeamSide
 {
     None,
     T = 2,
