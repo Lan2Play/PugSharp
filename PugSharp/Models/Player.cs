@@ -87,6 +87,27 @@ public class Player : IPlayer
         }
     }
 
+    public string? Clan
+    {
+        get
+        {
+            if (TryGetPlayerController(out var playerController))
+            {
+                return playerController?.Clan;
+            }
+
+            return null;
+        }
+
+        set
+        {
+            if (TryGetPlayerController(out var playerController) && playerController?.InGameMoneyServices != null && value != null)
+            {
+                playerController.Clan = value;
+            }
+        }
+    }
+
     public void PrintToChat(string message)
     {
         if (TryGetPlayerController(out var playerController))

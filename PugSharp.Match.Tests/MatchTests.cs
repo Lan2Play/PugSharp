@@ -217,6 +217,7 @@ public class MatchTests
             NumMaps = 1,
             Team1 = new Config.Team
             {
+                Id = "1",
                 Name = "Team1",
                 Players = new Dictionary<ulong, string>()
                 {
@@ -225,6 +226,7 @@ public class MatchTests
             },
             Team2 = new Config.Team
             {
+                Id = "2",
                 Name = "Team2",
                 Players = new Dictionary<ulong, string>()
                 {
