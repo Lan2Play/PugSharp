@@ -179,10 +179,10 @@ public sealed partial class G5CommandProvider : ICommandProvider
         return Enumerable.Empty<string>();
     }
 
-    private class G5WebAvailable
+    private sealed class G5WebAvailable
     {
         [JsonPropertyName("gamestate")]
-        public int GameState { get; init; } = 0;
+        public int GameState { get; init; }
 
         [JsonPropertyName("available")]
         public int Available { get; } = 1;

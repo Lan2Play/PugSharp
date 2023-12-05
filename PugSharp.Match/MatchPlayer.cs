@@ -4,8 +4,6 @@ namespace PugSharp.Match;
 
 public class MatchPlayer
 {
-    private bool _IsReady;
-
     public MatchPlayer(IPlayer player)
     {
         Player = player;
@@ -13,11 +11,5 @@ public class MatchPlayer
 
     public IPlayer Player { get; }
 
-    public bool IsReady
-    {
-        get => _IsReady; set
-        {
-            _IsReady = value;
-        }
-    }
+    public bool IsReady { get; set; }
 }
