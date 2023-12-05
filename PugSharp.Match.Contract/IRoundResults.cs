@@ -9,4 +9,6 @@ public interface IRoundResults
     ITeamRoundResults CTRoundResult { get; }
 
     IReadOnlyDictionary<ulong, IPlayerRoundResults> PlayerResults { get; }
+    int Reason { get; }
+    int RoundTime { get; }
 }

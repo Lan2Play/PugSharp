@@ -10,6 +10,8 @@ public class Map : IMap
 
     public required string WinnerTeamName { get; init; }
 
+    public required TeamSide WinnerTeamSide { get; init; }
+
     public required IMapTeamInfo Team1 { get; init; }
 
     public required IMapTeamInfo Team2 { get; init; }

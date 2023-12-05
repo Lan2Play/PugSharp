@@ -14,5 +14,5 @@ public class MapTeamInfo : IMapTeamInfo
 
     public int ScoreCT { get; set; }
 
-    public StartingSide StartingSide { get; set; }
+    public TeamSide StartingSide { get; set; }
 }

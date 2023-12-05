@@ -39,6 +39,7 @@ public class G5ApiFixture : IAsyncLifetime
     public G5ApiFixture()
     {
         _Network = new NetworkBuilder()
+            //.WithDriver(DotNet.Testcontainers.Configurations.NetworkDriver.Host)
             .Build();
 
         _DatabaseContainer = new MariaDbBuilder()

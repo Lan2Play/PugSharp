@@ -10,10 +10,12 @@ public class ConfigCreator
             MatchId = "CustomMatch",
             Team1 = new Team
             {
+                Id = "1",
                 Name = "Team 1",
             },
             Team2 = new Team
             {
+                Id = "2",
                 Name = "Team 2",
             },
             TeamMode = TeamMode.Scramble,

@@ -11,4 +11,5 @@ public interface IMap
     IMapTeamInfo Team2 { get; }
 
     public string WinnerTeamName { get; }
+    TeamSide WinnerTeamSide { get; init; }
 }

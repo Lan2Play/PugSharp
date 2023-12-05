@@ -60,16 +60,17 @@ public sealed class G5ApiClient
 
             if (httpResponseMessage == null)
             {
+                _Logger.LogError("G5 API request {event} failed. No HTTP status code available.", eventToSend.EventName);
                 return false;
             }
 
             if (httpResponseMessage.IsSuccessStatusCode)
             {
-                _Logger.LogInformation("G5 API request was successful, HTTP status code = {statusCode}", httpResponseMessage.StatusCode);
+                _Logger.LogInformation("G5 API request {event} was successful, HTTP status code = {statusCode}", eventToSend.EventName, httpResponseMessage.StatusCode);
                 return true;
             }
 
-            _Logger.LogError("G5 API request failed, HTTP status code = {statusCode} content: {content}", httpResponseMessage.StatusCode, httpResponseMessage.Content.ToString());
+            _Logger.LogError("G5 API request {event} failed. HTTP status code = {statusCode} content: {content}", eventToSend.EventName, httpResponseMessage.StatusCode, httpResponseMessage.Content.ToString());
 
             return false;
         }

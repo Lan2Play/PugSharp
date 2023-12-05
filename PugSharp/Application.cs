@@ -1,4 +1,5 @@
-﻿using System.Globalization;
+﻿using System.Diagnostics;
+using System.Globalization;
 using System.Runtime.CompilerServices;
 using System.Text.Json;
 
@@ -36,9 +37,9 @@ public class Application : IApplication
     private readonly ITextHelper _TextHelper;
     private readonly IServiceProvider _ServiceProvider;
     private readonly ConfigProvider _ConfigProvider;
-    private readonly PeriodicTimer _ConfigTimer = new(TimeSpan.FromSeconds(1));
+    private readonly PeriodicTimer _ConfigTimer = new(TimeSpan.FromSeconds(10));
     private readonly CancellationTokenSource _CancellationTokenSource = new();
-
+    private readonly Stopwatch _RoundStopwatch = new();
 
     public string PugSharpDirectory { get; }
 
@@ -110,7 +111,7 @@ public class Application : IApplication
                             // TODO Translation?
                             c.ReplyToCommand(result);
                         }
-                    }, c, p, c.GetCommandString, c.ArgString);
+                    }, c, p, c.ArgString, c.GetCommandString);
                 });
             }
         }
@@ -349,6 +350,8 @@ public class Application : IApplication
             return HookResult.Continue;
         }
 
+        _RoundStopwatch.Restart();
+
         return HookResult.Continue;
     }
 
@@ -368,6 +371,7 @@ public class Application : IApplication
 
         if (_Match.CurrentState == MatchState.MatchRunning)
         {
+            _RoundStopwatch.Stop();
             var teamEntities = Utilities.FindAllEntitiesByDesignerName<CCSTeam>("cs_team_manager");
 
             // Update contribution score foreach player
@@ -401,6 +405,8 @@ public class Application : IApplication
                     ScoreCT = isFirstHalf ? teamCT.ScoreFirstHalf : teamCT.ScoreSecondHalf,
                 },
                 PlayerResults = CreatePlayerResults(),
+                Reason = eventRoundEnd.Reason,
+                RoundTime = (int)_RoundStopwatch.Elapsed.TotalSeconds,
             });
 
             var backupDir = Path.Combine(PugSharpDirectory, "Backup");

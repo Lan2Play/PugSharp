@@ -43,15 +43,6 @@ public class MatchConfig
     [JsonPropertyName("eventula_demo_upload_url")]
     public string? EventulaDemoUploadUrl { get; init; }
 
-    [JsonPropertyName("g5_api_url")]
-    public string? G5ApiUrl { get; init; }
-
-    [JsonPropertyName("g5_api_header")]
-    public string? G5ApiHeader { get; init; }
-
-    [JsonPropertyName("g5_api_headervalue")]
-    public string? G5ApiHeaderValue { get; init; }
-
     [JsonPropertyName("allow_suicide")]
     public bool AllowSuicide { get; init; } = true;
 
@@ -60,4 +51,13 @@ public class MatchConfig
 
     [JsonPropertyName("team_mode")]
     public TeamMode TeamMode { get; set; }
+
+    [JsonPropertyName("cvars")]
+    public IDictionary<string, string> CVars { get; init; } = new Dictionary<string, string>(StringComparer.Ordinal);
+
+    public string? G5ApiUrl => CVars.TryGetValue("get5_remote_log_url", out var value) ? value : null;
+
+    public string? G5ApiHeader => CVars.TryGetValue("get5_remote_log_header_key", out var value) ? value : null;
+
+    public string? G5ApiHeaderValue => CVars.TryGetValue("get5_remote_log_header_value", out var value) ? value : null;
 }
