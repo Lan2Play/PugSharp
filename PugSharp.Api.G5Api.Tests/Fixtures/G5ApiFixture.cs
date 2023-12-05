@@ -60,10 +60,10 @@ public class G5ApiFixture : IAsyncLifetime
             .WithEnvironment("PORT", _ApiPort.ToString(CultureInfo.InvariantCulture))
             .WithEnvironment("DBKEY", "de84096947c7860ea6c1479573492f23")
             .WithEnvironment("STEAMAPIKEY", "")
-            .WithEnvironment("HOSTNAME", "http://192.168.178.52")
+            .WithEnvironment("HOSTNAME", "http://localhost")
             .WithEnvironment("SHAREDSECRET", $"{_ManagementKey}")
-            .WithEnvironment("CLIENTHOME", $"http://192.168.178.52")
-            .WithEnvironment("APIURL", $"http://192.168.178.52")
+            .WithEnvironment("CLIENTHOME", $"http://localhost")
+            .WithEnvironment("APIURL", $"http://localhost")
             .WithEnvironment("SQLUSER", $"{MariaDbBuilder.DefaultUsername}")
             .WithEnvironment("SQLPASSWORD", $"{MariaDbBuilder.DefaultPassword}")
             .WithEnvironment("SQLPORT", $"{MariaDbBuilder.MariaDbPort}")
@@ -201,7 +201,7 @@ public class G5ApiFixture : IAsyncLifetime
             {
                 new()
                 {
-                    IpString = "192.168.178.52",
+                    IpString = "192.168.0.1",
                     Port = 27015,
                     DisplayName = "Phlex's Temp Server",
                     RconPassword = "password",

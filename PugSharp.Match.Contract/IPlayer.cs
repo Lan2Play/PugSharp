@@ -6,10 +6,9 @@ public interface IPlayer
 
     int? UserId { get; }
 
-    string PlayerName { get; set; }
+    string PlayerName { get; }
 
     Team Team { get; }
-    string? Clan { get; set; }
 
     void PrintToChat(string message);
 

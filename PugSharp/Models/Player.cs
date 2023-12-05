@@ -8,30 +8,6 @@ using PugSharp.Match.Contract;
 
 namespace PugSharp.Models;
 
-
-//public class SchemaString<SchemaClass> : NativeObject where SchemaClass : NativeObject
-//{
-//    public SchemaString(SchemaClass instance, string member) : base(Schema.GetSchemaValue<nint>(instance.Handle, typeof(SchemaClass).Name!, member))
-//    { }
-
-//    public unsafe void Set(string str)
-//    {
-//        byte[] bytes = this.GetStringBytes(str);
-
-//        for (int i = 0; i < bytes.Length; i++)
-//        {
-//            Unsafe.Write((void*)(this.Handle.ToInt64() + i), bytes[i]);
-//        }
-
-//        Unsafe.Write((void*)(this.Handle.ToInt64() + bytes.Length), 0);
-//    }
-
-//    private byte[] GetStringBytes(string str)
-//    {
-//        return Encoding.ASCII.GetBytes(str);
-//    }
-//}
-
 public class Player : IPlayer
 {
     public Player(ulong steamId)
@@ -86,22 +62,7 @@ public class Player : IPlayer
 
     public int? UserId => NullIfInvalid(p => p.UserId);
 
-    public string PlayerName
-    {
-        get => DefaultIfInvalid(p => p.PlayerName, string.Empty);
-        set
-        {
-            // Do nothing
-        }
-        //set
-        //{
-        //    if (TryGetPlayerController(out var playerController) && playerController?.InGameMoneyServices != null && value != null)
-        //    {
-        //        var playerName = new SchemaString<CBasePlayerController>(playerController, "m_iszPlayerName");
-        //        playerName.Set(value);
-        //    }
-        //}
-    }
+    public string PlayerName => DefaultIfInvalid(p => p.PlayerName, string.Empty);
 
     public Team Team => DefaultIfInvalid(p => (Team)p.TeamNum, Team.None);
 
