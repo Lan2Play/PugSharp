@@ -17,10 +17,6 @@ public partial class G5ApiTests : ApiTestBase
         // Arrange
         var g5ApiClient = await Api.CreateClientAsync();
 
-        //await TestcontainersSettings.ExposeHostPortsAsync(27015);
-
-        //await Task.Delay(TimeSpan.FromDays(1));
-
         // Act
         Assert.True(await g5ApiClient.SendEventAsync(new MapVetoedEvent() { Team = "team1", MapName = "de_dust2", MatchId = "1" }, CancellationToken.None));
         Assert.True(await g5ApiClient.SendEventAsync(new MapVetoedEvent() { Team = "team2", MapName = "de_cache", MatchId = "1" }, CancellationToken.None));
@@ -41,7 +37,6 @@ public partial class G5ApiTests : ApiTestBase
          });
         Assert.True(await g5ApiClient.SendEventAsync(new MapResultEvent() { MapNumber = 1, MatchId = "1", Winner = new Winner(Side.T, 0), StatsTeam1 = statsTeam1, StatsTeam2 = statsTeam2 }, CancellationToken.None));
         Assert.True(await g5ApiClient.SendEventAsync(new SeriesResultEvent() { MatchId = "1", Winner = new Winner(Side.T, 0), Team1SeriesScore = 0, Team2SeriesScore = 1, TimeUntilRestore = 2 }, CancellationToken.None));
-
 
         // Assert
     }
