@@ -108,7 +108,6 @@ public class Application : IApplication
                         var results = command.CommandCallBack(args);
                         foreach (var result in results)
                         {
-                            Console.WriteLine(result);
                             // TODO Translation?
                             c.ReplyToCommand(result);
                         }
