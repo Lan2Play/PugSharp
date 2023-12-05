@@ -13,7 +13,6 @@ on:
     - main
     - develop
     - 'feature/**'
-    tags: [ v**]
     paths:
     - 'Docs/**'
     - 'packaging/Docs/**'

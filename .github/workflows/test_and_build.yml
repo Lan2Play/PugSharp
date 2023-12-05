@@ -15,7 +15,6 @@ on:
     - main
     - develop
     - 'feature/**'
-    tags: [ v**]
     paths:
     - '**'
     - '!README.md'
