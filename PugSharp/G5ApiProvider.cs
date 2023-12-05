@@ -70,8 +70,8 @@ public partial class G5ApiProvider : IApiProvider
             Reason = roundStatusUpdateParams.Reason,
             RoundTime = 10, // TODO
             Winner = winner,
-            StatsTeam1 = new StatsTeam("TODO TeamId", roundStatusUpdateParams.TeamInfo1.TeamName, 0, roundStatusUpdateParams.CurrentMap.Team1.Score, roundStatusUpdateParams.CurrentMap.Team1.ScoreCT, roundStatusUpdateParams.CurrentMap.Team1.ScoreT, roundStatusUpdateParams.CurrentMap.Team1.Players.Select(p => CreateStatsPlayer(p.Key, p.Value)).ToList()),
-            StatsTeam2 = new StatsTeam("TODO TeamId", roundStatusUpdateParams.TeamInfo2.TeamName, 0, roundStatusUpdateParams.CurrentMap.Team2.Score, roundStatusUpdateParams.CurrentMap.Team2.ScoreCT, roundStatusUpdateParams.CurrentMap.Team2.ScoreT, roundStatusUpdateParams.CurrentMap.Team2.Players.Select(p => CreateStatsPlayer(p.Key, p.Value)).ToList()),
+            StatsTeam1 = new StatsTeam(roundStatusUpdateParams.TeamInfo1.TeamId, roundStatusUpdateParams.TeamInfo1.TeamName, 0, roundStatusUpdateParams.CurrentMap.Team1.Score, roundStatusUpdateParams.CurrentMap.Team1.ScoreCT, roundStatusUpdateParams.CurrentMap.Team1.ScoreT, roundStatusUpdateParams.CurrentMap.Team1.Players.Select(p => CreateStatsPlayer(p.Key, p.Value)).ToList()),
+            StatsTeam2 = new StatsTeam(roundStatusUpdateParams.TeamInfo2.TeamId, roundStatusUpdateParams.TeamInfo2.TeamName, 0, roundStatusUpdateParams.CurrentMap.Team2.Score, roundStatusUpdateParams.CurrentMap.Team2.ScoreCT, roundStatusUpdateParams.CurrentMap.Team2.ScoreT, roundStatusUpdateParams.CurrentMap.Team2.Players.Select(p => CreateStatsPlayer(p.Key, p.Value)).ToList()),
         };
 
         await _G5Stats.SendEventAsync(roundEndEvent, cancellationToken).ConfigureAwait(false);

@@ -304,11 +304,13 @@ public class Match : IDisposable
     {
         var teamInfo1 = new TeamInfo
         {
+            TeamId = MatchInfo.Config.Team1.Id,
             TeamName = MatchInfo.Config.Team1.Name,
         };
 
         var teamInfo2 = new TeamInfo
         {
+            TeamId = MatchInfo.Config.Team2.Id,
             TeamName = MatchInfo.Config.Team2.Name,
         };
 

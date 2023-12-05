@@ -19,7 +19,7 @@ public partial class G5ApiTests : ApiTestBase
 
         //await TestcontainersSettings.ExposeHostPortsAsync(27015);
 
-        await Task.Delay(TimeSpan.FromDays(1));
+        //await Task.Delay(TimeSpan.FromDays(1));
 
         // Act
         Assert.True(await g5ApiClient.SendEventAsync(new MapVetoedEvent() { Team = "team1", MapName = "de_dust2", MatchId = "1" }, CancellationToken.None));

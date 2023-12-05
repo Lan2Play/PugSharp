@@ -4,6 +4,9 @@ namespace PugSharp.Config;
 
 public class Team
 {
+    [JsonPropertyName("id")]
+    public required string Id { get; set; }
+
     [JsonPropertyName("name")]
     public required string Name { get; set; }
 
