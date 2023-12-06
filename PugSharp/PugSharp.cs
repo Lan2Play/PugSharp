@@ -19,7 +19,7 @@ using PugSharp.Translation;
 
 namespace PugSharp;
 
-[MinimumApiVersion(60)]
+[MinimumApiVersion(110)]
 public class PugSharp : BasePlugin, IBasePlugin
 {
     private const int _RetryCount = 3;
@@ -36,6 +36,7 @@ public class PugSharp : BasePlugin, IBasePlugin
     {
         Console.WriteLine("Ctor PugSharp");
     }
+
     public override void Load(bool hotReload)
     {
         Console.WriteLine("Start Loading PugSharp");
@@ -56,8 +57,7 @@ public class PugSharp : BasePlugin, IBasePlugin
             services.Remove(serviceDescriptor);
         }
 
-        services.AddSingleton(CounterStrikeSharp.API.Core.Logging.CoreLogging.Factory);
-
+        services.AddSingleton<ICssDispatcher, CssDispatcher>();
         services.AddSingleton<ICsServer, CsServer>();
         services.AddSingleton<MultiApiProvider>();
         services.AddSingleton<IApiProvider>(s => s.GetRequiredService<MultiApiProvider>());

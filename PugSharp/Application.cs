@@ -27,7 +27,7 @@ using PugSharp.Translation.Properties;
 namespace PugSharp;
 public class Application : IApplication
 {
-    private const int _SwitchPlayerDelay = 1000;
+    private const int _SwitchPlayerDelay = 3000;
     private const int _ConfigLoadDelay = 10000;
     private readonly ILogger<Application> _Logger;
     private readonly IBasePlugin _Plugin;
@@ -37,6 +37,7 @@ public class Application : IApplication
     private readonly ITextHelper _TextHelper;
     private readonly IServiceProvider _ServiceProvider;
     private readonly ConfigProvider _ConfigProvider;
+    private readonly ICssDispatcher _Dispatcher;
     private readonly PeriodicTimer _ConfigTimer = new(TimeSpan.FromSeconds(10));
     private readonly CancellationTokenSource _CancellationTokenSource = new();
     private readonly Stopwatch _RoundStopwatch = new();
@@ -61,7 +62,8 @@ public class Application : IApplication
         G5CommandProvider g5CommandProvider,
         ITextHelper textHelper,
         IServiceProvider serviceProvider,
-        ConfigProvider configProvider)
+        ConfigProvider configProvider,
+        ICssDispatcher dispatcher)
 #pragma warning restore S107 // Methods should not have too many parameters
     {
         _Logger = logger;
@@ -72,6 +74,7 @@ public class Application : IApplication
         _TextHelper = textHelper;
         _ServiceProvider = serviceProvider;
         _ConfigProvider = configProvider;
+        _Dispatcher = dispatcher;
         PugSharpDirectory = Path.Combine(_CsServer.GameDirectory, "csgo", "PugSharp");
         _ConfigProvider.Initialize(Path.Join(PugSharpDirectory, "Config"));
 
@@ -267,12 +270,14 @@ public class Application : IApplication
             if ((int)configTeam != team)
             {
                 await Task.Delay(_SwitchPlayerDelay, _CancellationTokenSource.Token).ConfigureAwait(false);
+                _Dispatcher.NextFrame(() =>
+                {
+                    _Logger.LogInformation("Player {playerName} tried to join {team} but should be in {configTeam}!", userName, team, configTeam);
+                    var player = new Player(steamId);
 
-                _Logger.LogInformation("Player {playerName} tried to join {team} but should be in {configTeam}!", userName, team, configTeam);
-                var player = new Player(steamId);
-
-                _Logger.LogInformation("Switch {playerName} to team {team}!", player.PlayerName, configTeam);
-                player.SwitchTeam(configTeam);
+                    _Logger.LogInformation("Switch {playerName} to team {team}!", player.PlayerName, configTeam);
+                    player.SwitchTeam(configTeam);
+                });
             }
         }
     }
@@ -1126,6 +1131,12 @@ public class Application : IApplication
                 return;
             }
 
+            if (_ConfigCreator == null)
+            {
+                _ConfigCreator = new ConfigCreator();
+                _ConfigCreator.Config.Maplist.Add(_CsServer.CurrentMap);
+            }
+
             var matchConfig = _ConfigCreator.Config;
             if (matchConfig.Maplist.Count == 0)
             {
@@ -1568,18 +1579,22 @@ public class Application : IApplication
         {
             if (_Match == null || _Match.CurrentState == MatchState.WaitingForPlayersConnectedReady || _Match.CurrentState == MatchState.WaitingForPlayersReady)
             {
-                try
+                _Dispatcher.NextWorldUpdate(() =>
                 {
-                    if (!Utilities.GetPlayers().Exists(x => !x.IsBot && !x.IsHLTV))
+                    try
                     {
-                        _CsServer.LoadAndExecuteConfig("warmup.cfg");
+
+                        if (!Utilities.GetPlayers().Exists(x => !x.IsBot && !x.IsHLTV))
+                        {
+                            _CsServer.LoadAndExecuteConfig("warmup.cfg");
+                        }
                     }
-                }
-                catch (Exception e)
-                {
-                    _Logger.LogError(e, "Error Loading warmup.cfg");
-                    // TODO Besseren Platz suchen!
-                }
+                    catch (Exception e)
+                    {
+                        _Logger.LogError(e, "Error Loading warmup.cfg");
+                        // TODO Besseren Platz suchen!
+                    }
+                });
             }
         }
     }
@@ -1700,14 +1715,18 @@ public class Application : IApplication
             return;
         }
 
-        var players = Utilities.GetPlayers().Where(x => x.IsValid && !x.IsHLTV);
-        foreach (var player in players)
+        _Dispatcher.NextWorldUpdate(() =>
         {
-            if (!_Match.TryAddPlayer(new Player(player.SteamID)))
+            var players = Utilities.GetPlayers().Where(x => x.IsValid && !x.IsHLTV);
+            foreach (var player in players)
             {
-                player.Kick();
+                if (!_Match.TryAddPlayer(new Player(player.SteamID)))
+                {
+                    player.Kick();
+                }
             }
-        }
+        });
+
     }
 
     private void ResetServer(string map)

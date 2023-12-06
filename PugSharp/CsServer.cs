@@ -14,10 +14,12 @@ namespace PugSharp;
 public class CsServer : ICsServer
 {
     private readonly ILogger<CsServer> _Logger;
+    private readonly ICssDispatcher _Dispatcher;
 
-    public CsServer(ILogger<CsServer> logger)
+    public CsServer(ILogger<CsServer> logger, ICssDispatcher dispatcher)
     {
         _Logger = logger;
+        _Dispatcher = dispatcher;
     }
 
     public string GameDirectory => CounterStrikeSharp.API.Server.GameDirectory;
@@ -63,37 +65,43 @@ public class CsServer : ICsServer
 
     public void PrintToChatAll(string message)
     {
-        CounterStrikeSharp.API.Server.PrintToChatAll(message);
+        _Dispatcher.NextWorldUpdate(() =>
+        {
+            CounterStrikeSharp.API.Server.PrintToChatAll(message);
+        });
     }
 
     // TODO Create Convar Object in _CsServer or as Service and wrap Properties explicit to get/set values
     public void UpdateConvar<T>(string name, T value)
     {
-        try
+        _Dispatcher.NextWorldUpdate(() =>
         {
-            if (value is string stringValue)
+            try
             {
-                _Logger.LogInformation("Update ConVar {name} to stringvalue {value}", name, stringValue);
-                ExecuteCommand($"{name} {stringValue}");
-            }
-            else
-            {
-                var convar = ConVar.Find(name);
-
-                if (convar == null)
+                if (value is string stringValue)
                 {
-                    _Logger.LogError("ConVar {name} couldn't be found", name);
-                    return;
+                    _Logger.LogInformation("Update ConVar {name} to stringvalue {value}", name, stringValue);
+                    ExecuteCommand($"{name} {stringValue}");
                 }
+                else
+                {
+                    var convar = ConVar.Find(name);
 
-                _Logger.LogInformation("Update ConVar {name} to value {value}", name, value);
-                convar.SetValue(value);
+                    if (convar == null)
+                    {
+                        _Logger.LogError("ConVar {name} couldn't be found", name);
+                        return;
+                    }
+
+                    _Logger.LogInformation("Update ConVar {name} to value {value}", name, value);
+                    convar.SetValue(value);
+                }
             }
-        }
-        catch (Exception e)
-        {
-            _Logger.LogError(e, "Could not set cvar \"{name}\" to value \"{value}\" of type \"{type}\"", name, value, typeof(T).Name);
-        }
+            catch (Exception e)
+            {
+                _Logger.LogError(e, "Could not set cvar \"{name}\" to value \"{value}\" of type \"{type}\"", name, value, typeof(T).Name);
+            }
+        });
     }
 
     public T? GetConvar<T>(string name)

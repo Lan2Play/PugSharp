@@ -13,7 +13,6 @@ public class Player : IPlayer
     public Player(ulong steamId)
     {
         SteamID = steamId;
-
     }
 
     private T DefaultIfInvalid<T>(Func<CCSPlayerController, T> loadValue, T defaultValue)
@@ -135,7 +134,8 @@ public class Player : IPlayer
     {
         if (TryGetPlayerController(out var playerController))
         {
-            playerController!.ChangeTeam((CounterStrikeSharp.API.Modules.Utils.CsTeam)(int)team);
+            var targetTeam = (CounterStrikeSharp.API.Modules.Utils.CsTeam)(int)team;
+            playerController!.ChangeTeam(targetTeam);
 
         }
     }
