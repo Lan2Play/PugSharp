@@ -18,6 +18,7 @@ public class CssDispatcher : ICssDispatcher
     }
 
 #pragma warning disable IDE0039 // Use local function
+
     public void NextFrame(Action action)
     {
         var handle = Interlocked.Increment(ref _TaskHandle);

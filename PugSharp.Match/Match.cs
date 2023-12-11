@@ -570,10 +570,12 @@ public class Match : IDisposable
                 await _DemoUploader.UploadDemoAsync(MatchInfo.DemoFile, CancellationToken.None).ConfigureAwait(false);
             }
 
-            DoForAll(AllMatchPlayers.ToList(), p => p.Player.Kick());
+            _Dispatcher.NextWorldUpdate(() =>
+            {
+                DoForAll(AllMatchPlayers.ToList(), p => p.Player.Kick());
+            });
 
             await _ApiProvider.FreeServerAsync(CancellationToken.None).ConfigureAwait(false);
-
         }
         catch (Exception ex)
         {
