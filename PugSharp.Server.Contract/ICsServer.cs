@@ -16,8 +16,6 @@ public interface ICsServer
     IReadOnlyList<IPlayer> LoadAllPlayers();
     void LoadAndExecuteConfig(string configFileName);
     (int CtScore, int TScore) LoadTeamsScore();
-
-    void NextFrame(Action value);
     void PauseMatch();
     void PrintToChatAll(string message);
     void RestartGame();
