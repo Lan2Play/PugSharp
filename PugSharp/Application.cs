@@ -309,8 +309,7 @@ public class Application : IApplication
         var userId = eventPlayerSpawn.Userid;
         if (_Match.CurrentState < MatchState.MatchStarting && userId != null && userId.IsValid && !userId.IsBot)
         {
-            // Give players max money if no match is running
-            _CsServer.NextFrame(() =>
+            _Dispatcher.NextWorldUpdate(() =>
             {
                 CheckMatchPlayerTeam(userId, userId.TeamNum);
             });
@@ -324,7 +323,7 @@ public class Application : IApplication
     {
         if (_Match != null)
         {
-            _CsServer.NextFrame(() =>
+            _Dispatcher.NextFrame(() =>
             {
                 SetMatchVariable(_Match.MatchInfo.Config);
             });
@@ -567,28 +566,10 @@ public class Application : IApplication
             return HookResult.Continue;
         }
 
-        if (_Match.CurrentState <= MatchState.WaitingForPlayersReady)
+        if (_Match.CurrentState <= MatchState.WaitingForPlayersReady && eventPlayerDeath.Userid.InGameMoneyServices != null)
         {
-            if (eventPlayerDeath.Userid.InGameMoneyServices != null)
-            {
-                int maxMoneyValue = 16000;
-                //try
-                //{
-                //    // Use value from server if possible
-                //    var maxMoneyCvar = ConVar.Find("mp_maxmoney");
-                //    if (maxMoneyCvar != null)
-                //    {
-
-                //        maxMoneyValue = maxMoneyCvar.GetPrimitiveValue<int>();
-                //    }
-                //}
-                //catch (Exception e)
-                //{
-                //    _Logger.LogError(e, "Error loading mp_maxmoney!");
-                //}
-
-                eventPlayerDeath.Userid.InGameMoneyServices.Account = maxMoneyValue;
-            }
+            int maxMoneyValue = 16000;
+            eventPlayerDeath.Userid.InGameMoneyServices.Account = maxMoneyValue;
         }
 
         if (_Match.CurrentState == MatchState.MatchRunning)
@@ -884,6 +865,8 @@ public class Application : IApplication
         _Match.MatchFinalized -= OnMatchFinalized;
         _Match.Dispose();
         _Match = null;
+
+        ResetServer("de_dust2");
     }
 
     [ConsoleCommand("css_loadconfig", "Load a match config")]

@@ -2,6 +2,8 @@
 
 using CounterStrikeSharp.API.Core;
 
+using Microsoft.Extensions.Logging;
+
 using PugSharp.Server.Contract;
 
 namespace PugSharp;
@@ -10,10 +12,23 @@ public class CssDispatcher : ICssDispatcher
 {
     private int _TaskHandle;
     private readonly Dictionary<int, Action> _NextFrameTasks = new();
+    private readonly ILogger<CssDispatcher> _Logger;
+
+    public CssDispatcher(ILogger<CssDispatcher> logger)
+    {
+        _Logger = logger;
+    }
 
     private void AutoRemoveAction(int handle, Action action)
     {
-        action();
+        try
+        {
+            action();
+        }
+        catch (Exception ex)
+        {
+            _Logger.LogError(ex, "Error executing auto remove action!");
+        }
         _NextFrameTasks.Remove(handle);
     }
 
@@ -21,8 +36,9 @@ public class CssDispatcher : ICssDispatcher
 
     public void NextFrame(Action action)
     {
+        var localAction = action;
         var handle = Interlocked.Increment(ref _TaskHandle);
-        var autoRemoveAction = () => AutoRemoveAction(handle, action);
+        var autoRemoveAction = () => AutoRemoveAction(handle, localAction);
         _NextFrameTasks.Add(handle, autoRemoveAction);
 
         var ptr = Marshal.GetFunctionPointerForDelegate(autoRemoveAction);
@@ -31,8 +47,9 @@ public class CssDispatcher : ICssDispatcher
 
     public void NextWorldUpdate(Action action)
     {
+        var localAction = action;
         var handle = Interlocked.Increment(ref _TaskHandle);
-        var autoRemoveAction = () => AutoRemoveAction(handle, action);
+        var autoRemoveAction = () => AutoRemoveAction(handle, localAction);
         _NextFrameTasks.Add(handle, autoRemoveAction);
 
         var ptr = Marshal.GetFunctionPointerForDelegate(autoRemoveAction);

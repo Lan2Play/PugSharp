@@ -58,11 +58,6 @@ public class CsServer : ICsServer
         return (ctScore, tScore);
     }
 
-    public void NextFrame(Action value)
-    {
-        CounterStrikeSharp.API.Server.NextFrame(value);
-    }
-
     public void PrintToChatAll(string message)
     {
         _Dispatcher.NextWorldUpdate(() =>
