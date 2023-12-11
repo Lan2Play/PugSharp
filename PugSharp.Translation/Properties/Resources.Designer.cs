@@ -268,6 +268,15 @@ namespace PugSharp.Translation.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Currently no match is running. Matchstate is unavailable!.
+        /// </summary>
+        public static string PugSharp_Command_Error_MatchStateUnavailable {
+            get {
+                return ResourceManager.GetString("PugSharp.Command.Error.MatchStateUnavailable", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Currently no Match is running.
         /// </summary>
         public static string PugSharp_Command_Error_NoMatchRunning {

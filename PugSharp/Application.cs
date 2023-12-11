@@ -833,6 +833,10 @@ public class Application : IApplication
 
     #region Commands
 
+    [ConsoleCommand("css_cm", "Stop the current match")]
+    [ConsoleCommand("ps_cm", "Stop the current match")]
+    [ConsoleCommand("css_cancelmatch", "Stop the current match")]
+    [ConsoleCommand("ps_cancelmatch", "Stop the current match")]
     [ConsoleCommand("css_stopmatch", "Stop the current match")]
     [ConsoleCommand("ps_stopmatch", "Stop the current match")]
     [RequiresPermissions("@pugsharp/matchadmin")]
@@ -869,6 +873,7 @@ public class Application : IApplication
         ResetServer("de_dust2");
     }
 
+    [ConsoleCommand("css_lc", "Load a match config")]
     [ConsoleCommand("css_loadconfig", "Load a match config")]
     [ConsoleCommand("ps_loadconfig", "Load a match config")]
     [RequiresPermissions("@pugsharp/matchadmin")]
@@ -935,6 +940,7 @@ public class Application : IApplication
         player);
     }
 
+    [ConsoleCommand("css_lcf", "Load a match config from a file")]
     [ConsoleCommand("css_loadconfigfile", "Load a match config from a file")]
     [ConsoleCommand("ps_loadconfigfile", "Load a match config from a file")]
     [RequiresPermissions("@pugsharp/matchadmin")]
@@ -1414,7 +1420,29 @@ public class Application : IApplication
         player);
     }
 
+    [ConsoleCommand("css_matchstate", "Serialize match to JSON on console")]
+    [ConsoleCommand("ps_matchstate", "Serialize match to JSON on console")]
+    [RequiresPermissions("@pugsharp/matchadmin")]
+    public void OnCommandMatchState(CCSPlayerController? player, CommandInfo command)
+    {
+        HandleCommand((_, c) =>
+        {
+            if (_Match == null)
+            {
+                c.ReplyToCommand(_TextHelper.GetText(nameof(Resources.PugSharp_Command_Error_MatchStateUnavailable)));
+                return;
+            }
+
+            c.ReplyToCommand(_Match.CurrentState.ToString());
+        },
+        command,
+        player);
+    }
+
+    [ConsoleCommand("css_r", "Mark player as ready")]
+    [ConsoleCommand("ps_r", "Mark player as ready")]
     [ConsoleCommand("css_ready", "Mark player as ready")]
+    [ConsoleCommand("ps_ready", "Mark player as ready")]
     public void OnCommandReady(CCSPlayerController? player, CommandInfo command)
     {
         HandleCommand((p, c) =>
