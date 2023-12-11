@@ -15,7 +15,7 @@ public static class CounterStrikeSharpExtensions
 
     internal static void Kick(this CCSPlayerController? playerController)
     {
-        if (playerController?.UserId == null)
+        if (playerController?.UserId == null || !playerController.IsValid || !playerController.IsHLTV)
         {
             return;
         }

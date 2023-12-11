@@ -23,6 +23,7 @@ public class MatchFactory
             _ServiceProvider.GetRequiredService<IApiProvider>(),
             _ServiceProvider.GetRequiredService<ITextHelper>(),
              _ServiceProvider.GetRequiredService<ICsServer>(),
+             _ServiceProvider.GetRequiredService<ICssDispatcher>(),
             matchInfo,
             roundBackupFile);
     }
@@ -34,6 +35,7 @@ public class MatchFactory
             _ServiceProvider.GetRequiredService<IApiProvider>(),
             _ServiceProvider.GetRequiredService<ITextHelper>(),
              _ServiceProvider.GetRequiredService<ICsServer>(),
+             _ServiceProvider.GetRequiredService<ICssDispatcher>(),
             matchConfig);
     }
 }

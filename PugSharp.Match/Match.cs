@@ -38,7 +38,7 @@ public class Match : IDisposable
 
     private DemoUploader? _DemoUploader;
     private readonly List<Vote> _TeamVotes = new() { new("T"), new("CT") };
-
+    private readonly ICssDispatcher _Dispatcher;
     private List<Vote> _MapsToSelect = new List<Vote>();
     private MatchTeam? _CurrentMatchTeamToVote;
     private bool _DisposedValue;
@@ -51,15 +51,15 @@ public class Match : IDisposable
 
     public IEnumerable<MatchPlayer> AllMatchPlayers => MatchInfo?.MatchTeam1.Players.Concat(MatchInfo.MatchTeam2.Players) ?? Enumerable.Empty<MatchPlayer>();
 
-    internal Match(IServiceProvider serviceProvider, ILogger<Match> logger, IApiProvider apiProvider, ITextHelper textHelper, ICsServer csServer, Config.MatchConfig matchConfig) :
-        this(serviceProvider, logger, apiProvider, textHelper, csServer)
+    internal Match(IServiceProvider serviceProvider, ILogger<Match> logger, IApiProvider apiProvider, ITextHelper textHelper, ICsServer csServer, ICssDispatcher cssDispatcher, Config.MatchConfig matchConfig) :
+        this(serviceProvider, logger, apiProvider, textHelper, csServer, cssDispatcher)
     {
         Initialize(new MatchInfo(matchConfig));
         InitializeStateMachine();
     }
 
-    internal Match(IServiceProvider serviceProvider, ILogger<Match> logger, IApiProvider apiProvider, ITextHelper textHelper, ICsServer csServer, MatchInfo matchInfo, string roundBackupFile) :
-        this(serviceProvider, logger, apiProvider, textHelper, csServer)
+    internal Match(IServiceProvider serviceProvider, ILogger<Match> logger, IApiProvider apiProvider, ITextHelper textHelper, ICsServer csServer, ICssDispatcher cssDispatcher, MatchInfo matchInfo, string roundBackupFile) :
+        this(serviceProvider, logger, apiProvider, textHelper, csServer, cssDispatcher)
     {
         _RoundBackupFile = roundBackupFile;
         Initialize(matchInfo);
@@ -67,13 +67,14 @@ public class Match : IDisposable
         _Logger.LogInformation("Continue Match on map {mapNumber}({mapName})!", MatchInfo!.CurrentMap.MapNumber, MatchInfo.CurrentMap.MapName);
     }
 
-    private Match(IServiceProvider serviceProvider, ILogger<Match> logger, IApiProvider apiProvider, ITextHelper textHelper, ICsServer csServer)
+    private Match(IServiceProvider serviceProvider, ILogger<Match> logger, IApiProvider apiProvider, ITextHelper textHelper, ICsServer csServer, ICssDispatcher cssDispatcher)
     {
         _ServiceProvider = serviceProvider;
         _Logger = logger;
         _ApiProvider = apiProvider;
         _TextHelper = textHelper;
         _CsServer = csServer;
+        _Dispatcher = cssDispatcher;
         _MatchStateMachine = new StateMachine<MatchState, MatchCommand>(MatchState.None);
 
         MatchInfo ??= default!;
@@ -569,10 +570,12 @@ public class Match : IDisposable
                 await _DemoUploader.UploadDemoAsync(MatchInfo.DemoFile, CancellationToken.None).ConfigureAwait(false);
             }
 
-            DoForAll(AllMatchPlayers.ToList(), p => p.Player.Kick());
+            _Dispatcher.NextWorldUpdate(() =>
+            {
+                DoForAll(AllMatchPlayers.ToList(), p => p.Player.Kick());
+            });
 
             await _ApiProvider.FreeServerAsync(CancellationToken.None).ConfigureAwait(false);
-
         }
         catch (Exception ex)
         {
@@ -648,22 +651,25 @@ public class Match : IDisposable
             return;
         }
 
-        try
+        _Dispatcher.NextWorldUpdate(() =>
         {
-            _Logger.LogInformation("ReadyReminder Elapsed");
-            var readyPlayerIds = AllMatchPlayers.Where(p => p.IsReady).Select(x => x.Player.SteamID).ToList();
-            var notReadyPlayers = _CsServer.LoadAllPlayers().Where(p => !readyPlayerIds.Contains(p.SteamID));
-
-            var remindMessage = _TextHelper.GetText(nameof(Resources.PugSharp_Match_RemindReady));
-            foreach (var player in notReadyPlayers)
+            try
             {
-                player.PrintToChat(remindMessage);
+                _Logger.LogInformation("ReadyReminder Elapsed");
+                var readyPlayerIds = AllMatchPlayers.Where(p => p.IsReady).Select(x => x.Player.SteamID).ToList();
+                var notReadyPlayers = _CsServer.LoadAllPlayers().Where(p => !readyPlayerIds.Contains(p.SteamID));
+
+                var remindMessage = _TextHelper.GetText(nameof(Resources.PugSharp_Match_RemindReady));
+                foreach (var player in notReadyPlayers)
+                {
+                    player.PrintToChat(remindMessage);
+                }
             }
-        }
-        catch (Exception ex)
-        {
-            _Logger.LogError(ex, "Error sending vote reminder");
-        }
+            catch (Exception ex)
+            {
+                _Logger.LogError(ex, "Error sending vote reminder");
+            }
+        });
     }
 
     public string CreateDotGraph()
@@ -712,7 +718,7 @@ public class Match : IDisposable
 
         ShowMenuToTeam(_CurrentMatchTeamToVote!, _TextHelper.GetText(nameof(Resources.PugSharp_Match_VoteMapMenuHeader)), mapOptions);
 
-        //GetOtherTeam(_CurrentMatchTeamToVote!).PrintToChat(_TextHelper.GetText(nameof(Resources.PugSharp_Match_WaitForOtherTeam)));
+        GetOtherTeam(_CurrentMatchTeamToVote!).PrintToChat(_TextHelper.GetText(nameof(Resources.PugSharp_Match_WaitForOtherTeam)));
 
         _VoteTimer.Start();
     }
@@ -761,7 +767,7 @@ public class Match : IDisposable
         };
 
         ShowMenuToTeam(_CurrentMatchTeamToVote!, _TextHelper.GetText(nameof(Resources.PugSharp_Match_VoteTeamMenuHeader)), mapOptions);
-        //GetOtherTeam(_CurrentMatchTeamToVote!).PrintToChat(_TextHelper.GetText(nameof(Resources.PugSharp_Match_WaitForOtherTeam)));
+        GetOtherTeam(_CurrentMatchTeamToVote!).PrintToChat(_TextHelper.GetText(nameof(Resources.PugSharp_Match_WaitForOtherTeam)));
 
         _VoteTimer.Start();
     }
