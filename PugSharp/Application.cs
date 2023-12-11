@@ -1439,6 +1439,29 @@ public class Application : IApplication
         player);
     }
 
+    [ConsoleCommand("css_mapscore", "Get the current mapscore")]
+    [ConsoleCommand("ps_mapscore", "Get the current mapscore")]
+    [RequiresPermissions("@pugsharp/matchadmin")]
+    public void OnCommandMapScore(CCSPlayerController? player, CommandInfo command)
+    {
+        HandleCommand((_, c) =>
+        {
+            if (_Match == null || _Match.CurrentState < MatchState.MatchRunning)
+            {
+                c.ReplyToCommand(_TextHelper.GetText(nameof(Resources.PugSharp_Command_Error_NoMatchRunning)));
+                return;
+            }
+
+            var team1 = _Match.MatchInfo.Config.Team1.Name;
+            var team2 = _Match.MatchInfo.Config.Team2.Name;
+            var team1Points = _Match.MatchInfo.CurrentMap.Team1Points;
+            var team2Points = _Match.MatchInfo.CurrentMap.Team2Points;
+            c.ReplyToCommand(string.Create(CultureInfo.InvariantCulture, $"{team1} [{team1Points}] vs {team2} [{team2Points}]"));
+        },
+        command,
+        player);
+    }
+
     [ConsoleCommand("css_r", "Mark player as ready")]
     [ConsoleCommand("ps_r", "Mark player as ready")]
     [ConsoleCommand("css_ready", "Mark player as ready")]
