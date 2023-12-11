@@ -213,14 +213,17 @@ public class CsServer : ICsServer
 
     public void SwitchMap(string selectedMap)
     {
-        if (!IsMapValid(selectedMap))
+        _Dispatcher.NextWorldUpdate(() =>
         {
-            _Logger.LogInformation("The selected map is not valid: \"{selectedMap}\"!", selectedMap);
-            return;
-        }
+            if (!IsMapValid(selectedMap))
+            {
+                _Logger.LogInformation("The selected map is not valid: \"{selectedMap}\"!", selectedMap);
+                return;
+            }
 
-        _Logger.LogInformation("Switch map to: \"{selectedMap}\"!", selectedMap);
-        ExecuteCommand($"changelevel {selectedMap}");
+            _Logger.LogInformation("Switch map to: \"{selectedMap}\"!", selectedMap);
+            ExecuteCommand($"changelevel {selectedMap}");
+        });
     }
 
     public IReadOnlyList<IPlayer> LoadAllPlayers()

@@ -144,7 +144,7 @@ public class Player : IPlayer
     {
         try
         {
-            if (TryGetPlayerController(out var playerController) && playerController!.Connected == PlayerConnectedState.PlayerConnected)
+            if (TryGetPlayerController(out var playerController) && playerController!.Connected == PlayerConnectedState.PlayerConnected && !playerController.IsValid && !playerController.IsHLTV)
             {
                 var userId = UserId;
                 if (userId != null)
