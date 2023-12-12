@@ -277,6 +277,15 @@ namespace PugSharp.Translation.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to No match available..
+        /// </summary>
+        public static string PugSharp_Command_Error_NoMatch {
+            get {
+                return ResourceManager.GetString("PugSharp.Command.Error.NoMatch", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Currently no Match is running.
         /// </summary>
         public static string PugSharp_Command_Error_NoMatchRunning {

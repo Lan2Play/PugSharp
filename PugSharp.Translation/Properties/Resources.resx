@@ -189,6 +189,9 @@
   <data name="PugSharp.Command.Error.MatchStateUnavailable" xml:space="preserve">
     <value>Currently no match is running. Matchstate is unavailable!</value>
   </data>
+  <data name="PugSharp.Command.Error.NoMatch" xml:space="preserve">
+    <value>No match available.</value>
+  </data>
   <data name="PugSharp.Command.Error.NoMatchRunning" xml:space="preserve">
     <value>Currently no Match is running</value>
   </data>

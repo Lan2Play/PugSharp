@@ -1462,6 +1462,232 @@ public class Application : IApplication
         player);
     }
 
+    [ConsoleCommand("css_team1_name", "Get the team 1 name")]
+    [ConsoleCommand("ps_team1_name", "Get the team 1 name")]
+    [RequiresPermissions("@pugsharp/matchadmin")]
+    public void OnCommandTeam1Name(CCSPlayerController? player, CommandInfo command)
+    {
+        HandleCommand((_, c) =>
+        {
+            if (_Match == null)
+            {
+                c.ReplyToCommand(_TextHelper.GetText(nameof(Resources.PugSharp_Command_Error_NoMatch)));
+                return;
+            }
+
+            c.ReplyToCommand(_Match.MatchInfo.Config.Team1.Name);
+        },
+        command,
+        player);
+    }
+
+    [ConsoleCommand("css_team2_name", "Get the team 2 name")]
+    [ConsoleCommand("ps_team2_name", "Get the team 2 name")]
+    [RequiresPermissions("@pugsharp/matchadmin")]
+    public void OnCommandTeam2Name(CCSPlayerController? player, CommandInfo command)
+    {
+        HandleCommand((_, c) =>
+        {
+            if (_Match == null)
+            {
+                c.ReplyToCommand(_TextHelper.GetText(nameof(Resources.PugSharp_Command_Error_NoMatch)));
+                return;
+            }
+
+            c.ReplyToCommand(_Match.MatchInfo.Config.Team2.Name);
+        },
+        command,
+        player);
+    }
+
+    [ConsoleCommand("css_team1_side", "Get the team 1 side")]
+    [ConsoleCommand("ps_team1_side", "Get the team 1 side")]
+    [RequiresPermissions("@pugsharp/matchadmin")]
+    public void OnCommandTeam1Side(CCSPlayerController? player, CommandInfo command)
+    {
+        HandleCommand((_, c) =>
+        {
+            if (_Match == null)
+            {
+                c.ReplyToCommand(_TextHelper.GetText(nameof(Resources.PugSharp_Command_Error_NoMatch)));
+                return;
+            }
+
+            c.ReplyToCommand(_Match.MatchInfo.MatchTeam1.CurrentTeamSite.ToString());
+        },
+        command,
+        player);
+    }
+
+    [ConsoleCommand("css_team2_side", "Get the team 2 side")]
+    [ConsoleCommand("ps_team2_side", "Get the team 2 side")]
+    [RequiresPermissions("@pugsharp/matchadmin")]
+    public void OnCommandTeam2Side(CCSPlayerController? player, CommandInfo command)
+    {
+        HandleCommand((_, c) =>
+        {
+            if (_Match == null)
+            {
+                c.ReplyToCommand(_TextHelper.GetText(nameof(Resources.PugSharp_Command_Error_NoMatch)));
+                return;
+            }
+
+            c.ReplyToCommand(_Match.MatchInfo.MatchTeam2.CurrentTeamSite.ToString());
+        },
+        command,
+        player);
+    }
+
+    [ConsoleCommand("css_team1_mapscore", "Get the team 1 mapscore")]
+    [ConsoleCommand("ps_team1_mapscore", "Get the team 1 mapscore")]
+    [RequiresPermissions("@pugsharp/matchadmin")]
+    public void OnCommandTeam1MapScore(CCSPlayerController? player, CommandInfo command)
+    {
+        HandleCommand((_, c) =>
+        {
+            if (_Match == null || _Match.CurrentState < MatchState.MatchRunning)
+            {
+                c.ReplyToCommand(_TextHelper.GetText(nameof(Resources.PugSharp_Command_Error_NoMatchRunning)));
+                return;
+            }
+
+            c.ReplyToCommand(_Match.MatchInfo.CurrentMap.Team1Points.ToString(CultureInfo.InvariantCulture));
+        },
+        command,
+        player);
+    }
+
+    [ConsoleCommand("css_team2_mapscore", "Get the team 2 mapscore")]
+    [ConsoleCommand("ps_team2_mapscore", "Get the team 2 mapscore")]
+    [RequiresPermissions("@pugsharp/matchadmin")]
+    public void OnCommandTeam2MapScore(CCSPlayerController? player, CommandInfo command)
+    {
+        HandleCommand((_, c) =>
+        {
+            if (_Match == null || _Match.CurrentState < MatchState.MatchRunning)
+            {
+                c.ReplyToCommand(_TextHelper.GetText(nameof(Resources.PugSharp_Command_Error_NoMatchRunning)));
+                return;
+            }
+
+            c.ReplyToCommand(_Match.MatchInfo.CurrentMap.Team2Points.ToString(CultureInfo.InvariantCulture));
+        },
+        command,
+        player);
+    }
+
+    [ConsoleCommand("css_team1_seriesscore", "Get the team 1 seriesscore")]
+    [ConsoleCommand("ps_team1_seriesscore", "Get the team 1 seriesscore")]
+    [RequiresPermissions("@pugsharp/matchadmin")]
+    public void OnCommandTeam1SeriesScore(CCSPlayerController? player, CommandInfo command)
+    {
+        HandleCommand((_, c) =>
+        {
+            if (_Match == null)
+            {
+                c.ReplyToCommand(_TextHelper.GetText(nameof(Resources.PugSharp_Command_Error_NoMatch)));
+                return;
+            }
+
+            c.ReplyToCommand(_Match.MatchInfo.MatchMaps.Sum(x => x.Team1Points).ToString(CultureInfo.InvariantCulture));
+        },
+        command,
+        player);
+    }
+
+    [ConsoleCommand("css_team2_seriesscore", "Get the team 2 seriesscore")]
+    [ConsoleCommand("ps_team2_seriesscore", "Get the team 2 seriesscore")]
+    [RequiresPermissions("@pugsharp/matchadmin")]
+    public void OnCommandTeam2SeriesScore(CCSPlayerController? player, CommandInfo command)
+    {
+        HandleCommand((_, c) =>
+        {
+            if (_Match == null)
+            {
+                c.ReplyToCommand(_TextHelper.GetText(nameof(Resources.PugSharp_Command_Error_NoMatch)));
+                return;
+            }
+
+            c.ReplyToCommand(_Match.MatchInfo.MatchMaps.Sum(x => x.Team2Points).ToString(CultureInfo.InvariantCulture));
+        },
+        command,
+        player);
+    }
+
+    [ConsoleCommand("css_mapscore_json", "Get the mapscore as json")]
+    [ConsoleCommand("ps_mapscore_json", "Get the mapscore as json")]
+    [RequiresPermissions("@pugsharp/matchadmin")]
+    public void OnCommandMapScoreJson(CCSPlayerController? player, CommandInfo command)
+    {
+        HandleCommand((_, c) =>
+        {
+            if (_Match == null || _Match.CurrentState < MatchState.MatchRunning)
+            {
+                c.ReplyToCommand(_TextHelper.GetText(nameof(Resources.PugSharp_Command_Error_NoMatchRunning)));
+                return;
+            }
+
+            var mapScore = new
+            {
+                Team1 = new
+                {
+                    _Match.MatchInfo.Config.Team1.Name,
+                    Score = _Match.MatchInfo.CurrentMap.Team1Points,
+                    StartingSide = _Match.MatchInfo.MatchTeam1.StartingTeamSite,
+                    CurrentSide = _Match.MatchInfo.MatchTeam1.CurrentTeamSite,
+                },
+                Team2 = new
+                {
+                    _Match.MatchInfo.Config.Team2.Name,
+                    Score = _Match.MatchInfo.CurrentMap.Team2Points,
+                    StartingSide = _Match.MatchInfo.MatchTeam2.StartingTeamSite,
+                    CurrentSide = _Match.MatchInfo.MatchTeam2.CurrentTeamSite,
+                },
+            };
+
+            var mapScoreJson = JsonSerializer.Serialize(mapScore);
+
+            c.ReplyToCommand(mapScoreJson);
+        },
+        command,
+        player);
+    }
+
+    [ConsoleCommand("css_seriesscore_json", "Get the seriesscore as json")]
+    [ConsoleCommand("ps_seriesscore_json", "Get the seriesscore as json")]
+    [RequiresPermissions("@pugsharp/matchadmin")]
+    public void OnCommandSeriesScoreJson(CCSPlayerController? player, CommandInfo command)
+    {
+        HandleCommand((_, c) =>
+        {
+            if (_Match == null)
+            {
+                c.ReplyToCommand(_TextHelper.GetText(nameof(Resources.PugSharp_Command_Error_NoMatchRunning)));
+                return;
+            }
+
+            var mapScore = new
+            {
+                Team1 = new
+                {
+                    _Match.MatchInfo.Config.Team1.Name,
+                    Score = _Match.MatchInfo.MatchMaps.Sum(x => x.Team1Points).ToString(CultureInfo.InvariantCulture),
+                },
+                Team2 = new
+                {
+                    _Match.MatchInfo.Config.Team2.Name,
+                    Score = _Match.MatchInfo.MatchMaps.Sum(x => x.Team2Points).ToString(CultureInfo.InvariantCulture),
+                },
+            };
+
+            var mapScoreJson = JsonSerializer.Serialize(mapScore);
+
+            c.ReplyToCommand(mapScoreJson);
+        },
+        command,
+        player);
+    }
+
     [ConsoleCommand("css_r", "Mark player as ready")]
     [ConsoleCommand("ps_r", "Mark player as ready")]
     [ConsoleCommand("css_ready", "Mark player as ready")]
