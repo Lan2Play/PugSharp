@@ -320,6 +320,9 @@ public class Match : IDisposable
         var team1Results = MatchInfo.MatchTeam1.CurrentTeamSite == Team.Terrorist ? roundResults.TRoundResult : roundResults.CTRoundResult;
         var team2Results = MatchInfo.MatchTeam2.CurrentTeamSite == Team.Terrorist ? roundResults.TRoundResult : roundResults.CTRoundResult;
 
+        MatchInfo.CurrentMap.Team1Points = team1Results.Score;
+        MatchInfo.CurrentMap.Team2Points = team2Results.Score;
+
         _Logger.LogInformation("Team 1: {teamSite} : {teamScore}", MatchInfo.MatchTeam1.CurrentTeamSite, team1Results.Score);
         _Logger.LogInformation("Team 2: {teamSite} : {teamScore}", MatchInfo.MatchTeam2.CurrentTeamSite, team2Results.Score);
 
