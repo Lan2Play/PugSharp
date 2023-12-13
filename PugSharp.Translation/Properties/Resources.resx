@@ -213,6 +213,9 @@
   <data name="PugSharp.Command.Error.OneMapRequired" xml:space="preserve">
     <value>Can not start match. At least one map is required!</value>
   </data>
+  <data name="PugSharp.Command.Error.RconNotSupported" xml:space="preserve">
+    <value>This command is not supported via rcon.</value>
+  </data>
   <data name="PugSharp.Command.Error.RoundBackupFileNotFound" xml:space="preserve">
     <value>RoundBackupFile "{0:roundBackupFile}" not found!</value>
   </data>
@@ -310,7 +313,7 @@
     <value>Vote to ban map: type `!&lt;mapnumber&gt;`</value>
   </data>
   <data name="PugSharp.Match.VoteTeamMenuHeader" xml:space="preserve">
-    <value>Choose starting side:</value>
+    <value>Choose starting side (`!stay` or `!switch`)</value>
   </data>
   <data name="PugSharp.Match.WaitForOtherTeam" xml:space="preserve">
     <value>Waiting for other Team to vote!</value>

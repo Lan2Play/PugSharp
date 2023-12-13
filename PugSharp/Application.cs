@@ -1784,6 +1784,11 @@ public class Application : IApplication
                 return;
             }
 
+            if (p == null || !p.IsValid)
+            {
+                c.ReplyToCommand(_TextHelper.GetText(nameof(Resources.PugSharp_Command_Error_RconNotSupported)));
+                return;
+            }
 
             var voteSite = p.TeamNum == (int)Match.Contract.Team.Terrorist ? "CT" : "T";
             _Match.VoteTeam(new Player(p.SteamID), voteSite);
@@ -1801,6 +1806,12 @@ public class Application : IApplication
             if (_Match == null)
             {
                 c.ReplyToCommand(_TextHelper.GetText(nameof(Resources.PugSharp_Command_Error_NoMatch)));
+                return;
+            }
+
+            if (p == null || !p.IsValid)
+            {
+                c.ReplyToCommand(_TextHelper.GetText(nameof(Resources.PugSharp_Command_Error_RconNotSupported)));
                 return;
             }
 

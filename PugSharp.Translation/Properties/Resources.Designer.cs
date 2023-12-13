@@ -349,6 +349,15 @@ namespace PugSharp.Translation.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to This command is not supported via rcon..
+        /// </summary>
+        public static string PugSharp_Command_Error_RconNotSupported {
+            get {
+                return ResourceManager.GetString("PugSharp.Command.Error.RconNotSupported", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to RoundBackupFile &quot;{0:roundBackupFile}&quot; not found!.
         /// </summary>
         public static string PugSharp_Command_Error_RoundBackupFileNotFound {
@@ -637,7 +646,7 @@ namespace PugSharp.Translation.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Choose starting side:.
+        ///   Looks up a localized string similar to Choose starting side (`!stay` or `!switch`).
         /// </summary>
         public static string PugSharp_Match_VoteTeamMenuHeader {
             get {
