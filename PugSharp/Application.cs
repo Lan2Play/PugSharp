@@ -833,46 +833,6 @@ public class Application : IApplication
 
     #region Commands
 
-    [ConsoleCommand("css_cm", "Stop the current match")]
-    [ConsoleCommand("ps_cm", "Stop the current match")]
-    [ConsoleCommand("css_cancelmatch", "Stop the current match")]
-    [ConsoleCommand("ps_cancelmatch", "Stop the current match")]
-    [ConsoleCommand("css_stopmatch", "Stop the current match")]
-    [ConsoleCommand("ps_stopmatch", "Stop the current match")]
-    [RequiresPermissions("@pugsharp/matchadmin")]
-    public void OnCommandStopMatch(CCSPlayerController? player, CommandInfo command)
-    {
-        HandleCommand((_, c) =>
-        {
-            if (_Match == null)
-            {
-                c.ReplyToCommand(_TextHelper, nameof(Resources.PugSharp_Command_Error_NoMatchRunning));
-                return;
-            }
-
-            var resetMap = _Match.MatchInfo.Config.VoteMap;
-            StopMatch();
-            ResetServer(resetMap);
-            c.ReplyToCommand(_TextHelper, nameof(Resources.PugSharp_Command_MatchStopped));
-        },
-        command,
-        player);
-    }
-
-    private void StopMatch()
-    {
-        if (_Match == null)
-        {
-            return;
-        }
-
-        _Match.MatchFinalized -= OnMatchFinalized;
-        _Match.Dispose();
-        _Match = null;
-
-        ResetServer("de_dust2");
-    }
-
     [ConsoleCommand("css_lc", "Load a match config")]
     [ConsoleCommand("css_loadconfig", "Load a match config")]
     [ConsoleCommand("ps_loadconfig", "Load a match config")]
@@ -1077,6 +1037,8 @@ public class Application : IApplication
         player).ConfigureAwait(false);
     }
 
+    [ConsoleCommand("css_crm", "Create a match without predefined config")]
+    [ConsoleCommand("ps_crm", "Create a match without predefined config")]
     [ConsoleCommand("css_creatematch", "Create a match without predefined config")]
     [ConsoleCommand("ps_creatematch", "Create a match without predefined config")]
     [RequiresPermissions("@pugsharp/matchadmin")]
@@ -1107,8 +1069,10 @@ public class Application : IApplication
         player);
     }
 
-    [ConsoleCommand("css_startmatch", "Create a match without predefined config")]
-    [ConsoleCommand("ps_startmatch", "Create a match without predefined config")]
+    [ConsoleCommand("css_sm", "Start the match for the creating config")]
+    [ConsoleCommand("ps_sm", "Start the match for the creating config")]
+    [ConsoleCommand("css_startmatch", "Start the match for the creating config")]
+    [ConsoleCommand("ps_startmatch", "Start the match for the creating config")]
     [RequiresPermissions("@pugsharp/matchadmin")]
     public void OnCommandStartMatch(CCSPlayerController? player, CommandInfo command)
     {
@@ -1134,6 +1098,32 @@ public class Application : IApplication
             }
 
             InitializeMatch(matchConfig);
+        },
+        command,
+        player);
+    }
+
+    [ConsoleCommand("css_cm", "Cancel the current match")]
+    [ConsoleCommand("ps_cm", "Cancel the current match")]
+    [ConsoleCommand("css_cancelmatch", "Cancel the current match")]
+    [ConsoleCommand("ps_cancelmatch", "Cancel the current match")]
+    [ConsoleCommand("css_stopmatch", "Cancel the current match")]
+    [ConsoleCommand("ps_stopmatch", "Cancel the current match")]
+    [RequiresPermissions("@pugsharp/matchadmin")]
+    public void OnCommandStopMatch(CCSPlayerController? player, CommandInfo command)
+    {
+        HandleCommand((_, c) =>
+        {
+            if (_Match == null)
+            {
+                c.ReplyToCommand(_TextHelper, nameof(Resources.PugSharp_Command_Error_NoMatchRunning));
+                return;
+            }
+
+            var resetMap = _Match.MatchInfo.Config.VoteMap;
+            StopMatch();
+            ResetServer(resetMap);
+            c.ReplyToCommand(_TextHelper, nameof(Resources.PugSharp_Command_MatchStopped));
         },
         command,
         player);
@@ -2025,6 +2015,20 @@ public class Application : IApplication
             }
         });
 
+    }
+
+    private void StopMatch()
+    {
+        if (_Match == null)
+        {
+            return;
+        }
+
+        _Match.MatchFinalized -= OnMatchFinalized;
+        _Match.Dispose();
+        _Match = null;
+
+        ResetServer("de_dust2");
     }
 
     private void ResetServer(string map)
