@@ -1782,6 +1782,44 @@ public class Application : IApplication
         player);
     }
 
+    [ConsoleCommand("css_switch", "Vote to switch the current team")]
+    [ConsoleCommand("ps_switch", "Vote to switch the current team")]
+    public void OnCommandSwitch(CCSPlayerController? player, CommandInfo command)
+    {
+        HandleCommand((p, c) =>
+        {
+            if (_Match == null)
+            {
+                c.ReplyToCommand(_TextHelper.GetText(nameof(Resources.PugSharp_Command_Error_NoMatch)));
+                return;
+            }
+
+
+            var voteSite = p.TeamNum == (int)Match.Contract.Team.Terrorist ? "CT" : "T";
+            _Match.VoteTeam(new Player(p.SteamID), voteSite);
+        },
+        command,
+        player);
+    }
+
+    [ConsoleCommand("css_stay", "Vote to stay at the current team")]
+    [ConsoleCommand("ps_stay", "Vote to stay at the current team")]
+    public void OnCommandStay(CCSPlayerController? player, CommandInfo command)
+    {
+        HandleCommand((p, c) =>
+        {
+            if (_Match == null)
+            {
+                c.ReplyToCommand(_TextHelper.GetText(nameof(Resources.PugSharp_Command_Error_NoMatch)));
+                return;
+            }
+
+            var voteSite = p.TeamNum == (int)Match.Contract.Team.Terrorist ? "T" : "CT";
+            _Match.VoteTeam(new Player(p.SteamID), voteSite);
+        },
+        command,
+        player);
+    }
 
     private void HandleCommand(Action<CCSPlayerController?, CommandInfo> commandAction, CommandInfo commandInfo, CCSPlayerController? player = null, string? args = null, [CallerMemberName] string? commandMethod = null)
     {
