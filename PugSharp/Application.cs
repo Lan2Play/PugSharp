@@ -833,42 +833,7 @@ public class Application : IApplication
 
     #region Commands
 
-    [ConsoleCommand("css_stopmatch", "Stop the current match")]
-    [ConsoleCommand("ps_stopmatch", "Stop the current match")]
-    [RequiresPermissions("@pugsharp/matchadmin")]
-    public void OnCommandStopMatch(CCSPlayerController? player, CommandInfo command)
-    {
-        HandleCommand((_, c) =>
-        {
-            if (_Match == null)
-            {
-                c.ReplyToCommand(_TextHelper, nameof(Resources.PugSharp_Command_Error_NoMatchRunning));
-                return;
-            }
-
-            var resetMap = _Match.MatchInfo.Config.VoteMap;
-            StopMatch();
-            ResetServer(resetMap);
-            c.ReplyToCommand(_TextHelper, nameof(Resources.PugSharp_Command_MatchStopped));
-        },
-        command,
-        player);
-    }
-
-    private void StopMatch()
-    {
-        if (_Match == null)
-        {
-            return;
-        }
-
-        _Match.MatchFinalized -= OnMatchFinalized;
-        _Match.Dispose();
-        _Match = null;
-
-        ResetServer("de_dust2");
-    }
-
+    [ConsoleCommand("css_lc", "Load a match config")]
     [ConsoleCommand("css_loadconfig", "Load a match config")]
     [ConsoleCommand("ps_loadconfig", "Load a match config")]
     [RequiresPermissions("@pugsharp/matchadmin")]
@@ -935,6 +900,7 @@ public class Application : IApplication
         player);
     }
 
+    [ConsoleCommand("css_lcf", "Load a match config from a file")]
     [ConsoleCommand("css_loadconfigfile", "Load a match config from a file")]
     [ConsoleCommand("ps_loadconfigfile", "Load a match config from a file")]
     [RequiresPermissions("@pugsharp/matchadmin")]
@@ -1071,6 +1037,8 @@ public class Application : IApplication
         player).ConfigureAwait(false);
     }
 
+    [ConsoleCommand("css_crm", "Create a match without predefined config")]
+    [ConsoleCommand("ps_crm", "Create a match without predefined config")]
     [ConsoleCommand("css_creatematch", "Create a match without predefined config")]
     [ConsoleCommand("ps_creatematch", "Create a match without predefined config")]
     [RequiresPermissions("@pugsharp/matchadmin")]
@@ -1101,8 +1069,10 @@ public class Application : IApplication
         player);
     }
 
-    [ConsoleCommand("css_startmatch", "Create a match without predefined config")]
-    [ConsoleCommand("ps_startmatch", "Create a match without predefined config")]
+    [ConsoleCommand("css_sm", "Start the match for the creating config")]
+    [ConsoleCommand("ps_sm", "Start the match for the creating config")]
+    [ConsoleCommand("css_startmatch", "Start the match for the creating config")]
+    [ConsoleCommand("ps_startmatch", "Start the match for the creating config")]
     [RequiresPermissions("@pugsharp/matchadmin")]
     public void OnCommandStartMatch(CCSPlayerController? player, CommandInfo command)
     {
@@ -1128,6 +1098,32 @@ public class Application : IApplication
             }
 
             InitializeMatch(matchConfig);
+        },
+        command,
+        player);
+    }
+
+    [ConsoleCommand("css_cm", "Cancel the current match")]
+    [ConsoleCommand("ps_cm", "Cancel the current match")]
+    [ConsoleCommand("css_cancelmatch", "Cancel the current match")]
+    [ConsoleCommand("ps_cancelmatch", "Cancel the current match")]
+    [ConsoleCommand("css_stopmatch", "Cancel the current match")]
+    [ConsoleCommand("ps_stopmatch", "Cancel the current match")]
+    [RequiresPermissions("@pugsharp/matchadmin")]
+    public void OnCommandStopMatch(CCSPlayerController? player, CommandInfo command)
+    {
+        HandleCommand((_, c) =>
+        {
+            if (_Match == null)
+            {
+                c.ReplyToCommand(_TextHelper, nameof(Resources.PugSharp_Command_Error_NoMatchRunning));
+                return;
+            }
+
+            var resetMap = _Match.MatchInfo.Config.VoteMap;
+            StopMatch();
+            ResetServer(resetMap);
+            c.ReplyToCommand(_TextHelper, nameof(Resources.PugSharp_Command_MatchStopped));
         },
         command,
         player);
@@ -1414,7 +1410,278 @@ public class Application : IApplication
         player);
     }
 
+    [ConsoleCommand("css_matchstate", "Serialize match to JSON on console")]
+    [ConsoleCommand("ps_matchstate", "Serialize match to JSON on console")]
+    [RequiresPermissions("@pugsharp/matchadmin")]
+    public void OnCommandMatchState(CCSPlayerController? player, CommandInfo command)
+    {
+        HandleCommand((_, c) =>
+        {
+            if (_Match == null)
+            {
+                c.ReplyToCommand(_TextHelper.GetText(nameof(Resources.PugSharp_Command_Error_MatchStateUnavailable)));
+                return;
+            }
+
+            c.ReplyToCommand(_Match.CurrentState.ToString());
+        },
+        command,
+        player);
+    }
+
+    [ConsoleCommand("css_mapscore", "Get the current mapscore")]
+    [ConsoleCommand("ps_mapscore", "Get the current mapscore")]
+    [RequiresPermissions("@pugsharp/matchadmin")]
+    public void OnCommandMapScore(CCSPlayerController? player, CommandInfo command)
+    {
+        HandleCommand((_, c) =>
+        {
+            if (_Match == null || _Match.CurrentState < MatchState.MatchRunning)
+            {
+                c.ReplyToCommand(_TextHelper.GetText(nameof(Resources.PugSharp_Command_Error_NoMatchRunning)));
+                return;
+            }
+
+            var team1 = _Match.MatchInfo.Config.Team1.Name;
+            var team2 = _Match.MatchInfo.Config.Team2.Name;
+            var team1Points = _Match.MatchInfo.CurrentMap.Team1Points;
+            var team2Points = _Match.MatchInfo.CurrentMap.Team2Points;
+            c.ReplyToCommand(string.Create(CultureInfo.InvariantCulture, $"{team1} [{team1Points}] vs {team2} [{team2Points}]"));
+        },
+        command,
+        player);
+    }
+
+    [ConsoleCommand("css_team1_name", "Get the team 1 name")]
+    [ConsoleCommand("ps_team1_name", "Get the team 1 name")]
+    [RequiresPermissions("@pugsharp/matchadmin")]
+    public void OnCommandTeam1Name(CCSPlayerController? player, CommandInfo command)
+    {
+        HandleCommand((_, c) =>
+        {
+            if (_Match == null)
+            {
+                c.ReplyToCommand(_TextHelper.GetText(nameof(Resources.PugSharp_Command_Error_NoMatch)));
+                return;
+            }
+
+            c.ReplyToCommand(_Match.MatchInfo.Config.Team1.Name);
+        },
+        command,
+        player);
+    }
+
+    [ConsoleCommand("css_team2_name", "Get the team 2 name")]
+    [ConsoleCommand("ps_team2_name", "Get the team 2 name")]
+    [RequiresPermissions("@pugsharp/matchadmin")]
+    public void OnCommandTeam2Name(CCSPlayerController? player, CommandInfo command)
+    {
+        HandleCommand((_, c) =>
+        {
+            if (_Match == null)
+            {
+                c.ReplyToCommand(_TextHelper.GetText(nameof(Resources.PugSharp_Command_Error_NoMatch)));
+                return;
+            }
+
+            c.ReplyToCommand(_Match.MatchInfo.Config.Team2.Name);
+        },
+        command,
+        player);
+    }
+
+    [ConsoleCommand("css_team1_side", "Get the team 1 side")]
+    [ConsoleCommand("ps_team1_side", "Get the team 1 side")]
+    [RequiresPermissions("@pugsharp/matchadmin")]
+    public void OnCommandTeam1Side(CCSPlayerController? player, CommandInfo command)
+    {
+        HandleCommand((_, c) =>
+        {
+            if (_Match == null)
+            {
+                c.ReplyToCommand(_TextHelper.GetText(nameof(Resources.PugSharp_Command_Error_NoMatch)));
+                return;
+            }
+
+            c.ReplyToCommand(_Match.MatchInfo.MatchTeam1.CurrentTeamSite.ToString());
+        },
+        command,
+        player);
+    }
+
+    [ConsoleCommand("css_team2_side", "Get the team 2 side")]
+    [ConsoleCommand("ps_team2_side", "Get the team 2 side")]
+    [RequiresPermissions("@pugsharp/matchadmin")]
+    public void OnCommandTeam2Side(CCSPlayerController? player, CommandInfo command)
+    {
+        HandleCommand((_, c) =>
+        {
+            if (_Match == null)
+            {
+                c.ReplyToCommand(_TextHelper.GetText(nameof(Resources.PugSharp_Command_Error_NoMatch)));
+                return;
+            }
+
+            c.ReplyToCommand(_Match.MatchInfo.MatchTeam2.CurrentTeamSite.ToString());
+        },
+        command,
+        player);
+    }
+
+    [ConsoleCommand("css_team1_mapscore", "Get the team 1 mapscore")]
+    [ConsoleCommand("ps_team1_mapscore", "Get the team 1 mapscore")]
+    [RequiresPermissions("@pugsharp/matchadmin")]
+    public void OnCommandTeam1MapScore(CCSPlayerController? player, CommandInfo command)
+    {
+        HandleCommand((_, c) =>
+        {
+            if (_Match == null || _Match.CurrentState < MatchState.MatchRunning)
+            {
+                c.ReplyToCommand(_TextHelper.GetText(nameof(Resources.PugSharp_Command_Error_NoMatchRunning)));
+                return;
+            }
+
+            c.ReplyToCommand(_Match.MatchInfo.CurrentMap.Team1Points.ToString(CultureInfo.InvariantCulture));
+        },
+        command,
+        player);
+    }
+
+    [ConsoleCommand("css_team2_mapscore", "Get the team 2 mapscore")]
+    [ConsoleCommand("ps_team2_mapscore", "Get the team 2 mapscore")]
+    [RequiresPermissions("@pugsharp/matchadmin")]
+    public void OnCommandTeam2MapScore(CCSPlayerController? player, CommandInfo command)
+    {
+        HandleCommand((_, c) =>
+        {
+            if (_Match == null || _Match.CurrentState < MatchState.MatchRunning)
+            {
+                c.ReplyToCommand(_TextHelper.GetText(nameof(Resources.PugSharp_Command_Error_NoMatchRunning)));
+                return;
+            }
+
+            c.ReplyToCommand(_Match.MatchInfo.CurrentMap.Team2Points.ToString(CultureInfo.InvariantCulture));
+        },
+        command,
+        player);
+    }
+
+    [ConsoleCommand("css_team1_seriesscore", "Get the team 1 seriesscore")]
+    [ConsoleCommand("ps_team1_seriesscore", "Get the team 1 seriesscore")]
+    [RequiresPermissions("@pugsharp/matchadmin")]
+    public void OnCommandTeam1SeriesScore(CCSPlayerController? player, CommandInfo command)
+    {
+        HandleCommand((_, c) =>
+        {
+            if (_Match == null)
+            {
+                c.ReplyToCommand(_TextHelper.GetText(nameof(Resources.PugSharp_Command_Error_NoMatch)));
+                return;
+            }
+
+            c.ReplyToCommand(_Match.MatchInfo.MatchMaps.Sum(x => x.Team1Points).ToString(CultureInfo.InvariantCulture));
+        },
+        command,
+        player);
+    }
+
+    [ConsoleCommand("css_team2_seriesscore", "Get the team 2 seriesscore")]
+    [ConsoleCommand("ps_team2_seriesscore", "Get the team 2 seriesscore")]
+    [RequiresPermissions("@pugsharp/matchadmin")]
+    public void OnCommandTeam2SeriesScore(CCSPlayerController? player, CommandInfo command)
+    {
+        HandleCommand((_, c) =>
+        {
+            if (_Match == null)
+            {
+                c.ReplyToCommand(_TextHelper.GetText(nameof(Resources.PugSharp_Command_Error_NoMatch)));
+                return;
+            }
+
+            c.ReplyToCommand(_Match.MatchInfo.MatchMaps.Sum(x => x.Team2Points).ToString(CultureInfo.InvariantCulture));
+        },
+        command,
+        player);
+    }
+
+    [ConsoleCommand("css_mapscore_json", "Get the mapscore as json")]
+    [ConsoleCommand("ps_mapscore_json", "Get the mapscore as json")]
+    [RequiresPermissions("@pugsharp/matchadmin")]
+    public void OnCommandMapScoreJson(CCSPlayerController? player, CommandInfo command)
+    {
+        HandleCommand((_, c) =>
+        {
+            if (_Match == null || _Match.CurrentState < MatchState.MatchRunning)
+            {
+                c.ReplyToCommand(_TextHelper.GetText(nameof(Resources.PugSharp_Command_Error_NoMatchRunning)));
+                return;
+            }
+
+            var mapScore = new
+            {
+                Team1 = new
+                {
+                    _Match.MatchInfo.Config.Team1.Name,
+                    Score = _Match.MatchInfo.CurrentMap.Team1Points,
+                    StartingSide = _Match.MatchInfo.MatchTeam1.StartingTeamSite,
+                    CurrentSide = _Match.MatchInfo.MatchTeam1.CurrentTeamSite,
+                },
+                Team2 = new
+                {
+                    _Match.MatchInfo.Config.Team2.Name,
+                    Score = _Match.MatchInfo.CurrentMap.Team2Points,
+                    StartingSide = _Match.MatchInfo.MatchTeam2.StartingTeamSite,
+                    CurrentSide = _Match.MatchInfo.MatchTeam2.CurrentTeamSite,
+                },
+            };
+
+            var mapScoreJson = JsonSerializer.Serialize(mapScore);
+
+            c.ReplyToCommand(mapScoreJson);
+        },
+        command,
+        player);
+    }
+
+    [ConsoleCommand("css_seriesscore_json", "Get the seriesscore as json")]
+    [ConsoleCommand("ps_seriesscore_json", "Get the seriesscore as json")]
+    [RequiresPermissions("@pugsharp/matchadmin")]
+    public void OnCommandSeriesScoreJson(CCSPlayerController? player, CommandInfo command)
+    {
+        HandleCommand((_, c) =>
+        {
+            if (_Match == null)
+            {
+                c.ReplyToCommand(_TextHelper.GetText(nameof(Resources.PugSharp_Command_Error_NoMatchRunning)));
+                return;
+            }
+
+            var mapScore = new
+            {
+                Team1 = new
+                {
+                    _Match.MatchInfo.Config.Team1.Name,
+                    Score = _Match.MatchInfo.MatchMaps.Sum(x => x.Team1Points).ToString(CultureInfo.InvariantCulture),
+                },
+                Team2 = new
+                {
+                    _Match.MatchInfo.Config.Team2.Name,
+                    Score = _Match.MatchInfo.MatchMaps.Sum(x => x.Team2Points).ToString(CultureInfo.InvariantCulture),
+                },
+            };
+
+            var mapScoreJson = JsonSerializer.Serialize(mapScore);
+
+            c.ReplyToCommand(mapScoreJson);
+        },
+        command,
+        player);
+    }
+
+    [ConsoleCommand("css_r", "Mark player as ready")]
+    [ConsoleCommand("ps_r", "Mark player as ready")]
     [ConsoleCommand("css_ready", "Mark player as ready")]
+    [ConsoleCommand("ps_ready", "Mark player as ready")]
     public void OnCommandReady(CCSPlayerController? player, CommandInfo command)
     {
         HandleCommand((p, c) =>
@@ -1505,6 +1772,55 @@ public class Application : IApplication
         player);
     }
 
+    [ConsoleCommand("css_switch", "Vote to switch the current team")]
+    [ConsoleCommand("ps_switch", "Vote to switch the current team")]
+    public void OnCommandSwitch(CCSPlayerController? player, CommandInfo command)
+    {
+        HandleCommand((p, c) =>
+        {
+            if (_Match == null)
+            {
+                c.ReplyToCommand(_TextHelper.GetText(nameof(Resources.PugSharp_Command_Error_NoMatch)));
+                return;
+            }
+
+            if (p == null || !p.IsValid)
+            {
+                c.ReplyToCommand(_TextHelper.GetText(nameof(Resources.PugSharp_Command_Error_RconNotSupported)));
+                return;
+            }
+
+            var voteSite = p.TeamNum == (int)Match.Contract.Team.Terrorist ? "CT" : "T";
+            _Match.VoteTeam(new Player(p.SteamID), voteSite);
+        },
+        command,
+        player);
+    }
+
+    [ConsoleCommand("css_stay", "Vote to stay at the current team")]
+    [ConsoleCommand("ps_stay", "Vote to stay at the current team")]
+    public void OnCommandStay(CCSPlayerController? player, CommandInfo command)
+    {
+        HandleCommand((p, c) =>
+        {
+            if (_Match == null)
+            {
+                c.ReplyToCommand(_TextHelper.GetText(nameof(Resources.PugSharp_Command_Error_NoMatch)));
+                return;
+            }
+
+            if (p == null || !p.IsValid)
+            {
+                c.ReplyToCommand(_TextHelper.GetText(nameof(Resources.PugSharp_Command_Error_RconNotSupported)));
+                return;
+            }
+
+            var voteSite = p.TeamNum == (int)Match.Contract.Team.Terrorist ? "T" : "CT";
+            _Match.VoteTeam(new Player(p.SteamID), voteSite);
+        },
+        command,
+        player);
+    }
 
     private void HandleCommand(Action<CCSPlayerController?, CommandInfo> commandAction, CommandInfo commandInfo, CCSPlayerController? player = null, string? args = null, [CallerMemberName] string? commandMethod = null)
     {
@@ -1710,6 +2026,20 @@ public class Application : IApplication
             }
         });
 
+    }
+
+    private void StopMatch()
+    {
+        if (_Match == null)
+        {
+            return;
+        }
+
+        _Match.MatchFinalized -= OnMatchFinalized;
+        _Match.Dispose();
+        _Match = null;
+
+        ResetServer("de_dust2");
     }
 
     private void ResetServer(string map)
