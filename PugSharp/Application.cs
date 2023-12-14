@@ -968,7 +968,7 @@ public class Application : IApplication
                 return;
             }
 
-            var matchId = int.Parse(c.ArgByIndex(argMatchIdIndex), CultureInfo.InvariantCulture);
+            var matchId = c.ArgByIndex(argMatchIdIndex);
 
             // Backups are stored in csgo directory
             var csgoDirectory = Path.GetDirectoryName(PugSharpDirectory);
@@ -1003,35 +1003,7 @@ public class Application : IApplication
 
             _Logger.LogInformation("Start restoring match {matchid}!", matchId);
 
-
-            var roundBackupFile = string.Create(CultureInfo.InvariantCulture, $"PugSharp_Match_{matchId}_round{roundToRestore:D2}.txt");
-
-            if (!File.Exists(Path.Combine(_CsServer.GameDirectory, "csgo", roundBackupFile)))
-            {
-                c.ReplyToCommand(_TextHelper, nameof(Resources.PugSharp_Command_Error_RoundBackupFileNotFound), roundBackupFile);
-                return;
-            }
-
-            var matchInfoFileName = Path.Combine(PugSharpDirectory, "Backup", string.Create(CultureInfo.InvariantCulture, $"Match_{matchId}_Round_{roundToRestore}.json"));
-            if (!File.Exists(matchInfoFileName))
-            {
-                c.ReplyToCommand(_TextHelper, nameof(Resources.PugSharp_Command_Error_MatchInfoFileNotFound), matchInfoFileName);
-                return;
-            }
-
-            var matchInfoStream = File.OpenRead(matchInfoFileName);
-            await using (matchInfoStream.ConfigureAwait(false))
-            {
-                var matchInfo = await JsonSerializer.DeserializeAsync<MatchInfo>(matchInfoStream).ConfigureAwait(false);
-
-                if (matchInfo == null)
-                {
-                    c.ReplyToCommand(_TextHelper, nameof(Resources.PugSharp_Command_Error_MatchInfoFileCouldNotBeLoaded), matchInfoFileName);
-                    return;
-                }
-
-                InitializeMatch(matchInfo, roundBackupFile);
-            }
+            await RestoreMatchAsync(c, matchId, roundToRestore).ConfigureAwait(false);
         },
         command,
         player).ConfigureAwait(false);
@@ -1124,6 +1096,45 @@ public class Application : IApplication
             StopMatch();
             ResetServer(resetMap);
             c.ReplyToCommand(_TextHelper, nameof(Resources.PugSharp_Command_MatchStopped));
+        },
+        command,
+        player);
+    }
+
+    [ConsoleCommand("css_ch", "Cancel the current match half")]
+    [ConsoleCommand("ps_ch", "Cancel the current match half")]
+    [ConsoleCommand("css_cancelhalf", "Cancel the current match half")]
+    [ConsoleCommand("ps_cancelhalf", "Cancel the current match half")]
+    [RequiresPermissions("@pugsharp/matchadmin")]
+    public void OnCommandCancelHalf(CCSPlayerController? player, CommandInfo command)
+    {
+        _ = HandleCommandAsync(async (_, c) =>
+        {
+            if (_Match == null || _Match.CurrentState < MatchState.MatchRunning)
+            {
+                c.ReplyToCommand(_TextHelper, nameof(Resources.PugSharp_Command_Error_NoMatchRunning));
+                return;
+            }
+
+            var currentRound = _Match.MatchInfo.CurrentMap.Team1Points + _Match.MatchInfo.CurrentMap.Team2Points;
+
+            var rounds = _Match.MatchInfo.Config.MaxRounds;
+            var overTimeRounds = _Match.MatchInfo.Config.MaxOvertimeRounds;
+
+            var roundToRestore = 0;
+            if (currentRound > rounds.Half())
+            {
+                if (currentRound > rounds + overTimeRounds.Half())
+                {
+                    roundToRestore = rounds + overTimeRounds;
+                }
+                else
+                {
+                    roundToRestore = rounds;
+                }
+            }
+
+            await RestoreMatchAsync(c, _Match.MatchInfo.Config.MatchId, roundToRestore).ConfigureAwait(false);
         },
         command,
         player);
@@ -1753,7 +1764,7 @@ public class Application : IApplication
     {
         HandleCommand((p, c) =>
         {
-            if (p == null || !p.IsValid)
+            if (p == null || !p.IsValid || p.Pawn.Value == null)
             {
                 c.ReplyToCommand("Command is only possible for valid players!");
                 return;
@@ -1762,11 +1773,10 @@ public class Application : IApplication
             if (_Match?.MatchInfo.Config?.AllowSuicide != true)
             {
                 c.ReplyToCommand("Suicide is not allowed during this match!");
+                return;
             }
 
-#pragma warning disable MA0003 // Add parameter name to improve readability
-            p.Pawn.Value.CommitSuicide(true, true);
-#pragma warning restore MA0003 // Add parameter name to improve readability
+            p.Pawn.Value.CommitSuicide(explode: true, force: true);
         },
         command,
         player);
@@ -2062,6 +2072,43 @@ public class Application : IApplication
             _Logger.LogError(ex, "Setting cultureInfo is not possible. Linux requires libicu-dev/libicu/icu-libs to support translations.");
         }
     }
+
+    private async Task RestoreMatchAsync(CommandInfo c, string matchId, int roundToRestore)
+    {
+        var roundBackupFile = string.Create(CultureInfo.InvariantCulture, $"PugSharp_Match_{matchId}_round{roundToRestore:D2}.txt");
+
+        if (!File.Exists(Path.Combine(_CsServer.GameDirectory, "csgo", roundBackupFile)))
+        {
+            c.ReplyToCommand(_TextHelper, nameof(Resources.PugSharp_Command_Error_RoundBackupFileNotFound), roundBackupFile);
+            return;
+        }
+
+        var matchInfoFileName = Path.Combine(PugSharpDirectory, "Backup", string.Create(CultureInfo.InvariantCulture, $"Match_{matchId}_Round_{roundToRestore}.json"));
+        if (!File.Exists(matchInfoFileName))
+        {
+            c.ReplyToCommand(_TextHelper, nameof(Resources.PugSharp_Command_Error_MatchInfoFileNotFound), matchInfoFileName);
+            return;
+        }
+
+        var matchInfoStream = File.OpenRead(matchInfoFileName);
+        await using (matchInfoStream.ConfigureAwait(false))
+        {
+            var matchInfo = await JsonSerializer.DeserializeAsync<MatchInfo>(matchInfoStream).ConfigureAwait(false);
+
+            _Dispatcher.NextWorldUpdate(() =>
+            {
+                if (matchInfo == null)
+                {
+                    c.ReplyToCommand(_TextHelper, nameof(Resources.PugSharp_Command_Error_MatchInfoFileCouldNotBeLoaded), matchInfoFileName);
+                    return;
+                }
+
+                InitializeMatch(matchInfo, roundBackupFile);
+            });
+        }
+    }
+
+
 
     protected virtual void Dispose(bool disposing)
     {
