@@ -19,6 +19,7 @@ public class MatchTests
         services.AddSingleton(Substitute.For<ICsServer>());
         services.AddSingleton<IApiProvider, MultiApiProvider>();
 
+        services.AddSingleton(Substitute.For<ICssDispatcher>());
         services.AddSingleton(Substitute.For<ICsServer>());
         services.AddLogging(options =>
         {
