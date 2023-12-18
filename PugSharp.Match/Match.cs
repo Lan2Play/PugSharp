@@ -797,7 +797,7 @@ public class Match : IDisposable
         _CsServer.PrintToChatAll(_TextHelper.GetText(nameof(Resources.PugSharp_Match_SelectedTeam), _CurrentMatchTeamToVote!.TeamConfig.Name, startTeam));
     }
 
-    private MatchTeam GetOtherTeam(MatchTeam team)
+    public MatchTeam GetOtherTeam(MatchTeam team)
     {
         return team == MatchInfo.MatchTeam1 ? MatchInfo.MatchTeam2 : MatchInfo.MatchTeam1;
     }
