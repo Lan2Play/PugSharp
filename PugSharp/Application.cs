@@ -325,7 +325,7 @@ public class Application : IApplication
         {
             _Dispatcher.NextFrame(() =>
             {
-                SetMatchVariable(_Match.MatchInfo.Config);
+                SetMatchVariable();
             });
         }
     }
@@ -1935,20 +1935,29 @@ public class Application : IApplication
         }
     }
 
-    private void SetMatchVariable(MatchConfig matchConfig)
+    private void SetMatchVariable()
     {
+        if (_Match == null)
+        {
+            return;
+        }
+
         _Logger.LogInformation("Start set match variables");
 
-        _CsServer.UpdateConvar("mp_overtime_maxrounds", matchConfig.MaxOvertimeRounds);
-        _CsServer.UpdateConvar("mp_maxrounds", matchConfig.MaxRounds);
+        _CsServer.UpdateConvar("mp_overtime_maxrounds", _Match.MatchInfo.Config.MaxOvertimeRounds);
+        _CsServer.UpdateConvar("mp_maxrounds", _Match.MatchInfo.Config.MaxRounds);
 
-        // Set T Name, can be changed to ConVar if issue https://github.com/roflmuffin/CounterStrikeSharp/issues/45 is fixed
-        _CsServer.ExecuteCommand($"mp_teamname_1 {matchConfig.Team2.Name}");
-        _CsServer.ExecuteCommand($"mp_teamflag_1 {matchConfig.Team2.Flag}");
+        // Compare with not equals to support initial state with current teamsite none
+        var tTeam = _Match.MatchInfo.MatchTeam1.CurrentTeamSite != Match.Contract.Team.CounterTerrorist ? _Match.MatchInfo.MatchTeam1 : _Match.MatchInfo.MatchTeam2;
+        var ctTeam = _Match.GetOtherTeam(tTeam);
 
-        // Set CT Name, can be changed to ConVar if issue https://github.com/roflmuffin/CounterStrikeSharp/issues/45 is fixed
-        _CsServer.ExecuteCommand($"mp_teamname_2 {matchConfig.Team1.Name}");
-        _CsServer.ExecuteCommand($"mp_teamflag_2 {matchConfig.Team1.Flag}");
+        // Set CT Site Names
+        _CsServer.ExecuteCommand($"mp_teamname_1 {ctTeam.TeamConfig.Name}");
+        _CsServer.ExecuteCommand($"mp_teamflag_1 {ctTeam.TeamConfig.Flag}");
+
+        // Set T Site Names
+        _CsServer.ExecuteCommand($"mp_teamname_2 {tTeam.TeamConfig.Name}");
+        _CsServer.ExecuteCommand($"mp_teamflag_2 {tTeam.TeamConfig.Flag}");
 
         _Logger.LogInformation("Set match variables done");
     }
@@ -2002,7 +2011,7 @@ public class Application : IApplication
         jsonProvider.Initialize(Path.Combine(PugSharpDirectory, "Stats"));
         _ApiProvider.AddApiProvider(jsonProvider);
 
-        SetMatchVariable(matchConfig);
+        SetMatchVariable();
 
         _Match?.Dispose();
     }
