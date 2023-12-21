@@ -908,7 +908,7 @@ public class Application : IApplication
     {
         const int requiredArgCount = 2;
 
-        _ = HandleCommandAsync(async (p, c) =>
+        HandleCommand((p, c) =>
         {
 
             if (_Match != null)
@@ -927,7 +927,7 @@ public class Application : IApplication
             var fileName = c.ArgByIndex(1);
 
             c.ReplyToCommand(_TextHelper, nameof(Resources.PugSharp_Command_LoadingConfigFromFile), fileName);
-            var loadMatchConfigFromFileResult = await _ConfigProvider.LoadMatchConfigFromFileAsync(fileName).ConfigureAwait(false);
+            var loadMatchConfigFromFileResult = _ConfigProvider.LoadMatchConfigFromFileAsync(fileName).GetAwaiter().GetResult();
 
             loadMatchConfigFromFileResult.Switch(
                 error =>
@@ -1912,7 +1912,6 @@ public class Application : IApplication
 
         return dict;
     }
-
 
     private void OnPlayerDeathHandleFirstKill(TeamConstants victimSide, PlayerRoundStats victimStats)
     {
