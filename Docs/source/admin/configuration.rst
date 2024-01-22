@@ -131,7 +131,7 @@ Serverconfig Example
 CounterstrikeSharp Configs
 ----------------------------------------
 
-For the administration permissions, we are using `the CounterstrikeSharp admin framework <https://docs.cssharp.dev/admin-framework/defining-admins/#adding-admins>`_ .
+For the administration permissions, we are using `the CounterstrikeSharp admin framework <https://docs.cssharp.dev/docs/admin-framework/defining-admins.html#adding-admins>`_ .
 Currently all :ref:`admin/commands:Admin/Rcon Commands` are using the permission ``@pugsharp/matchadmin``
 
 
