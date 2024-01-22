@@ -46,8 +46,8 @@ public class Application : IApplication
 
     private Match.Match? _Match;
     private bool _DisposedValue;
-    private ConfigCreator _ConfigCreator;
-    private ServerConfig _ServerConfig;
+    private ConfigCreator? _ConfigCreator;
+    private ServerConfig? _ServerConfig;
     private readonly CurrentRoundState _CurrentRoundState = new();
 
     /// <summary>
@@ -1149,7 +1149,7 @@ public class Application : IApplication
             }
 
             var mapName = c.ArgByIndex(1);
-            if (!_ConfigCreator.Config.Maplist.Contains(mapName, StringComparer.OrdinalIgnoreCase))
+            if (!_ConfigCreator!.Config.Maplist.Contains(mapName, StringComparer.OrdinalIgnoreCase))
             {
                 _ConfigCreator.Config.Maplist.Add(mapName);
             }
@@ -1180,7 +1180,7 @@ public class Application : IApplication
             }
 
             var mapName = c.ArgByIndex(1);
-            if (_ConfigCreator.Config.Maplist.Remove(mapName))
+            if (_ConfigCreator!.Config.Maplist.Remove(mapName))
             {
                 c.ReplyToCommand(_TextHelper, nameof(Resources.PugSharp_Command_MapRemoved), mapName, string.Join(", ", _ConfigCreator.Config.Maplist));
             }
@@ -1224,7 +1224,7 @@ public class Application : IApplication
                 return;
             }
 
-            var oldMaxRounds = _ConfigCreator.Config.MaxRounds;
+            var oldMaxRounds = _ConfigCreator!.Config.MaxRounds;
             _ConfigCreator.Config.MaxRounds = maxRounds;
             c.ReplyToCommand(_TextHelper, nameof(Resources.PugSharp_Command_ChangedMaxRounds), oldMaxRounds, maxRounds);
         },
@@ -1263,7 +1263,7 @@ public class Application : IApplication
                 return;
             }
 
-            var oldMaxRounds = _ConfigCreator.Config.MaxOvertimeRounds;
+            var oldMaxRounds = _ConfigCreator!.Config.MaxOvertimeRounds;
             _ConfigCreator.Config.MaxOvertimeRounds = maxOvertimeRounds;
             c.ReplyToCommand(_TextHelper, nameof(Resources.PugSharp_Command_ChangedMaxOvertimeRounds), oldMaxRounds, maxOvertimeRounds);
         },
@@ -1302,7 +1302,7 @@ public class Application : IApplication
                 return;
             }
 
-            var oldPlayersPerTeam = _ConfigCreator.Config.PlayersPerTeam;
+            var oldPlayersPerTeam = _ConfigCreator!.Config.PlayersPerTeam;
             _ConfigCreator.Config.PlayersPerTeam = playersPerTeam;
             _ConfigCreator.Config.MinPlayersToReady = playersPerTeam;
             c.ReplyToCommand($"Changed players per team from {oldPlayersPerTeam} to {playersPerTeam}");
@@ -1341,7 +1341,7 @@ public class Application : IApplication
                 teamMode = (TeamMode)teamModeNumber;
             }
 
-            var oldTeamMode = _ConfigCreator.Config.TeamMode;
+            var oldTeamMode = _ConfigCreator!.Config.TeamMode;
             _ConfigCreator.Config.TeamMode = teamMode;
             c.ReplyToCommand(_TextHelper, nameof(Resources.PugSharp_Command_ChangedTeamMode), oldTeamMode, teamMode);
         },
@@ -1379,7 +1379,7 @@ public class Application : IApplication
                 return;
             }
 
-            var config = _Match?.MatchInfo?.Config ?? _ConfigCreator.Config;
+            var config = _Match?.MatchInfo?.Config ?? _ConfigCreator!.Config;
 
             c.ReplyToCommand($"Info Match {config.MatchId}");
             c.ReplyToCommand($"Maplist: {string.Join(", ", config.Maplist)}");
@@ -1764,9 +1764,7 @@ public class Application : IApplication
                 c.ReplyToCommand("Suicide is not allowed during this match!");
             }
 
-#pragma warning disable MA0003 // Add parameter name to improve readability
-            p.Pawn.Value.CommitSuicide(true, true);
-#pragma warning restore MA0003 // Add parameter name to improve readability
+            p.Pawn.Value?.CommitSuicide(true, true);
         },
         command,
         player);
