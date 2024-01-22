@@ -47,7 +47,7 @@ public class Application : IApplication
     private Match.Match? _Match;
     private bool _DisposedValue;
     private ConfigCreator? _ConfigCreator;
-    private ServerConfig _ServerConfig;
+    private ServerConfig? _ServerConfig;
     private readonly CurrentRoundState _CurrentRoundState = new();
 
     /// <summary>
