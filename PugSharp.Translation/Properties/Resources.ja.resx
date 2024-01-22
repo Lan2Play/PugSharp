@@ -1,0 +1,145 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <xsd:schema xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata" id="root">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="PugSharp.Command.Error.ArgumentRoundIndexNotNumeric" xml:space="preserve">
+    <value>ラウンドインデックスの引数は数字である必要があります。</value>
+  </data>
+  <data name="PugSharp.Command.CreatingMatchMaxRounds" xml:space="preserve">
+    <value>`!maxrounds &lt;rounds&gt;` で試合の最大ラウンド数を設定できます！</value>
+  </data>
+  <data name="PugSharp.Command.ChangedMaxRounds" xml:space="preserve">
+    <value>最大ラウンド数を{0:oldMaxRounds}から{1:maxRounds}に変更</value>
+  </data>
+  <data name="PugSharp.Command.CreatingMatchStartMatch" xml:space="preserve">
+    <value>`!startmatch`で試合を開始できます！</value>
+  </data>
+  <data name="PugSharp.Command.Error.NumberOfRoundsNotNumeric" xml:space="preserve">
+    <value>最大ラウンド数は数字のみ使用できます！</value>
+  </data>
+  <data name="PugSharp.Command.CreatingMatchTeamMode" xml:space="preserve">
+    <value>`!teammode &lt;mode&gt;` でチームモードを設定できます！</value>
+  </data>
+  <data name="PugSharp.Command.Error.CsgoDirNotFound" xml:space="preserve">
+    <value>Csgoディレクトリが見つかりません！</value>
+  </data>
+  <data name="PugSharp.Command.Error.LoadingConfig" xml:space="preserve">
+    <value>configをロードできませんでした。エラー: {0:error.Value}</value>
+  </data>
+  <data name="PugSharp.Command.Error.MatchInfoFileCouldNotBeLoaded" xml:space="preserve">
+    <value>MatchInfoファイル "{matchInfoFileName}" がロードできませんでした！</value>
+  </data>
+  <data name="PugSharp.Command.CreatingMatchRemoveMap" xml:space="preserve">
+    <value>`!removemap &lt;mapname&gt;` でマップを削除できます！</value>
+  </data>
+  <data name="PugSharp.Command.Error.MatchIdRequired" xml:space="preserve">
+    <value>引数としてMatchIdが必要です！</value>
+  </data>
+  <data name="PugSharp.Command.Error.NoMatchRunning" xml:space="preserve">
+    <value>現在試合は開始されていません</value>
+  </data>
+  <data name="PugSharp.Command.Error.NumberOfOvertimeRoundsNotNumeric" xml:space="preserve">
+    <value>延長戦の最大ラウンド数は数字のみ使用できます！</value>
+  </data>
+  <data name="PugSharp.Command.ConfigLoaded" xml:space="preserve">
+    <value>Matchconfigのロードが完了しました！</value>
+  </data>
+  <data name="PugSharp.Command.Error.MapNameRequired" xml:space="preserve">
+    <value>マップ名は必須です！</value>
+  </data>
+  <data name="PugSharp.Command.Error.MatchRunning" xml:space="preserve">
+    <value>現在の試合 {0:match} は開始済です。 試合を中止するには `{1:stopCommand}`を宣言してください！</value>
+  </data>
+  <data name="PugSharp.Command.CreatingMatchPlayersPerTeam" xml:space="preserve">
+    <value>`!playersperteam &lt;players&gt;` でチームあたりのプレイヤー数を設定できます！</value>
+  </data>
+  <data name="PugSharp.Command.CreatingMatchAddMap" xml:space="preserve">
+    <value>`!addmap &lt;mapname&gt; でマップを追加できます！</value>
+  </data>
+  <data name="PugSharp.Command.Error.NumberOfRoundsLessThanZero" xml:space="preserve">
+    <value>最大ラウンド数は1以上にしてください！</value>
+  </data>
+  <data name="PugSharp.Command.CreatingMatchMaxOvertimeRounds" xml:space="preserve">
+    <value>`!maxovertimerounds &lt;rounds&gt;` で延長戦の最大ラウンド数を設定できます！</value>
+  </data>
+  <data name="PugSharp.Command.Error.MatchInfoFileNotFound" xml:space="preserve">
+    <value>MatchInfoファイル "{matchInfoFileName}" が見つかりません！</value>
+  </data>
+  <data name="PugSharp.Command.CreatingMatchStarted" xml:space="preserve">
+    <value>試合が開始されました！</value>
+  </data>
+  <data name="PugSharp.Command.Error.FileNameRequired" xml:space="preserve">
+    <value>引数にはファイル名が必要です！</value>
+  </data>
+  <data name="PugSharp.Command.Error.MapNotRemoved" xml:space="preserve">
+    <value>**{0:mapName}**を削除できませんでした。 現在のマップは {1:maps}です</value>
+  </data>
+  <data name="PugSharp.Command.ChangedMaxOvertimeRounds" xml:space="preserve">
+    <value>延長戦の最大ラウンド数を{0:oldMaxRounds}から{1:maxOvertimeRounds}に変更</value>
+  </data>
+  <data name="PugSharp.Command.CreatingMatchMatchInfo" xml:space="preserve">
+    <value>`!matchinfo` で現在の試合設定が表示されます！</value>
+  </data>
+  <data name="PugSharp.Command.Error.NumberOfOvertimeRoundsLessThanZero" xml:space="preserve">
+    <value>延長戦の最大ラウンド数は1以上にしてください！</value>
+  </data>
+  <data name="PugSharp.Command.ChangedTeamMode" xml:space="preserve">
+    <value>チームモードを{0:oldTeamMode}から{1:newTeamMode}に変更</value>
+  </data>
+</root>
