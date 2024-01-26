@@ -221,12 +221,12 @@ public class Application : IApplication
             }
             else
             {
-                // Do nothign if no match is loaded
+                // Do nothing if no match is loaded
             }
         }
         else
         {
-            _Logger.LogInformation($"Ivalid Player has connected!");
+            _Logger.LogInformation($"Invalid Player has connected!");
         }
 
         return HookResult.Continue;
@@ -1503,7 +1503,7 @@ public class Application : IApplication
                 return;
             }
 
-            c.ReplyToCommand(_Match.MatchInfo.MatchTeam1.CurrentTeamSite.ToString());
+            c.ReplyToCommand(_Match.MatchInfo.MatchTeam1.CurrentTeamSide.ToString());
         },
         command,
         player);
@@ -1522,7 +1522,7 @@ public class Application : IApplication
                 return;
             }
 
-            c.ReplyToCommand(_Match.MatchInfo.MatchTeam2.CurrentTeamSite.ToString());
+            c.ReplyToCommand(_Match.MatchInfo.MatchTeam2.CurrentTeamSide.ToString());
         },
         command,
         player);
@@ -1623,15 +1623,15 @@ public class Application : IApplication
                 {
                     _Match.MatchInfo.Config.Team1.Name,
                     Score = _Match.MatchInfo.CurrentMap.Team1Points,
-                    StartingSide = _Match.MatchInfo.MatchTeam1.StartingTeamSite,
-                    CurrentSide = _Match.MatchInfo.MatchTeam1.CurrentTeamSite,
+                    StartingSide = _Match.MatchInfo.MatchTeam1.StartingTeamSide,
+                    CurrentSide = _Match.MatchInfo.MatchTeam1.CurrentTeamSide,
                 },
                 Team2 = new
                 {
                     _Match.MatchInfo.Config.Team2.Name,
                     Score = _Match.MatchInfo.CurrentMap.Team2Points,
-                    StartingSide = _Match.MatchInfo.MatchTeam2.StartingTeamSite,
-                    CurrentSide = _Match.MatchInfo.MatchTeam2.CurrentTeamSite,
+                    StartingSide = _Match.MatchInfo.MatchTeam2.StartingTeamSide,
+                    CurrentSide = _Match.MatchInfo.MatchTeam2.CurrentTeamSide,
                 },
             };
 
@@ -1788,8 +1788,8 @@ public class Application : IApplication
                 return;
             }
 
-            var voteSite = p.TeamNum == (int)Match.Contract.Team.Terrorist ? "CT" : "T";
-            _Match.VoteTeam(new Player(p.SteamID), voteSite);
+            var voteSide = p.TeamNum == (int)Match.Contract.Team.Terrorist ? "CT" : "T";
+            _Match.VoteTeam(new Player(p.SteamID), voteSide);
         },
         command,
         player);
@@ -1813,8 +1813,8 @@ public class Application : IApplication
                 return;
             }
 
-            var voteSite = p.TeamNum == (int)Match.Contract.Team.Terrorist ? "T" : "CT";
-            _Match.VoteTeam(new Player(p.SteamID), voteSite);
+            var voteSide = p.TeamNum == (int)Match.Contract.Team.Terrorist ? "T" : "CT";
+            _Match.VoteTeam(new Player(p.SteamID), voteSide);
         },
         command,
         player);
@@ -1944,15 +1944,15 @@ public class Application : IApplication
         _CsServer.UpdateConvar("mp_overtime_maxrounds", _Match.MatchInfo.Config.MaxOvertimeRounds);
         _CsServer.UpdateConvar("mp_maxrounds", _Match.MatchInfo.Config.MaxRounds);
 
-        // Compare with not equals to support initial state with current teamsite none
-        var tTeam = _Match.MatchInfo.MatchTeam1.CurrentTeamSite != Match.Contract.Team.CounterTerrorist ? _Match.MatchInfo.MatchTeam1 : _Match.MatchInfo.MatchTeam2;
+        // Compare with not equals to support initial state with current teamside none
+        var tTeam = _Match.MatchInfo.MatchTeam1.CurrentTeamSide != Match.Contract.Team.CounterTerrorist ? _Match.MatchInfo.MatchTeam1 : _Match.MatchInfo.MatchTeam2;
         var ctTeam = _Match.GetOtherTeam(tTeam);
 
-        // Set CT Site Names
+        // Set CT Side Names
         _CsServer.ExecuteCommand($"mp_teamname_1 {ctTeam.TeamConfig.Name}");
         _CsServer.ExecuteCommand($"mp_teamflag_1 {ctTeam.TeamConfig.Flag}");
 
-        // Set T Site Names
+        // Set T Side Names
         _CsServer.ExecuteCommand($"mp_teamname_2 {tTeam.TeamConfig.Name}");
         _CsServer.ExecuteCommand($"mp_teamflag_2 {tTeam.TeamConfig.Flag}");
 

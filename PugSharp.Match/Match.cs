@@ -136,7 +136,7 @@ public class Match : IDisposable
         _MatchStateMachine.Configure(MatchState.TeamVote)
             .Permit(MatchCommand.VoteTeam, MatchState.SwitchMap)
             .OnEntry(SendTeamVoteToVotingTeam)
-            .OnExit(SetSelectedTeamSite);
+            .OnExit(SetSelectedTeamSide);
 
         _MatchStateMachine.Configure(MatchState.SwitchMap)
             .Permit(MatchCommand.SwitchMap, MatchState.WaitingForPlayersReady)
@@ -284,7 +284,7 @@ public class Match : IDisposable
         string demoDirectory = Path.Combine(_CsServer.GameDirectory, "csgo", "PugSharp", "Demo");
         MatchInfo.DemoFile = _CsServer.StartDemoRecording(demoDirectory, demoFileName);
 
-        _CsServer.PrintToChatAll(_TextHelper.GetText(nameof(Resources.PugSharp_Match_Info_StartMatch), MatchInfo.MatchTeam1.TeamConfig.Name, MatchInfo.MatchTeam1.CurrentTeamSite, MatchInfo.MatchTeam2.TeamConfig.Name, MatchInfo.MatchTeam2.CurrentTeamSite));
+        _CsServer.PrintToChatAll(_TextHelper.GetText(nameof(Resources.PugSharp_Match_Info_StartMatch), MatchInfo.MatchTeam1.TeamConfig.Name, MatchInfo.MatchTeam1.CurrentTeamSide, MatchInfo.MatchTeam2.TeamConfig.Name, MatchInfo.MatchTeam2.CurrentTeamSide));
 
         _ = _ApiProvider.GoingLiveAsync(new GoingLiveParams(MatchInfo.Config.MatchId, MatchInfo.CurrentMap.MapName, MatchInfo.CurrentMap.MapNumber), CancellationToken.None);
 
@@ -317,18 +317,18 @@ public class Match : IDisposable
 
         UpdateStats(roundResults.PlayerResults);
 
-        var team1Results = MatchInfo.MatchTeam1.CurrentTeamSite == Team.Terrorist ? roundResults.TRoundResult : roundResults.CTRoundResult;
-        var team2Results = MatchInfo.MatchTeam2.CurrentTeamSite == Team.Terrorist ? roundResults.TRoundResult : roundResults.CTRoundResult;
+        var team1Results = MatchInfo.MatchTeam1.CurrentTeamSide == Team.Terrorist ? roundResults.TRoundResult : roundResults.CTRoundResult;
+        var team2Results = MatchInfo.MatchTeam2.CurrentTeamSide == Team.Terrorist ? roundResults.TRoundResult : roundResults.CTRoundResult;
 
         MatchInfo.CurrentMap.Team1Points = team1Results.Score;
         MatchInfo.CurrentMap.Team2Points = team2Results.Score;
 
-        _Logger.LogInformation("Team 1: {teamSite} : {teamScore}", MatchInfo.MatchTeam1.CurrentTeamSite, team1Results.Score);
-        _Logger.LogInformation("Team 2: {teamSite} : {teamScore}", MatchInfo.MatchTeam2.CurrentTeamSite, team2Results.Score);
+        _Logger.LogInformation("Team 1: {teamSide} : {teamScore}", MatchInfo.MatchTeam1.CurrentTeamSide, team1Results.Score);
+        _Logger.LogInformation("Team 2: {teamSide} : {teamScore}", MatchInfo.MatchTeam2.CurrentTeamSide, team2Results.Score);
 
         var mapTeamInfo1 = new MapTeamInfo
         {
-            StartingSide = MatchInfo.MatchTeam1.StartingTeamSite == Team.Terrorist ? TeamSide.T : TeamSide.CT,
+            StartingSide = MatchInfo.MatchTeam1.StartingTeamSide == Team.Terrorist ? TeamSide.T : TeamSide.CT,
             Score = team1Results.Score,
             ScoreT = team1Results.ScoreT,
             ScoreCT = team1Results.ScoreCT,
@@ -339,7 +339,7 @@ public class Match : IDisposable
 
         var mapTeamInfo2 = new MapTeamInfo
         {
-            StartingSide = MatchInfo.MatchTeam2.StartingTeamSite == Team.Terrorist ? TeamSide.T : TeamSide.CT,
+            StartingSide = MatchInfo.MatchTeam2.StartingTeamSide == Team.Terrorist ? TeamSide.T : TeamSide.CT,
             Score = team2Results.Score,
             ScoreT = team2Results.ScoreT,
             ScoreCT = team2Results.ScoreCT,
@@ -356,7 +356,7 @@ public class Match : IDisposable
             return;
         }
 
-        var map = new Map { WinnerTeamName = winnerTeam.TeamConfig.Name, WinnerTeamSide = (TeamSide)(int)winnerTeam.CurrentTeamSite, Name = MatchInfo.CurrentMap.MapName, Team1 = mapTeamInfo1, Team2 = mapTeamInfo2, DemoFileName = Path.GetFileName(MatchInfo.DemoFile) ?? string.Empty };
+        var map = new Map { WinnerTeamName = winnerTeam.TeamConfig.Name, WinnerTeamSide = (TeamSide)(int)winnerTeam.CurrentTeamSide, Name = MatchInfo.CurrentMap.MapName, Team1 = mapTeamInfo1, Team2 = mapTeamInfo2, DemoFileName = Path.GetFileName(MatchInfo.DemoFile) ?? string.Empty };
         _ = _ApiProvider?.RoundStatsUpdateAsync(new RoundStatusUpdateParams(MatchInfo.Config.MatchId, MatchInfo.CurrentMap.MapNumber, teamInfo1, teamInfo2, map, roundResults.Reason, roundResults.RoundTime), CancellationToken.None);
     }
 
@@ -775,23 +775,23 @@ public class Match : IDisposable
         _VoteTimer.Start();
     }
 
-    private void SetSelectedTeamSite()
+    private void SetSelectedTeamSide()
     {
         _VoteTimer.Stop();
 
         var startTeam = _TeamVotes.MaxBy(m => m.Votes.Count)!.Name.Equals("T", StringComparison.OrdinalIgnoreCase) ? Team.Terrorist : Team.CounterTerrorist;
-        _Logger.LogInformation("Set selected teamsite to {startTeam}. Voted by {team}", startTeam, _CurrentMatchTeamToVote!.TeamConfig.Name);
+        _Logger.LogInformation("Set selected teamside to {startTeam}. Voted by {team}", startTeam, _CurrentMatchTeamToVote!.TeamConfig.Name);
 
-        if (_CurrentMatchTeamToVote!.CurrentTeamSite != startTeam)
+        if (_CurrentMatchTeamToVote!.CurrentTeamSide != startTeam)
         {
-            _CurrentMatchTeamToVote.StartingTeamSite = startTeam;
-            _CurrentMatchTeamToVote.CurrentTeamSite = startTeam;
+            _CurrentMatchTeamToVote.StartingTeamSide = startTeam;
+            _CurrentMatchTeamToVote.CurrentTeamSide = startTeam;
             var otherTeam = GetOtherTeam(_CurrentMatchTeamToVote);
-            otherTeam.StartingTeamSite = startTeam == Team.Terrorist ? Team.CounterTerrorist : Team.Terrorist;
-            otherTeam.CurrentTeamSite = otherTeam.StartingTeamSite;
+            otherTeam.StartingTeamSide = startTeam == Team.Terrorist ? Team.CounterTerrorist : Team.Terrorist;
+            otherTeam.CurrentTeamSide = otherTeam.StartingTeamSide;
 
-            _Logger.LogInformation("{team} starts as Team {startTeam}", _CurrentMatchTeamToVote.TeamConfig.Name, _CurrentMatchTeamToVote!.CurrentTeamSite.ToString());
-            _Logger.LogInformation("{team} starts as Team {startTeam}", otherTeam.TeamConfig.Name, otherTeam!.CurrentTeamSite.ToString());
+            _Logger.LogInformation("{team} starts as Team {startTeam}", _CurrentMatchTeamToVote.TeamConfig.Name, _CurrentMatchTeamToVote!.CurrentTeamSide.ToString());
+            _Logger.LogInformation("{team} starts as Team {startTeam}", otherTeam.TeamConfig.Name, otherTeam!.CurrentTeamSide.ToString());
         }
 
         _CsServer.PrintToChatAll(_TextHelper.GetText(nameof(Resources.PugSharp_Match_SelectedTeam), _CurrentMatchTeamToVote!.TeamConfig.Name, startTeam));
@@ -929,7 +929,7 @@ public class Match : IDisposable
 
     private MatchTeam? GetMatchTeam(Team team)
     {
-        return MatchInfo.MatchTeam1.CurrentTeamSite == team ? MatchInfo.MatchTeam1 : MatchInfo.MatchTeam2;
+        return MatchInfo.MatchTeam1.CurrentTeamSide == team ? MatchInfo.MatchTeam1 : MatchInfo.MatchTeam2;
     }
 
     private MatchPlayer GetMatchPlayer(ulong steamID)
@@ -972,19 +972,19 @@ public class Match : IDisposable
         }
 
         var team = isTeam1 ? MatchInfo.MatchTeam1 : MatchInfo.MatchTeam2;
-        var startSite = team.CurrentTeamSite;
-        if (startSite == Team.None)
+        var startSide = team.CurrentTeamSide;
+        if (startSide == Team.None)
         {
-            startSite = isTeam1 ? Team.Terrorist : Team.CounterTerrorist;
+            startSide = isTeam1 ? Team.Terrorist : Team.CounterTerrorist;
         }
 
         _Logger.LogInformation("Player {playerName} belongs to {teamName}", player.PlayerName, team.TeamConfig.Name);
 
-        if (player.Team != startSite)
+        if (player.Team != startSide)
         {
-            _Logger.LogInformation("Player {playerName} should be on {startSite} but is {currentTeam}", player.PlayerName, startSite, player.Team);
+            _Logger.LogInformation("Player {playerName} should be on {startSide} but is {currentTeam}", player.PlayerName, startSide, player.Team);
 
-            player.SwitchTeam(startSite);
+            player.SwitchTeam(startSide);
         }
 
         team.Players.Add(new MatchPlayer(player));
@@ -1060,7 +1060,7 @@ public class Match : IDisposable
 
         if (matchTeam != null)
         {
-            return matchTeam.CurrentTeamSite;
+            return matchTeam.CurrentTeamSide;
         }
 
         _Logger.LogInformation("No matchTeam found. Fallback to Config Team!");
@@ -1208,10 +1208,10 @@ public class Match : IDisposable
 
     public void SwitchTeam()
     {
-        _Logger.LogInformation("Toggle TeamSites");
+        _Logger.LogInformation("Toggle TeamSides");
 
-        MatchInfo.MatchTeam1.ToggleTeamSite();
-        MatchInfo.MatchTeam2.ToggleTeamSite();
+        MatchInfo.MatchTeam1.ToggleTeamSide();
+        MatchInfo.MatchTeam2.ToggleTeamSide();
     }
 
 
@@ -1251,6 +1251,7 @@ public class Match : IDisposable
         MatchInfo.CurrentMap.Winner = winnerTeam;
 
         var configWinnerTeam = GetConfigTeam(winnerTeam.Players[0].Player.SteamID);
+        // TODO: if (configWinnerTeam == Team.CounterTerrorist)
         if (configWinnerTeam == Team.Terrorist)
         {
             // Team 1 won

@@ -12,8 +12,8 @@ public class MatchInfo
         CurrentMap = MatchMaps[0];
         Config = config;
 
-        MatchTeam1 = new MatchTeam(Config.Team1) { CurrentTeamSite = Contract.Team.Terrorist };
-        MatchTeam2 = new MatchTeam(Config.Team2) { CurrentTeamSite = Contract.Team.CounterTerrorist };
+        MatchTeam1 = new MatchTeam(Config.Team1) { CurrentTeamSide = Contract.Team.Terrorist };
+        MatchTeam2 = new MatchTeam(Config.Team2) { CurrentTeamSide = Contract.Team.CounterTerrorist };
         RandomPlayersAllowed = Config.Team1.Players.Count == 0 && Config.Team2.Players.Count == 0;
     }
 
