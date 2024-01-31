@@ -267,7 +267,7 @@ public class Application : IApplication
             if (_Match.MatchInfo.Config.TeamMode == TeamMode.PlayerSelect)
             {
                 // If player is already on team, make sure the match teams are updated
-                if (_Match.PlayerIsReady(playerController.SteamID))
+                if (_Match.PlayerIsReady(playerController.SteamID) && (team == (int)Match.Contract.Team.Terrorist || team == (int)Match.Contract.Team.CounterTerrorist))
                 {
                     _Match.TryAddPlayer(new Player(playerController.SteamID));
                 }
@@ -335,6 +335,11 @@ public class Application : IApplication
     {
         if (_Match != null)
         {
+            if (_Match.CurrentState is MatchState.WaitingForPlayersConnectedReady or MatchState.WaitingForPlayersReady)
+            {
+                _CsServer.LoadAndExecuteConfig("warmup.cfg");
+            }
+
             _Dispatcher.NextFrame(() =>
             {
                 SetMatchVariable();
@@ -1970,13 +1975,13 @@ public class Application : IApplication
         // Allow players to select their team
         if (_Match.MatchInfo.Config.TeamMode == TeamMode.PlayerSelect)
         {
-            _CsServer.UpdateConvar("sv_disable_teamselect_menu", value: false);
-            _CsServer.UpdateConvar("sv_human_autojoin_team", Match.Contract.Team.Spectator);
+            _CsServer.UpdateConvar("sv_disable_teamselect_menu", false);
+            _CsServer.UpdateConvar("sv_human_autojoin_team", (int)Match.Contract.Team.None);
         }
         else
         {
-            _CsServer.UpdateConvar("sv_disable_teamselect_menu", value: true);
-            _CsServer.UpdateConvar("sv_human_autojoin_team", Match.Contract.Team.Terrorist);
+            _CsServer.UpdateConvar("sv_disable_teamselect_menu", true);
+            _CsServer.UpdateConvar("sv_human_autojoin_team", (int)Match.Contract.Team.Terrorist);
         }
 
         _Logger.LogInformation("Set match variables done");

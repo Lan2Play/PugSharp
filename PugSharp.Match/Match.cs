@@ -649,7 +649,7 @@ public class Match : IDisposable
 
     private void ReadyReminderTimer_Elapsed(object? sender, System.Timers.ElapsedEventArgs e)
     {
-        if (!_ReadyReminderTimer.Enabled)
+        if (MatchInfo.Config.TeamMode != Config.TeamMode.PlayerSelect && !_ReadyReminderTimer.Enabled)
         {
             return;
         }
@@ -658,6 +658,20 @@ public class Match : IDisposable
         {
             try
             {
+                if (MatchInfo.Config.TeamMode == Config.TeamMode.PlayerSelect)
+                {
+                    _Logger.LogInformation("TeamReminder Elapsed");
+                    foreach (var player in AllMatchPlayers)
+                    {
+                        var matchTeam = GetMatchTeam(player.Player.Team);
+                        if (player.Player.Team == Team.Terrorist || player.Player.Team == Team.CounterTerrorist)
+                        {
+                            var teamMessage = _TextHelper.GetText(nameof(Resources.PugSharp_Match_TeamReminder), matchTeam?.TeamConfig.Name);
+                            player.Player.PrintToChat(teamMessage);
+                        }
+                    }
+                }
+
                 _Logger.LogInformation("ReadyReminder Elapsed");
                 var readyPlayerIds = AllMatchPlayers.Where(p => p.IsReady).Select(x => x.Player.SteamID).ToList();
                 var notReadyPlayers = _CsServer.LoadAllPlayers().Where(p => !readyPlayerIds.Contains(p.SteamID));
@@ -665,13 +679,6 @@ public class Match : IDisposable
 
                 foreach (var player in notReadyPlayers)
                 {
-                    if (MatchInfo.Config.TeamMode == Config.TeamMode.PlayerSelect)
-                    {
-                        var matchTeam = GetMatchTeam(player.Team);
-                        var teamMessage = _TextHelper.GetText(nameof(Resources.PugSharp_Match_TeamReminder), matchTeam?.TeamConfig.Name);
-                        player.PrintToChat(teamMessage);
-                    }
-
                     player.PrintToChat(remindMessage);
                 }
             }
@@ -1102,6 +1109,12 @@ public class Match : IDisposable
         }
 
         var matchPlayer = GetMatchPlayer(player.SteamID);
+        if (matchPlayer.Player.Team != Team.Terrorist && matchPlayer.Player.Team != Team.CounterTerrorist)
+        {
+            player.PrintToChat(_TextHelper.GetText(nameof(Resources.PugSharp_Match_Error_NoReadyExpected)));
+            return;
+        }
+
         matchPlayer.IsReady = !matchPlayer.IsReady;
 
         var readyPlayers = MatchInfo.MatchTeam1.Players.Count(x => x.IsReady) + MatchInfo.MatchTeam2.Players.Count(x => x.IsReady);
