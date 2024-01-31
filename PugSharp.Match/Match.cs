@@ -680,8 +680,8 @@ public class Match : IDisposable
                 _Logger.LogInformation("ReadyReminder Elapsed");
                 var readyPlayerIds = AllMatchPlayers.Where(p => p.IsReady).Select(x => x.Player.SteamID).ToList();
                 var notReadyPlayers = _CsServer.LoadAllPlayers().Where(p => !readyPlayerIds.Contains(p.SteamID));
-                var remindMessage = _TextHelper.GetText(nameof(Resources.PugSharp_Match_RemindReady));
 
+                var remindMessage = _TextHelper.GetText(nameof(Resources.PugSharp_Match_RemindReady));
                 foreach (var player in notReadyPlayers)
                 {
                     player.PrintToChat(remindMessage);
