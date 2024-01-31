@@ -338,12 +338,12 @@ public class Application : IApplication
             if (_Match.CurrentState is MatchState.WaitingForPlayersConnectedReady or MatchState.WaitingForPlayersReady)
             {
                 _CsServer.LoadAndExecuteConfig("warmup.cfg");
-            }
 
-            _Dispatcher.NextFrame(() =>
-            {
-                SetMatchVariable();
-            });
+                _Dispatcher.NextFrame(() =>
+                {
+                    SetMatchVariable();
+                });
+            }
         }
     }
 
