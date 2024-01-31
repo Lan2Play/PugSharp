@@ -263,6 +263,18 @@ public class Application : IApplication
 
         if (_Match.CurrentState == MatchState.WaitingForPlayersConnectedReady || _Match.CurrentState == MatchState.WaitingForPlayersReady)
         {
+            // Do not enforce locked teams during warmup for TeamMode: PlayerSelect
+            if (_Match.MatchInfo.Config.TeamMode == TeamMode.PlayerSelect)
+            {
+                // If player is already on team, make sure the match teams are updated
+                if (_Match.PlayerIsReady(playerController.SteamID))
+                {
+                    _Match.TryAddPlayer(new Player(playerController.SteamID));
+                }
+
+                return;
+            }
+
             var configTeam = _Match.GetPlayerTeam(playerController.SteamID);
             var steamId = playerController.SteamID;
             var userName = playerController.PlayerName;
@@ -1880,7 +1892,6 @@ public class Application : IApplication
                 {
                     try
                     {
-
                         if (!Utilities.GetPlayers().Exists(x => !x.IsBot && !x.IsHLTV))
                         {
                             _CsServer.LoadAndExecuteConfig("warmup.cfg");
@@ -1955,6 +1966,18 @@ public class Application : IApplication
         // Set T Site Names
         _CsServer.ExecuteCommand($"mp_teamname_2 {tTeam.TeamConfig.Name}");
         _CsServer.ExecuteCommand($"mp_teamflag_2 {tTeam.TeamConfig.Flag}");
+
+        // Allow players to select their team
+        if (_Match.MatchInfo.Config.TeamMode == TeamMode.PlayerSelect)
+        {
+            _CsServer.UpdateConvar("sv_disable_teamselect_menu", value: false);
+            _CsServer.UpdateConvar("sv_human_autojoin_team", Match.Contract.Team.Spectator);
+        }
+        else
+        {
+            _CsServer.UpdateConvar("sv_disable_teamselect_menu", value: true);
+            _CsServer.UpdateConvar("sv_human_autojoin_team", Match.Contract.Team.Terrorist);
+        }
 
         _Logger.LogInformation("Set match variables done");
     }

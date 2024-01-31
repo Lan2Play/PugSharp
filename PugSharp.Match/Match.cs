@@ -209,7 +209,7 @@ public class Match : IDisposable
 
     private void ContinueIfDefault()
     {
-        if (MatchInfo.Config.TeamMode == Config.TeamMode.Default)
+        if (MatchInfo.Config.TeamMode == Config.TeamMode.Default || MatchInfo.Config.TeamMode == Config.TeamMode.PlayerSelect)
         {
             TryFireState(MatchCommand.TeamsDefined);
         }
@@ -661,10 +661,17 @@ public class Match : IDisposable
                 _Logger.LogInformation("ReadyReminder Elapsed");
                 var readyPlayerIds = AllMatchPlayers.Where(p => p.IsReady).Select(x => x.Player.SteamID).ToList();
                 var notReadyPlayers = _CsServer.LoadAllPlayers().Where(p => !readyPlayerIds.Contains(p.SteamID));
-
                 var remindMessage = _TextHelper.GetText(nameof(Resources.PugSharp_Match_RemindReady));
+
                 foreach (var player in notReadyPlayers)
                 {
+                    if (MatchInfo.Config.TeamMode == Config.TeamMode.PlayerSelect)
+                    {
+                        var matchTeam = GetMatchTeam(player.Team);
+                        var teamMessage = _TextHelper.GetText(nameof(Resources.PugSharp_Match_TeamReminder), matchTeam?.TeamConfig.Name);
+                        player.PrintToChat(teamMessage);
+                    }
+
                     player.PrintToChat(remindMessage);
                 }
             }
@@ -937,7 +944,60 @@ public class Match : IDisposable
         return AllMatchPlayers.First(x => x.Player.SteamID == steamID);
     }
 
+    public bool PlayerIsReady(ulong steamID)
+    {
+        var matchPlayer = AllMatchPlayers.FirstOrDefault(x => x.Player.SteamID == steamID);
+        return matchPlayer != null && matchPlayer.IsReady;
+    }
+
     #region Match Functions
+
+    private bool TryAddPlayerToCurrentTeam(IPlayer player)
+    {
+        var matchPlayer = MatchInfo.MatchTeam1.Players.Any(x => x.Player.SteamID == player.SteamID) || MatchInfo.MatchTeam2.Players.Any(x => x.Player.SteamID == player.SteamID) ? GetMatchPlayer(player.SteamID) : null;
+        if (matchPlayer == null) {
+            matchPlayer = new MatchPlayer(player);
+        }
+        else {
+            // Remove the player from the match
+            MatchInfo.MatchTeam1.Players.Remove(matchPlayer);
+            MatchInfo.MatchTeam2.Players.Remove(matchPlayer);
+        }
+
+        // Add them back to the match
+        bool? isTeam1 = null;
+        if (MatchInfo.MatchTeam1.CurrentTeamSite == Team.None && MatchInfo.MatchTeam2.CurrentTeamSite == Team.None)
+        {
+            isTeam1 = player.Team == Team.Terrorist;
+        }
+        else if (MatchInfo.MatchTeam1.CurrentTeamSite != Team.None)
+        {
+            isTeam1 = MatchInfo.MatchTeam1.CurrentTeamSite == player.Team;
+        }
+        else if (MatchInfo.MatchTeam2.CurrentTeamSite != Team.None)
+        {
+            isTeam1 = MatchInfo.MatchTeam2.CurrentTeamSite != player.Team;
+        }
+
+        if (isTeam1 == null)
+        {
+            _Logger.LogInformation("Could not add player to match", player.SteamID);
+            return false;
+        }
+        else if (isTeam1.HasValue && isTeam1.Value)
+        {
+            MatchInfo.MatchTeam1.Players.Add(matchPlayer);
+        }
+        else
+        {
+            MatchInfo.MatchTeam2.Players.Add(matchPlayer);
+        }
+
+        // Console.WriteLine("Team 1: " + string.Join(',', MatchInfo.MatchTeam1.Players.Select(p => $"{p.Player.PlayerName}").ToList()));
+        // Console.WriteLine("Team 2: " + string.Join(',', MatchInfo.MatchTeam2.Players.Select(p => $"{p.Player.PlayerName}").ToList()));
+
+        return true;
+    }
 
     public bool TryAddPlayer(IPlayer player)
     {
@@ -945,6 +1005,12 @@ public class Match : IDisposable
         {
             _Logger.LogInformation("Player with steam id {steamId} is no member of this match!", player.SteamID);
             return false;
+        }
+
+        if (MatchInfo.Config.TeamMode == Config.TeamMode.PlayerSelect)
+        {
+            // Quicker to just remove them and add them back, rather than check whether they are already in the match
+            return TryAddPlayerToCurrentTeam(player);
         }
 
         if (MatchInfo.MatchTeam1.Players.Any(x => x.Player.SteamID == player.SteamID)

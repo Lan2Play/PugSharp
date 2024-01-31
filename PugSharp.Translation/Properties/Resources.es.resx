@@ -64,6 +64,9 @@
   <data name="PugSharp.Match.VoteTeamMenuHeader" xml:space="preserve">
     <value>Elige bando inicial:</value>
   </data>
+  <data name="PugSharp_Match_VoteConfirmTeamHeader" xml:space="preserve">
+    <value>Elige el equipo correcto:</value>
+  </data>
   <data name="PugSharp.Match.VoteMapMenuHeader" xml:space="preserve">
     <value>Votación para banear mapa: escribe `!&lt;mapnumber&gt;`</value>
   </data>
@@ -87,6 +90,9 @@
   </data>
   <data name="PugSharp.Match.Info.WaitingForAllPlayers" xml:space="preserve">
     <value>Esperando a que todos los jugadores estén preparados.</value>
+  </data>
+  <data name="PugSharp.Match.TeamReminder" xml:space="preserve">
+    <value>Actualmente estás en el equipo: **{0:teamName}**.</value>
   </data>
   <data name="PugSharp.Match.Info.IsLive" xml:space="preserve">
     <value>La partida está **EN VIVO**</value>
