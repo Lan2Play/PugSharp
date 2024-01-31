@@ -1251,7 +1251,6 @@ public class Match : IDisposable
         MatchInfo.CurrentMap.Winner = winnerTeam;
 
         var configWinnerTeam = GetConfigTeam(winnerTeam.Players[0].Player.SteamID);
-        // TODO: if (configWinnerTeam == Team.CounterTerrorist)
         if (configWinnerTeam == Team.Terrorist)
         {
             // Team 1 won
