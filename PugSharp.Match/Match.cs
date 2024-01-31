@@ -672,6 +672,11 @@ public class Match : IDisposable
                     }
                 }
 
+                if (!_ReadyReminderTimer.Enabled)
+                {
+                    return;
+                }
+
                 _Logger.LogInformation("ReadyReminder Elapsed");
                 var readyPlayerIds = AllMatchPlayers.Where(p => p.IsReady).Select(x => x.Player.SteamID).ToList();
                 var notReadyPlayers = _CsServer.LoadAllPlayers().Where(p => !readyPlayerIds.Contains(p.SteamID));
