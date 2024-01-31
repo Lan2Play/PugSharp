@@ -1897,7 +1897,7 @@ public class Application : IApplication
                 {
                     try
                     {
-                        
+
                         if (!Utilities.GetPlayers().Exists(x => !x.IsBot && !x.IsHLTV))
                         {
                             _CsServer.LoadAndExecuteConfig("warmup.cfg");
