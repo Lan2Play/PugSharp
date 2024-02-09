@@ -124,6 +124,7 @@ public class Match : IDisposable
         _MatchStateMachine.Configure(MatchState.DefineTeams)
             .Permit(MatchCommand.TeamsDefined, MatchState.MapVote)
             .OnEntry(ContinueIfDefault)
+            .OnEntry(ContinueIfPlayerSelect)
             .OnEntry(ScrambleTeams);
 
         _MatchStateMachine.Configure(MatchState.MapVote)
@@ -209,7 +210,15 @@ public class Match : IDisposable
 
     private void ContinueIfDefault()
     {
-        if (MatchInfo.Config.TeamMode == Config.TeamMode.Default || MatchInfo.Config.TeamMode == Config.TeamMode.PlayerSelect)
+        if (MatchInfo.Config.TeamMode == Config.TeamMode.Default)
+        {
+            TryFireState(MatchCommand.TeamsDefined);
+        }
+    }
+
+    private void ContinueIfPlayerSelect()
+    {
+        if (MatchInfo.Config.TeamMode == Config.TeamMode.PlayerSelect)
         {
             TryFireState(MatchCommand.TeamsDefined);
         }
