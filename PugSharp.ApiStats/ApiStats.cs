@@ -1,6 +1,6 @@
 ﻿using System.Globalization;
+using System.Web;
 
-using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.Extensions.Logging;
 
 using PugSharp.Api.Contract;
@@ -42,7 +42,7 @@ public class ApiStats : BaseApi, IApiProvider
                 {ApiStatsConstants.StatsMapName, goingLiveParams.MapName},
             };
 
-            var uri = QueryHelpers.AddQueryString(string.Create(CultureInfo.InvariantCulture, $"golive/{goingLiveParams.MapNumber}"), queryParams);
+            var uri = AppendQuery(string.Create(CultureInfo.InvariantCulture, $"golive/{goingLiveParams.MapNumber}"), queryParams);
 
             var response = await HttpClient.PostAsync(uri, content: null, cancellationToken).ConfigureAwait(false);
 
@@ -69,7 +69,7 @@ public class ApiStats : BaseApi, IApiProvider
                 {"team2score", CreateIntParam(roundStatusUpdateParams.CurrentMap.Team2.Score)},
             };
 
-            var uri = QueryHelpers.AddQueryString(string.Create(CultureInfo.InvariantCulture, $"updateround/{roundStatusUpdateParams.MapNumber}"), queryParams);
+            var uri = AppendQuery(string.Create(CultureInfo.InvariantCulture, $"updateround/{roundStatusUpdateParams.MapNumber}"), queryParams);
 
             var response = await HttpClient.PostAsync(uri, content: null, cancellationToken).ConfigureAwait(false);
 
@@ -105,7 +105,7 @@ public class ApiStats : BaseApi, IApiProvider
                 {ApiStatsConstants.StatsMapWinner, finalizeMapParams.WinnerTeamName},
             };
 
-            var uri = QueryHelpers.AddQueryString(string.Create(CultureInfo.InvariantCulture, $"finalize/{finalizeMapParams.MapNumber}"), queryParams);
+            var uri = AppendQuery(string.Create(CultureInfo.InvariantCulture, $"finalize/{finalizeMapParams.MapNumber}"), queryParams);
 
             var response = await HttpClient.PostAsync(uri, content: null, cancellationToken).ConfigureAwait(false);
 
@@ -130,7 +130,7 @@ public class ApiStats : BaseApi, IApiProvider
             {ApiStatsConstants.StatsSeriesForfeit, CreateIntParam(Convert.ToInt32(seriesResultParams.Forfeit))},
         };
 
-        var uri = QueryHelpers.AddQueryString($"finalize", queryParams);
+        var uri = AppendQuery(string.Create(CultureInfo.InvariantCulture, $"finalize"), queryParams);
 
         var response = await HttpClient.PostAsync(uri, content: null, cancellationToken).ConfigureAwait(false);
 
@@ -179,7 +179,7 @@ public class ApiStats : BaseApi, IApiProvider
 
                 Dictionary<string, string> queryParams = CreateUpdatePlayerQueryParameters(teamName, playerStatistics);
 
-                var uri = QueryHelpers.AddQueryString(string.Create(CultureInfo.InvariantCulture, $"updateplayer/{mapNumber}/{player.Key}"), queryParams);
+                var uri = AppendQuery(string.Create(CultureInfo.InvariantCulture, $"updateplayer/{mapNumber}/{player.Key}"), queryParams);
 
                 var response = await HttpClient.PostAsync(uri, content: null, cancellationToken).ConfigureAwait(false);
 
@@ -233,6 +233,17 @@ public class ApiStats : BaseApi, IApiProvider
     internal static string CreateIntParam(int param)
     {
         return param.ToString(CultureInfo.InvariantCulture);
+    }
+
+    internal static string AppendQuery(string baseUri, Dictionary<string, string> queryParams)
+    {
+        var query = HttpUtility.ParseQueryString(string.Empty);
+        foreach (var dict in queryParams)
+        {
+            query[dict.Key] = dict.Value;
+        }
+
+        return string.Join("?", baseUri.TrimEnd('/').TrimEnd('?'), query.ToString());
     }
 
     private static class ApiStatsConstants

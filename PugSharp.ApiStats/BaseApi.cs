@@ -1,5 +1,6 @@
-﻿using Microsoft.Extensions.Logging;
-using Microsoft.Net.Http.Headers;
+﻿using System.Net;
+
+using Microsoft.Extensions.Logging;
 
 namespace PugSharp.ApiStats;
 
@@ -33,11 +34,11 @@ public class BaseApi
 
             HttpClient.BaseAddress = new Uri(baseUrl);
 
-            HttpClient.DefaultRequestHeaders.Remove(HeaderNames.Authorization);
+            HttpClient.DefaultRequestHeaders.Remove(HttpRequestHeader.Authorization.ToString());
 
             if (!string.IsNullOrEmpty(authKey))
             {
-                HttpClient.DefaultRequestHeaders.Add(HeaderNames.Authorization, authKey);
+                HttpClient.DefaultRequestHeaders.Add(HttpRequestHeader.Authorization.ToString(), authKey);
             }
         }
         catch (Exception ex)

@@ -7,20 +7,14 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-
-		<PackageReference Include="CounterStrikeSharp.API" Version="1.0.153">
+		<PackageReference Include="CounterStrikeSharp.API" Version="1.0.169">
 			<PrivateAssets>none</PrivateAssets>
 			<ExcludeAssets>runtime</ExcludeAssets>
 			<IncludeAssets>compile; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
 		</PackageReference>
-
-		<PackageReference Include="Microsoft.Extensions.Http.Polly" Version="7.0.14" />
-
+		<PackageReference Include="Microsoft.Extensions.Http.Polly" Version="7.0.16" />
 		<PackageReference Include="OneOf" Version="3.0.263" />
 		<PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="7.0.0" />
-		<!--<PackageReference Include="Microsoft.Extensions.Logging" Version="8.0.0" />
-		<PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="8.0.0" />-->
-
 	</ItemGroup>
 
 	<ItemGroup>
@@ -31,12 +25,4 @@
 		<ProjectReference Include="..\PugSharp.Shared\PugSharp.Shared.csproj" />
 		<ProjectReference Include="..\PugSharp.Translation\PugSharp.Translation.csproj" />
 	</ItemGroup>
-
-	<ItemGroup>
-		<PackageReference Update="Meziantou.Analyzer" Version="2.0.136">
-			<PrivateAssets>all</PrivateAssets>
-			<IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
-		</PackageReference>
-	</ItemGroup>
-
 </Project>
