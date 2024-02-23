@@ -14,9 +14,9 @@ public class MatchTeam
     [JsonIgnore]
     public IList<MatchPlayer> Players { get; } = new List<MatchPlayer>();
 
-    public Team StartingTeamSite { get; set; }
+    public Team StartingTeamSide { get; set; }
 
-    public Team CurrentTeamSite { get; set; }
+    public Team CurrentTeamSide { get; set; }
 
     public Config.Team TeamConfig { get; }
 
@@ -32,8 +32,8 @@ public class MatchTeam
         }
     }
 
-    internal void ToggleTeamSite()
+    internal void ToggleTeamSide()
     {
-        CurrentTeamSite = CurrentTeamSite == Team.Terrorist ? Team.CounterTerrorist : Team.Terrorist;
+        CurrentTeamSide = CurrentTeamSide == Team.Terrorist ? Team.CounterTerrorist : Team.Terrorist;
     }
 }
