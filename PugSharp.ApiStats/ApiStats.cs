@@ -243,7 +243,7 @@ public class ApiStats : BaseApi, IApiProvider
             query[dict.Key] = dict.Value;
         }
 
-        return string.Join("?", baseUri.TrimEnd('/').TrimEnd('?'), query.ToString());
+        return string.Join('?', baseUri.TrimEnd('/').TrimEnd('?'), query.ToString());
     }
 
     private static class ApiStatsConstants

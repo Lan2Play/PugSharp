@@ -34,11 +34,11 @@ public class BaseApi
 
             HttpClient.BaseAddress = new Uri(baseUrl);
 
-            HttpClient.DefaultRequestHeaders.Remove(HttpRequestHeader.Authorization.ToString());
+            HttpClient.DefaultRequestHeaders.Remove(nameof(HttpRequestHeader.Authorization));
 
             if (!string.IsNullOrEmpty(authKey))
             {
-                HttpClient.DefaultRequestHeaders.Add(HttpRequestHeader.Authorization.ToString(), authKey);
+                HttpClient.DefaultRequestHeaders.Add(nameof(HttpRequestHeader.Authorization), authKey);
             }
         }
         catch (Exception ex)

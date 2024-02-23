@@ -72,7 +72,7 @@ public class ConfigProvider
 
             if (!string.IsNullOrEmpty(authToken))
             {
-                httpRequestMessage.Headers.Add(HttpRequestHeader.Authorization.ToString(), authToken);
+                httpRequestMessage.Headers.Add(nameof(HttpRequestHeader.Authorization), authToken);
             }
 
             var response = await _HttpClient.SendAsync(httpRequestMessage).ConfigureAwait(false);
