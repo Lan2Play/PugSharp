@@ -168,6 +168,9 @@
   <data name="PugSharp.Match.Error.UnknownMapNumber" xml:space="preserve">
     <value>Die Karte mit der Kartennummer **{0:mapNumber}** ist nicht verfügbar!</value>
   </data>
+  <data name="PugSharp.Match.TeamReminder" xml:space="preserve">
+    <value>Sie sind derzeit im Team: **{0:teamName}**.</value>
+  </data>
   <data name="PugSharp.Match.RemindReady" xml:space="preserve">
     <value>Du bist !!nicht!! bereit! Schreibe `!ready` in den chat wenn du bereit bist.</value>
   </data>
@@ -176,6 +179,9 @@
   </data>
   <data name="PugSharp.Match.VoteTeamMenuHeader" xml:space="preserve">
     <value>Wähle die Startseite (`!stay` oder`!switch`)</value>
+  </data>
+  <data name="PugSharp_Match_VoteConfirmTeamHeader" xml:space="preserve">
+    <value>Wählen Sie das richtige Team:</value>
   </data>
   <data name="PugSharp.Match.VoteMapMenuHeader" xml:space="preserve">
     <value>Stimme ab um eine Karte zu bannen: schreibe `!&lt;Kartennummer&gt;` in den Chat</value>

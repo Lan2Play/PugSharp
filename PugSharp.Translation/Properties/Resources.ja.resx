@@ -67,6 +67,9 @@
   <data name="PugSharp.Command.ChangedMaxRounds" xml:space="preserve">
     <value>最大ラウンド数を{0:oldMaxRounds}から{1:maxRounds}に変更</value>
   </data>
+  <data name="PugSharp.Match.TeamReminder" xml:space="preserve">
+    <value>あなたは現在次のチームに所属しています: **{0:teamName}**.</value>
+  </data>
   <data name="PugSharp.Command.CreatingMatchStartMatch" xml:space="preserve">
     <value>`!startmatch`で試合を開始できます！</value>
   </data>

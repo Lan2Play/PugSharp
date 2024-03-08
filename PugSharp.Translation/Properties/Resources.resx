@@ -297,6 +297,9 @@
   <data name="PugSharp.Match.Info.WaitingForAllPlayers" xml:space="preserve">
     <value>Waiting for all players to be ready.</value>
   </data>
+  <data name="PugSharp.Match.TeamReminder" xml:space="preserve">
+    <value>You are currently on Team: **{0:teamName}**.</value>
+  </data>
   <data name="PugSharp.Match.RemindReady" xml:space="preserve">
     <value>You are !!not!! ready! Type `!ready` if you are ready.</value>
   </data>
@@ -314,6 +317,9 @@
   </data>
   <data name="PugSharp.Match.VoteTeamMenuHeader" xml:space="preserve">
     <value>Choose starting side (`!stay` or `!switch`)</value>
+  </data>
+  <data name="PugSharp.Match.VoteConfirmTeamHeader" xml:space="preserve">
+    <value>Escolha a equipe correta:</value>
   </data>
   <data name="PugSharp.Match.WaitForOtherTeam" xml:space="preserve">
     <value>Waiting for other Team to vote!</value>

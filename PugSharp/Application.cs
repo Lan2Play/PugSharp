@@ -263,6 +263,18 @@ public class Application : IApplication
 
         if (_Match.CurrentState == MatchState.WaitingForPlayersConnectedReady || _Match.CurrentState == MatchState.WaitingForPlayersReady)
         {
+            // Do not enforce locked teams during warmup for TeamMode: PlayerSelect
+            if (_Match.MatchInfo.Config.TeamMode == TeamMode.PlayerSelect)
+            {
+                // If player is already on team, make sure the match teams are updated
+                if (_Match.PlayerIsReady(playerController.SteamID) && (team == (int)Match.Contract.Team.Terrorist || team == (int)Match.Contract.Team.CounterTerrorist))
+                {
+                    _Match.TryAddPlayer(new Player(playerController.SteamID));
+                }
+
+                return;
+            }
+
             var configTeam = _Match.GetPlayerTeam(playerController.SteamID);
             var steamId = playerController.SteamID;
             var userName = playerController.PlayerName;
@@ -323,10 +335,15 @@ public class Application : IApplication
     {
         if (_Match != null)
         {
-            _Dispatcher.NextFrame(() =>
+            if (_Match.CurrentState is MatchState.WaitingForPlayersConnectedReady or MatchState.WaitingForPlayersReady)
             {
-                SetMatchVariable();
-            });
+                _CsServer.LoadAndExecuteConfig("warmup.cfg");
+
+                _Dispatcher.NextFrame(() =>
+                {
+                    SetMatchVariable();
+                });
+            }
         }
     }
 
@@ -1955,6 +1972,18 @@ public class Application : IApplication
         // Set T Site Names
         _CsServer.ExecuteCommand($"mp_teamname_2 {tTeam.TeamConfig.Name}");
         _CsServer.ExecuteCommand($"mp_teamflag_2 {tTeam.TeamConfig.Flag}");
+
+        // Allow players to select their team
+        if (_Match.MatchInfo.Config.TeamMode == TeamMode.PlayerSelect)
+        {
+            _CsServer.UpdateConvar("sv_disable_teamselect_menu", false);
+            _CsServer.UpdateConvar("sv_human_autojoin_team", (int)Match.Contract.Team.None);
+        }
+        else
+        {
+            _CsServer.UpdateConvar("sv_disable_teamselect_menu", true);
+            _CsServer.UpdateConvar("sv_human_autojoin_team", (int)Match.Contract.Team.Terrorist);
+        }
 
         _Logger.LogInformation("Set match variables done");
     }
