@@ -1,7 +1,7 @@
-﻿using System.Text.Json;
+﻿using System.Net;
+using System.Text.Json;
 
 using Microsoft.Extensions.Logging;
-using Microsoft.Net.Http.Headers;
 
 using OneOf;
 using OneOf.Types;
@@ -72,7 +72,7 @@ public class ConfigProvider
 
             if (!string.IsNullOrEmpty(authToken))
             {
-                httpRequestMessage.Headers.Add(HeaderNames.Authorization, authToken);
+                httpRequestMessage.Headers.Add(nameof(HttpRequestHeader.Authorization), authToken);
             }
 
             var response = await _HttpClient.SendAsync(httpRequestMessage).ConfigureAwait(false);

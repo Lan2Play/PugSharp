@@ -151,7 +151,7 @@ jobs:
         run: sed -i "s|%%CS2VERSION%%|1.39.6.5/13965 9842|g" ./release.json;
       - name: replace METAMODVERSION variable in meta files
         run: sed -i "s|%%METAMODVERSION%%|2.0 - 1256|g" ./release.json;
-      - name: upload artefact
+      - name: upload artifact
         if: github.event_name != 'pull_request'
         uses: actions/upload-artifact@v4
         with:
@@ -220,7 +220,7 @@ jobs:
       - name: move package
         run: mv PugSharp_with_cssharp_and_runtime_linux_$PUGSHARPNETVER.zip ../
         working-directory: ./packagebuild
-      - name: upload artefact
+      - name: upload artifact
         if: github.event_name != 'pull_request'
         uses: actions/upload-artifact@v4
         with:
@@ -228,7 +228,7 @@ jobs:
           path: |
             ./PugSharp_linux_*.zip
           retention-days: 10
-      - name: upload artefact
+      - name: upload artifact
         if: github.event_name != 'pull_request'
         uses: actions/upload-artifact@v4
         with:
@@ -236,7 +236,7 @@ jobs:
           path: |
             ./PugSharp_with_cssharp_linux_*.zip
           retention-days: 10
-      - name: upload artefact
+      - name: upload artifact
         if: github.event_name != 'pull_request'
         uses: actions/upload-artifact@v4
         with:
@@ -318,7 +318,7 @@ jobs:
         shell: bash
         run: mv PugSharp_with_cssharp_and_runtime_windows_$PUGSHARPNETVER.zip ../
         working-directory: ./packagebuild
-      - name: upload artefact
+      - name: upload artifact
         if: github.event_name != 'pull_request'
         uses: actions/upload-artifact@v4
         with:
@@ -326,7 +326,7 @@ jobs:
           path: |
             ./PugSharp_windows_*.zip
           retention-days: 10
-      - name: upload artefact
+      - name: upload artifact
         if: github.event_name != 'pull_request'
         uses: actions/upload-artifact@v4
         with:
@@ -334,7 +334,7 @@ jobs:
           path: |
             ./PugSharp_with_cssharp_windows_*.zip
           retention-days: 10
-      - name: upload artefact
+      - name: upload artifact
         if: github.event_name != 'pull_request'
         uses: actions/upload-artifact@v4
         with:
