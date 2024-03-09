@@ -65,7 +65,7 @@
     <value>Matchconfig配置文件加载完成!</value>
   </data>
   <data name="PugSharp.Command.CreatingMatchAddMap" xml:space="preserve">
-    <value>`使用 !addmap &lt;地图名称&gt; 添加地图!</value>
+    <value>使用 `!addmap &lt;地图名称&gt;` 添加地图!</value>
   </data>
   <data name="PugSharp.Command.CreatingMatchMatchInfo" xml:space="preserve">
     <value>使用 `!matchinfo` 展示当前比赛配置!</value>
