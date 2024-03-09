@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <root>
-  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+  <xsd:schema xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata" id="root">
     <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
     <xsd:element name="root" msdata:IsDataSet="true">
       <xsd:complexType>
@@ -58,4 +58,73 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
+  <data name="PugSharp.Command.ChangedTeamMode" xml:space="preserve">
+    <value>将队伍模式由 {0:oldTeamMode} 修改至 {1:newTeamMode}</value>
+  </data>
+  <data name="PugSharp.Command.ConfigLoaded" xml:space="preserve">
+    <value>Matchconfig配置文件加载完成!</value>
+  </data>
+  <data name="PugSharp.Command.CreatingMatchAddMap" xml:space="preserve">
+    <value>`使用 !addmap &lt;地图名称&gt; 添加地图!</value>
+  </data>
+  <data name="PugSharp.Command.CreatingMatchMatchInfo" xml:space="preserve">
+    <value>使用 `!matchinfo` 展示当前比赛配置!</value>
+  </data>
+  <data name="PugSharp.Command.CreatingMatchMaxRounds" xml:space="preserve">
+    <value>使用 `!maxrounds &lt;rounds&gt;` 设置最大回合数!</value>
+  </data>
+  <data name="PugSharp.Command.CreatingMatchPlayersPerTeam" xml:space="preserve">
+    <value>使用 `!playersperteam &lt;玩家数量&gt;` 设置每支队伍的最大玩家数量!</value>
+  </data>
+  <data name="PugSharp.Command.CreatingMatchRemoveMap" xml:space="preserve">
+    <value>使用 `!removemap &lt;地图名称&gt;` 删除地图!</value>
+  </data>
+  <data name="PugSharp.Command.CreatingMatchStarted" xml:space="preserve">
+    <value>成功创建比赛!</value>
+  </data>
+  <data name="PugSharp.Command.CreatingMatchStartMatch" xml:space="preserve">
+    <value>使用 `!startmatch` 开始比赛!</value>
+  </data>
+  <data name="PugSharp.Command.CreatingMatchTeamMode" xml:space="preserve">
+    <value>使用 `!teammode &lt;模式&gt;` 设置队伍模式!</value>
+  </data>
+  <data name="PugSharp.Command.Error.CsgoDirNotFound" xml:space="preserve">
+    <value>没有找到Csgo游戏目录!</value>
+  </data>
+  <data name="PugSharp.Command.Error.FileNameRequired" xml:space="preserve">
+    <value>需要FileName作为参数!</value>
+  </data>
+  <data name="PugSharp.Command.Error.LoadingConfig" xml:space="preserve">
+    <value>无法加载config文件. 错误: {0:error.Value}</value>
+  </data>
+  <data name="PugSharp.Command.Error.MapNameRequired" xml:space="preserve">
+    <value>需要地图名称!</value>
+  </data>
+  <data name="PugSharp.Command.Error.MapNotRemoved" xml:space="preserve">
+    <value>无法删除 **{0:mapName}**. 当前地图为 {1:maps}</value>
+  </data>
+  <data name="PugSharp.Command.Error.MatchIdRequired" xml:space="preserve">
+    <value>MatchId必须作为参数!</value>
+  </data>
+  <data name="PugSharp.Command.Error.MatchInfoFileNotFound" xml:space="preserve">
+    <value>找不到 "{matchInfoFileName}" MatchInfo文件!</value>
+  </data>
+  <data name="PugSharp.Command.Error.MatchRunning" xml:space="preserve">
+    <value>当前正在进行比赛 {0:match} . 取消比赛请使用 `{1:stopCommand}`!</value>
+  </data>
+  <data name="PugSharp.Command.ChangedMaxOvertimeRounds" xml:space="preserve">
+    <value>将最大加时赛回合数由 {0:oldMaxRounds} 修改至 {1:maxOvertimeRounds}</value>
+  </data>
+  <data name="PugSharp.Command.ChangedMaxRounds" xml:space="preserve">
+    <value>将最大回合数由 {0:oldMaxRounds} 修改至 {1:maxRounds}</value>
+  </data>
+  <data name="PugSharp.Command.CreatingMatchMaxOvertimeRounds" xml:space="preserve">
+    <value>使用 `!maxovertimerounds &lt;回合数&gt;` 设置最大加时赛回合数!</value>
+  </data>
+  <data name="PugSharp.Command.Error.ArgumentRoundIndexNotNumeric" xml:space="preserve">
+    <value>round index的参数必须为数字.</value>
+  </data>
+  <data name="PugSharp.Command.Error.MatchInfoFileCouldNotBeLoaded" xml:space="preserve">
+    <value>无法加载 "{matchInfoFileName}" MatchInfo文件!</value>
+  </data>
 </root>
