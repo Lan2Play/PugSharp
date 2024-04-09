@@ -64,9 +64,6 @@
   <data name="PugSharp.Match.VoteTeamMenuHeader" xml:space="preserve">
     <value>Elige bando inicial:</value>
   </data>
-  <data name="PugSharp_Match_VoteConfirmTeamHeader" xml:space="preserve">
-    <value>Elige el equipo correcto:</value>
-  </data>
   <data name="PugSharp.Match.VoteMapMenuHeader" xml:space="preserve">
     <value>Votación para banear mapa: escribe `!&lt;mapnumber&gt;`</value>
   </data>
