@@ -70,6 +70,9 @@
   <data name="PugSharp.Command.ConfigLoaded" xml:space="preserve">
     <value>Kampconfig loadet!</value>
   </data>
+  <data name="PugSharp.Match.TeamReminder" xml:space="preserve">
+    <value>Je zit momenteel in Team: **{0:teamName}**.</value>
+  </data>
   <data name="PugSharp.Command.CreatingMatchPlayersPerTeam" xml:space="preserve">
     <value>`!spillereperteam &lt;players&gt;` for at sætte antal spillere per hold!</value>
   </data>

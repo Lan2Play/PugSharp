@@ -7,4 +7,7 @@ public enum TeamMode
 
     // Scramble Teams after all players are joined
     Scramble,
+
+    // Player Selects which Team to join
+    PlayerSelect
 }
