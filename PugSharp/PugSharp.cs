@@ -48,7 +48,7 @@ public class PugSharp : BasePlugin, IBasePlugin
 
         services.AddLogging(options =>
         {
-            //options.AddConsole();
+            options.AddConsole();
         });
 
         var serviceDescriptor = services.FirstOrDefault(descriptor => descriptor.ServiceType == typeof(ILoggerFactory));

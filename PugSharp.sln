@@ -39,6 +39,17 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PugSharp.Shared", "PugSharp
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PugSharp.Api.G5Api.Tests", "PugSharp.Api.G5Api.Tests\PugSharp.Api.G5Api.Tests.csproj", "{32CFE830-AF15-497C-806F-EE31F64D8F04}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".github", ".github", "{4026B00D-BC5D-4F42-B369-1703C8D7460A}"
+	ProjectSection(SolutionItems) = preProject
+		.github\dependabot.yml = .github\dependabot.yml
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "workflows", "workflows", "{600860EC-2A30-46DC-A197-B6709A158169}"
+	ProjectSection(SolutionItems) = preProject
+		.github\workflows\test_and_build.yml = .github\workflows\test_and_build.yml
+		.github\workflows\website_build.yml = .github\workflows\website_build.yml
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -104,6 +115,9 @@ Global
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{600860EC-2A30-46DC-A197-B6709A158169} = {4026B00D-BC5D-4F42-B369-1703C8D7460A}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {AD40617F-6B33-45B4-AF4D-1D5D0EA8F958}
