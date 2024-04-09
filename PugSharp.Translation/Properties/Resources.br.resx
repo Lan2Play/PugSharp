@@ -238,6 +238,9 @@
   <data name="PugSharp.Match.Info.WaitingForAllPlayers" xml:space="preserve">
     <value>Aguardando todos os jogadores estarem prontos.</value>
   </data>
+  <data name="PugSharp.Match.TeamReminder" xml:space="preserve">
+    <value>Você está atualmente na equipe: **{0:teamName}**.</value>
+  </data>
   <data name="PugSharp.Match.RemindReady" xml:space="preserve">
     <value>Você !!não!! está pronto!! Digite `!ready` se você está pronto.</value>
   </data>
@@ -255,6 +258,9 @@
   </data>
   <data name="PugSharp.Match.VoteTeamMenuHeader" xml:space="preserve">
     <value>Escolha o lado inicial com (`!stay` ou `!switch`)</value>
+  </data>
+  <data name="PugSharp_Match_VoteConfirmTeamHeader" xml:space="preserve">
+    <value>Escolha a equipe correta:</value>
   </data>
   <data name="PugSharp.Match.WaitForOtherTeam" xml:space="preserve">
     <value>Aguardando o voto da outra equipe!</value>

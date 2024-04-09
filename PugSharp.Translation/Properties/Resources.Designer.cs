@@ -601,6 +601,15 @@ namespace PugSharp.Translation.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to You are currently on the Team {0:teamName}.
+        /// </summary>
+        public static string PugSharp_Match_TeamReminder {
+            get {
+                return ResourceManager.GetString("PugSharp.Match.TeamReminder", resourceCulture);
+            }
+        }
+
+        /// <summary>
         ///   Looks up a localized string similar to You are !!not!! ready! Type `!ready` if you are ready..
         /// </summary>
         public static string PugSharp_Match_RemindReady {
@@ -608,7 +617,7 @@ namespace PugSharp.Translation.Properties {
                 return ResourceManager.GetString("PugSharp.Match.RemindReady", resourceCulture);
             }
         }
-        
+
         /// <summary>
         ///   Looks up a localized string similar to {0:teamName} selected {1:side} as startside!.
         /// </summary>
@@ -651,6 +660,15 @@ namespace PugSharp.Translation.Properties {
         public static string PugSharp_Match_VoteTeamMenuHeader {
             get {
                 return ResourceManager.GetString("PugSharp.Match.VoteTeamMenuHeader", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar Confirming Team
+        /// </summary>
+        public static string PugSharp_Match_VoteConfirmTeamHeader {
+            get {
+                return ResourceManager.GetString("PugSharp.Match.VoteConfirmTeamHeader", resourceCulture);
             }
         }
         
