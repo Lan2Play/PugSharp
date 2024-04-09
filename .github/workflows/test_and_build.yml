@@ -277,7 +277,7 @@ jobs:
         run: mkdir -p packagebuild/addons/counterstrikesharp/plugins/PugSharp
         shell: bash
       - name: copy package content
-        run: cp -rf PugSharp/bin/Debug/net8.0/publish/* packagebuild/addons/counterstrikesharp/plugins/PugSharp
+        run: cp -rf PugSharp/bin/Release/net8.0/publish/* packagebuild/addons/counterstrikesharp/plugins/PugSharp
         shell: bash
       - name: copy sample configs
         run: cp -rf resources/cfg packagebuild/cfg
