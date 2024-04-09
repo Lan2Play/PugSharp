@@ -1,20 +1,20 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
-		<TargetFramework>net7.0</TargetFramework>
+		<TargetFramework>net8.0</TargetFramework>
 		<ImplicitUsings>enable</ImplicitUsings>
 		<Nullable>enable</Nullable>
 	</PropertyGroup>
 
 	<ItemGroup>
-		<PackageReference Include="CounterStrikeSharp.API" Version="1.0.198">
+		<PackageReference Include="CounterStrikeSharp.API" Version="1.0.205">
 			<PrivateAssets>none</PrivateAssets>
 			<ExcludeAssets>runtime</ExcludeAssets>
 			<IncludeAssets>compile; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
 		</PackageReference>
-		<PackageReference Include="Microsoft.Extensions.Http.Polly" Version="7.0.16" />
+		<PackageReference Include="Microsoft.Extensions.Http.Polly" Version="8.0.3" />
 		<PackageReference Include="OneOf" Version="3.0.263" />
-		<PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="7.0.0" />
+		<PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="8.0.0" />
 	</ItemGroup>
 
 	<ItemGroup>

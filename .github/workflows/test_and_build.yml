@@ -36,7 +36,7 @@ jobs:
       - name: Setup .NET
         uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: 7.0
+          dotnet-version: 8.0
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
@@ -189,7 +189,7 @@ jobs:
       - name: prepare package structure
         run: mkdir -p packagebuild/addons/counterstrikesharp/plugins/PugSharp
       - name: copy package content
-        run: cp -rf PugSharp/bin/Debug/net7.0/publish/* packagebuild/addons/counterstrikesharp/plugins/PugSharp
+        run: cp -rf PugSharp/bin/Release/net8.0/publish/* packagebuild/addons/counterstrikesharp/plugins/PugSharp
       - name: copy sample configs
         run: cp -rf resources/cfg packagebuild/cfg
       - name: build package
@@ -277,7 +277,7 @@ jobs:
         run: mkdir -p packagebuild/addons/counterstrikesharp/plugins/PugSharp
         shell: bash
       - name: copy package content
-        run: cp -rf PugSharp/bin/Debug/net7.0/publish/* packagebuild/addons/counterstrikesharp/plugins/PugSharp
+        run: cp -rf PugSharp/bin/Release/net8.0/publish/* packagebuild/addons/counterstrikesharp/plugins/PugSharp
         shell: bash
       - name: copy sample configs
         run: cp -rf resources/cfg packagebuild/cfg
