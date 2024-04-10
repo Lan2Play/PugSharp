@@ -246,9 +246,12 @@ public class MatchTests
 
     private static IPlayer CreatePlayerSub(ulong steamId, int playerId)
     {
+        var playerTeam = Contract.Team.None;
         var player = Substitute.For<IPlayer>();
         player.SteamID.Returns(steamId);
         player.UserId.Returns(playerId);
+        player.Team.Returns(_ => playerTeam);
+        player.When(player => player.SwitchTeam(Arg.Any<Contract.Team>())).Do(c => playerTeam = c.Arg<Contract.Team>());
         return player;
     }
 }
