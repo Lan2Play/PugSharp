@@ -976,36 +976,38 @@ public class Match : IDisposable
     private bool TryAddPlayerToCurrentTeam(IPlayer player)
     {
         var matchPlayer = MatchInfo.MatchTeam1.Players.Any(x => x.Player.SteamID == player.SteamID) || MatchInfo.MatchTeam2.Players.Any(x => x.Player.SteamID == player.SteamID) ? GetMatchPlayer(player.SteamID) : null;
-        if (matchPlayer == null) {
+        if (matchPlayer == null)
+        {
             matchPlayer = new MatchPlayer(player);
         }
-        else {
+        else
+        {
             // Remove the player from the match
             MatchInfo.MatchTeam1.Players.Remove(matchPlayer);
             MatchInfo.MatchTeam2.Players.Remove(matchPlayer);
         }
 
         // Add them back to the match
-        bool? isTeam1 = null;
-        if (MatchInfo.MatchTeam1.CurrentTeamSite == Team.None && MatchInfo.MatchTeam2.CurrentTeamSite == Team.None)
+        bool isTeam1;
+        if (MatchInfo.MatchTeam1.CurrentTeamSide == Team.None && MatchInfo.MatchTeam2.CurrentTeamSide == Team.None)
         {
             isTeam1 = player.Team == Team.Terrorist;
         }
-        else if (MatchInfo.MatchTeam1.CurrentTeamSite != Team.None)
+        else if (MatchInfo.MatchTeam1.CurrentTeamSide != Team.None)
         {
-            isTeam1 = MatchInfo.MatchTeam1.CurrentTeamSite == player.Team;
+            isTeam1 = MatchInfo.MatchTeam1.CurrentTeamSide == player.Team;
         }
-        else if (MatchInfo.MatchTeam2.CurrentTeamSite != Team.None)
+        else if (MatchInfo.MatchTeam2.CurrentTeamSide != Team.None)
         {
-            isTeam1 = MatchInfo.MatchTeam2.CurrentTeamSite != player.Team;
+            isTeam1 = MatchInfo.MatchTeam2.CurrentTeamSide != player.Team;
         }
-
-        if (isTeam1 == null)
+        else
         {
             _Logger.LogInformation("Could not add player to match", player.SteamID);
             return false;
         }
-        else if (isTeam1.HasValue && isTeam1.Value)
+
+        if (isTeam1)
         {
             MatchInfo.MatchTeam1.Players.Add(matchPlayer);
         }
@@ -1013,9 +1015,6 @@ public class Match : IDisposable
         {
             MatchInfo.MatchTeam2.Players.Add(matchPlayer);
         }
-
-        // Console.WriteLine("Team 1: " + string.Join(',', MatchInfo.MatchTeam1.Players.Select(p => $"{p.Player.PlayerName}").ToList()));
-        // Console.WriteLine("Team 2: " + string.Join(',', MatchInfo.MatchTeam2.Players.Select(p => $"{p.Player.PlayerName}").ToList()));
 
         return true;
     }
