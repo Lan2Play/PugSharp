@@ -265,4 +265,10 @@
   <data name="PugSharp.Match.Info.NotReady" xml:space="preserve">
     <value>{0:playerName} 取消准备! {1:readyPlayers} / {2:requiredPlayers} 已准备.</value>
   </data>
+  <data name="PugSharp.Match.TeamReminder" xml:space="preserve">
+    <value>你现在在队伍: **{0:teamName}**.</value>
+  </data>
+  <data name="PugSharp.Match.VoteConfirmTeamHeader" xml:space="preserve">
+    <value>请选择正确的队伍:</value>
+  </data>
 </root>
