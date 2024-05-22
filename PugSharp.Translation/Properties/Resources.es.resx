@@ -64,9 +64,6 @@
   <data name="PugSharp.Match.VoteTeamMenuHeader" xml:space="preserve">
     <value>Elige bando inicial:</value>
   </data>
-  <data name="PugSharp_Match_VoteConfirmTeamHeader" xml:space="preserve">
-    <value>Elige el equipo correcto:</value>
-  </data>
   <data name="PugSharp.Match.VoteMapMenuHeader" xml:space="preserve">
     <value>Votación para banear mapa: escribe `!&lt;mapnumber&gt;`</value>
   </data>
@@ -144,5 +141,23 @@
   </data>
   <data name="PugSharp.Match.Error.NotPermittedToVoteForTeam" xml:space="preserve">
     <value>No puedes votar por un equipo en este momento!</value>
+  </data>
+  <data name="PugSharp.Command.ChangedMaxOvertimeRounds" xml:space="preserve">
+    <value>Cambiado el número máximo de rondas de prórroga de {0:oldMaxRounds} a {1:maxOvertimeRounds}</value>
+  </data>
+  <data name="PugSharp.Command.ChangedMaxRounds" xml:space="preserve">
+    <value>Cambiado el número máximo de rondas de {0:oldMaxRounds} a {1:maxRounds}</value>
+  </data>
+  <data name="PugSharp.Command.ConfigLoaded" xml:space="preserve">
+    <value>¡Configuración de la partida cargada!</value>
+  </data>
+  <data name="PugSharp.Command.CreatingMatchMatchInfo" xml:space="preserve">
+    <value>`!matchinfo` para mostrar la configuración actual de la partida!</value>
+  </data>
+  <data name="PugSharp.Command.CreatingMatchAddMap" xml:space="preserve">
+    <value>`!addmap &lt;nombre_del_mapa&gt; ` para añadir un mapa!</value>
+  </data>
+  <data name="PugSharp.Command.ChangedTeamMode" xml:space="preserve">
+    <value>Cambiado el Modo de Equipo de {0:oldTeamMode} a {1:newTeamMode}</value>
   </data>
 </root>

@@ -180,9 +180,6 @@
   <data name="PugSharp.Match.VoteTeamMenuHeader" xml:space="preserve">
     <value>Wähle die Startseite (`!stay` oder`!switch`)</value>
   </data>
-  <data name="PugSharp_Match_VoteConfirmTeamHeader" xml:space="preserve">
-    <value>Wählen Sie das richtige Team:</value>
-  </data>
   <data name="PugSharp.Match.VoteMapMenuHeader" xml:space="preserve">
     <value>Stimme ab um eine Karte zu bannen: schreibe `!&lt;Kartennummer&gt;` in den Chat</value>
   </data>

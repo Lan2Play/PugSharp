@@ -58,214 +58,217 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="PugSharp.Command.ChangedMaxOvertimeRounds" xml:space="preserve">
-    <value>Alterado o número máximo de rounds da prorrogação de {0:oldMaxRounds} para {1:maxOvertimeRounds}</value>
-  </data>
-  <data name="PugSharp.Command.ChangedMaxRounds" xml:space="preserve">
-    <value>Alterado o número máximo de rounds de {0:oldMaxRounds} para {1:maxRounds}</value>
-  </data>
   <data name="PugSharp.Command.ChangedTeamMode" xml:space="preserve">
-    <value>Modo de equipe alterado de {0:oldTeamMode} para {1:newTeamMode}</value>
+    <value>将队伍模式由 {0:oldTeamMode} 修改至 {1:newTeamMode}</value>
   </data>
   <data name="PugSharp.Command.ConfigLoaded" xml:space="preserve">
-    <value>Configuração da partida carregado!</value>
+    <value>Matchconfig配置文件加载完成!</value>
   </data>
   <data name="PugSharp.Command.CreatingMatchAddMap" xml:space="preserve">
-    <value>`!addmap &lt;nome_do_mapa&gt; para adicionar um mapa!</value>
+    <value>使用 `!addmap &lt;地图名称&gt;` 添加地图!</value>
   </data>
   <data name="PugSharp.Command.CreatingMatchMatchInfo" xml:space="preserve">
-    <value>`!matchinfo` para mostrar a configuração atual!</value>
-  </data>
-  <data name="PugSharp.Command.CreatingMatchMaxOvertimeRounds" xml:space="preserve">
-    <value>`!maxovertimerounds &lt;rounds&gt;` para definir o máximo de rounds da prorrogação!</value>
+    <value>使用 `!matchinfo` 展示当前比赛配置!</value>
   </data>
   <data name="PugSharp.Command.CreatingMatchMaxRounds" xml:space="preserve">
-    <value>`!maxrounds &lt;rounds&gt;` para definir o número máximo de rounds!</value>
+    <value>使用 `!maxrounds &lt;回合数&gt;` 设置最大回合数!</value>
   </data>
   <data name="PugSharp.Command.CreatingMatchPlayersPerTeam" xml:space="preserve">
-    <value>`!playersperteam &lt;players&gt;` para definir o número de jogadores por time!</value>
+    <value>使用 `!playersperteam &lt;玩家数量&gt;` 设置每支队伍的最大玩家数量!</value>
   </data>
   <data name="PugSharp.Command.CreatingMatchRemoveMap" xml:space="preserve">
-    <value>`!removemap &lt;mapname&gt;` para remover um mapa!</value>
+    <value>使用 `!removemap &lt;地图名称&gt;` 删除地图!</value>
   </data>
   <data name="PugSharp.Command.CreatingMatchStarted" xml:space="preserve">
-    <value>Criação de partida iniciado!</value>
+    <value>成功创建比赛!</value>
   </data>
   <data name="PugSharp.Command.CreatingMatchStartMatch" xml:space="preserve">
-    <value>`!startmatch` para iniciar a partida!</value>
+    <value>使用 `!startmatch` 开始比赛!</value>
   </data>
   <data name="PugSharp.Command.CreatingMatchTeamMode" xml:space="preserve">
-    <value>`!teammode &lt;modo&gt;` para definir o módo de equipe!</value>
-  </data>
-  <data name="PugSharp.Command.Error.ArgumentRoundIndexNotNumeric" xml:space="preserve">
-    <value>O argumento de do índice de rounds tem que ser numérico.</value>
+    <value>使用 `!teammode &lt;模式&gt;` 设置队伍模式!</value>
   </data>
   <data name="PugSharp.Command.Error.CsgoDirNotFound" xml:space="preserve">
-    <value>Diretório do CSGO não foi encontrado!</value>
+    <value>没有找到Csgo游戏目录!</value>
   </data>
   <data name="PugSharp.Command.Error.FileNameRequired" xml:space="preserve">
-    <value>Nome do arquivo é obrigatório!</value>
+    <value>需要FileName作为参数!</value>
   </data>
   <data name="PugSharp.Command.Error.LoadingConfig" xml:space="preserve">
-    <value>Não foi possível carregar a configuração, Erro: {0:error.Value}</value>
+    <value>无法加载config文件. 错误: {0:error.Value}</value>
   </data>
   <data name="PugSharp.Command.Error.MapNameRequired" xml:space="preserve">
-    <value>Nome do mapa é obrigatório!</value>
+    <value>需要地图名称!</value>
   </data>
   <data name="PugSharp.Command.Error.MapNotRemoved" xml:space="preserve">
-    <value>Não foi possível remover **{0:mapName}**. Mapas atuais: {1:maps}</value>
+    <value>无法删除 **{0:mapName}**. 当前地图为 {1:maps}</value>
   </data>
   <data name="PugSharp.Command.Error.MatchIdRequired" xml:space="preserve">
-    <value>ID da partida é obrigatório!</value>
-  </data>
-  <data name="PugSharp.Command.Error.MatchInfoFileCouldNotBeLoaded" xml:space="preserve">
-    <value>Arquivo da partida "{matchInfoFileName}" não pode ser carregado!</value>
+    <value>MatchId必须作为参数!</value>
   </data>
   <data name="PugSharp.Command.Error.MatchInfoFileNotFound" xml:space="preserve">
-    <value>Arquivo da partida "{matchInfoFileName}" não encontrado!</value>
+    <value>找不到 "{matchInfoFileName}" MatchInfo文件!</value>
   </data>
   <data name="PugSharp.Command.Error.MatchRunning" xml:space="preserve">
-    <value>Partida atual {0:match} está em progresso. Para parar, digite `{1:stopCommand}`!</value>
+    <value>当前正在进行比赛 {0:match} . 取消比赛请使用 `{1:stopCommand}`!</value>
   </data>
-  <data name="PugSharp.Command.Error.MatchStateUnavailable" xml:space="preserve">
-    <value>Atualmente não há partida em progresso, estado da partida indisponível!</value>
+  <data name="PugSharp.Command.ChangedMaxOvertimeRounds" xml:space="preserve">
+    <value>将最大加时赛回合数由 {0:oldMaxRounds} 修改至 {1:maxOvertimeRounds}</value>
+  </data>
+  <data name="PugSharp.Command.ChangedMaxRounds" xml:space="preserve">
+    <value>将最大回合数由 {0:oldMaxRounds} 修改至 {1:maxRounds}</value>
+  </data>
+  <data name="PugSharp.Command.CreatingMatchMaxOvertimeRounds" xml:space="preserve">
+    <value>使用 `!maxovertimerounds &lt;回合数&gt;` 设置最大加时赛回合数!</value>
+  </data>
+  <data name="PugSharp.Command.Error.ArgumentRoundIndexNotNumeric" xml:space="preserve">
+    <value>round index的参数必须为数字.</value>
+  </data>
+  <data name="PugSharp.Command.Error.MatchInfoFileCouldNotBeLoaded" xml:space="preserve">
+    <value>无法加载 "{matchInfoFileName}" MatchInfo文件!</value>
   </data>
   <data name="PugSharp.Command.Error.NoMatch" xml:space="preserve">
-    <value>Não há partida disponível.</value>
+    <value>没有可用的比赛.</value>
+  </data>
+  <data name="PugSharp.Command.Error.MatchStateUnavailable" xml:space="preserve">
+    <value>当前没有正在进行的比赛. 比赛信息不可用!</value>
   </data>
   <data name="PugSharp.Command.Error.NoMatchRunning" xml:space="preserve">
-    <value>Atualmente, não há partidas em progresso</value>
+    <value>当前没有正在进行的比赛</value>
   </data>
   <data name="PugSharp.Command.Error.NumberOfOvertimeRoundsLessThanZero" xml:space="preserve">
-    <value>Número máximo de rounds da prorrogação tem que ser maior que 0!</value>
+    <value>最大加时赛回合数应大于0!</value>
   </data>
   <data name="PugSharp.Command.Error.NumberOfOvertimeRoundsNotNumeric" xml:space="preserve">
-    <value>Número máximo de rounds da prorrogação tem que ser um número!</value>
+    <value>最大加时赛回合数应为一个数字!</value>
   </data>
   <data name="PugSharp.Command.Error.NumberOfRoundsLessThanZero" xml:space="preserve">
-    <value>Número máximo de rounds tem que ser maior que 0!</value>
+    <value>最大回合数应大于0!</value>
   </data>
   <data name="PugSharp.Command.Error.NumberOfRoundsNotNumeric" xml:space="preserve">
-    <value>Número máximo de Rounds tem que ser um número!</value>
+    <value>最大回合数应为一个数字!</value>
   </data>
   <data name="PugSharp.Command.Error.NumberOfRoundsRequired" xml:space="preserve">
-    <value>Número de rounds é obrigatório!</value>
+    <value>需要比赛的回合数!</value>
   </data>
   <data name="PugSharp.Command.Error.OneMapRequired" xml:space="preserve">
-    <value>Não foi possível iniciar a partida. Pelo menos um mapa é necessário!</value>
+    <value>无法开始比赛. 请选择至少一张地图!</value>
   </data>
   <data name="PugSharp.Command.Error.RconNotSupported" xml:space="preserve">
-    <value>Este comando não é suportado via rcon.</value>
+    <value>这个指令不可以通过rcon执行.</value>
   </data>
   <data name="PugSharp.Command.Error.RoundBackupFileNotFound" xml:space="preserve">
-    <value>Arquivo de Backup do round "{0:roundBackupFile}" não encontrado!</value>
+    <value>没有找到回合备份文件 "{0:roundBackupFile}" !</value>
   </data>
   <data name="PugSharp.Command.Error.TeammodePossibleValues" xml:space="preserve">
-    <value>PValores possíveis para o modo de equipe: {0:possibleValues}</value>
+    <value>可以使用的队伍模式: {0:possibleValues}</value>
   </data>
   <data name="PugSharp.Command.Error.TeammodeRequired" xml:space="preserve">
-    <value>Modo de equipe é obrigatório!</value>
+    <value>需要选择队伍模式!</value>
   </data>
   <data name="PugSharp.Command.Error.UrlRequired" xml:space="preserve">
-    <value>URL é obrigatório como um argumento!</value>
+    <value>需要输入Url!</value>
   </data>
   <data name="PugSharp.Command.LoadingConfigFromFile" xml:space="preserve">
-    <value>Carregando configuração do arquivo {0:fileName}</value>
+    <value>从 {0:fileName} 加载配置文件</value>
   </data>
   <data name="PugSharp.Command.LoadingConfigFromUrl" xml:space="preserve">
-    <value>Carregando configuração de {0:url}</value>
+    <value>从 {0:url} 加载配置文件</value>
   </data>
   <data name="PugSharp.Command.MapAdded" xml:space="preserve">
-    <value>Adicionado **{0:mapName}**. Mapas atuais: {1:maps}</value>
+    <value>成功添加 **{0:mapName}**. 当前的地图为 {1:maps}</value>
   </data>
   <data name="PugSharp.Command.MapRemoved" xml:space="preserve">
-    <value>Removido **{0:mapName}**. Mapas atuais: {1:maps}</value>
+    <value>成功删除 **{0:mapName}**. 当前的地图为 {1:maps}</value>
   </data>
   <data name="PugSharp.Command.MatchStopped" xml:space="preserve">
-    <value>Partida pausada!</value>
+    <value>比赛已暂停!</value>
   </data>
   <data name="PugSharp.Hello" xml:space="preserve">
-    <value>Olá **{0:playerName}**, bem vindo à partida {1:matchId}</value>
+    <value>欢迎 **{0:playerName}** , 欢迎来到比赛 {1:matchId}</value>
   </data>
   <data name="PugSharp.Match.BannedMap" xml:space="preserve">
-    <value>Mapa **{0:mapName}** foi banido pela equipe {1:teamName}!</value>
+    <value>地图 **{0:mapName}** 被 {1:teamName} 禁用!</value>
   </data>
   <data name="PugSharp.Match.Error.AlreadyBannedMap" xml:space="preserve">
-    <value>Você já baniu o mapa {0: mapNumber}: {1:mapName}!</value>
+    <value>你已经禁用了地图 {0: mapNumber}: {1:mapName}!</value>
   </data>
   <data name="PugSharp.Match.Error.AlreadyVotedForTeam" xml:space="preserve">
-    <value>Você já votou pela equipe {0:teamNumber}: {1:teamName}!</value>
+    <value>你已经投票了队伍 {0:teamNumber}: {1:teamName}!</value>
   </data>
   <data name="PugSharp.Match.Error.NoMapVoteExpected" xml:space="preserve">
-    <value>Atualmente, não há votação de mapas acontecendo!</value>
+    <value>没有正在进行的地图投票!</value>
   </data>
   <data name="PugSharp.Match.Error.NoReadyExpected" xml:space="preserve">
-    <value>Atualmente, não esperamos pelo estado de pronto!</value>
+    <value>当前无法准备!</value>
   </data>
   <data name="PugSharp.Match.Error.NoTeamVoteExpected" xml:space="preserve">
-    <value>Não há votação de equipe ativa!</value>
+    <value>没有正在进行的队伍投票!</value>
   </data>
   <data name="PugSharp.Match.Error.NotPermittedToBanMap" xml:space="preserve">
-    <value>Atualmente, não é permitido que você faça o banimento de um mapa!</value>
+    <value>你现在不可以禁用地图!</value>
   </data>
   <data name="PugSharp.Match.Error.NotPermittedToVoteForTeam" xml:space="preserve">
-    <value>Atualmente, não é permitido que você voce por uma equipe!</value>
+    <value>你现在不可以投票队伍!</value>
   </data>
   <data name="PugSharp.Match.Error.PauseNotPossible" xml:space="preserve">
-    <value>Pause não é possível atualmente!</value>
+    <value>当前不可以战术暂停!</value>
   </data>
   <data name="PugSharp.Match.Error.TeamNotAvailable" xml:space="preserve">
-    <value>Equipe com o nome {0:teamName} não está disponível!</value>
+    <value>无法选择队伍 {0:teamName} !</value>
   </data>
   <data name="PugSharp.Match.Error.UnknownMapNumber" xml:space="preserve">
-    <value>Mapa número **{0:mapNumber}** não está disponível!</value>
+    <value>无法选择地图序号 **{0:mapNumber}** !</value>
   </data>
   <data name="PugSharp.Match.Error.UnpauseNotPossible" xml:space="preserve">
-    <value>Despausar não é possível atualmente!</value>
+    <value>当前无法取消战术暂停!</value>
   </data>
   <data name="PugSharp.Match.Info.IsLive" xml:space="preserve">
-    <value>Partida está **LIVE**</value>
-  </data>
-  <data name="PugSharp.Match.Info.NotReady" xml:space="preserve">
-    <value>{0:playerName} não está pronto! {1:readyPlayers} de {2:requiredPlayers} estão prontos.</value>
+    <value>**比赛开始 GL&amp;&amp;HF**</value>
   </data>
   <data name="PugSharp.Match.Info.Ready" xml:space="preserve">
-    <value>{0:playerName} está pronto! {1:readyPlayers} de {2:requiredPlayers} estão prontos.</value>
+    <value>{0:playerName} 已准备! {1:readyPlayers} / {2:requiredPlayers} 已准备.</value>
   </data>
   <data name="PugSharp.Match.Info.StartMatch" xml:space="preserve">
-    <value>Partida iniciando. **{0:team1Name}** como **{1:team1Side}**. **{2:team2Name}** como **{3:team2Side}**</value>
+    <value>开始比赛. **{0:team1Name}* 在 **{1:team1Side}**. **{2:team2Name}** 在 **{3:team2Side}**</value>
   </data>
   <data name="PugSharp.Match.Info.WaitingForAllPlayers" xml:space="preserve">
-    <value>Aguardando todos os jogadores estarem prontos.</value>
-  </data>
-  <data name="PugSharp.Match.TeamReminder" xml:space="preserve">
-    <value>Você está atualmente na equipe: **{0:teamName}**.</value>
+    <value>正在等待所有玩家准备.</value>
   </data>
   <data name="PugSharp.Match.RemindReady" xml:space="preserve">
-    <value>Você !!não!! está pronto!! Digite `!ready` se você está pronto.</value>
+    <value>你当前 !!没有准备!! ! 输入 `!ready` 准备.</value>
   </data>
   <data name="PugSharp.Match.SelectedTeam" xml:space="preserve">
-    <value>{0:teamName} selecionou {1:side} como lado inicial!</value>
-  </data>
-  <data name="PugSharp.Match.VotedForTeam" xml:space="preserve">
-    <value>Você votou por **{0:teamName}**</value>
+    <value>{0:teamName} 选择了 {1:side} 作为初始边!</value>
   </data>
   <data name="PugSharp.Match.VotedToBanMap" xml:space="preserve">
-    <value>Você votou para banir **{0:mapName}**</value>
+    <value>你投票禁用了 **{0:mapName}**</value>
   </data>
   <data name="PugSharp.Match.VoteMapMenuHeader" xml:space="preserve">
-    <value>Para banir, digite: `!&lt;mapnumber&gt;`</value>
+    <value>投票以禁用地图: 输入 `!&lt;地图ID&gt;`</value>
   </data>
   <data name="PugSharp.Match.VoteTeamMenuHeader" xml:space="preserve">
-    <value>Escolha o lado inicial com (`!stay` ou `!switch`)</value>
+    <value>选择初始边 (`!stay` 或 `!switch`)</value>
   </data>
   <data name="PugSharp.Match.WaitForOtherTeam" xml:space="preserve">
-    <value>Aguardando o voto da outra equipe!</value>
-  </data>
-  <data name="PugSharp.NotifyReady" xml:space="preserve">
-    <value>digite `!ready` para se marcar como pronto e iniciar a partida</value>
+    <value>等待对方投票!</value>
   </data>
   <data name="PugSharp.PoweredBy" xml:space="preserve">
-    <value>distribuído por **PugSharp** (https://github.com/Lan2Play/PugSharp/)</value>
+    <value>由 **PugSharp** (https://github.com/Lan2Play/PugSharp/) 强力驱动</value>
+  </data>
+  <data name="PugSharp.Match.VotedForTeam" xml:space="preserve">
+    <value>你投票给了 **{0:teamName}**</value>
+  </data>
+  <data name="PugSharp.NotifyReady" xml:space="preserve">
+    <value>输入 `!ready` 以准备比赛</value>
+  </data>
+  <data name="PugSharp.Match.Info.NotReady" xml:space="preserve">
+    <value>{0:playerName} 取消准备! {1:readyPlayers} / {2:requiredPlayers} 已准备.</value>
+  </data>
+  <data name="PugSharp.Match.TeamReminder" xml:space="preserve">
+    <value>你现在在队伍: **{0:teamName}**.</value>
+  </data>
+  <data name="PugSharp.Match.VoteConfirmTeamHeader" xml:space="preserve">
+    <value>请选择正确的队伍:</value>
   </data>
 </root>

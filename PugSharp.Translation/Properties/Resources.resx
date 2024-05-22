@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <root>
   <!-- 
     Microsoft ResX Schema 
@@ -59,7 +59,7 @@
             : using a System.ComponentModel.TypeConverter
             : and then encoded with base64 encoding.
     -->
-  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+  <xsd:schema xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata" id="root">
     <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
     <xsd:element name="root" msdata:IsDataSet="true">
       <xsd:complexType>
@@ -130,7 +130,7 @@
     <value>Matchconfig loaded!</value>
   </data>
   <data name="PugSharp.Command.CreatingMatchAddMap" xml:space="preserve">
-    <value>`!addmap &lt;mapname&gt; to add a map!</value>
+    <value>`!addmap &lt;mapname&gt;` to add a map!</value>
   </data>
   <data name="PugSharp.Command.CreatingMatchMatchInfo" xml:space="preserve">
     <value>`!matchinfo` to show current match configuration!</value>
