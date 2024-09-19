@@ -40,7 +40,7 @@ public class UnitTest1
         return services.BuildServiceProvider();
     }
     [Fact]
-    public void Test1()
+    public void InitializeApplicationTest()
     {
         var serviceProvider = CreateTestProvider();
         var application = serviceProvider.GetRequiredService<IApplication>();
