@@ -31,13 +31,12 @@ public partial class TextHelper : ITextHelper
     [GeneratedRegex(@"(`(?<command>.*?)`)", RegexOptions.ExplicitCapture, _RegexTimeout)]
     private static partial Regex CommandRegex();
 
-
     [GeneratedRegex(@"(!!(?<error>.*?)!!)", RegexOptions.ExplicitCapture, _RegexTimeout)]
     private static partial Regex ErrorRegex();
 
     public string GetTranslatedText(string key, CultureInfo cultureInfo, params object?[] arguments)
     {
-        return GetTranslatedText(key, cultureInfo, true, arguments);
+        return GetTranslatedText(key, cultureInfo, withColors: true, arguments);
     }
 
     public string GetTranslatedText(string key, CultureInfo cultureInfo, bool withColors, params object?[] arguments)

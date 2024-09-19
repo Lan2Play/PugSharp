@@ -877,7 +877,7 @@ public class Application : IApplication
     {
         const int requiredArgCount = 2;
 
-        HandleCommand((p, c) =>
+        this.HandleCommand((p, c) =>
         {
             if (_Match != null)
             {
@@ -914,18 +914,7 @@ public class Application : IApplication
 
                     c.ReplyToCommand(_TextHelper, nameof(Resources.PugSharp_Command_ConfigLoaded));
 
-                    var backupDir = Path.Combine(PugSharpDirectory, "Backup");
-                    if (!Directory.Exists(backupDir))
-                    {
-                        Directory.CreateDirectory(backupDir);
-                    }
-
-                    var configFileName = Path.Combine(backupDir, $"Match_{matchConfig.MatchId}_Config.json");
-
-                    using var configWriteStream = File.Open(configFileName, FileMode.Create);
-                    {
-                        JsonSerializer.Serialize(configWriteStream, matchConfig);
-                    }
+                    StoreConfig(matchConfig);
 
                     InitializeMatch(matchConfig);
                 }
@@ -933,6 +922,19 @@ public class Application : IApplication
         },
         command,
         player);
+    }
+
+    private void StoreConfig(MatchConfig matchConfig)
+    {
+        var backupDir = Path.Combine(PugSharpDirectory, "Backup");
+        if (!Directory.Exists(backupDir))
+        {
+            Directory.CreateDirectory(backupDir);
+        }
+
+        var configFileName = Path.Combine(backupDir, $"Match_{matchConfig.MatchId}_Config.json");
+        using var configWriteStream = File.Open(configFileName, FileMode.Create);
+        JsonSerializer.Serialize(configWriteStream, matchConfig);
     }
 
     [ConsoleCommand("css_lcf", "Load a match config from a file")]

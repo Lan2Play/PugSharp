@@ -13,10 +13,10 @@ public sealed partial class G5CommandProvider : ICommandProvider
 {
     private const int _RegexTimeout = 1000;
     private const string _NotSupported = "Not yet supported!";
-    private readonly ILogger<G5ApiProvider> _Logger;
+    private readonly ILogger<G5CommandProvider> _Logger;
     private readonly ICsServer _CsServer;
 
-    public G5CommandProvider(ICsServer csServer, ILogger<G5ApiProvider> logger)
+    public G5CommandProvider(ICsServer csServer, ILogger<G5CommandProvider> logger)
     {
         _Logger = logger;
         _CsServer = csServer;
@@ -42,37 +42,37 @@ public sealed partial class G5CommandProvider : ICommandProvider
         };
     }
 
-    private IEnumerable<string> CommandGet5WebAvailable(string[] arg)
+    private static IEnumerable<string> CommandGet5WebAvailable(string[] arg)
     {
         yield return JsonSerializer.Serialize(new G5WebAvailable());
     }
 
-    private string[] CommandLoadBackUpUrl(string[] arg)
+    private static string[] CommandLoadBackUpUrl(string[] arg)
     {
         return [_NotSupported];
     }
 
-    private string[] CommandLoadBackUp(string[] arg)
+    private static string[] CommandLoadBackUp(string[] arg)
     {
         return [_NotSupported];
     }
 
-    private string[] CommandListBackUps(string[] arg)
+    private static string[] CommandListBackUps(string[] arg)
     {
         return [_NotSupported];
     }
 
-    private string[] CommandRemovePlayer(string[] arg)
+    private static string[] CommandRemovePlayer(string[] arg)
     {
         return [_NotSupported];
     }
 
-    private string[] CommandAddCoach(string[] arg)
+    private static string[] CommandAddCoach(string[] arg)
     {
         return [_NotSupported];
     }
 
-    private string[] CommandAddPlayer(string[] arg)
+    private static string[] CommandAddPlayer(string[] arg)
     {
         return [_NotSupported];
     }
@@ -111,7 +111,7 @@ public sealed partial class G5CommandProvider : ICommandProvider
         public int GameState { get; set; }
     }
 
-    private string[] CommandGet5Status(string[] args)
+    private static string[] CommandGet5Status(string[] args)
     {
         return [JsonSerializer.Serialize(new Get5Status { PluginVersion = "0.15.0", GameState = 0 })];
     }
