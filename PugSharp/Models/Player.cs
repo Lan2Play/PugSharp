@@ -119,6 +119,11 @@ public class Player : IPlayer
     {
         if (TryGetPlayerController(out var playerController))
         {
+            if (playerController == null)
+            {
+                return;
+            }
+
             var menu = new ChatMenu(title);
 
             foreach (var menuOption in menuOptions)
@@ -126,7 +131,7 @@ public class Player : IPlayer
                 menu.AddMenuOption(menuOption.DisplayName, (player, opt) => menuOption.Action.Invoke(menuOption, this));
             }
 
-            ChatMenus.OpenMenu(playerController!, menu);
+            MenuManager.OpenChatMenu(playerController, menu);
         }
     }
 

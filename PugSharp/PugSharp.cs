@@ -45,11 +45,7 @@ public class PugSharp : BasePlugin, IBasePlugin
         // Create DI container
         var services = new ServiceCollection();
 
-
-        services.AddLogging(options =>
-        {
-            options.AddConsole();
-        });
+        services.AddLogging(options => options.AddConsole());
 
         var serviceDescriptor = services.FirstOrDefault(descriptor => descriptor.ServiceType == typeof(ILoggerFactory));
         if (serviceDescriptor != null)
@@ -61,9 +57,7 @@ public class PugSharp : BasePlugin, IBasePlugin
         services.AddSingleton<ICsServer, CsServer>();
         services.AddSingleton<MultiApiProvider>();
         services.AddSingleton<IApiProvider>(s => s.GetRequiredService<MultiApiProvider>());
-
         services.AddSingleton<IBasePlugin>(this);
-
         services.AddSingleton<IApplication, Application>();
 
         var retryPolicy = HttpPolicyExtensions
@@ -75,25 +69,19 @@ public class PugSharp : BasePlugin, IBasePlugin
                 .AddPolicyHandler(retryPolicy);
 
         services.AddSingleton<ConfigProvider>();
-
         services.AddTransient<MatchFactory>();
 
         services.AddHttpClient<G5ApiClient>()
                 .AddPolicyHandler(retryPolicy);
+
         services.AddSingleton<G5ApiClient>();
         services.AddSingleton<G5ApiProvider>();
 
-        services.AddHttpClient<ApiStats.ApiStats>()
-               .AddPolicyHandler(retryPolicy);
-        services.AddSingleton<ApiStats.ApiStats>();
+        services.AddApiStats(retryPolicy);
 
         services.AddSingleton<JsonApiProvider>();
 
         services.AddSingleton<ITextHelper>(sp => new TextHelper(sp.GetRequiredService<ILogger<TextHelper>>(), ChatColors.Blue, ChatColors.Green, ChatColors.Red));
-
-        services.AddHttpClient<DemoUploader>()
-               .AddPolicyHandler(retryPolicy);
-        services.AddSingleton<DemoUploader>();
 
         services.AddSingleton<G5CommandProvider>();
 

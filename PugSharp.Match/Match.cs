@@ -1003,7 +1003,7 @@ public class Match : IDisposable
         }
         else
         {
-            _Logger.LogInformation("Could not add player to match", player.SteamID);
+            _Logger.LogInformation("Could not add player {SteamId} to match", player.SteamID);
             return false;
         }
 
