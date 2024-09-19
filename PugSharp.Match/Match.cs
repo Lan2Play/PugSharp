@@ -89,7 +89,7 @@ public class Match : IDisposable
 
         if (matchInfo.Config.Maplist.Count < matchInfo.Config.NumMaps)
         {
-            throw new NotSupportedException($"Can not create Match without the required number of maps! At lease {matchInfo.Config.NumMaps} are required!");
+            throw new NotSupportedException(string.Create(CultureInfo.InvariantCulture, $"Can not create Match without the required number of maps! At lease {matchInfo.Config.NumMaps} are required!"));
         }
 
         MatchInfo = matchInfo;
@@ -442,54 +442,63 @@ public class Match : IDisposable
             // Score is the overall value, not reported per round
             matchStats.ContributionScore = playerResult.ContributionScore;
 
-            switch (playerResult.Kills)
+            UpdateKills(playerResult, matchStats);
+            UpdateClutchKills(playerResult, matchStats);
+
+            // TODO Kast
+        }
+    }
+
+    private static void UpdateKills(IPlayerRoundResults playerResult, PlayerMatchStatistics matchStats)
+    {
+        switch (playerResult.Kills)
+        {
+            case _Kill1:
+                matchStats.Count1K++;
+                break;
+            case _Kill2:
+                matchStats.Count2K++;
+                break;
+            case _Kill3:
+                matchStats.Count3K++;
+                break;
+            case _Kill4:
+                matchStats.Count4K++;
+                break;
+            case _Kill5:
+                matchStats.Count5K++;
+                break;
+            default:
+                // Do nothing
+                break;
+        }
+    }
+
+    private static void UpdateClutchKills(IPlayerRoundResults playerResult, PlayerMatchStatistics matchStats)
+    {
+        if (playerResult.Clutched)
+        {
+            switch (playerResult.ClutchKills)
             {
                 case _Kill1:
-                    matchStats.Count1K++;
+                    matchStats.V1++;
                     break;
                 case _Kill2:
-                    matchStats.Count2K++;
+                    matchStats.V2++;
                     break;
                 case _Kill3:
-                    matchStats.Count3K++;
+                    matchStats.V3++;
                     break;
                 case _Kill4:
-                    matchStats.Count4K++;
+                    matchStats.V4++;
                     break;
                 case _Kill5:
-                    matchStats.Count5K++;
+                    matchStats.V5++;
                     break;
                 default:
                     // Do nothing
                     break;
             }
-
-            if (playerResult.Clutched)
-            {
-                switch (playerResult.ClutchKills)
-                {
-                    case _Kill1:
-                        matchStats.V1++;
-                        break;
-                    case _Kill2:
-                        matchStats.V2++;
-                        break;
-                    case _Kill3:
-                        matchStats.V3++;
-                        break;
-                    case _Kill4:
-                        matchStats.V4++;
-                        break;
-                    case _Kill5:
-                        matchStats.V5++;
-                        break;
-                    default:
-                        // Do nothing
-                        break;
-                }
-            }
-
-            // TODO Kast
         }
     }
 
@@ -670,13 +679,13 @@ public class Match : IDisposable
                 if (MatchInfo.Config.TeamMode == Config.TeamMode.PlayerSelect)
                 {
                     _Logger.LogInformation("TeamReminder Elapsed");
-                    foreach (var player in AllMatchPlayers)
+                    foreach (var player in AllMatchPlayers.Select(p => p.Player))
                     {
-                        var matchTeam = GetMatchTeam(player.Player.Team);
-                        if (player.Player.Team == Team.Terrorist || player.Player.Team == Team.CounterTerrorist)
+                        var matchTeam = GetMatchTeam(player.Team);
+                        if (player.Team == Team.Terrorist || player.Team == Team.CounterTerrorist)
                         {
                             var teamMessage = _TextHelper.GetText(nameof(Resources.PugSharp_Match_TeamReminder), matchTeam?.TeamConfig.Name);
-                            player.Player.PrintToChat(teamMessage);
+                            player.PrintToChat(teamMessage);
                         }
                     }
                 }
@@ -808,7 +817,7 @@ public class Match : IDisposable
         _VoteTimer.Stop();
 
         var startTeam = _TeamVotes.MaxBy(m => m.Votes.Count)!.Name.Equals("T", StringComparison.OrdinalIgnoreCase) ? Team.Terrorist : Team.CounterTerrorist;
-        _Logger.LogInformation("Set selected teamsite to {startTeam}. Voted by {team}", startTeam, _CurrentMatchTeamToVote!.TeamConfig.Name);
+        _Logger.LogInformation("Set selected teamsite to {StartTeam}. Voted by {Team}", startTeam, _CurrentMatchTeamToVote!.TeamConfig.Name);
 
         if (_CurrentMatchTeamToVote!.CurrentTeamSide != startTeam)
         {
@@ -818,8 +827,8 @@ public class Match : IDisposable
             otherTeam.StartingTeamSide = startTeam == Team.Terrorist ? Team.CounterTerrorist : Team.Terrorist;
             otherTeam.CurrentTeamSide = otherTeam.StartingTeamSide;
 
-            _Logger.LogInformation("{team} starts as Team {startTeam}", _CurrentMatchTeamToVote.TeamConfig.Name, _CurrentMatchTeamToVote!.CurrentTeamSide.ToString());
-            _Logger.LogInformation("{team} starts as Team {startTeam}", otherTeam.TeamConfig.Name, otherTeam!.CurrentTeamSide.ToString());
+            _Logger.LogInformation("{Team} starts as Team {StartTeam}", _CurrentMatchTeamToVote.TeamConfig.Name, _CurrentMatchTeamToVote!.CurrentTeamSide.ToString());
+            _Logger.LogInformation("{Team} starts as Team {StartTeam}", otherTeam.TeamConfig.Name, otherTeam!.CurrentTeamSide.ToString());
         }
 
         _CsServer.PrintToChatAll(_TextHelper.GetText(nameof(Resources.PugSharp_Match_SelectedTeam), _CurrentMatchTeamToVote!.TeamConfig.Name, startTeam));
@@ -864,8 +873,6 @@ public class Match : IDisposable
     {
         var readyPlayers = AllMatchPlayers.Where(p => p.IsReady);
         var requiredPlayers = MatchInfo.Config.PlayersPerTeam * 2;
-
-        //_Logger.LogInformation("Match has {readyPlayers} of {requiredPlayers} ready players: {readyPlayers}", readyPlayers.Count(), requiredPlayers, string.Join("; ", readyPlayers.Select(a => $"{a.Player.PlayerName}[{a.IsReady}]").ToList()));
 
         return readyPlayers.Take(requiredPlayers + 1).Count() == requiredPlayers;
     }

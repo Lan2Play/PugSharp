@@ -70,7 +70,7 @@ public sealed class G5ApiClient
                 return true;
             }
 
-            _Logger.LogError("G5 API request {Event} failed. HTTP status code = {statusCode} content: {Content}", eventToSend.EventName, httpResponseMessage.StatusCode, httpResponseMessage.Content.ToString());
+            _Logger.LogError("G5 API request {Event} failed. HTTP status code = {StatusCode} content: {Content}", eventToSend.EventName, httpResponseMessage.StatusCode, httpResponseMessage.Content.ToString());
 
             return false;
         }

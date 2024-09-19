@@ -140,7 +140,7 @@ public partial class G5ApiProvider : IApiProvider
             MatchId = roundMvpParams.MatchId,
             Reason = roundMvpParams.Reason,
             RoundNumber = roundMvpParams.RoundNumber,
-            Player = new Player(player.SteamId.ToString(CultureInfo.InvariantCulture), player.Name, player.UserId, (Side)player.Side, player.IsBot)
+            Player = new Player(player.SteamId.ToString(CultureInfo.InvariantCulture), player.Name, player.UserId, (Side)player.Side, player.IsBot),
         };
 
         return _G5Stats.SendEventAsync(roundMvpEvent, cancellationToken);
@@ -182,13 +182,6 @@ public partial class G5ApiProvider : IApiProvider
         // Not Required. Handled via TimeUntilRestore of in the Finalize event
         return Task.CompletedTask;
     }
-
-
-
-    #endregion
-
-    #region Get5Api Commands
-
 
     #endregion
 }

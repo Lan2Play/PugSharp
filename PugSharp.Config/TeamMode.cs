@@ -9,5 +9,5 @@ public enum TeamMode
     Scramble,
 
     // Player Selects which Team to join
-    PlayerSelect
+    PlayerSelect,
 }

@@ -4,13 +4,12 @@
     {
         public static IEnumerable<T> Randomize<T>(this IEnumerable<T> source)
         {
-            if (source == null) throw new ArgumentNullException(nameof(source));
-
-            return source.RandomizeInternal();
+            return source == null 
+                ? throw new ArgumentNullException(nameof(source))
+                : source.RandomizeInternal();
         }
 
-        private static IEnumerable<T> RandomizeInternal<T>(
-            this IEnumerable<T> source)
+        private static IEnumerable<T> RandomizeInternal<T>(this IEnumerable<T> source)
         {
             var buffer = source.ToList();
             for (int i = 0; i < buffer.Count; i++)

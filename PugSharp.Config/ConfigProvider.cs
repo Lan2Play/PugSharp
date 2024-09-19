@@ -46,7 +46,7 @@ public class ConfigProvider
                     return new Error<string>("Config couldn't be deserialized");
                 }
 
-                _Logger.LogInformation("Successfully loaded config for match {matchId}", config.MatchId);
+                _Logger.LogInformation("Successfully loaded config for match {MatchId}", config.MatchId);
                 return config;
             }
         }

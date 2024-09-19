@@ -57,7 +57,7 @@ public partial class TextHelper : ITextHelper
             }
             catch (Exception ex)
             {
-                _Logger.LogError(ex, "Error formatting text {text}", text);
+                _Logger.LogError(ex, "Error formatting text {Text}", text);
             }
         }
 
@@ -86,7 +86,7 @@ public partial class TextHelper : ITextHelper
 
     public string GetText(string key, params object?[] arguments) => GetTranslatedText(key, CultureInfo.CurrentUICulture, arguments);
 
-    private string GetArgumentString(object? value)
+    private static string GetArgumentString(object? value)
     {
         return value switch
         {

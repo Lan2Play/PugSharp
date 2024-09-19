@@ -216,7 +216,7 @@ public class CsServer : ICsServer
                 return;
             }
 
-            _Logger.LogInformation("Switch map to: \"{electedMap}\"!", selectedMap);
+            _Logger.LogInformation("Switch map to: \"{SelectedMap}\"!", selectedMap);
             ExecuteCommand($"changelevel {selectedMap}");
         });
     }

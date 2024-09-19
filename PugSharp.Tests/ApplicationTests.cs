@@ -1,4 +1,3 @@
-
 using Microsoft.Extensions.DependencyInjection;
 
 using NSubstitute;
@@ -11,9 +10,9 @@ using PugSharp.Translation;
 
 namespace PugSharp.Tests;
 
-public class UnitTest1
+public class ApplicationTests
 {
-    private static IServiceProvider CreateTestProvider()
+    private static ServiceProvider CreateTestProvider()
     {
         var services = new ServiceCollection();
 
@@ -22,10 +21,7 @@ public class UnitTest1
 
         services.AddSingleton(Substitute.For<ICssDispatcher>());
         services.AddSingleton(Substitute.For<ICsServer>());
-        services.AddLogging(options =>
-        {
-            //options.AddConsole();
-        });
+        services.AddLogging();
         services.AddSingleton<IApplication, Application>();
 
         services.AddSingleton<ConfigProvider>();
@@ -39,6 +35,7 @@ public class UnitTest1
         // Build service provider
         return services.BuildServiceProvider();
     }
+
     [Fact]
     public void InitializeApplicationTest()
     {

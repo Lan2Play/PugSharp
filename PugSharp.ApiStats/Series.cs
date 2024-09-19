@@ -18,7 +18,7 @@ public class Series
 
     public Map GetMap(int mapNumber)
     {
-        var mapNumberString = $"map{mapNumber}";
+        var mapNumberString = string.Create(CultureInfo.CurrentUICulture, $"map{mapNumber}");
 
         return Maps[mapNumberString];
     }

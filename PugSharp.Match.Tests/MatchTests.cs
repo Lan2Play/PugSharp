@@ -12,7 +12,7 @@ namespace PugSharp.Match.Tests;
 
 public class MatchTests
 {
-    private static IServiceProvider CreateTestProvider()
+    private static ServiceProvider CreateTestProvider()
     {
         var services = new ServiceCollection();
 
@@ -45,7 +45,7 @@ public class MatchTests
         var match = matchFactory.CreateMatch(config);
 
         var dotGraphString = match.CreateDotGraph();
-        Assert.True(!string.IsNullOrEmpty(dotGraphString));
+        Assert.False(string.IsNullOrEmpty(dotGraphString));
     }
 
     [Fact]

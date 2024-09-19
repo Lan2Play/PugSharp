@@ -12,7 +12,7 @@ internal static class CommandInfoExtensions
         string translatedText;
         if (commandInfo.CallingPlayer == null)
         {
-            translatedText = textHelper.GetTranslatedText(textKey, CultureInfo.InvariantCulture, false, arguments);
+            translatedText = textHelper.GetTranslatedText(textKey, CultureInfo.InvariantCulture, withColors: false, arguments);
         }
         else
         {
