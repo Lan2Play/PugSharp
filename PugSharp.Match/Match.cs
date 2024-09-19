@@ -49,7 +49,7 @@ public class Match : IDisposable
 
     public event EventHandler<MatchFinalizedEventArgs>? MatchFinalized;
 
-    public IEnumerable<MatchPlayer> AllMatchPlayers => MatchInfo?.MatchTeam1.Players.Concat(MatchInfo.MatchTeam2.Players) ?? Enumerable.Empty<MatchPlayer>();
+    public IEnumerable<MatchPlayer> AllMatchPlayers => MatchInfo?.MatchTeam1.Players.Concat(MatchInfo.MatchTeam2.Players) ?? [];
 
     internal Match(IServiceProvider serviceProvider, ILogger<Match> logger, IApiProvider apiProvider, ITextHelper textHelper, ICsServer csServer, ICssDispatcher cssDispatcher, Config.MatchConfig matchConfig) :
         this(serviceProvider, logger, apiProvider, textHelper, csServer, cssDispatcher)

@@ -12,6 +12,7 @@ namespace PugSharp;
 public sealed partial class G5CommandProvider : ICommandProvider
 {
     private const int _RegexTimeout = 1000;
+    private const string _NotSupported = "Not yet supported!";
     private readonly ILogger<G5ApiProvider> _Logger;
     private readonly ICsServer _CsServer;
 
@@ -48,57 +49,57 @@ public sealed partial class G5CommandProvider : ICommandProvider
 
     private IEnumerable<string> CommandLoadBackUpUrl(string[] arg)
     {
-        return new[] { "Not yet supported!" };
+        return new[] { _NotSupported };
     }
 
     private IEnumerable<string> CommandLoadBackUp(string[] arg)
     {
-        return new[] { "Not yet supported!" };
+        return new[] { _NotSupported };
     }
 
     private IEnumerable<string> CommandListBackUps(string[] arg)
     {
-        return new[] { "Not yet supported!" };
+        return new[] { _NotSupported };
     }
 
     private IEnumerable<string> CommandRemovePlayer(string[] arg)
     {
-        return new[] { "Not yet supported!" };
+        return new[] { _NotSupported };
     }
 
     private IEnumerable<string> CommandAddCoach(string[] arg)
     {
-        return new[] { "Not yet supported!" };
+        return new[] { _NotSupported };
     }
 
     private IEnumerable<string> CommandAddPlayer(string[] arg)
     {
-        return new[] { "Not yet supported!" };
+        return new[] { _NotSupported };
     }
 
     private IEnumerable<string> CommandSmUnpause(string[] arg)
     {
         _CsServer.ExecuteCommand("css_unpause");
-        return Enumerable.Empty<string>();
+        return [];
     }
 
     private IEnumerable<string> CommandSmPause(string[] arg)
     {
         _CsServer.ExecuteCommand("css_pause");
-        return Enumerable.Empty<string>();
+        return [];
     }
 
     private IEnumerable<string> CommandEndMatch(string[] arg)
     {
         _CsServer.ExecuteCommand("ps_stopmatch");
-        return Enumerable.Empty<string>();
+        return [];
     }
 
     private IEnumerable<string> CommandLoadMatchUrl(string[] args)
     {
         // TODO reply from G5Api is different than the callback from eventula! All the cvars are ignored
         _CsServer.ExecuteCommand($"ps_loadconfig {string.Join(' ', args.Skip(1).Where(x => !x.Contains("Authorization", StringComparison.OrdinalIgnoreCase)).Select(x => $"\"{x}\""))}");
-        return Enumerable.Empty<string>();
+        return [];
     }
 
     internal class Get5Status
@@ -176,7 +177,7 @@ public sealed partial class G5CommandProvider : ICommandProvider
             _Logger.LogError("The 'steam.inf' file was not found in the root directory of Counter-Strike 2. Path: \"{steamInfPath}\"", steamInfPath);
         }
 
-        return Enumerable.Empty<string>();
+        return [];
     }
 
     private sealed class G5WebAvailable

@@ -149,7 +149,7 @@ public partial class G5ApiProvider : IApiProvider
     public Task FinalizeMapAsync(MapResultParams finalizeMapParams, CancellationToken cancellationToken)
     {
         var (CtScore, TScore) = _CsServer.LoadTeamsScore();
-        var emptyStatsTeam = new StatsTeam(string.Empty, string.Empty, 0, 0, 0, 0, Enumerable.Empty<StatsPlayer>());
+        var emptyStatsTeam = new StatsTeam(string.Empty, string.Empty, 0, 0, 0, 0, []);
 
         var mapResultEvent = new MapResultEvent
         {
