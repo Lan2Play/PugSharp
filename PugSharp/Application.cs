@@ -57,7 +57,7 @@ public class Application : IApplication
     public Application(
         ILogger<Application> logger,
         IBasePlugin plugin,
-        ICsServer csServer, G5ApiClient
+        ICsServer csServer,
         MultiApiProvider apiProvider,
         G5CommandProvider g5CommandProvider,
         ITextHelper textHelper,
@@ -176,12 +176,17 @@ public class Application : IApplication
 
     private HookResult OnPlayerConnectFull(EventPlayerConnectFull eventPlayerConnectFull, GameEventInfo info)
     {
+        if (eventPlayerConnectFull == null)
+        {
+            return HookResult.Continue;
+        }
+
         var userId = eventPlayerConnectFull.Userid;
 
         if (userId != null && userId.IsValid)
         {
             // Userid will give you a reference to a CCSPlayerController class
-            _Logger.LogInformation("Player {playerName} has connected!", userId.PlayerName);
+            _Logger.LogInformation("Player {PlayerName} has connected!", userId.PlayerName);
 
             if (userId.IsHLTV)
             {
@@ -190,11 +195,11 @@ public class Application : IApplication
 
             if (_Match != null)
             {
-                if (!_Match.PlayerBelongsToMatch(eventPlayerConnectFull.Userid.SteamID))
+                if (!_Match.PlayerBelongsToMatch(userId.SteamID))
                 {
-                    _Logger.LogInformation("Player {playerName} does not belong to the match!", userId.PlayerName);
+                    _Logger.LogInformation("Player {PlayerName} does not belong to the match!", userId.PlayerName);
 
-                    eventPlayerConnectFull.Userid.Kick();
+                    userId.Kick();
                     return HookResult.Continue;
                 }
 
@@ -216,8 +221,8 @@ public class Application : IApplication
             }
             else if (_ServerConfig?.AllowPlayersWithoutMatch == false)
             {
-                eventPlayerConnectFull.Userid.PrintToCenter("Joining without a match is not allowed!");
-                eventPlayerConnectFull.Userid.Kick();
+                userId.PrintToCenter("Joining without a match is not allowed!");
+                userId.Kick();
             }
             else
             {
@@ -234,17 +239,17 @@ public class Application : IApplication
 
     public HookResult OnPlayerTeam(EventPlayerTeam eventPlayerTeam, GameEventInfo info)
     {
-        _Logger.LogInformation("OnPlayerTeam called. {playerName} tries to join {team} IsHLTV: {isHLTV} IsBot {isBot}", eventPlayerTeam.Userid.PlayerName, eventPlayerTeam.Team, eventPlayerTeam.Userid.IsHLTV, eventPlayerTeam.Userid.IsBot);
+        _Logger.LogInformation("OnPlayerTeam called. {PlayerName} tries to join {Team} IsHLTV: {IsHLTV} IsBot {IsBot}", eventPlayerTeam.Userid?.PlayerName, eventPlayerTeam.Team, eventPlayerTeam.Userid?.IsHLTV, eventPlayerTeam.Userid?.IsBot);
 
         // Ignore SourceTV
-        if (eventPlayerTeam.Userid.IsHLTV)
+        if (eventPlayerTeam.Userid == null || eventPlayerTeam.Userid.IsHLTV)
         {
             return HookResult.Continue;
         }
 
         if (_Match != null)
         {
-            CheckMatchPlayerTeam(eventPlayerTeam.Userid, eventPlayerTeam.Team);
+            _ = CheckMatchPlayerTeamAsync(eventPlayerTeam.Userid, eventPlayerTeam.Team);
         }
         else
         {
@@ -254,7 +259,7 @@ public class Application : IApplication
         return HookResult.Continue;
     }
 
-    private async void CheckMatchPlayerTeam(CCSPlayerController playerController, int team)
+    private async Task CheckMatchPlayerTeamAsync(CCSPlayerController playerController, int team)
     {
         if (_Match == null || !playerController.IsValid)
         {
@@ -284,10 +289,10 @@ public class Application : IApplication
                 await Task.Delay(_SwitchPlayerDelay, _CancellationTokenSource.Token).ConfigureAwait(false);
                 _Dispatcher.NextFrame(() =>
                 {
-                    _Logger.LogInformation("Player {playerName} tried to join {team} but should be in {configTeam}!", userName, team, configTeam);
+                    _Logger.LogInformation("Player {PlayerName} tried to join {Team} but should be in {ConfigTeam}!", userName, team, configTeam);
                     var player = new Player(steamId);
 
-                    _Logger.LogInformation("Switch {playerName} to team {team}!", player.PlayerName, configTeam);
+                    _Logger.LogInformation("Switch {PlayerName} to team {Team}!", player.PlayerName, configTeam);
                     player.SwitchTeam(configTeam);
                 });
             }
@@ -298,8 +303,13 @@ public class Application : IApplication
     {
         var userId = eventPlayerDisconnect.Userid;
 
+        if (userId == null)
+        {
+            return HookResult.Continue;
+        }
+
         // Userid will give you a reference to a CCSPlayerController class
-        _Logger.LogInformation("Player {playerName} has disconnected!", userId.PlayerName);
+        _Logger.LogInformation("Player {PlayerName} has disconnected!", userId.PlayerName);
 
         _Match?.SetPlayerDisconnected(new Player(userId.SteamID));
 
@@ -323,7 +333,7 @@ public class Application : IApplication
         {
             _Dispatcher.NextWorldUpdate(() =>
             {
-                CheckMatchPlayerTeam(userId, userId.TeamNum);
+                _ = CheckMatchPlayerTeamAsync(userId, userId.TeamNum);
             });
         }
 
@@ -333,17 +343,14 @@ public class Application : IApplication
 
     private void OnMapStartHandler(string mapName)
     {
-        if (_Match != null)
+        if (_Match != null && _Match.CurrentState is MatchState.WaitingForPlayersConnectedReady or MatchState.WaitingForPlayersReady)
         {
-            if (_Match.CurrentState is MatchState.WaitingForPlayersConnectedReady or MatchState.WaitingForPlayersReady)
-            {
-                _CsServer.LoadAndExecuteConfig("warmup.cfg");
+            _CsServer.LoadAndExecuteConfig("warmup.cfg");
 
-                _Dispatcher.NextFrame(() =>
-                {
-                    SetMatchVariable();
-                });
-            }
+            _Dispatcher.NextFrame(() =>
+            {
+                SetMatchVariable();
+            });
         }
     }
 
@@ -475,33 +482,39 @@ public class Application : IApplication
             return HookResult.Continue;
         }
 
-        if (_Match.CurrentState == MatchState.MatchRunning)
+        if (_Match.CurrentState != MatchState.MatchRunning)
         {
-            var mvp = eventRoundMvp.Userid;
-            var mvpStats = _CurrentRoundState.GetPlayerRoundStats(mvp.SteamID, mvp.PlayerName);
+            return HookResult.Continue;
+        }
 
-            mvpStats.Mvp = true;
+        var mvp = eventRoundMvp.Userid;
+        if (mvp == null)
+        {
+            return HookResult.Continue;
+        }
 
-            // Report MVP
-            if (mvp.UserId.HasValue)
+        var mvpStats = _CurrentRoundState.GetPlayerRoundStats(mvp.SteamID, mvp.PlayerName);
+        mvpStats.Mvp = true;
+
+        // Report MVP
+        if (mvp.UserId.HasValue)
+        {
+            var roundMvpParams = new RoundMvpParams(
+            _Match.MatchInfo.Config.MatchId,
+            _Match.MatchInfo.CurrentMap.MapNumber,
+            _Match.MatchInfo.CurrentMap.Team1Points + _Match.MatchInfo.CurrentMap.Team2Points,
+            new ApiPlayer
             {
-                var roundMvpParams = new RoundMvpParams(
-                _Match.MatchInfo.Config.MatchId,
-                _Match.MatchInfo.CurrentMap.MapNumber,
-                _Match.MatchInfo.CurrentMap.Team1Points + _Match.MatchInfo.CurrentMap.Team2Points,
-                new ApiPlayer
-                {
-                    UserId = mvp.UserId.Value,
-                    SteamId = mvp.SteamID,
-                    IsBot = mvp.IsBot,
-                    Name = mvp.PlayerName,
-                    Side = mvp.TeamNum,
-                },
-                eventRoundMvp.Reason
-                );
+                UserId = mvp.UserId.Value,
+                SteamId = mvp.SteamID,
+                IsBot = mvp.IsBot,
+                Name = mvp.PlayerName,
+                Side = mvp.TeamNum,
+            },
+            eventRoundMvp.Reason
+            );
 
-                _ = _ApiProvider.RoundMvpAsync(roundMvpParams, CancellationToken.None);
-            }
+            _ = _ApiProvider.RoundMvpAsync(roundMvpParams, CancellationToken.None);
         }
 
         return HookResult.Continue;
@@ -526,45 +539,42 @@ public class Application : IApplication
             return HookResult.Continue;
         }
 
-        if (_Match.CurrentState == MatchState.None)
+        if (_Match.CurrentState != MatchState.MatchRunning)
         {
             return HookResult.Continue;
         }
 
-        if (_Match.CurrentState == MatchState.MatchRunning && eventPlayerHurt.Attacker.IsValid)
+        var attacker = eventPlayerHurt.Attacker;
+        if (attacker == null || !attacker.IsValid)
         {
-            var attacker = eventPlayerHurt.Attacker;
+            return HookResult.Continue;
+        }
 
-            if (attacker == null)
+        var victim = eventPlayerHurt.Userid;
+        if (victim == null || !victim.IsValid)
+        {
+            return HookResult.Continue;
+        }
+
+        var attackerSide = attacker.TeamNum;
+        var victimSide = victim.TeamNum;
+
+        var weapon = eventPlayerHurt.Weapon;
+        var isUtility = CounterStrikeSharpExtensions.IsUtility(weapon);
+
+        var attackerStats = _CurrentRoundState.GetPlayerRoundStats(attacker.SteamID, attacker.PlayerName);
+        var victimHealth = victim.Health;
+
+        var damageCapped = eventPlayerHurt.DmgHealth > victimHealth ? victimHealth : eventPlayerHurt.DmgHealth;
+
+        // Don't count friendlydamage
+        if (attackerSide != victimSide)
+        {
+            attackerStats.Damage += damageCapped;
+
+            if (isUtility)
             {
-                return HookResult.Continue;
-            }
-
-            var attackerSide = eventPlayerHurt.Attacker.TeamNum;
-
-            var victim = eventPlayerHurt.Userid;
-
-            var victimSide = eventPlayerHurt.Userid.TeamNum;
-
-            var weapon = eventPlayerHurt.Weapon;
-
-            var isUtility = CounterStrikeSharpExtensions.IsUtility(weapon);
-
-            var attackerStats = _CurrentRoundState.GetPlayerRoundStats(attacker.SteamID, attacker.PlayerName);
-
-            var victimHealth = victim.Health;
-
-            var damageCapped = eventPlayerHurt.DmgHealth > victimHealth ? victimHealth : eventPlayerHurt.DmgHealth;
-
-            // Don't count friendlydamage
-            if (attackerSide != victimSide)
-            {
-                attackerStats.Damage += damageCapped;
-
-                if (isUtility)
-                {
-                    attackerStats.UtilityDamage += damageCapped;
-                }
+                attackerStats.UtilityDamage += damageCapped;
             }
         }
 
@@ -583,21 +593,25 @@ public class Application : IApplication
             return HookResult.Continue;
         }
 
-        if (_Match.CurrentState <= MatchState.WaitingForPlayersReady && eventPlayerDeath.Userid.InGameMoneyServices != null)
+        var victim = eventPlayerDeath.Userid;
+        if (victim == null || !victim.IsValid)
+        {
+            return HookResult.Continue;
+        }
+
+        if (_Match.CurrentState <= MatchState.WaitingForPlayersReady && victim.InGameMoneyServices != null)
         {
             int maxMoneyValue = 16000;
-            eventPlayerDeath.Userid.InGameMoneyServices.Account = maxMoneyValue;
+            victim.InGameMoneyServices.Account = maxMoneyValue;
         }
 
         if (_Match.CurrentState == MatchState.MatchRunning)
         {
-            var victim = eventPlayerDeath.Userid;
-
-            var victimSide = (TeamConstants)eventPlayerDeath.Userid.TeamNum;
+            var victimSide = (TeamConstants)victim.TeamNum;
 
             var attacker = eventPlayerDeath.Attacker;
 
-            var attackerSide = eventPlayerDeath.Attacker == null || !eventPlayerDeath.Attacker.IsValid ? TeamConstants.TEAM_INVALID : (TeamConstants)eventPlayerDeath.Attacker.TeamNum;
+            var attackerSide = attacker == null || !attacker.IsValid ? TeamConstants.TEAM_INVALID : (TeamConstants)attacker.TeamNum;
 
             CCSPlayerController? assister = eventPlayerDeath.Assister;
 
@@ -738,46 +752,49 @@ public class Application : IApplication
             return HookResult.Continue;
         }
 
-        if (_Match.CurrentState == MatchState.None)
+        if (_Match.CurrentState != MatchState.MatchRunning)
         {
             return HookResult.Continue;
         }
 
-        if (_Match.CurrentState == MatchState.MatchRunning)
+        var attacker = eventPlayerBlind.Attacker;
+        if (attacker == null || !attacker.IsValid)
         {
+            return HookResult.Continue;
+        }
 
-            var victim = eventPlayerBlind.Userid;
+        var victim = eventPlayerBlind.Userid;
+        if (victim == null || !victim.IsValid)
+        {
+            return HookResult.Continue;
+        }
 
-            var victimSide = eventPlayerBlind.Userid.TeamNum;
+        var victimSide = victim.TeamNum;
+        var attackerSide = attacker.TeamNum;
 
-            var attacker = eventPlayerBlind.Attacker;
+        if (attacker == victim)
+        {
+            return HookResult.Continue;
+        }
 
-            var attackerSide = eventPlayerBlind.Attacker.TeamNum;
+        bool isFriendlyFire = victimSide == attackerSide;
 
-            if (attacker == victim)
+        // 2.5 is an arbitrary value that closely matches the "enemies flashed" column of the in-game
+        // scoreboard.
+        const double requieredenemiesFlashedDuration = 2.5;
+        if (eventPlayerBlind.BlindDuration >= requieredenemiesFlashedDuration)
+        {
+            var attackerStats = _CurrentRoundState.GetPlayerRoundStats(attacker.SteamID, attacker.PlayerName);
+
+            if (isFriendlyFire)
             {
-                return HookResult.Continue;
+                attackerStats.FriendliesFlashed++;
+            }
+            else
+            {
+                attackerStats.EnemiesFlashed++;
             }
 
-            bool isFriendlyFire = victimSide == attackerSide;
-
-            // 2.5 is an arbitrary value that closely matches the "enemies flashed" column of the in-game
-            // scoreboard.
-            const double requieredenemiesFlashedDuration = 2.5;
-            if (eventPlayerBlind.BlindDuration >= requieredenemiesFlashedDuration)
-            {
-                var attackerStats = _CurrentRoundState.GetPlayerRoundStats(attacker.SteamID, attacker.PlayerName);
-
-                if (isFriendlyFire)
-                {
-                    attackerStats.FriendliesFlashed++;
-                }
-                else
-                {
-                    attackerStats.EnemiesFlashed++;
-                }
-
-            }
         }
 
         return HookResult.Continue;
@@ -790,18 +807,19 @@ public class Application : IApplication
             return HookResult.Continue;
         }
 
-        if (_Match.CurrentState == MatchState.None)
+        if (_Match.CurrentState != MatchState.MatchRunning)
         {
             return HookResult.Continue;
         }
 
-        if (_Match.CurrentState == MatchState.MatchRunning)
+        var planter = eventBombPlanted.Userid;
+        if (planter == null || !planter.IsValid)
         {
-            var planter = eventBombPlanted.Userid;
-            var planterStats = _CurrentRoundState.GetPlayerRoundStats(planter.SteamID, planter.PlayerName);
-
-            planterStats.BombPlanted = true;
+            return HookResult.Continue;
         }
+
+        var planterStats = _CurrentRoundState.GetPlayerRoundStats(planter.SteamID, planter.PlayerName);
+        planterStats.BombPlanted = true;
 
         return HookResult.Continue;
     }
@@ -813,18 +831,19 @@ public class Application : IApplication
             return HookResult.Continue;
         }
 
-        if (_Match.CurrentState == MatchState.None)
+        if (_Match.CurrentState != MatchState.MatchRunning)
         {
             return HookResult.Continue;
         }
 
-        if (_Match.CurrentState == MatchState.MatchRunning)
+        var defuser = eventBombDefused.Userid;
+        if (defuser == null || !defuser.IsValid)
         {
-            var defuser = eventBombDefused.Userid;
-            var defuserStats = _CurrentRoundState.GetPlayerRoundStats(defuser.SteamID, defuser.PlayerName);
-
-            defuserStats.BombDefused = true;
+            return HookResult.Continue;
         }
+
+        var defuserStats = _CurrentRoundState.GetPlayerRoundStats(defuser.SteamID, defuser.PlayerName);
+        defuserStats.BombDefused = true;
 
         return HookResult.Continue;
     }
@@ -840,7 +859,7 @@ public class Application : IApplication
         _Logger.LogInformation("OnClientCommandJoinTeam was called!");
         if (player != null && player.IsValid)
         {
-            _Logger.LogInformation("Player {playerName} tried to switch team!", player.PlayerName);
+            _Logger.LogInformation("Player {PlayerName} tried to switch team!", player.PlayerName);
         }
 
         return HookResult.Stop;
@@ -860,7 +879,6 @@ public class Application : IApplication
 
         HandleCommand((p, c) =>
         {
-
             if (_Match != null)
             {
                 c.ReplyToCommand(_TextHelper, nameof(Resources.PugSharp_Command_Error_MatchRunning), _Match.MatchInfo.Config.MatchId, p != null ? "!stopmatch" : "ps_stopmatch");
@@ -1003,7 +1021,7 @@ public class Application : IApplication
                 var files = Directory.EnumerateFiles(csgoDirectory, fileNameWildcard);
                 foreach (var file in files)
                 {
-                    _Logger.LogInformation("found posisble Backup: {file} ", file);
+                    _Logger.LogInformation("found posisble Backup: {File} ", file);
                 }
 
                 const int last2Chars = 2;
@@ -1018,7 +1036,7 @@ public class Application : IApplication
                 }
             }
 
-            _Logger.LogInformation("Start restoring match {matchid}!", matchId);
+            _Logger.LogInformation("Start restoring match {Matchid}!", matchId);
 
 
             var roundBackupFile = string.Create(CultureInfo.InvariantCulture, $"PugSharp_Match_{matchId}_round{roundToRestore:D2}.txt");
@@ -1039,7 +1057,7 @@ public class Application : IApplication
             var matchInfoStream = File.OpenRead(matchInfoFileName);
             await using (matchInfoStream.ConfigureAwait(false))
             {
-                var matchInfo = await JsonSerializer.DeserializeAsync<MatchInfo>(matchInfoStream).ConfigureAwait(false);
+                var matchInfo = await JsonSerializer.DeserializeAsync<MatchInfo>(matchInfoStream, cancellationToken: _CancellationTokenSource.Token).ConfigureAwait(false);
 
                 if (matchInfo == null)
                 {
@@ -1322,7 +1340,7 @@ public class Application : IApplication
             var oldPlayersPerTeam = _ConfigCreator!.Config.PlayersPerTeam;
             _ConfigCreator.Config.PlayersPerTeam = playersPerTeam;
             _ConfigCreator.Config.MinPlayersToReady = playersPerTeam;
-            c.ReplyToCommand($"Changed players per team from {oldPlayersPerTeam} to {playersPerTeam}");
+            c.ReplyToCommand(string.Create(CultureInfo.InvariantCulture, $"Changed players per team from {oldPlayersPerTeam} to {playersPerTeam}"));
         },
         command,
         player);
@@ -1400,11 +1418,11 @@ public class Application : IApplication
 
             c.ReplyToCommand($"Info Match {config.MatchId}");
             c.ReplyToCommand($"Maplist: {string.Join(", ", config.Maplist)}");
-            c.ReplyToCommand($"Number of Maps: {config.NumMaps}");
-            c.ReplyToCommand($"Players per Team: {config.PlayersPerTeam}");
-            c.ReplyToCommand($"Max rounds: {config.MaxRounds}");
-            c.ReplyToCommand($"Max overtime rounds: {config.MaxOvertimeRounds}");
-            c.ReplyToCommand($"Vote timeout: {config.VoteTimeout}");
+            c.ReplyToCommand(string.Create(CultureInfo.CurrentUICulture, $"Number of Maps: {config.NumMaps}"));
+            c.ReplyToCommand(string.Create(CultureInfo.CurrentUICulture, $"Players per Team: {config.PlayersPerTeam}"));
+            c.ReplyToCommand(string.Create(CultureInfo.CurrentUICulture, $"Max rounds: {config.MaxRounds}"));
+            c.ReplyToCommand(string.Create(CultureInfo.CurrentUICulture, $"Max overtime rounds: {config.MaxOvertimeRounds}"));
+            c.ReplyToCommand(string.Create(CultureInfo.CurrentUICulture, $"Vote timeout: {config.VoteTimeout}"));
             c.ReplyToCommand($"Allow suicide: {config.AllowSuicide}");
             c.ReplyToCommand($"Team mode: {config.TeamMode}");
         },
@@ -1419,9 +1437,7 @@ public class Application : IApplication
     {
         HandleCommand((_, c) =>
         {
-            _Logger.LogInformation("################ dump match ################");
-            _Logger.LogInformation("{matchJson}", JsonSerializer.Serialize(_Match));
-            _Logger.LogInformation("################ dump match ################");
+            _Logger.LogInformation("################ dump match ################\n{MatchJson}\n################ dump match ################", JsonSerializer.Serialize(_Match));
         },
         command,
         player);
@@ -1781,7 +1797,7 @@ public class Application : IApplication
                 c.ReplyToCommand("Suicide is not allowed during this match!");
             }
 
-            p.Pawn.Value?.CommitSuicide(true, true);
+            p.Pawn.Value?.CommitSuicide(explode: true, force: true);
         },
         command,
         player);
@@ -1844,18 +1860,18 @@ public class Application : IApplication
         {
             if (player != null)
             {
-                _Logger.LogInformation("Command \"{commandName} {args}\" called by player with SteamID {steamId}.", commandName, args ?? string.Empty, player.SteamID);
+                _Logger.LogInformation("Command \"{CommandName} {Args}\" called by player with SteamID {SteamId}.", commandName, args ?? string.Empty, player.SteamID);
             }
             else
             {
-                _Logger.LogInformation("Command \"{commandName} {args}\" called.", commandName, args ?? string.Empty);
+                _Logger.LogInformation("Command \"{CommandName} {Args}\" called.", commandName, args ?? string.Empty);
             }
 
             commandAction(player, commandInfo);
         }
         catch (Exception e)
         {
-            _Logger.LogError(e, "Error executing command {command}", commandName);
+            _Logger.LogError(e, "Error executing command {Command}", commandName);
             commandInfo.ReplyToCommand($"Error executing command \"{commandName}\"!");
         }
     }
@@ -1867,18 +1883,18 @@ public class Application : IApplication
         {
             if (player != null)
             {
-                _Logger.LogInformation("Command \"{commandName} {args}\" called by player with SteamID {steamId}.", commandName, args ?? string.Empty, player.SteamID);
+                _Logger.LogInformation("Command \"{CommandName} {Args}\" called by player with SteamID {SteamId}.", commandName, args ?? string.Empty, player.SteamID);
             }
             else
             {
-                _Logger.LogInformation("Command \"{commandName} {args}\" called.", commandName, args ?? string.Empty);
+                _Logger.LogInformation("Command \"{CommandName} {Args}\" called.", commandName, args ?? string.Empty);
             }
 
             await commandAction(player, commandInfo).ConfigureAwait(false);
         }
         catch (Exception e)
         {
-            _Logger.LogError(e, "Error executing command {command}", commandName);
+            _Logger.LogError(e, "Error executing command {Command}", commandName);
         }
     }
 
@@ -1888,7 +1904,7 @@ public class Application : IApplication
     private async Task ConfigLoaderTask()
     {
         // Delay before first call. Otherwise it crashes sometimes during GetPlayers
-        await Task.Delay(_ConfigLoadDelay).ConfigureAwait(false);
+        await Task.Delay(_ConfigLoadDelay, _CancellationTokenSource.Token).ConfigureAwait(false);
         while (await _ConfigTimer.WaitForNextTickAsync(_CancellationTokenSource.Token).ConfigureAwait(false))
         {
             if (_Match == null || _Match.CurrentState == MatchState.WaitingForPlayersConnectedReady || _Match.CurrentState == MatchState.WaitingForPlayersReady)
@@ -1916,7 +1932,7 @@ public class Application : IApplication
     #region Utils
 
     // TODO put somewhere else?
-    private IReadOnlyDictionary<ulong, IPlayerRoundResults> CreatePlayerResults()
+    private Dictionary<ulong, IPlayerRoundResults> CreatePlayerResults()
     {
         var dict = new Dictionary<ulong, IPlayerRoundResults>();
 
@@ -1976,12 +1992,12 @@ public class Application : IApplication
         // Allow players to select their team
         if (_Match.MatchInfo.Config.TeamMode == TeamMode.PlayerSelect)
         {
-            _CsServer.UpdateConvar("sv_disable_teamselect_menu", false);
+            _CsServer.UpdateConvar("sv_disable_teamselect_menu", value: false);
             _CsServer.UpdateConvar("sv_human_autojoin_team", (int)Match.Contract.Team.None);
         }
         else
         {
-            _CsServer.UpdateConvar("sv_disable_teamselect_menu", true);
+            _CsServer.UpdateConvar("sv_disable_teamselect_menu", value: true);
             _CsServer.UpdateConvar("sv_human_autojoin_team", (int)Match.Contract.Team.Terrorist);
         }
 
@@ -2105,6 +2121,9 @@ public class Application : IApplication
             if (disposing)
             {
                 StopMatch();
+
+                _CancellationTokenSource.Cancel();
+                _CancellationTokenSource.Dispose();
             }
 
             _DisposedValue = true;

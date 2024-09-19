@@ -47,34 +47,34 @@ public sealed partial class G5CommandProvider : ICommandProvider
         yield return JsonSerializer.Serialize(new G5WebAvailable());
     }
 
-    private IEnumerable<string> CommandLoadBackUpUrl(string[] arg)
+    private string[] CommandLoadBackUpUrl(string[] arg)
     {
-        return new[] { _NotSupported };
+        return [_NotSupported];
     }
 
-    private IEnumerable<string> CommandLoadBackUp(string[] arg)
+    private string[] CommandLoadBackUp(string[] arg)
     {
-        return new[] { _NotSupported };
+        return [_NotSupported];
     }
 
-    private IEnumerable<string> CommandListBackUps(string[] arg)
+    private string[] CommandListBackUps(string[] arg)
     {
-        return new[] { _NotSupported };
+        return [_NotSupported];
     }
 
-    private IEnumerable<string> CommandRemovePlayer(string[] arg)
+    private string[] CommandRemovePlayer(string[] arg)
     {
-        return new[] { _NotSupported };
+        return [_NotSupported];
     }
 
-    private IEnumerable<string> CommandAddCoach(string[] arg)
+    private string[] CommandAddCoach(string[] arg)
     {
-        return new[] { _NotSupported };
+        return [_NotSupported];
     }
 
-    private IEnumerable<string> CommandAddPlayer(string[] arg)
+    private string[] CommandAddPlayer(string[] arg)
     {
-        return new[] { _NotSupported };
+        return [_NotSupported];
     }
 
     private IEnumerable<string> CommandSmUnpause(string[] arg)
@@ -102,7 +102,7 @@ public sealed partial class G5CommandProvider : ICommandProvider
         return [];
     }
 
-    internal class Get5Status
+    internal sealed class Get5Status
     {
         [JsonPropertyName("plugin_version")]
         public required string PluginVersion { get; set; }
@@ -111,9 +111,9 @@ public sealed partial class G5CommandProvider : ICommandProvider
         public int GameState { get; set; }
     }
 
-    private IEnumerable<string> CommandGet5Status(string[] args)
+    private string[] CommandGet5Status(string[] args)
     {
-        return new[] { JsonSerializer.Serialize(new Get5Status { PluginVersion = "0.15.0", GameState = 0 }) };
+        return [JsonSerializer.Serialize(new Get5Status { PluginVersion = "0.15.0", GameState = 0 })];
     }
 
     [GeneratedRegex(@"PatchVersion=(?<version>[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+)", RegexOptions.ExplicitCapture, _RegexTimeout)]
@@ -156,7 +156,7 @@ public sealed partial class G5CommandProvider : ICommandProvider
                 var serverVersion = LoadSteamInfValue(steamInf, ServerVersionRegex(), "version", errors);
                 var productName = LoadSteamInfValue(steamInf, ProductNameRegex(), "productname", errors);
 
-                if (errors.Any())
+                if (errors.Count != 0)
                 {
                     return errors;
                 }
@@ -174,7 +174,7 @@ public sealed partial class G5CommandProvider : ICommandProvider
         }
         else
         {
-            _Logger.LogError("The 'steam.inf' file was not found in the root directory of Counter-Strike 2. Path: \"{steamInfPath}\"", steamInfPath);
+            _Logger.LogError("The 'steam.inf' file was not found in the root directory of Counter-Strike 2. Path: \"{SteamInfPath}\"", steamInfPath);
         }
 
         return [];
