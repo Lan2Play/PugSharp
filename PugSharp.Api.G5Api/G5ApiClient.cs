@@ -23,7 +23,7 @@ public sealed class G5ApiClient
 
     public void Initialize(string g5ApiUrl, string g5ApiHeader, string g5ApiHeaderValue)
     {
-        _Logger.LogInformation("Initialize G5Api with BaseUrl: {url}", g5ApiUrl);
+        _Logger.LogInformation("Initialize G5Api with BaseUrl: {Url}", g5ApiUrl);
 
         var modifiedApiUrl = g5ApiUrl;
 
@@ -60,17 +60,17 @@ public sealed class G5ApiClient
 
             if (httpResponseMessage == null)
             {
-                _Logger.LogError("G5 API request {event} failed. No HTTP status code available.", eventToSend.EventName);
+                _Logger.LogError("G5 API request {Event} failed. No HTTP status code available.", eventToSend.EventName);
                 return false;
             }
 
             if (httpResponseMessage.IsSuccessStatusCode)
             {
-                _Logger.LogInformation("G5 API request {event} was successful, HTTP status code = {statusCode}", eventToSend.EventName, httpResponseMessage.StatusCode);
+                _Logger.LogInformation("G5 API request {Event} was successful, HTTP status code = {StatusCode}", eventToSend.EventName, httpResponseMessage.StatusCode);
                 return true;
             }
 
-            _Logger.LogError("G5 API request {event} failed. HTTP status code = {statusCode} content: {content}", eventToSend.EventName, httpResponseMessage.StatusCode, httpResponseMessage.Content.ToString());
+            _Logger.LogError("G5 API request {Event} failed. HTTP status code = {statusCode} content: {Content}", eventToSend.EventName, httpResponseMessage.StatusCode, httpResponseMessage.Content.ToString());
 
             return false;
         }

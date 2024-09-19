@@ -64,7 +64,7 @@ public class Match : IDisposable
         _RoundBackupFile = roundBackupFile;
         Initialize(matchInfo);
         InitializeStateMachine();
-        _Logger.LogInformation("Continue Match on map {mapNumber}({mapName})!", MatchInfo!.CurrentMap.MapNumber, MatchInfo.CurrentMap.MapName);
+        _Logger.LogInformation("Continue Match on map {MapNumber}({MapName})!", MatchInfo!.CurrentMap.MapNumber, MatchInfo.CurrentMap.MapName);
     }
 
     private Match(IServiceProvider serviceProvider, ILogger<Match> logger, IApiProvider apiProvider, ITextHelper textHelper, ICsServer csServer, ICssDispatcher cssDispatcher)
@@ -98,7 +98,7 @@ public class Match : IDisposable
         _ReadyReminderTimer.Elapsed += ReadyReminderTimer_Elapsed;
 
         MatchInfo.CurrentMap = matchInfo.MatchMaps.LastOrDefault(x => !string.IsNullOrEmpty(x.MapName)) ?? matchInfo.MatchMaps[matchInfo.MatchMaps.Count - 1];
-        _Logger.LogInformation("Continue Match on map {mapNumber}({mapName})!", MatchInfo.CurrentMap.MapNumber, MatchInfo.CurrentMap.MapName);
+        _Logger.LogInformation("Continue Match on map {MapNumber}({MapName})!", MatchInfo.CurrentMap.MapNumber, MatchInfo.CurrentMap.MapName);
 
         if (!string.IsNullOrEmpty(MatchInfo.Config.EventulaDemoUploadUrl) && !string.IsNullOrEmpty(MatchInfo.Config.EventulaApistatsToken))
         {
@@ -332,8 +332,8 @@ public class Match : IDisposable
         MatchInfo.CurrentMap.Team1Points = team1Results.Score;
         MatchInfo.CurrentMap.Team2Points = team2Results.Score;
 
-        _Logger.LogInformation("Team 1: {teamSide} : {teamScore}", MatchInfo.MatchTeam1.CurrentTeamSide, team1Results.Score);
-        _Logger.LogInformation("Team 2: {teamSide} : {teamScore}", MatchInfo.MatchTeam2.CurrentTeamSide, team2Results.Score);
+        _Logger.LogInformation("Team 1: {TeamSide} : {TeamScore}", MatchInfo.MatchTeam1.CurrentTeamSide, team1Results.Score);
+        _Logger.LogInformation("Team 2: {TeamSide} : {TeamScore}", MatchInfo.MatchTeam2.CurrentTeamSide, team2Results.Score);
 
         var mapTeamInfo1 = new MapTeamInfo
         {
@@ -361,7 +361,7 @@ public class Match : IDisposable
         var winnerTeam = GetMatchTeam(roundResults.RoundWinner);
         if (winnerTeam == null)
         {
-            _Logger.LogError("WinnerTeam {winner} could not be found.", roundResults.RoundWinner);
+            _Logger.LogError("WinnerTeam {Winner} could not be found.", roundResults.RoundWinner);
             return;
         }
 
@@ -569,7 +569,7 @@ public class Match : IDisposable
 
             while (delay > 0)
             {
-                _Logger.LogInformation("Waiting for sourceTV. Remaining Delay: {delay}s", delay);
+                _Logger.LogInformation("Waiting for sourceTV. Remaining Delay: {Delay}s", delay);
                 var delayLoopTime = Math.Min(_TimeBetweenDelayMessages, delay);
                 await Task.Delay(TimeSpan.FromSeconds(delayLoopTime)).ConfigureAwait(false);
                 delay -= delayLoopTime;
@@ -607,7 +607,7 @@ public class Match : IDisposable
         {
             // TV Delay in s
             var tvDelaySeconds = Math.Max(_CsServer.GetConvar<int>("tv_delay"), _CsServer.GetConvar<int>("tv_delay1"));
-            _Logger.LogInformation("Waiting for sourceTV. Delay: {delay}s + 15s", tvDelaySeconds);
+            _Logger.LogInformation("Waiting for sourceTV. Delay: {Delay}s + 15s", tvDelaySeconds);
             delay += tvDelaySeconds;
         }
 
@@ -630,7 +630,7 @@ public class Match : IDisposable
 
     private void OnMatchStateChanged(StateMachine<MatchState, MatchCommand>.Transition transition)
     {
-        _Logger.LogInformation("MatchState Changed: {source} => {destination}", transition.Source, transition.Destination);
+        _Logger.LogInformation("MatchState Changed: {Source} => {Destination}", transition.Source, transition.Destination);
     }
 
     private void SwitchToMatchMap()
@@ -940,13 +940,13 @@ public class Match : IDisposable
 
     private MatchTeam? GetMatchTeam(ulong steamID)
     {
-        _Logger.LogInformation("GetMatchTeam for {steamId} in MatchTeam1: {team1Ids}", steamID, string.Join(", ", MatchInfo.MatchTeam1.Players.Select(x => x.Player.SteamID)));
+        _Logger.LogInformation("GetMatchTeam for {SteamId} in MatchTeam1: {Team1Ids}", steamID, string.Join(", ", MatchInfo.MatchTeam1.Players.Select(x => x.Player.SteamID)));
         if (MatchInfo.MatchTeam1.Players.Any(x => x.Player.SteamID.Equals(steamID)))
         {
             return MatchInfo.MatchTeam1;
         }
 
-        _Logger.LogInformation("GetMatchTeam for {steamId} in MatchTeam2: {team1Ids}", steamID, string.Join(", ", MatchInfo.MatchTeam2.Players.Select(x => x.Player.SteamID)));
+        _Logger.LogInformation("GetMatchTeam for {SteamId} in MatchTeam2: {Team1Ids}", steamID, string.Join(", ", MatchInfo.MatchTeam2.Players.Select(x => x.Player.SteamID)));
         if (MatchInfo.MatchTeam2.Players.Any(x => x.Player.SteamID.Equals(steamID)))
         {
             return MatchInfo.MatchTeam2;
@@ -1023,7 +1023,7 @@ public class Match : IDisposable
     {
         if (!PlayerBelongsToMatch(player.SteamID))
         {
-            _Logger.LogInformation("Player with steam id {steamId} is no member of this match!", player.SteamID);
+            _Logger.LogInformation("Player with steam id {SteamId} is no member of this match!", player.SteamID);
             return false;
         }
 
@@ -1064,11 +1064,11 @@ public class Match : IDisposable
             startSide = isTeam1 ? Team.Terrorist : Team.CounterTerrorist;
         }
 
-        _Logger.LogInformation("Player {playerName} belongs to {teamName}", player.PlayerName, team.TeamConfig.Name);
+        _Logger.LogInformation("Player {PlayerName} belongs to {TeamName}", player.PlayerName, team.TeamConfig.Name);
 
         if (player.Team != startSide)
         {
-            _Logger.LogInformation("Player {playerName} should be on {startSide} but is {currentTeam}", player.PlayerName, startSide, player.Team);
+            _Logger.LogInformation("Player {PlayerName} should be on {StartSide} but is {CurrentTeam}", player.PlayerName, startSide, player.Team);
 
             player.SwitchTeam(startSide);
         }
@@ -1354,7 +1354,7 @@ public class Match : IDisposable
             MatchInfo.CurrentMap.Team2Points = winner == Team.Terrorist ? tPoints : ctPoints;
         }
 
-        _Logger.LogInformation("The winner is: {winner}", winnerTeam!.TeamConfig.Name);
+        _Logger.LogInformation("The winner is: {Winner}", winnerTeam!.TeamConfig.Name);
         _ = TryFireStateAsync(MatchCommand.CompleteMap);
     }
 

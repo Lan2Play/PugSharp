@@ -51,7 +51,7 @@ public class CsServer : ICsServer
             }
             else
             {
-                _Logger.LogError("TeamName '{name}'is not supported!", team.Teamname);
+                _Logger.LogError("TeamName '{Name}'is not supported!", team.Teamname);
             }
         }
 
@@ -75,7 +75,7 @@ public class CsServer : ICsServer
             {
                 if (value is string stringValue)
                 {
-                    _Logger.LogInformation("Update ConVar {name} to stringvalue {value}", name, stringValue);
+                    _Logger.LogInformation("Update ConVar {Name} to stringvalue {Value}", name, stringValue);
                     ExecuteCommand($"{name} {stringValue}");
                 }
                 else
@@ -84,17 +84,17 @@ public class CsServer : ICsServer
 
                     if (convar == null)
                     {
-                        _Logger.LogError("ConVar {name} couldn't be found", name);
+                        _Logger.LogError("ConVar {Name} couldn't be found", name);
                         return;
                     }
 
-                    _Logger.LogInformation("Update ConVar {name} to value {value}", name, value);
+                    _Logger.LogInformation("Update ConVar {Name} to value {Value}", name, value);
                     convar.SetValue(value);
                 }
             }
             catch (Exception e)
             {
-                _Logger.LogError(e, "Could not set cvar \"{name}\" to value \"{value}\" of type \"{type}\"", name, value, typeof(T).Name);
+                _Logger.LogError(e, "Could not set cvar \"{Name}\" to value \"{Value}\" of type \"{Type}\"", name, value, typeof(T).Name);
             }
         });
     }
@@ -104,7 +104,7 @@ public class CsServer : ICsServer
         var convar = ConVar.Find(name);
         if (convar == null)
         {
-            _Logger.LogError("Convar {name} not found!", name);
+            _Logger.LogError("Convar {Name} not found!", name);
             return default;
         }
 
@@ -139,19 +139,19 @@ public class CsServer : ICsServer
         var absoluteConfigFilePath = Path.Combine(GameDirectory, "csgo", "cfg", "PugSharp", configFileName);
         if (!File.Exists(absoluteConfigFilePath))
         {
-            _Logger.LogError("Config {configFile} was not found on the server.", absoluteConfigFilePath);
+            _Logger.LogError("Config {ConfigFile} was not found on the server.", absoluteConfigFilePath);
             return;
         }
 
         var configFilePath = $"PugSharp/{configFileName}";
 
-        _Logger.LogTrace("Loading {configFilePath} with absolute path {absoluteConfigFilePath}.", configFilePath, absoluteConfigFilePath);
+        _Logger.LogTrace("Loading {ConfigFilePath} with absolute path {AbsoluteConfigFilePath}.", configFilePath, absoluteConfigFilePath);
         ExecuteCommand($"exec {configFilePath}");
     }
 
     public void SetupRoundBackup(string prefix)
     {
-        _Logger.LogInformation("Create round backup files: {prefix}", prefix);
+        _Logger.LogInformation("Create round backup files: {Prefix}", prefix);
         ExecuteCommand($"mp_backup_round_file {prefix}");
     }
 
@@ -166,15 +166,15 @@ public class CsServer : ICsServer
 
             var relativeDemoDirectory = Path.GetRelativePath(Path.Combine(GameDirectory, "csgo"), demoDirectory);
             var relativeDemoFileName = Path.Join(relativeDemoDirectory, demoFileName);
-            _Logger.LogInformation("Starting demo recording, path: {relativeDemoFileName}", relativeDemoFileName);
+            _Logger.LogInformation("Starting demo recording, path: {RelativeDemoFileName}", relativeDemoFileName);
             ExecuteCommand($"tv_record {relativeDemoFileName}");
             var fullDemoPath = Path.Combine(demoDirectory, demoFileName + ".dem");
-            _Logger.LogInformation("Started demo recording, path: \"{relativeDemoFileName}\", full path: \"{fullPath}\"", relativeDemoFileName, fullDemoPath);
+            _Logger.LogInformation("Started demo recording, path: \"{RelativeDemoFileName}\", full path: \"{FullPath}\"", relativeDemoFileName, fullDemoPath);
             return fullDemoPath;
         }
         catch (Exception e)
         {
-            _Logger.LogError(e, "Error Starting DemoRecording. Fallback to tv_record. Fallback to {demoFileName}", demoFileName);
+            _Logger.LogError(e, "Error Starting DemoRecording. Fallback to tv_record. Fallback to {DemoFileName}", demoFileName);
             ExecuteCommand($"tv_record {demoFileName}");
         }
 
@@ -190,7 +190,7 @@ public class CsServer : ICsServer
 
     public void RestoreBackup(string roundBackupFile)
     {
-        _Logger.LogInformation("Restore Backup {backup}", roundBackupFile);
+        _Logger.LogInformation("Restore Backup {Backup}", roundBackupFile);
         ExecuteCommand($"mp_backup_restore_load_file {roundBackupFile}");
     }
 
@@ -212,11 +212,11 @@ public class CsServer : ICsServer
         {
             if (!IsMapValid(selectedMap))
             {
-                _Logger.LogInformation("The selected map is not valid: \"{selectedMap}\"!", selectedMap);
+                _Logger.LogInformation("The selected map is not valid: \"{SelectedMap}\"!", selectedMap);
                 return;
             }
 
-            _Logger.LogInformation("Switch map to: \"{selectedMap}\"!", selectedMap);
+            _Logger.LogInformation("Switch map to: \"{electedMap}\"!", selectedMap);
             ExecuteCommand($"changelevel {selectedMap}");
         });
     }

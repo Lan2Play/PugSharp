@@ -30,7 +30,7 @@ public class ConfigProvider
     public async Task<OneOf<Error<string>, MatchConfig>> LoadMatchConfigFromFileAsync(string fileName)
     {
         var fullFileName = Path.IsPathRooted(fileName) ? fileName : Path.Combine(_ConfigDirectory, fileName);
-        _Logger.LogInformation("Loading match from \"{fileName}\"", fullFileName);
+        _Logger.LogInformation("Loading match from \"{FileName}\"", fullFileName);
 
         try
         {
@@ -52,7 +52,7 @@ public class ConfigProvider
         }
         catch (Exception ex)
         {
-            _Logger.LogError(ex, "Failed loading config from {fileName}.", fullFileName);
+            _Logger.LogError(ex, "Failed loading config from {FileName}.", fullFileName);
 
             return new Error<string>($"Failed loading config from {fullFileName}.");
         }
@@ -60,7 +60,7 @@ public class ConfigProvider
 
     public async Task<OneOf<Error<string>, MatchConfig>> LoadMatchConfigFromUrlAsync(string url, string authToken)
     {
-        _Logger.LogInformation("Loading match from \"{url}\"", url);
+        _Logger.LogInformation("Loading match from \"{Url}\"", url);
 
         try
         {
@@ -99,19 +99,19 @@ public class ConfigProvider
                     configJsonStream.Close();
                 }
 
-                _Logger.LogInformation("Successfully loaded config for match {matchId}", config.MatchId);
+                _Logger.LogInformation("Successfully loaded config for match {MatchId}", config.MatchId);
                 return config;
             }
             catch (JsonException ex)
             {
                 var configJsonString = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
-                _Logger.LogError(ex, "{error}", configJsonString);
+                _Logger.LogError(ex, "{Error}", configJsonString);
                 return new Error<string>(configJsonString);
             }
         }
         catch (Exception ex)
         {
-            _Logger.LogError(ex, "Failed loading config from {url}.", url);
+            _Logger.LogError(ex, "Failed loading config from {Url}.", url);
 
             return new Error<string>($"Failed loading config from {url}.");
         }

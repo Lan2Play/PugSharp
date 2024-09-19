@@ -30,7 +30,7 @@ public class BaseApi
                 baseUrl += "/";
             }
 
-            _Logger.LogInformation("Using BaseURL : \"{url}\" and authKey \"{authKey}\"", baseUrl, authKey);
+            _Logger.LogInformation("Using BaseURL : \"{Url}\" and authKey \"{AuthKey}\"", baseUrl, authKey);
 
             HttpClient.BaseAddress = new Uri(baseUrl);
 
@@ -43,7 +43,7 @@ public class BaseApi
         }
         catch (Exception ex)
         {
-            _Logger.LogError(ex, "Error initializing {type} some api features may not work correctly!", GetType().Name);
+            _Logger.LogError(ex, "Error initializing {Type} some api features may not work correctly!", GetType().Name);
         }
     }
 
@@ -58,19 +58,19 @@ public class BaseApi
         {
             if (httpResponseMessage.IsSuccessStatusCode)
             {
-                _Logger.LogInformation("API request was successful, HTTP status code = {statusCode}", httpResponseMessage.StatusCode);
+                _Logger.LogInformation("API request was successful, HTTP status code = {StatusCode}", httpResponseMessage.StatusCode);
 
                 var responseContent = await httpResponseMessage.Content.ReadAsStringAsync(cancellationToken).ConfigureAwait(false);
 
-                _Logger.LogInformation("ResponseContent: {responseContent}", responseContent);
+                _Logger.LogInformation("ResponseContent: {ResponseContent}", responseContent);
             }
             else
             {
-                _Logger.LogError("API request failed, HTTP status code = {statusCode}", httpResponseMessage.StatusCode);
+                _Logger.LogError("API request failed, HTTP status code = {StatusCode}", httpResponseMessage.StatusCode);
 
                 var responseContent = await httpResponseMessage.Content.ReadAsStringAsync(cancellationToken).ConfigureAwait(false);
 
-                _Logger.LogError("ResponseContent: {responseContent}", responseContent);
+                _Logger.LogError("ResponseContent: {ResponseContent}", responseContent);
             }
         }
         catch (Exception e)

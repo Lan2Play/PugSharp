@@ -57,7 +57,7 @@ public class Application : IApplication
     public Application(
         ILogger<Application> logger,
         IBasePlugin plugin,
-        ICsServer csServer,
+        ICsServer csServer, G5ApiClient
         MultiApiProvider apiProvider,
         G5CommandProvider g5CommandProvider,
         ITextHelper textHelper,

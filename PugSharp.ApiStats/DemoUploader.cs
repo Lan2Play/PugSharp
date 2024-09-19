@@ -13,7 +13,7 @@ public class DemoUploader : BaseApi
 
     public void Initialize(string demoUploadUrl, string demoUploadKey)
     {
-        _Logger.LogInformation("Initialize Api Stats with BaseUrl: {url}", demoUploadUrl);
+        _Logger.LogInformation("Initialize Api Stats with BaseUrl: {Url}", demoUploadUrl);
         InitializeBase(demoUploadUrl, demoUploadKey);
     }
 

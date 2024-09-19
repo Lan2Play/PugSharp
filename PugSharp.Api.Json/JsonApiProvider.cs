@@ -39,12 +39,12 @@ public class JsonApiProvider : IApiProvider
             await using (fileStream.ConfigureAwait(false))
             {
                 await JsonSerializer.SerializeAsync(fileStream, data, cancellationToken: cancellationToken).ConfigureAwait(false);
-                _Logger.LogInformation("Stored {dataType}: {fullFileName}", typeof(T), fullFileName);
+                _Logger.LogInformation("Stored {DataType}: {FullFileName}", typeof(T), fullFileName);
             }
         }
         catch (Exception ex)
         {
-            _Logger.LogError(ex, "Error storing map {dataType} to {fileName}!", typeof(T), fileName);
+            _Logger.LogError(ex, "Error storing map {DataType} to {FileName}!", typeof(T), fileName);
         }
     }
 

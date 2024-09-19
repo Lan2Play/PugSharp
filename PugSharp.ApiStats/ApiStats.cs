@@ -17,7 +17,7 @@ public class ApiStats : BaseApi, IApiProvider
 
     public void Initialize(string? apiStatsUrl, string? apiStatsKey)
     {
-        _Logger.LogInformation("Initialize Api Stats with BaseUrl: {url}", apiStatsUrl);
+        _Logger.LogInformation("Initialize Api Stats with BaseUrl: {Url}", apiStatsUrl);
         base.InitializeBase(apiStatsUrl, apiStatsKey);
     }
 
@@ -130,7 +130,7 @@ public class ApiStats : BaseApi, IApiProvider
             {ApiStatsConstants.StatsSeriesForfeit, CreateIntParam(Convert.ToInt32(seriesResultParams.Forfeit))},
         };
 
-        var uri = AppendQuery(string.Create(CultureInfo.InvariantCulture, $"finalize"), queryParams);
+        var uri = AppendQuery("finalize", queryParams);
 
         var response = await HttpClient.PostAsync(uri, content: null, cancellationToken).ConfigureAwait(false);
 
