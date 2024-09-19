@@ -7,7 +7,7 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-		<PackageReference Include="CounterStrikeSharp.API" Version="1.0.264">
+		<PackageReference Include="CounterStrikeSharp.API" Version="1.0.265">
 			<PrivateAssets>none</PrivateAssets>
 			<ExcludeAssets>runtime</ExcludeAssets>
 			<IncludeAssets>compile; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
@@ -24,5 +24,12 @@
 		<ProjectReference Include="..\PugSharp.Server.Contract\PugSharp.Server.Contract.csproj" />
 		<ProjectReference Include="..\PugSharp.Shared\PugSharp.Shared.csproj" />
 		<ProjectReference Include="..\PugSharp.Translation\PugSharp.Translation.csproj" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <PackageReference Update="Meziantou.Analyzer" Version="2.0.163">
+	    <PrivateAssets>all</PrivateAssets>
+	    <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
+	  </PackageReference>
 	</ItemGroup>
 </Project>

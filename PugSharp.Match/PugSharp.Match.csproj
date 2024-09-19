@@ -21,4 +21,11 @@
 		<ProjectReference Include="..\PugSharp.Shared\PugSharp.Shared.csproj" />
 		<ProjectReference Include="..\PugSharp.Translation\PugSharp.Translation.csproj" />
 	</ItemGroup>
+
+	<ItemGroup>
+	  <PackageReference Update="Meziantou.Analyzer" Version="2.0.163">
+	    <PrivateAssets>all</PrivateAssets>
+	    <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
+	  </PackageReference>
+	</ItemGroup>
 </Project>
