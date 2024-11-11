@@ -88,22 +88,22 @@ public class Player : IPlayer
         }
     }
 
-    public string? Clan
+    public string Clan
     {
         get
         {
             if (TryGetPlayerController(out var playerController))
             {
-                return playerController?.ClanName;
+                return playerController?.ClanName ?? string.Empty;
             }
 
-            return null;
+            return string.Empty;
         }
 
         set
         {
-            if (TryGetPlayerController(out var playerController) 
-                && value != null 
+            if (TryGetPlayerController(out var playerController)
+                && value != null
                 && !string.Equals(playerController!.Clan, value, StringComparison.Ordinal))
             {
                 playerController.SetClantag(value);
