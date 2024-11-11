@@ -8,9 +8,9 @@ public class MatchInfo
 {
     public MatchInfo(MatchConfig config)
     {
-        MatchMaps = Enumerable.Range(0, config.NumMaps).Select(n => new MatchMap(n)).ToList();
-        CurrentMap = MatchMaps[0];
         Config = config;
+        MatchMaps = Enumerable.Range(0, Config.NumMaps).Select(n => new MatchMap(n)).ToList();
+        CurrentMap = MatchMaps[0];
 
         MatchTeam1 = new MatchTeam(Config.Team1) { CurrentTeamSide = Contract.Team.Terrorist };
         MatchTeam2 = new MatchTeam(Config.Team2) { CurrentTeamSide = Contract.Team.CounterTerrorist };
