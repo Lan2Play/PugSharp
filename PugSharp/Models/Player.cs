@@ -4,6 +4,8 @@ using CounterStrikeSharp.API;
 using CounterStrikeSharp.API.Core;
 using CounterStrikeSharp.API.Modules.Menu;
 
+using CSSharpUtils.Extensions;
+
 using PugSharp.Match.Contract;
 
 namespace PugSharp.Models;
@@ -102,7 +104,11 @@ public class Player : IPlayer
         {
             if (TryGetPlayerController(out var playerController) && value != null)
             {
-                playerController.ClanName = value;
+                var tag = $"{value} - ";
+                if (!string.Equals(playerController!.Clan, tag, StringComparison.Ordinal))
+                {
+                    playerController.SetClantag(tag);
+                }
             }
         }
     }

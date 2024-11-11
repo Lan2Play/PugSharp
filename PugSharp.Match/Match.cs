@@ -703,6 +703,7 @@ public class Match : IDisposable
                 foreach (var player in notReadyPlayers)
                 {
                     player.PrintToChat(remindMessage);
+                    player.Clan = _TextHelper.GetText(nameof(Resources.PugSharp_Match_NotReadyTag));
                 }
             }
             catch (Exception ex)
@@ -1034,6 +1035,7 @@ public class Match : IDisposable
             return false;
         }
 
+        player.Clan = _TextHelper.GetText(nameof(Resources.PugSharp_Match_NotReadyTag));
         if (MatchInfo.Config.TeamMode == Config.TeamMode.PlayerSelect)
         {
             // Quicker to just remove them and add them back, rather than check whether they are already in the match
@@ -1153,7 +1155,6 @@ public class Match : IDisposable
             player.Clan = _TextHelper.GetText(nameof(Resources.PugSharp_Match_NotReadyTag));
             _CsServer.PrintToChatAll(_TextHelper.GetText(nameof(Resources.PugSharp_Match_Info_NotReady), player.PlayerName, readyPlayers, requiredPlayers));
         }
-
     }
 
     public Team GetPlayerTeam(ulong steamID)
