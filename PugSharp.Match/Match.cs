@@ -1145,22 +1145,13 @@ public class Match : IDisposable
         if (matchPlayer.IsReady)
         {
             player.Clan = _TextHelper.GetText(nameof(Resources.PugSharp_Match_ReadyTag));
-
-            // TODO Wich Line
             _CsServer.PrintToChatAll(_TextHelper.GetText(nameof(Resources.PugSharp_Match_Info_Ready), player.PlayerName, readyPlayers, requiredPlayers));
-            _MatchCallback.SendMessage(_TextHelper.GetText(nameof(Resources.PugSharp_Match_Info_Ready), player.PlayerName, readyPlayers, requiredPlayers));
-            // TODO Here
-
-            await TryFireStateAsync(MatchCommand.PlayerReady).ConfigureAwait(false);
+            TryFireState(MatchCommand.PlayerReady);
         }
         else
         {
             player.Clan = _TextHelper.GetText(nameof(Resources.PugSharp_Match_NotReadyTag));
-
-            // TODO Wich Line
-            _MatchCallback.SendMessage(_TextHelper.GetText(nameof(Resources.PugSharp_Match_Info_NotReady), player.PlayerName, readyPlayers, requiredPlayers));
             _CsServer.PrintToChatAll(_TextHelper.GetText(nameof(Resources.PugSharp_Match_Info_NotReady), player.PlayerName, readyPlayers, requiredPlayers));
-            // TODO Here
         }
 
     }

@@ -92,7 +92,7 @@ public class Player : IPlayer
         {
             if (TryGetPlayerController(out var playerController))
             {
-                return playerController?.Clan;
+                return playerController?.ClanName;
             }
 
             return null;
@@ -100,21 +100,9 @@ public class Player : IPlayer
 
         set
         {
-            if (TryGetPlayerController(out var playerController) && playerController?.InGameMoneyServices != null && value != null)
+            if (TryGetPlayerController(out var playerController) && value != null)
             {
-                playerController.Clan = value;
-            }
-        }
-    }
-
-    public string Clan
-    {
-        get => DefaultIfInvalid(() => _PlayerController.Clan, string.Empty);
-        set
-        {
-            if (_PlayerController.IsValid)
-            {
-                _PlayerController.Clan = value;
+                playerController.ClanName = value;
             }
         }
     }
@@ -173,18 +161,6 @@ public class Player : IPlayer
         catch (Exception)
         {
             // TODO Logging?
-        }
-    }
-
-
-    private void ResetScoreboard()
-    {
-        var matchStats = _PlayerController.ActionTrackingServices?.MatchStats;
-
-        if (matchStats != null)
-        {
-            matchStats.Kills = 0;
-            matchStats.Deaths = 0;
         }
     }
 }
