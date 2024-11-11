@@ -1,8 +1,7 @@
 ﻿
-namespace PugSharp.Api.Contract
+namespace PugSharp.Api.Contract;
+
+public interface ICommandProvider
 {
-    public interface ICommandProvider
-    {
-        IReadOnlyList<ProviderCommand> LoadProviderCommands();
-    }
+    IReadOnlyList<ProviderCommand> LoadProviderCommands();
 }

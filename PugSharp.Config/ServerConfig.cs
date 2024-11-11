@@ -1,10 +1,12 @@
 ﻿using System.Text.Json.Serialization;
 
-namespace PugSharp.Config
+namespace PugSharp.Config;
+
+public class ServerConfig
 {
-    public class ServerConfig
-    {
-        [JsonPropertyName("admins")]
-        public IDictionary<ulong, string> Admins { get; set; } = new Dictionary<ulong, string>();
-    }
+    [JsonPropertyName("locale")]
+    public string Locale { get; init; } = "en";
+
+    [JsonPropertyName("allow_players_without_match")]
+    public bool AllowPlayersWithoutMatch { get; init; } = true;
 }

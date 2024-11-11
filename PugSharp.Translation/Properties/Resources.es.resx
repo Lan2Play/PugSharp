@@ -1,0 +1,163 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <xsd:schema xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata" id="root">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="PugSharp.Match.Info.Ready" xml:space="preserve">
+    <value>{0:playerName} está preparado! {1:readyPlayers} de {2:requiredPlayers} están preparados.</value>
+  </data>
+  <data name="PugSharp.Match.VoteTeamMenuHeader" xml:space="preserve">
+    <value>Elige bando inicial:</value>
+  </data>
+  <data name="PugSharp.Match.VoteMapMenuHeader" xml:space="preserve">
+    <value>Votación para banear mapa: escribe `!&lt;mapnumber&gt;`</value>
+  </data>
+  <data name="PugSharp.Match.Error.NoTeamVoteExpected" xml:space="preserve">
+    <value>No hay ninguna votación de equipo activa en este momento!</value>
+  </data>
+  <data name="PugSharp.NotifyReady" xml:space="preserve">
+    <value>escribe `!ready` para marcarte como preparado para la partida</value>
+  </data>
+  <data name="PugSharp.Match.Error.UnpauseNotPossible" xml:space="preserve">
+    <value>No se puede reanudar la partida en este momento!</value>
+  </data>
+  <data name="PugSharp.Match.Error.TeamNotAvailable" xml:space="preserve">
+    <value>El equipo con nombre {0:teamName} no está disponible!</value>
+  </data>
+  <data name="PugSharp.Match.WaitForOtherTeam" xml:space="preserve">
+    <value>Esperando a que vote el otro equipo!</value>
+  </data>
+  <data name="PugSharp.Hello" xml:space="preserve">
+    <value>Hola **{0:playerName}**, bienvenido a la partida {1:matchId}</value>
+  </data>
+  <data name="PugSharp.Match.Info.WaitingForAllPlayers" xml:space="preserve">
+    <value>Esperando a que todos los jugadores estén preparados.</value>
+  </data>
+  <data name="PugSharp.Match.TeamReminder" xml:space="preserve">
+    <value>Actualmente estás en el equipo: **{0:teamName}**.</value>
+  </data>
+  <data name="PugSharp.Match.Info.IsLive" xml:space="preserve">
+    <value>La partida está **EN VIVO**</value>
+  </data>
+  <data name="PugSharp.PoweredBy" xml:space="preserve">
+    <value>desarrollado por **PugSharp** (https://github.com/Lan2Play/PugSharp/)</value>
+  </data>
+  <data name="PugSharp.Match.Error.AlreadyVotedForTeam" xml:space="preserve">
+    <value>Ya has votado por el equipo {0:teamNumber}: {1:teamName}!</value>
+  </data>
+  <data name="PugSharp.Match.VotedForTeam" xml:space="preserve">
+    <value>Has votado por **{0:teamName}**</value>
+  </data>
+  <data name="PugSharp.Match.Error.PauseNotPossible" xml:space="preserve">
+    <value>No se puede pausar en este momento!</value>
+  </data>
+  <data name="PugSharp.Match.Error.AlreadyBannedMap" xml:space="preserve">
+    <value>Ya has baneado el mapa número {0: mapNumber}: {1:mapName}!</value>
+  </data>
+  <data name="PugSharp.Match.Error.NotPermittedToBanMap" xml:space="preserve">
+    <value>No puedes banear ningún mapa en este momento!</value>
+  </data>
+  <data name="PugSharp.Match.VotedToBanMap" xml:space="preserve">
+    <value>Has votado para banear **{0:mapName}**</value>
+  </data>
+  <data name="PugSharp.Match.Info.NotReady" xml:space="preserve">
+    <value>{0:playerName} no está preparado! {1:readyPlayers} de {2:requiredPlayers} están preparados.</value>
+  </data>
+  <data name="PugSharp.Match.Info.StartMatch" xml:space="preserve">
+    <value>Comenzando partida. **{0:team1Name}** como **{1:team1Side}**. **{2:team2Name}** como **{3:team2Side}**</value>
+  </data>
+  <data name="PugSharp.Match.Error.NoMapVoteExpected" xml:space="preserve">
+    <value>No hay ninguna votación de mapa activa en este momento!</value>
+  </data>
+  <data name="PugSharp.Match.Error.NoReadyExpected" xml:space="preserve">
+    <value>No se espera el estado preparado en este momento!</value>
+  </data>
+  <data name="PugSharp.Match.Error.UnknownMapNumber" xml:space="preserve">
+    <value>El número de mapa **{0:mapNumber}** no está disponible!</value>
+  </data>
+  <data name="PugSharp.Match.RemindReady" xml:space="preserve">
+    <value>¡¡No!! estás preparado! Escribe `!ready` si estás preparado.</value>
+  </data>
+  <data name="PugSharp.Match.SelectedTeam" xml:space="preserve">
+    <value>{0:teamName} ha seleccionado {1:side} como bando de inicio!</value>
+  </data>
+  <data name="PugSharp.Match.BannedMap" xml:space="preserve">
+    <value>El mapa **{0:mapName}** ha sido baneado por {1:teamName}!</value>
+  </data>
+  <data name="PugSharp.Match.Error.NotPermittedToVoteForTeam" xml:space="preserve">
+    <value>No puedes votar por un equipo en este momento!</value>
+  </data>
+  <data name="PugSharp.Command.ChangedMaxOvertimeRounds" xml:space="preserve">
+    <value>Cambiado el número máximo de rondas de prórroga de {0:oldMaxRounds} a {1:maxOvertimeRounds}</value>
+  </data>
+  <data name="PugSharp.Command.ChangedMaxRounds" xml:space="preserve">
+    <value>Cambiado el número máximo de rondas de {0:oldMaxRounds} a {1:maxRounds}</value>
+  </data>
+  <data name="PugSharp.Command.ConfigLoaded" xml:space="preserve">
+    <value>¡Configuración de la partida cargada!</value>
+  </data>
+  <data name="PugSharp.Command.CreatingMatchMatchInfo" xml:space="preserve">
+    <value>`!matchinfo` para mostrar la configuración actual de la partida!</value>
+  </data>
+  <data name="PugSharp.Command.CreatingMatchAddMap" xml:space="preserve">
+    <value>`!addmap &lt;nombre_del_mapa&gt; ` para añadir un mapa!</value>
+  </data>
+  <data name="PugSharp.Command.ChangedTeamMode" xml:space="preserve">
+    <value>Cambiado el Modo de Equipo de {0:oldTeamMode} a {1:newTeamMode}</value>
+  </data>
+</root>

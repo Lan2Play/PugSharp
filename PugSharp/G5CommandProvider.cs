@@ -1,21 +1,24 @@
-﻿using PugSharp.Api.Contract;
-using Microsoft.Extensions.Logging;
-using PugSharp.Logging;
-using PugSharp.Server.Contract;
-using System.Text.RegularExpressions;
-using System.Text.Json;
+﻿using System.Text.Json;
 using System.Text.Json.Serialization;
+using System.Text.RegularExpressions;
+
+using Microsoft.Extensions.Logging;
+
+using PugSharp.Api.Contract;
+using PugSharp.Server.Contract;
 
 namespace PugSharp;
 
 public sealed partial class G5CommandProvider : ICommandProvider
 {
     private const int _RegexTimeout = 1000;
-    private static readonly ILogger<G5ApiProvider> _Logger = LogManager.CreateLogger<G5ApiProvider>();
+    private const string _NotSupported = "Not yet supported!";
+    private readonly ILogger<G5CommandProvider> _Logger;
     private readonly ICsServer _CsServer;
 
-    public G5CommandProvider(ICsServer csServer)
+    public G5CommandProvider(ICsServer csServer, ILogger<G5CommandProvider> logger)
     {
+        _Logger = logger;
         _CsServer = csServer;
     }
 
@@ -25,6 +28,7 @@ public sealed partial class G5CommandProvider : ICommandProvider
         {
             new("version","Return the cs server version", CommandVersion),
             new("get5_status","Return the get 5 status", CommandGet5Status),
+            new("get5_web_available","Return if g5 is availbale", CommandGet5WebAvailable),
             new("get5_loadmatch_url","Load a match with the given URL and API key for a match", CommandLoadMatchUrl),
             new("get5_endmatch","Ends the match", CommandEndMatch),
             new("sm_pause","Pauses the match", CommandSmPause),
@@ -38,61 +42,67 @@ public sealed partial class G5CommandProvider : ICommandProvider
         };
     }
 
-    private IEnumerable<string> CommandLoadBackUpUrl(string[] arg)
+    private static IEnumerable<string> CommandGet5WebAvailable(string[] arg)
     {
-        return new[] { "Not yet supported!" };
+        yield return JsonSerializer.Serialize(new G5WebAvailable());
     }
 
-    private IEnumerable<string> CommandLoadBackUp(string[] arg)
+    private static string[] CommandLoadBackUpUrl(string[] arg)
     {
-        return new[] { "Not yet supported!" };
+        return [_NotSupported];
     }
 
-    private IEnumerable<string> CommandListBackUps(string[] arg)
+    private static string[] CommandLoadBackUp(string[] arg)
     {
-        return new[] { "Not yet supported!" };
+        return [_NotSupported];
     }
 
-    private IEnumerable<string> CommandRemovePlayer(string[] arg)
+    private static string[] CommandListBackUps(string[] arg)
     {
-        return new[] { "Not yet supported!" };
+        return [_NotSupported];
     }
 
-    private IEnumerable<string> CommandAddCoach(string[] arg)
+    private static string[] CommandRemovePlayer(string[] arg)
     {
-        return new[] { "Not yet supported!" };
+        return [_NotSupported];
     }
 
-    private IEnumerable<string> CommandAddPlayer(string[] arg)
+    private static string[] CommandAddCoach(string[] arg)
     {
-        return new[] { "Not yet supported!" };
+        return [_NotSupported];
+    }
+
+    private static string[] CommandAddPlayer(string[] arg)
+    {
+        return [_NotSupported];
     }
 
     private IEnumerable<string> CommandSmUnpause(string[] arg)
     {
         _CsServer.ExecuteCommand("css_unpause");
-        return Enumerable.Empty<string>();
+        return [];
     }
 
     private IEnumerable<string> CommandSmPause(string[] arg)
     {
         _CsServer.ExecuteCommand("css_pause");
-        return Enumerable.Empty<string>();
+        return [];
     }
 
     private IEnumerable<string> CommandEndMatch(string[] arg)
     {
         _CsServer.ExecuteCommand("ps_stopmatch");
-        return Enumerable.Empty<string>();
+        return [];
     }
 
     private IEnumerable<string> CommandLoadMatchUrl(string[] args)
     {
+        // TODO reply from G5Api is different than the callback from eventula! All the cvars are ignored
         _CsServer.ExecuteCommand($"ps_loadconfig {string.Join(' ', args.Skip(1).Where(x => !x.Contains("Authorization", StringComparison.OrdinalIgnoreCase)).Select(x => $"\"{x}\""))}");
-        return Enumerable.Empty<string>();
+        return [];
     }
 
-    internal class Get5Status
+    internal sealed class Get5Status
     {
         [JsonPropertyName("plugin_version")]
         public required string PluginVersion { get; set; }
@@ -101,9 +111,9 @@ public sealed partial class G5CommandProvider : ICommandProvider
         public int GameState { get; set; }
     }
 
-    private IEnumerable<string> CommandGet5Status(string[] args)
+    private static string[] CommandGet5Status(string[] args)
     {
-        return new[] { JsonSerializer.Serialize(new Get5Status { PluginVersion = "0.15.0", GameState = 0 }) };
+        return [JsonSerializer.Serialize(new Get5Status { PluginVersion = "0.15.0", GameState = 0 })];
     }
 
     [GeneratedRegex(@"PatchVersion=(?<version>[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+)", RegexOptions.ExplicitCapture, _RegexTimeout)]
@@ -146,7 +156,7 @@ public sealed partial class G5CommandProvider : ICommandProvider
                 var serverVersion = LoadSteamInfValue(steamInf, ServerVersionRegex(), "version", errors);
                 var productName = LoadSteamInfValue(steamInf, ProductNameRegex(), "productname", errors);
 
-                if (errors.Any())
+                if (errors.Count != 0)
                 {
                     return errors;
                 }
@@ -164,9 +174,21 @@ public sealed partial class G5CommandProvider : ICommandProvider
         }
         else
         {
-            _Logger.LogError("The 'steam.inf' file was not found in the root directory of Counter-Strike 2. Path: \"{steamInfPath}\"", steamInfPath);
+            _Logger.LogError("The 'steam.inf' file was not found in the root directory of Counter-Strike 2. Path: \"{SteamInfPath}\"", steamInfPath);
         }
 
-        return Enumerable.Empty<string>();
+        return [];
+    }
+
+    private sealed class G5WebAvailable
+    {
+        [JsonPropertyName("gamestate")]
+        public int GameState { get; init; }
+
+        [JsonPropertyName("available")]
+        public int Available { get; } = 1;
+
+        [JsonPropertyName("plugin_version")]
+        public string PluginVersion { get; } = "0.15.0";
     }
 }

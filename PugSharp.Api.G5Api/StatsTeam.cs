@@ -10,8 +10,6 @@ public class StatsTeam : TeamWrapper
     [JsonPropertyName("score")]
     public int Score { get; set; }
 
-    public int ScoreCt { get; }
-
     [JsonPropertyName("score_ct")]
     public int ScoreCT { get; set; }
 
@@ -25,7 +23,7 @@ public class StatsTeam : TeamWrapper
     {
         SeriesScore = seriesScore;
         Score = score;
-        ScoreCt = scoreCt;
+        ScoreCT = scoreCt;
         ScoreT = scoreT;
         Players = players;
     }

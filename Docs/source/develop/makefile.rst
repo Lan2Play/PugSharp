@@ -16,7 +16,7 @@ A few of the Commands have optional parameters that can be set via either a prom
 So for example if you had the available parameter ``STEAMUSER`` on the make command ``init-all``, that you want to set to ``username`` your finalized Make command would look like:
 
 .. code-block:: bash
-    
+
     make init-all STEAMUSER="username"
 
 
@@ -29,9 +29,9 @@ Publishes a debug build of Pugsharp with the locally installed .Net SDK and copi
 
 **Group Command**
 
-- :ref:`develop/makefile:git-pull` 
-- :ref:`develop/makefile:build-debug` 
-- :ref:`develop/makefile:copy-pugsharp` 
+- :ref:`develop/makefile:git-pull`
+- :ref:`develop/makefile:build-debug`
+- :ref:`develop/makefile:copy-pugsharp`
 
 **Parameters:**
 
@@ -43,9 +43,9 @@ Publishes a debug build of Pugsharp with .Net SDK inside of docker and copies it
 
 **Group Command**
 
-- :ref:`develop/makefile:git-pull` 
-- :ref:`develop/makefile:build-debug-docker` 
-- :ref:`develop/makefile:copy-pugsharp` 
+- :ref:`develop/makefile:git-pull`
+- :ref:`develop/makefile:build-debug-docker`
+- :ref:`develop/makefile:copy-pugsharp`
 
 **Parameters:**
 
@@ -57,12 +57,12 @@ Prepares the gameserver folder, initializes the .env file for the cs2 server, co
 
 **Group Command**
 
-- :ref:`develop/makefile:prepare-folders` 
-- :ref:`develop/makefile:init-env` 
-- :ref:`develop/makefile:install-deps` 
-- :ref:`develop/makefile:copy-pugsharp-sample-configs` 
-- :ref:`develop/makefile:pull-csserver` 
-- :ref:`develop/makefile:start-csserver` 
+- :ref:`develop/makefile:prepare-folders`
+- :ref:`develop/makefile:init-env`
+- :ref:`develop/makefile:install-deps`
+- :ref:`develop/makefile:copy-pugsharp-sample-configs`
+- :ref:`develop/makefile:pull-csserver`
+- :ref:`develop/makefile:start-csserver`
 
 **Parameters:**
 
@@ -74,12 +74,12 @@ Prepares the gameserver folder, initializes the .env file for the cs2 server, co
 
 **Group Command**
 
-- :ref:`develop/makefile:prepare-folders` 
-- :ref:`develop/makefile:init-env` 
-- :ref:`develop/makefile:install-deps-docker` 
-- :ref:`develop/makefile:copy-pugsharp-sample-configs` 
-- :ref:`develop/makefile:pull-csserver` 
-- :ref:`develop/makefile:start-csserver` 
+- :ref:`develop/makefile:prepare-folders`
+- :ref:`develop/makefile:init-env`
+- :ref:`develop/makefile:install-deps-docker`
+- :ref:`develop/makefile:copy-pugsharp-sample-configs`
+- :ref:`develop/makefile:pull-csserver`
+- :ref:`develop/makefile:start-csserver`
 
 **Parameters:**
 
@@ -91,7 +91,7 @@ Installs counterstrikesharp and metamod to your local cs2 server
 
 **Group Command**
 
-- :ref:`develop/makefile:install-counterstrikesharp` 
+- :ref:`develop/makefile:install-counterstrikesharp`
 - :ref:`develop/makefile:install-metamod`
 
 **Parameters:**
@@ -104,7 +104,7 @@ Installs counterstrikesharp and metamod to your local cs2 server
 
 **Group Command**
 
-- :ref:`develop/makefile:install-counterstrikesharp-docker` 
+- :ref:`develop/makefile:install-counterstrikesharp-docker`
 - :ref:`develop/makefile:install-metamod`
 
 **Parameters:**
@@ -117,9 +117,9 @@ Cleans the CS2 server including all plugins, the build folders and the local .en
 
 **Group Command**
 
-- :ref:`develop/makefile:clean-csserver` 
-- :ref:`develop/makefile:clean-env` 
-- :ref:`develop/makefile:clean-build` 
+- :ref:`develop/makefile:clean-csserver`
+- :ref:`develop/makefile:clean-env`
+- :ref:`develop/makefile:clean-build`
 
 **Parameters:**
 
@@ -131,8 +131,8 @@ starts a local deattached cs2 server and attaches to it
 
 **Group Command**
 
-- :ref:`develop/makefile:start-csserver` 
-- :ref:`develop/makefile:attach-csserver` 
+- :ref:`develop/makefile:start-csserver`
+- :ref:`develop/makefile:attach-csserver`
 
 **Parameters:**
 
@@ -238,7 +238,7 @@ No Parameters
 
 build-debug
 ........................
-Publishes a debug build of Pugsharp with the locally installed .Net SDK 
+Publishes a debug build of Pugsharp with the locally installed .Net SDK
 
 **Parameters:**
 
@@ -246,7 +246,7 @@ No Parameters
 
 build-release
 ........................
-Publishes a release build of Pugsharp with the locally installed .Net SDK 
+Publishes a release build of Pugsharp with the locally installed .Net SDK
 
 **Parameters:**
 
@@ -277,7 +277,7 @@ copies pugsharp debug build in to the local cs2 server
 No Parameters
 
 copy-pugsharp-sample-configs
-........................
+............................
 copies pugsharp sample configs in to the local cs2 server
 
 **Parameters:**
@@ -285,7 +285,7 @@ copies pugsharp sample configs in to the local cs2 server
 No Parameters
 
 git-pull
-........................
+............................
 pulls the repository
 
 **Parameters:**

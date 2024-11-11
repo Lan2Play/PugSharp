@@ -1,7 +1,8 @@
-﻿namespace PugSharp.Api.Contract
+﻿namespace PugSharp.Api.Contract;
+
+public interface ITeamInfo
 {
-    public interface ITeamInfo
-    {
-        string TeamName { get; }
-    }
+    string TeamId { get; }
+
+    string TeamName { get; }
 }

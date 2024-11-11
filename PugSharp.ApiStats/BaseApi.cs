@@ -1,91 +1,81 @@
-﻿using Microsoft.Extensions.Logging;
-using Microsoft.Net.Http.Headers;
-using PugSharp.Logging;
-using System.Net.Http.Headers;
+﻿using System.Net;
 
-namespace PugSharp.ApiStats
+using Microsoft.Extensions.Logging;
+
+namespace PugSharp.ApiStats;
+
+public class BaseApi
 {
-    public class BaseApi : IDisposable
+    private readonly ILogger<BaseApi> _Logger;
+
+    protected readonly HttpClient HttpClient;
+
+    protected BaseApi(HttpClient httpClient, ILogger<BaseApi> logger)
     {
-        private static readonly ILogger<BaseApi> _Logger = LogManager.CreateLogger<BaseApi>();
+        HttpClient = httpClient;
+        _Logger = logger;
+    }
 
-        private bool _DisposedValue;
-
-        protected HttpClient? HttpClient { get; }
-
-        protected BaseApi(string? baseUrl, string? authKey)
+    protected void InitializeBase(string? baseUrl, string? authKey)
+    {
+        if (string.IsNullOrEmpty(baseUrl))
         {
-            if (string.IsNullOrEmpty(baseUrl))
-            {
-                return;
-            }
+            return;
+        }
 
+        try
+        {
             if (!baseUrl.EndsWith('/'))
             {
                 baseUrl += "/";
             }
 
-            HttpClient = new HttpClient()
-            {
-                BaseAddress = new Uri(baseUrl),
-            };
+            _Logger.LogInformation("Using BaseURL : \"{Url}\" and authKey \"{AuthKey}\"", baseUrl, authKey);
+
+            HttpClient.BaseAddress = new Uri(baseUrl);
+
+            HttpClient.DefaultRequestHeaders.Remove(nameof(HttpRequestHeader.Authorization));
 
             if (!string.IsNullOrEmpty(authKey))
             {
-                HttpClient.DefaultRequestHeaders.Add(HeaderNames.Authorization, authKey);
+                HttpClient.DefaultRequestHeaders.Add(nameof(HttpRequestHeader.Authorization), authKey);
             }
         }
-
-        protected static async Task HandleResponseAsync(HttpResponseMessage? httpResponseMessage, CancellationToken cancellationToken)
+        catch (Exception ex)
         {
-            if (httpResponseMessage == null)
-            {
-                return;
-            }
+            _Logger.LogError(ex, "Error initializing {Type} some api features may not work correctly!", GetType().Name);
+        }
+    }
 
-            try
-            {
-                if (httpResponseMessage.IsSuccessStatusCode)
-                {
-                    _Logger.LogInformation("API request was succesful, HTTP status code = {statusCode}", httpResponseMessage.StatusCode);
-
-                    var responseContent = await httpResponseMessage.Content.ReadAsStringAsync(cancellationToken).ConfigureAwait(false);
-
-                    _Logger.LogInformation("ResponseContent: {responseContent}", responseContent);
-                }
-                else
-                {
-                    _Logger.LogError("API request failed, HTTP status code = {statusCode}", httpResponseMessage.StatusCode);
-
-                    var responseContent = await httpResponseMessage.Content.ReadAsStringAsync(cancellationToken).ConfigureAwait(false);
-
-                    _Logger.LogError("ResponseContent: {responseContent}", responseContent);
-                }
-            }
-            catch (Exception e)
-            {
-                _Logger.LogError(e, "Error handling response");
-            }
+    protected async Task HandleResponseAsync(HttpResponseMessage? httpResponseMessage, CancellationToken cancellationToken)
+    {
+        if (httpResponseMessage == null)
+        {
+            return;
         }
 
-        protected virtual void Dispose(bool disposing)
+        try
         {
-            if (!_DisposedValue)
+            if (httpResponseMessage.IsSuccessStatusCode)
             {
-                if (disposing)
-                {
-                    HttpClient?.Dispose();
-                }
+                _Logger.LogInformation("API request was successful, HTTP status code = {StatusCode}", httpResponseMessage.StatusCode);
 
-                _DisposedValue = true;
+                var responseContent = await httpResponseMessage.Content.ReadAsStringAsync(cancellationToken).ConfigureAwait(false);
+
+                _Logger.LogInformation("ResponseContent: {ResponseContent}", responseContent);
+            }
+            else
+            {
+                _Logger.LogError("API request failed, HTTP status code = {StatusCode}", httpResponseMessage.StatusCode);
+
+                var responseContent = await httpResponseMessage.Content.ReadAsStringAsync(cancellationToken).ConfigureAwait(false);
+
+                _Logger.LogError("ResponseContent: {ResponseContent}", responseContent);
             }
         }
-
-        public void Dispose()
+        catch (Exception e)
         {
-            // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
-            Dispose(disposing: true);
-            GC.SuppressFinalize(this);
+            _Logger.LogError(e, "Error handling response");
         }
     }
 }

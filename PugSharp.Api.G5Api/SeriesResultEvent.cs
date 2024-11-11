@@ -16,7 +16,7 @@ public sealed class SeriesResultEvent : MatchEvent
     [JsonPropertyName("team2_series_score")]
     public required int Team2SeriesScore { get; init; }
 
-    public SeriesResultEvent() : base( "series_end")
+    public SeriesResultEvent() : base("series_end")
     {
     }
 }

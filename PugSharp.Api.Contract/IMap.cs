@@ -6,9 +6,10 @@ public interface IMap
 
     string Name { get; }
 
-    IMapTeamInfo Team1 { get;  }
+    IMapTeamInfo Team1 { get; }
 
     IMapTeamInfo Team2 { get; }
 
     public string WinnerTeamName { get; }
+    TeamSide WinnerTeamSide { get; init; }
 }

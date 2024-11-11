@@ -15,7 +15,6 @@ on:
     - main
     - develop
     - 'feature/**'
-    tags: [ v**]
     paths:
     - '**'
     - '!README.md'
@@ -30,26 +29,26 @@ jobs:
         env : { CONTENT : "${{ toJson(github) }}" }
         run : "echo $CONTENT"
       - name: Set up JDK 11
-        uses: actions/setup-java@v3
+        uses: actions/setup-java@v4
         with:
           distribution: 'temurin'
           java-version: '17'
       - name: Setup .NET
-        uses: actions/setup-dotnet@v3
+        uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: 7.0
+          dotnet-version: 8.0
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
       - name: Cache SonarCloud packages
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: ./sonar/cache
           key: ${{ runner.os }}-sonar
           restore-keys: ${{ runner.os }}-sonar
       - name: Cache SonarCloud scanner
         id: cache-sonar-scanner
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: ./sonar/scanner
           key: ${{ runner.os }}-sonar-scanner
@@ -91,7 +90,7 @@ jobs:
       PUGSHARPNETVER: ${{ steps.PUGSHARPNETVER.outputs.PUGSHARPNETVER }}
       CSSHARPVER: ${{ steps.CSSHARPVER.outputs.CSSHARPVER }}
       CSSHARPlink: ${{ steps.CSSHARPlink.outputs.CSSHARPlink }}
-      CSSHARPlinkWRuntime: ${{ steps.CSSHARPlinkWRuntime.outputs.CSSHARPlinkWRuntime }}      
+      CSSHARPlinkWRuntime: ${{ steps.CSSHARPlinkWRuntime.outputs.CSSHARPlinkWRuntime }}
       CSSHARPlinkWindows: ${{ steps.CSSHARPlinkWindows.outputs.CSSHARPlinkWindows }}
       CSSHARPlinkWRuntimeWindows: ${{ steps.CSSHARPlinkWRuntimeWindows.outputs.CSSHARPlinkWRuntimeWindows }}
     steps:
@@ -102,7 +101,7 @@ jobs:
       - name: install deps
         run: sudo apt-get update && sudo apt-get install jq -y
       - name: get Pugsharp dependencies
-        run: dotnet restore    
+        run: dotnet restore
 
       - name: set Pugsharp Version
         if: ${{ (startsWith(github.ref, 'refs/tags/v')) }}
@@ -142,25 +141,25 @@ jobs:
         run: echo "CSSHARPlinkWindows=$(curl -s -L https://api.github.com/repos/roflmuffin/CounterStrikeSharp/releases/tags/$CSSHARPVER | jq -r '.assets[] | select(.browser_download_url | contains("windows") and (. | contains("with-runtime") | not)) | .browser_download_url')" >> $GITHUB_ENV
       - name: set counterstrikesharp link without runtime for windows in output
         run: echo "CSSHARPlinkWindows=$CSSHARPlinkWindows" >> "$GITHUB_OUTPUT"
-        id: CSSHARPlinkWindows      
+        id: CSSHARPlinkWindows
 
       - name: replace version variable in meta files
-        run: sed -i "s|%%VERSION%%|$PUGSHARPNETVER|g" ./release.json;       
+        run: sed -i "s|%%VERSION%%|$PUGSHARPNETVER|g" ./release.json;
       - name: replace CounterStrikeSharpVersion variable in meta files
-        run: sed -i "s|%%COUNTERSTRIKESHARPVERSION%%|$CSSHARPVER|g" ./release.json; 
+        run: sed -i "s|%%COUNTERSTRIKESHARPVERSION%%|$CSSHARPVER|g" ./release.json;
       - name: replace CS2VERSION variable in meta files
-        run: sed -i "s|%%CS2VERSION%%|1.39.6.5/13965 9842|g" ./release.json; 
+        run: sed -i "s|%%CS2VERSION%%|1.39.6.5/13965 9842|g" ./release.json;
       - name: replace METAMODVERSION variable in meta files
-        run: sed -i "s|%%METAMODVERSION%%|2.0 - 1256|g" ./release.json; 
-      - name: upload artefact
+        run: sed -i "s|%%METAMODVERSION%%|2.0 - 1256|g" ./release.json;
+      - name: upload artifact
         if: github.event_name != 'pull_request'
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: latest_build_meta
           path: |
             ./release.json
           retention-days: 10
- 
+
 
 
   build_linux_x64:
@@ -186,15 +185,15 @@ jobs:
         run: dotnet publish
       - name: Build Pugsharp release
         if: ${{ startsWith(github.ref, 'refs/tags/v') &&  !(contains(github.ref, '-beta')) }}
-        run: dotnet publish -c Release 
+        run: dotnet publish -c Release
       - name: prepare package structure
         run: mkdir -p packagebuild/addons/counterstrikesharp/plugins/PugSharp
       - name: copy package content
-        run: cp -rf PugSharp/bin/Debug/net7.0/publish/* packagebuild/addons/counterstrikesharp/plugins/PugSharp
+        run: cp -rf PugSharp/bin/Release/net8.0/publish/* packagebuild/addons/counterstrikesharp/plugins/PugSharp
       - name: copy sample configs
         run: cp -rf resources/cfg packagebuild/cfg
       - name: build package
-        run: zip -r PugSharp_linux_$PUGSHARPNETVER.zip addons
+        run: zip -r PugSharp_linux_$PUGSHARPNETVER.zip addons cfg
         working-directory: ./packagebuild
       - name: move package
         run: mv PugSharp_linux_$PUGSHARPNETVER.zip ../
@@ -206,7 +205,7 @@ jobs:
       - name: extract counterstrikesharp without runtime
         run: unzip -o counterstrikesharp.zip -d  packagebuild/
       - name: build package
-        run: zip -r PugSharp_with_cssharp_linux_$PUGSHARPNETVER.zip addons
+        run: zip -r PugSharp_with_cssharp_linux_$PUGSHARPNETVER.zip addons cfg
         working-directory: ./packagebuild
       - name: move package
         run: mv PugSharp_with_cssharp_linux_$PUGSHARPNETVER.zip ../
@@ -216,34 +215,34 @@ jobs:
       - name: extract counterstrikesharp with runtime
         run: unzip -o counterstrikesharp.zip -d  packagebuild/
       - name: build package
-        run: zip -r PugSharp_with_cssharp_and_runtime_linux_$PUGSHARPNETVER.zip addons
+        run: zip -r PugSharp_with_cssharp_and_runtime_linux_$PUGSHARPNETVER.zip addons cfg
         working-directory: ./packagebuild
       - name: move package
         run: mv PugSharp_with_cssharp_and_runtime_linux_$PUGSHARPNETVER.zip ../
         working-directory: ./packagebuild
-      - name: upload artefact
+      - name: upload artifact
         if: github.event_name != 'pull_request'
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: latest_build_linux
           path: |
-            ./PugSharp_linux_*.zip 
+            ./PugSharp_linux_*.zip
           retention-days: 10
-      - name: upload artefact
+      - name: upload artifact
         if: github.event_name != 'pull_request'
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: latest_build_linux_with_cssharp
           path: |
-            ./PugSharp_with_cssharp_linux_*.zip 
-          retention-days: 10      
-      - name: upload artefact
+            ./PugSharp_with_cssharp_linux_*.zip
+          retention-days: 10
+      - name: upload artifact
         if: github.event_name != 'pull_request'
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: latest_build_linux_with_cssharp_and_runtime
           path: |
-            ./PugSharp_with_cssharp_and_runtime_linux_*.zip 
+            ./PugSharp_with_cssharp_and_runtime_linux_*.zip
           retention-days: 10
 
 
@@ -278,13 +277,13 @@ jobs:
         run: mkdir -p packagebuild/addons/counterstrikesharp/plugins/PugSharp
         shell: bash
       - name: copy package content
-        run: cp -rf PugSharp/bin/Debug/net7.0/publish/* packagebuild/addons/counterstrikesharp/plugins/PugSharp
+        run: cp -rf PugSharp/bin/Release/net8.0/publish/* packagebuild/addons/counterstrikesharp/plugins/PugSharp
         shell: bash
       - name: copy sample configs
         run: cp -rf resources/cfg packagebuild/cfg
         shell: bash
       - name: build package
-        run: zip -r PugSharp_windows_$PUGSHARPNETVER.zip addons
+        run: zip -r PugSharp_windows_$PUGSHARPNETVER.zip addons cfg
         shell: bash
         working-directory: ./packagebuild
       - name: move package
@@ -298,7 +297,7 @@ jobs:
         run: unzip -o counterstrikesharp.zip -d  packagebuild/
         shell: bash
       - name: build package
-        run: zip -r PugSharp_with_cssharp_windows_$PUGSHARPNETVER.zip addons
+        run: zip -r PugSharp_with_cssharp_windows_$PUGSHARPNETVER.zip addons cfg
         shell: bash
         working-directory: ./packagebuild
       - name: move package
@@ -313,38 +312,38 @@ jobs:
         run: unzip -o counterstrikesharp.zip -d  packagebuild/
       - name: build package
         shell: bash
-        run: zip -r PugSharp_with_cssharp_and_runtime_windows_$PUGSHARPNETVER.zip addons
+        run: zip -r PugSharp_with_cssharp_and_runtime_windows_$PUGSHARPNETVER.zip addons cfg
         working-directory: ./packagebuild
       - name: move package
         shell: bash
         run: mv PugSharp_with_cssharp_and_runtime_windows_$PUGSHARPNETVER.zip ../
         working-directory: ./packagebuild
-      - name: upload artefact
+      - name: upload artifact
         if: github.event_name != 'pull_request'
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: latest_build_windows
           path: |
-            ./PugSharp_windows_*.zip 
+            ./PugSharp_windows_*.zip
           retention-days: 10
-      - name: upload artefact
+      - name: upload artifact
         if: github.event_name != 'pull_request'
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: latest_build_windows_with_cssharp
           path: |
-            ./PugSharp_with_cssharp_windows_*.zip 
-          retention-days: 10      
-      - name: upload artefact
+            ./PugSharp_with_cssharp_windows_*.zip
+          retention-days: 10
+      - name: upload artifact
         if: github.event_name != 'pull_request'
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: latest_build_windows_with_cssharp_and_runtime
           path: |
-            ./PugSharp_with_cssharp_and_runtime_windows_*.zip 
+            ./PugSharp_with_cssharp_and_runtime_windows_*.zip
           retention-days: 10
 
-          
+
   release:
     runs-on: ubuntu-latest
     if: ${{ startsWith(github.ref, 'refs/tags/v') }}
@@ -357,53 +356,53 @@ jobs:
       CSSHARPlink: ${{needs.get_versions.outputs.CSSHARPlink}}
       CSSHARPlinkWRuntime: ${{needs.get_versions.outputs.CSSHARPlinkWRuntime}}
     steps:
-      - uses: actions/download-artifact@v3
+      - uses: actions/download-artifact@v4
         with:
           name: latest_build_windows
-          path: build/windows      
-      - uses: actions/download-artifact@v3
+          path: build/windows
+      - uses: actions/download-artifact@v4
         with:
           name: latest_build_windows_with_cssharp
           path: build/windows
-      - uses: actions/download-artifact@v3
+      - uses: actions/download-artifact@v4
         with:
           name: latest_build_windows_with_cssharp_and_runtime
           path: build/windows
-      - uses: actions/download-artifact@v3
+      - uses: actions/download-artifact@v4
         with:
           name: latest_build_linux
           path: build/linux
-      - uses: actions/download-artifact@v3
+      - uses: actions/download-artifact@v4
         with:
           name: latest_build_linux_with_cssharp
           path: build/linux
-      - uses: actions/download-artifact@v3
+      - uses: actions/download-artifact@v4
         with:
           name: latest_build_linux_with_cssharp_and_runtime
           path: build/linux
-      - uses: actions/download-artifact@v3
+      - uses: actions/download-artifact@v4
         with:
           name: latest_build_meta
           path: build/meta
 
       - name: Release
         if: ${{ !(contains(github.ref, '-beta')) }}
-        uses: softprops/action-gh-release@v1
+        uses: softprops/action-gh-release@v2
         with:
           files: |
-            ./build/windows/PugSharp_*.zip 
-            ./build/linux/PugSharp_*.zip 
+            ./build/windows/PugSharp_*.zip
+            ./build/linux/PugSharp_*.zip
             ./build/meta/release.json
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: pre Release
         if: ${{ contains(github.ref, '-beta') }}
-        uses: softprops/action-gh-release@v1
+        uses: softprops/action-gh-release@v2
         with:
           prerelease: true
           files: |
-            ./build/windows/PugSharp_*.zip 
-            ./build/linux/PugSharp_*.zip 
+            ./build/windows/PugSharp_*.zip
+            ./build/linux/PugSharp_*.zip
             ./build/meta/release.json
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

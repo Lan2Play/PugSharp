@@ -1,119 +1,84 @@
-﻿using Microsoft.Extensions.Logging;
-using Polly;
-using Polly.Extensions.Http;
-using PugSharp.Logging;
-using System.Text;
+﻿using System.Text;
 using System.Text.Json;
 
-namespace PugSharp.Api.G5Api
+using Microsoft.Extensions.Logging;
+
+namespace PugSharp.Api.G5Api;
+
+public sealed class G5ApiClient
 {
-    public sealed class G5ApiClient : IDisposable
+    private readonly ILogger<G5ApiClient> _Logger;
+
+    private readonly HttpClient _HttpClient;
+
+    private string? _ApiUrl;
+    private string? _ApiHeader;
+    private string? _ApiHeadeValue;
+
+    public G5ApiClient(HttpClient httpClient, ILogger<G5ApiClient> logger)
     {
-        private const int _RetryCount = 3;
-        private const int _RetryDelayFactor = 2;
-        private static readonly ILogger<G5ApiClient> _Logger = LogManager.CreateLogger<G5ApiClient>();
+        _HttpClient = httpClient;
+        _Logger = logger;
+    }
 
-        private readonly HttpClient? _HttpClient;
-        private readonly IAsyncPolicy<HttpResponseMessage>? _RetryPolicy;
+    public void Initialize(string g5ApiUrl, string g5ApiHeader, string g5ApiHeaderValue)
+    {
+        _Logger.LogInformation("Initialize G5Api with BaseUrl: {Url}", g5ApiUrl);
 
-        private string _ApiUrl;
-        private string _ApiHeader;
-        private string _ApiHeadeValue;
-        private bool _DisposedValue;
+        var modifiedApiUrl = g5ApiUrl;
 
-        public G5ApiClient(string g5ApiUrl, string g5ApiHeader, string g5ApiHeaderValue)
+        if (!g5ApiUrl.EndsWith("v2", StringComparison.OrdinalIgnoreCase) && !g5ApiUrl.EndsWith("v2/", StringComparison.OrdinalIgnoreCase))
         {
-            _Logger.LogInformation("Create G5Api with BaseUrl: {url}", g5ApiUrl);
-
-            _ApiUrl = g5ApiUrl;
-            _ApiHeader = g5ApiHeader;
-            _ApiHeadeValue = g5ApiHeaderValue;
-
-            if (string.IsNullOrEmpty(g5ApiUrl))
-            {
-                return;
-            }
-
-            _HttpClient = new HttpClient();
-
-            _RetryPolicy = HttpPolicyExtensions
-             .HandleTransientHttpError()
-             .WaitAndRetryAsync(_RetryCount,
-                retryAttempt => TimeSpan.FromSeconds(Math.Pow(_RetryDelayFactor, retryAttempt)),
-                onRetry: (response, calculatedWaitDuration) =>
-                {
-                    _Logger.LogError(response.Exception, "G5Api failed attempt. Waited for {CalculatedWaitDuration}. Retrying.", calculatedWaitDuration);
-                });
+            modifiedApiUrl = $"{g5ApiUrl.TrimEnd('/')}/v2";
         }
 
-        public void UpdateConfig(string g5ApiUrl, string g5ApiHeader, string g5ApiHeaderValue)
+        _ApiUrl = modifiedApiUrl;
+        _ApiHeader = g5ApiHeader;
+        _ApiHeadeValue = g5ApiHeaderValue;
+    }
+
+    public async Task<bool> SendEventAsync(EventBase eventToSend, CancellationToken cancellationToken)
+    {
+        try
         {
-            _ApiUrl = g5ApiUrl;
-            _ApiHeader = g5ApiHeader;
-            _ApiHeadeValue = g5ApiHeaderValue;
-        }
+            using var jsonContent = new StringContent(
+                JsonSerializer.Serialize(eventToSend, eventToSend.GetType()),
+                Encoding.UTF8,
+                "application/json");
 
-        public async Task SendEventAsync(EventBase eventToSend, CancellationToken cancellationToken)
-        {
-            if (_HttpClient == null || _RetryPolicy == null)
+            var httpRequest = new HttpRequestMessage(HttpMethod.Post, _ApiUrl)
             {
-                return;
-            }
+                Content = jsonContent,
+            };
 
-            try
+            if (!string.IsNullOrEmpty(_ApiHeader))
             {
-                using var jsonContent = new StringContent(
-                    JsonSerializer.Serialize(eventToSend),
-                    Encoding.UTF8,
-                    "application/json");
-
-                var httpRequest = new HttpRequestMessage(HttpMethod.Post, _ApiUrl)
-                {
-                    Content = jsonContent,
-                };
-
                 httpRequest.Headers.Add(_ApiHeader, _ApiHeadeValue);
-
-                using var httpResponseMessage = await _RetryPolicy.ExecuteAsync(
-                                                            () => _HttpClient.SendAsync(httpRequest, cancellationToken)).ConfigureAwait(false);
-
-                if (httpResponseMessage == null)
-                {
-                    return;
-                }
-
-                if (httpResponseMessage.IsSuccessStatusCode)
-                {
-                    _Logger.LogInformation("G5 API request was succesful, HTTP status code = {statusCode}", httpResponseMessage.StatusCode);
-                }
-                else
-                {
-                    _Logger.LogError("G5 API request failed, HTTP status code = {statusCode}", httpResponseMessage.StatusCode);
-                }
             }
-            catch (Exception ex)
+
+            using var httpResponseMessage = await _HttpClient.SendAsync(httpRequest, cancellationToken).ConfigureAwait(false);
+
+            if (httpResponseMessage == null)
             {
-                _Logger.LogError(ex, "Error sending event to G5 API. EventName {EventName}", eventToSend.EventName);
+                _Logger.LogError("G5 API request {Event} failed. No HTTP status code available.", eventToSend.EventName);
+                return false;
             }
-        }
 
-        private void Dispose(bool disposing)
-        {
-            if (!_DisposedValue)
+            if (httpResponseMessage.IsSuccessStatusCode)
             {
-                if (disposing)
-                {
-                    _HttpClient?.Dispose();
-                }
-
-                _DisposedValue = true;
+                _Logger.LogInformation("G5 API request {Event} was successful, HTTP status code = {StatusCode}", eventToSend.EventName, httpResponseMessage.StatusCode);
+                return true;
             }
+
+            _Logger.LogError("G5 API request {Event} failed. HTTP status code = {StatusCode} content: {Content}", eventToSend.EventName, httpResponseMessage.StatusCode, httpResponseMessage.Content.ToString());
+
+            return false;
+        }
+        catch (Exception ex)
+        {
+            _Logger.LogError(ex, "Error sending event to G5 API. EventName {EventName}", eventToSend.EventName);
         }
 
-        public void Dispose()
-        {
-            // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
-            Dispose(disposing: true);
-        }
+        return false;
     }
 }

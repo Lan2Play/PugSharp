@@ -1,84 +1,108 @@
-﻿using CounterStrikeSharp.API;
+﻿using System.Globalization;
+
+using CounterStrikeSharp.API;
 using CounterStrikeSharp.API.Core;
 using CounterStrikeSharp.API.Modules.Menu;
-using Microsoft.Extensions.Logging;
-using PugSharp.Logging;
+
 using PugSharp.Match.Contract;
-using System.Globalization;
 
 namespace PugSharp.Models;
 
 public class Player : IPlayer
 {
-    private static readonly ILogger<Player> _Logger = LogManager.CreateLogger<Player>();
-    private readonly int _UserId;
-    private CCSPlayerController _PlayerController;
-
-    public Player(CCSPlayerController playerController)
+    public Player(ulong steamId)
     {
-        if (!playerController.IsValid)
+        SteamID = steamId;
+    }
+
+    private T DefaultIfInvalid<T>(Func<CCSPlayerController, T> loadValue, T defaultValue)
+    {
+        if (TryGetPlayerController(out var playerController))
         {
-            _Logger.LogError("PlayerController is invalid!");
+            return playerController != null && playerController.IsValid ? loadValue(playerController) : defaultValue;
         }
 
-        _UserId = playerController.UserId!.Value;
-        SteamID = playerController.SteamID;
-        _PlayerController = playerController;
-
+        return defaultValue;
     }
 
-    private T DefaultIfInvalid<T>(Func<T> loadValue, T defaultValue)
+    private T? NullIfInvalid<T>(Func<CCSPlayerController, T?> loadValue)
     {
-        ReloadPlayerController();
-        return _PlayerController != null && _PlayerController.IsValid ? loadValue() : defaultValue;
-    }
-
-    private T? NullIfInvalid<T>(Func<T?> loadValue)
-    {
-        ReloadPlayerController();
-        return _PlayerController != null && _PlayerController.IsValid ? loadValue() : default;
-    }
-
-    private void ReloadPlayerController()
-    {
-        if (_PlayerController == null || !_PlayerController.IsValid)
+        if (TryGetPlayerController(out var playerController))
         {
-            _Logger.LogInformation("_PlayerController for SteamId {steamId} is Invalid. Reload with {userId} ", SteamID, _UserId);
-            _PlayerController = Utilities.GetPlayerFromUserid(_UserId);
-            _Logger.LogInformation("_PlayerController for SteamId {steamId} reloaded. UserID: {userId}; PlayerName: {playerName}", SteamID, UserId, PlayerName);
+            return playerController != null && playerController.IsValid ? loadValue(playerController) : default;
         }
+
+        return default;
+    }
+
+    /// <summary>
+    /// Try to load a player controller
+    /// </summary>
+    /// <returns>true if playerController is found and valid else false</returns>
+    private bool TryGetPlayerController(out CCSPlayerController? playerController)
+    {
+        try
+        {
+            playerController = Utilities.GetPlayerFromSteamId(SteamID);
+            if (playerController != null && playerController.IsValid)
+            {
+                return true;
+            }
+        }
+        catch (Exception)
+        {
+            playerController = null;
+        }
+
+        return false;
     }
 
     public ulong SteamID { get; }
 
-    public int? UserId => NullIfInvalid(() => _PlayerController.UserId);
+    public int? UserId => NullIfInvalid(p => p.UserId);
 
-    public string PlayerName => DefaultIfInvalid(() => _PlayerController.PlayerName, string.Empty);
+    public string PlayerName => DefaultIfInvalid(p => p.PlayerName, string.Empty);
 
-    public Team Team => DefaultIfInvalid(() => (Team)_PlayerController.TeamNum, Team.None);
+    public Team Team => DefaultIfInvalid(p => (Team)p.TeamNum, Team.None);
 
     public int? Money
     {
         get
         {
-            if (!_PlayerController.IsValid)
+            if (TryGetPlayerController(out var playerController))
             {
-                return null;
+                return playerController?.InGameMoneyServices?.Account;
             }
 
-            return _PlayerController.InGameMoneyServices?.Account;
+            return null;
         }
 
         set
         {
-            if (_PlayerController.IsValid)
+            if (TryGetPlayerController(out var playerController) && playerController?.InGameMoneyServices != null && value != null)
             {
-#pragma warning disable S1854 // Unused assignments should be removed
-#pragma warning disable IDE0059 // Unnecessary assignment of a value
-                var money = _PlayerController.InGameMoneyServices?.Account;
-                money = value;
-#pragma warning restore IDE0059 // Unnecessary assignment of a value
-#pragma warning restore S1854 // Unused assignments should be removed
+                playerController.InGameMoneyServices.Account = value.Value;
+            }
+        }
+    }
+
+    public string? Clan
+    {
+        get
+        {
+            if (TryGetPlayerController(out var playerController))
+            {
+                return playerController?.Clan;
+            }
+
+            return null;
+        }
+
+        set
+        {
+            if (TryGetPlayerController(out var playerController) && playerController?.InGameMoneyServices != null && value != null)
+            {
+                playerController.Clan = value;
             }
         }
     }
@@ -97,37 +121,59 @@ public class Player : IPlayer
 
     public void PrintToChat(string message)
     {
-        _PlayerController.PrintToChat(message);
+        if (TryGetPlayerController(out var playerController))
+        {
+            playerController!.PrintToChat(message);
+        }
     }
 
     public void ShowMenu(string title, IEnumerable<MenuOption> menuOptions)
     {
-        var menu = new ChatMenu(title);
-
-        foreach (var menuOption in menuOptions)
+        if (TryGetPlayerController(out var playerController))
         {
-            menu.AddMenuOption(menuOption.DisplayName, (player, opt) => menuOption.Action.Invoke(menuOption, this));
-        }
+            if (playerController == null)
+            {
+                return;
+            }
 
-        ChatMenus.OpenMenu(_PlayerController, menu);
+            var menu = new ChatMenu(title);
+
+            foreach (var menuOption in menuOptions)
+            {
+                menu.AddMenuOption(menuOption.DisplayName, (player, opt) => menuOption.Action.Invoke(menuOption, this));
+            }
+
+            MenuManager.OpenChatMenu(playerController, menu);
+        }
     }
 
     public void SwitchTeam(Team team)
     {
-        if (_PlayerController.IsValid)
+        if (TryGetPlayerController(out var playerController))
         {
-            _PlayerController.SwitchTeam((CounterStrikeSharp.API.Modules.Utils.CsTeam)(int)team);
-            CounterStrikeSharp.API.Server.NextFrame(() =>
-            {
-                _PlayerController.PlayerPawn.Value.CommitSuicide(explode: true, force: true);
-                ResetScoreboard();
-            });
+            var targetTeam = (CounterStrikeSharp.API.Modules.Utils.CsTeam)(int)team;
+            playerController!.ChangeTeam(targetTeam);
+
         }
     }
 
     public void Kick()
     {
-        CounterStrikeSharp.API.Server.ExecuteCommand(string.Create(CultureInfo.InvariantCulture, $"kickid {UserId!.Value} \"You are not part of the current match!\""));
+        try
+        {
+            if (TryGetPlayerController(out var playerController) && playerController!.Connected == PlayerConnectedState.PlayerConnected && !playerController.IsValid && !playerController.IsHLTV)
+            {
+                var userId = UserId;
+                if (userId != null)
+                {
+                    CounterStrikeSharp.API.Server.ExecuteCommand(string.Create(CultureInfo.InvariantCulture, $"kickid {userId.Value} \"You are not part of the current match!\""));
+                }
+            }
+        }
+        catch (Exception)
+        {
+            // TODO Logging?
+        }
     }
 
 

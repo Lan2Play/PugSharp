@@ -6,7 +6,7 @@ public class PlayerWeaponEvent : PlayerTimedRoundEvent
 {
     [JsonPropertyName("weapon")]
     public Weapon Weapon { get; }
-    
+
     protected PlayerWeaponEvent(Weapon weapon, string eventName) : base(eventName)
     {
         Weapon = weapon;

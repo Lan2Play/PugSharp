@@ -1,19 +1,21 @@
 ﻿using System.Text.Json.Serialization;
 
-namespace PugSharp.Config
+namespace PugSharp.Config;
+
+public class Team
 {
-    public class Team
-    {
-        [JsonPropertyName("name")]
-        public required string Name { get; init; }
+    [JsonPropertyName("id")]
+    public required string Id { get; set; } = Ulid.NewUlid().ToString();
 
-        [JsonPropertyName("tag")]
-        public string Tag { get; init; } = string.Empty;
+    [JsonPropertyName("name")]
+    public required string Name { get; set; } = string.Empty;
 
-        [JsonPropertyName("flag")]
-        public string Flag { get; init; } = string.Empty;
+    [JsonPropertyName("tag")]
+    public string Tag { get; init; } = string.Empty;
 
-        [JsonPropertyName("players")]
-        public required IDictionary<ulong, string> Players { get; init; }
-    }
+    [JsonPropertyName("flag")]
+    public string Flag { get; init; } = "DE";
+
+    [JsonPropertyName("players")]
+    public IDictionary<ulong, string> Players { get; init; } = new Dictionary<ulong, string>();
 }

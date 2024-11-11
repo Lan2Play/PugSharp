@@ -6,7 +6,7 @@ PugSharp
 |Duplicated Lines (%)| |Coverage| |Maintainability Rating| |Reliability
 Rating| |Security Rating| |Vulnerabilities| |Code Smells| |Bugs| |PugSharp Translation|
 
-`Pugsharp <https://github.com/Lan2Play/PugSharp>`_ is a PUG System Plugin for CS2 based on the awsome  `CounterStrikeSharp by roflmuffin <https://github.com/roflmuffin/CounterStrikeSharp>`_. 
+`Pugsharp <https://github.com/Lan2Play/PugSharp>`_ is a PUG System Plugin for CS2 based on the awesome  `CounterStrikeSharp by roflmuffin <https://github.com/roflmuffin/CounterStrikeSharp>`_. 
 
 Its intended purpose is to be used with our fork of `eventula <https://github.com/Lan2Play/eventula-manager>`_, but ofc can be used in a different environment or with different software as well.
 If you implement software to interface with PugSharp let us know please!
@@ -68,25 +68,25 @@ Table of contents
 .. |PugSharp_website_build| image:: https://github.com/Lan2Play/PugSharp/actions/workflows/website_build.yml/badge.svg
    :target: https://github.com/Lan2Play/PugSharp/actions/workflows/website_build.yml
 .. |Lines of Code| image:: https://sonarcloud.io/api/project_badges/measure?project=Lan2Play_PugSharp&metric=ncloc
-   :target: https://sonarcloud.io/summary/new_code?id=Lan2Play_PugSharp
+   :target: https://sonarcloud.io/summary/overall?id=Lan2Play_PugSharp
 .. |Quality Gate Status| image:: https://sonarcloud.io/api/project_badges/measure?project=Lan2Play_PugSharp&metric=alert_status
-   :target: https://sonarcloud.io/summary/new_code?id=Lan2Play_PugSharp
+   :target: https://sonarcloud.io/summary/overall?id=Lan2Play_PugSharp
 .. |Duplicated Lines (%)| image:: https://sonarcloud.io/api/project_badges/measure?project=Lan2Play_PugSharp&metric=duplicated_lines_density
-   :target: https://sonarcloud.io/summary/new_code?id=Lan2Play_PugSharp
+   :target: https://sonarcloud.io/summary/overall?id=Lan2Play_PugSharp
 .. |Coverage| image:: https://sonarcloud.io/api/project_badges/measure?project=Lan2Play_PugSharp&metric=coverage
-   :target: https://sonarcloud.io/summary/new_code?id=Lan2Play_PugSharp
+   :target: https://sonarcloud.io/summary/overall?id=Lan2Play_PugSharp
 .. |Maintainability Rating| image:: https://sonarcloud.io/api/project_badges/measure?project=Lan2Play_PugSharp&metric=sqale_rating
-   :target: https://sonarcloud.io/summary/new_code?id=Lan2Play_PugSharp
+   :target: https://sonarcloud.io/summary/overall?id=Lan2Play_PugSharp
 .. |Reliability Rating| image:: https://sonarcloud.io/api/project_badges/measure?project=Lan2Play_PugSharp&metric=reliability_rating
-   :target: https://sonarcloud.io/summary/new_code?id=Lan2Play_PugSharp
+   :target: https://sonarcloud.io/summary/overall?id=Lan2Play_PugSharp
 .. |Security Rating| image:: https://sonarcloud.io/api/project_badges/measure?project=Lan2Play_PugSharp&metric=security_rating
-   :target: https://sonarcloud.io/summary/new_code?id=Lan2Play_PugSharp
+   :target: https://sonarcloud.io/summary/overall?id=Lan2Play_PugSharp
 .. |Vulnerabilities| image:: https://sonarcloud.io/api/project_badges/measure?project=Lan2Play_PugSharp&metric=vulnerabilities
-   :target: https://sonarcloud.io/summary/new_code?id=Lan2Play_PugSharp
+   :target: https://sonarcloud.io/summary/overall?id=Lan2Play_PugSharp
 .. |Code Smells| image:: https://sonarcloud.io/api/project_badges/measure?project=Lan2Play_PugSharp&metric=code_smells
-   :target: https://sonarcloud.io/summary/new_code?id=Lan2Play_PugSharp
+   :target: https://sonarcloud.io/summary/overall?id=Lan2Play_PugSharp
 .. |Bugs| image:: https://sonarcloud.io/api/project_badges/measure?project=Lan2Play_PugSharp&metric=bugs
-   :target: https://sonarcloud.io/summary/new_code?id=Lan2Play_PugSharp
+   :target: https://sonarcloud.io/summary/overall?id=Lan2Play_PugSharp
 .. |PugSharp Translation| image:: https://translate.lan2play.de/widgets/pugsharp/-/pugsharp/svg-badge.svg
     :alt: PugSharp Translation status
     :target: https://translate.lan2play.de/engage/pugsharp/

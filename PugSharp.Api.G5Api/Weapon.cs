@@ -1,5 +1,7 @@
 ﻿using System.Text.Json.Serialization;
 
+using PugSharp.Shared;
+
 namespace PugSharp.Api.G5Api;
 
 public class Weapon
@@ -8,9 +10,9 @@ public class Weapon
     public string Name { get; }
 
     [JsonPropertyName("id")]
-    public CsWeaponId CsWeaponID { get; }
+    public CSWeaponId CsWeaponID { get; }
 
-    public Weapon(string name, CsWeaponId csWeaponID)
+    public Weapon(string name, CSWeaponId csWeaponID)
     {
         Name = name;
         CsWeaponID = csWeaponID;

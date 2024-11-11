@@ -1,79 +1,100 @@
-﻿using Microsoft.Extensions.Logging;
-using PugSharp.Api.Contract;
-using PugSharp.Logging;
-using System.Globalization;
+﻿using System.Globalization;
 using System.Text.Json;
 
-namespace PugSharp.Api.Json
+using Microsoft.Extensions.Logging;
+
+using PugSharp.Api.Contract;
+
+namespace PugSharp.Api.Json;
+
+public class JsonApiProvider : IApiProvider
 {
-    public class JsonApiProvider : IApiProvider
+    private readonly ILogger<JsonApiProvider> _Logger;
+
+    private string? _ApiStatsDirectory;
+
+    public JsonApiProvider(ILogger<JsonApiProvider> logger)
     {
-        private static readonly ILogger<JsonApiProvider> _Logger = LogManager.CreateLogger<JsonApiProvider>();
+        _Logger = logger;
+    }
 
-        private readonly string? _ApiStatsDirectory;
+    public void Initialize(string? apiStatsDirectory)
+    {
+        _ApiStatsDirectory = apiStatsDirectory;
+    }
 
-        public JsonApiProvider(string? apiStatsDirectory)
+    private async Task SerializeAndSaveData<T>(string fileName, T data, CancellationToken cancellationToken)
+    {
+        try
         {
-            _ApiStatsDirectory = apiStatsDirectory;
-        }
-
-        private async Task SerializeAndSaveData<T>(string fileName, T data, CancellationToken cancellationToken)
-        {
-            try
+            if (_ApiStatsDirectory == null)
             {
-                if (_ApiStatsDirectory == null)
-                {
-                    return;
-                }
-
-                var fullFileName = Path.GetFullPath(Path.Combine(_ApiStatsDirectory, fileName));
-                CreateStatsDirectoryIfNotExists();
-
-                var fileStream = File.Open(fullFileName, FileMode.Create);
-                await using (fileStream.ConfigureAwait(false))
-                {
-                    await JsonSerializer.SerializeAsync(fileStream, data, cancellationToken: cancellationToken).ConfigureAwait(false);
-                    _Logger.LogInformation("Stored {dataType}: {fullFileName}", typeof(T), fullFileName);
-                }
+                return;
             }
-            catch (Exception ex)
+
+            var fullFileName = Path.GetFullPath(Path.Combine(_ApiStatsDirectory, fileName));
+            CreateStatsDirectoryIfNotExists();
+
+            var fileStream = File.Open(fullFileName, FileMode.Create);
+            await using (fileStream.ConfigureAwait(false))
             {
-                _Logger.LogError(ex, "Error storing map {dataType} to {fileName}!", typeof(T), fileName);
+                await JsonSerializer.SerializeAsync(fileStream, data, cancellationToken: cancellationToken).ConfigureAwait(false);
+                _Logger.LogInformation("Stored {DataType}: {FullFileName}", typeof(T), fullFileName);
             }
         }
-
-        public Task GoingLiveAsync(GoingLiveParams goingLiveParams, CancellationToken cancellationToken)
+        catch (Exception ex)
         {
-            return SerializeAndSaveData($"Match_{goingLiveParams.MatchId}_golive.json", goingLiveParams, cancellationToken);
+            _Logger.LogError(ex, "Error storing map {DataType} to {FileName}!", typeof(T), fileName);
         }
+    }
 
-        public Task FinalizeMapAsync(MapResultParams finalizeMapParams, CancellationToken cancellationToken)
-        {
-            return SerializeAndSaveData($"Match_{finalizeMapParams.MatchId}_mapresult.json", finalizeMapParams, cancellationToken);
-        }
+    public Task MapVetoedAsync(MapVetoedParams mapVetoedParams, CancellationToken cancellationToken)
+    {
+        return SerializeAndSaveData($"Match_{mapVetoedParams.MatchId}_mapvetoed.json", mapVetoedParams, cancellationToken);
+    }
 
-        public Task FinalizeAsync(SeriesResultParams seriesResultParams, CancellationToken cancellationToken)
-        {
-            return SerializeAndSaveData($"Match_{seriesResultParams.MatchId}_result.json", seriesResultParams, cancellationToken);
-        }
+    public Task MapPickedAsync(MapPickedParams mapPickedParams, CancellationToken cancellationToken)
+    {
+        return SerializeAndSaveData($"Match_{mapPickedParams.MatchId}_mappicked.json", mapPickedParams, cancellationToken);
+    }
 
-        public Task FreeServerAsync(CancellationToken cancellationToken)
-        {
-            return Task.CompletedTask;
-        }
+    public Task GoingLiveAsync(GoingLiveParams goingLiveParams, CancellationToken cancellationToken)
+    {
+        return SerializeAndSaveData($"Match_{goingLiveParams.MatchId}_golive.json", goingLiveParams, cancellationToken);
+    }
 
-        public Task RoundStatsUpdateAsync(RoundStatusUpdateParams roundStatusUpdateParams, CancellationToken cancellationToken)
-        {
-            var round = roundStatusUpdateParams.CurrentMap.Team1.Score + roundStatusUpdateParams.CurrentMap.Team2.Score;
-            return SerializeAndSaveData(string.Create(CultureInfo.InvariantCulture, $"Match_{roundStatusUpdateParams.MatchId}_roundresult_{round}.json"), roundStatusUpdateParams, cancellationToken);
-        }
+    public Task RoundStatsUpdateAsync(RoundStatusUpdateParams roundStatusUpdateParams, CancellationToken cancellationToken)
+    {
+        var round = roundStatusUpdateParams.CurrentMap.Team1.Score + roundStatusUpdateParams.CurrentMap.Team2.Score;
+        return SerializeAndSaveData(string.Create(CultureInfo.InvariantCulture, $"Match_{roundStatusUpdateParams.MatchId}_roundresult_{round}.json"), roundStatusUpdateParams, cancellationToken);
+    }
 
-        private void CreateStatsDirectoryIfNotExists()
+    public Task RoundMvpAsync(RoundMvpParams roundMvpParams, CancellationToken cancellationToken)
+    {
+        return Task.CompletedTask;
+    }
+
+    public Task FinalizeMapAsync(MapResultParams finalizeMapParams, CancellationToken cancellationToken)
+    {
+        return SerializeAndSaveData($"Match_{finalizeMapParams.MatchId}_mapresult.json", finalizeMapParams, cancellationToken);
+    }
+
+    public Task FinalizeAsync(SeriesResultParams seriesResultParams, CancellationToken cancellationToken)
+    {
+        return SerializeAndSaveData($"Match_{seriesResultParams.MatchId}_result.json", seriesResultParams, cancellationToken);
+    }
+
+    public Task FreeServerAsync(CancellationToken cancellationToken)
+    {
+        return Task.CompletedTask;
+    }
+
+
+    private void CreateStatsDirectoryIfNotExists()
+    {
+        if (_ApiStatsDirectory != null && !Directory.Exists(_ApiStatsDirectory))
         {
-            if (_ApiStatsDirectory != null && !Directory.Exists(_ApiStatsDirectory))
-            {
-                Directory.CreateDirectory(_ApiStatsDirectory);
-            }
+            Directory.CreateDirectory(_ApiStatsDirectory);
         }
     }
 }
