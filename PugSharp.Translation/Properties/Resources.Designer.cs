@@ -601,7 +601,7 @@ namespace PugSharp.Translation.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Not Ready.
+        ///   Looks up a localized string similar to [Not Ready] .
         /// </summary>
         public static string PugSharp_Match_NotReadyTag {
             get {
@@ -610,7 +610,7 @@ namespace PugSharp.Translation.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Ready.
+        ///   Looks up a localized string similar to [Ready] .
         /// </summary>
         public static string PugSharp_Match_ReadyTag {
             get {

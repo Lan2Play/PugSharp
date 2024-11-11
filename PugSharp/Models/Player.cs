@@ -102,13 +102,11 @@ public class Player : IPlayer
 
         set
         {
-            if (TryGetPlayerController(out var playerController) && value != null)
+            if (TryGetPlayerController(out var playerController) 
+                && value != null 
+                && !string.Equals(playerController!.Clan, value, StringComparison.Ordinal))
             {
-                var tag = $"{value} - ";
-                if (!string.Equals(playerController!.Clan, tag, StringComparison.Ordinal))
-                {
-                    playerController.SetClantag(tag);
-                }
+                playerController.SetClantag(value);
             }
         }
     }
