@@ -5,10 +5,10 @@ namespace PugSharp.Config;
 public class Team
 {
     [JsonPropertyName("id")]
-    public required string Id { get; set; } = Ulid.NewUlid().ToString();
+    public string Id { get; set; } = Ulid.NewUlid().ToString();
 
     [JsonPropertyName("name")]
-    public required string Name { get; set; } = string.Empty;
+    public string Name { get; set; } = string.Empty;
 
     [JsonPropertyName("tag")]
     public string Tag { get; init; } = string.Empty;
