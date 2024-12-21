@@ -53,7 +53,7 @@ install-counterstrikesharp:
 install-counterstrikesharp-docker:
 	docker run --rm --interactive \
 	-v $(currentDir):/app \
-	mcr.microsoft.com/dotnet/sdk:7.0 /bin/sh -c " \
+	mcr.microsoft.com/dotnet/sdk:8.0 /bin/sh -c " \
 	apt-get update && apt-get install jq unzip -y; \
 	mkdir -p /app/cs2/game/csgo/addons/; \
 	wget -q -O /app/counterstrikesharp.zip $(shell curl -s -L -H "Accept: application/vnd.github+json" https://api.github.com/repos/roflmuffin/CounterStrikeSharp/releases/tags/$(shell dotnet list PugSharp/PugSharp.csproj package --format json | jq -r '.projects[].frameworks[].topLevelPackages[] | select(.id == "CounterStrikeSharp.API") | .resolvedVersion' | sed 's|1.0.|v|g') | jq -r '.assets.[] | select(.browser_download_url | test("with-runtime.*linux")) | .browser_download_url'); \
@@ -109,18 +109,18 @@ build-release:
 build-debug-docker:
 	docker run --rm --interactive \
 	-v $(currentDir):/app \
-	mcr.microsoft.com/dotnet/sdk:7.0 /bin/sh -c " \
+	mcr.microsoft.com/dotnet/sdk:8.0 /bin/sh -c " \
 	cd /app && dotnet publish -c debug; chown -R $(user) /app"
 
 build-release-docker:
 	docker run --rm --interactive \
 	-v $(currentDir):/app \
-	mcr.microsoft.com/dotnet/sdk:7.0 /bin/sh -c " \
+	mcr.microsoft.com/dotnet/sdk:8.0 /bin/sh -c " \
 	cd /app && dotnet publish -c release; chown -R $(user) /app"
 
 copy-pugsharp:
 	mkdir -p $(currentDir)/cs2/game/csgo/addons/counterstrikesharp/plugins/PugSharp
-	cp -rf $(currentDir)/PugSharp/bin/Debug/net7.0/publish/* $(currentDir)/cs2/game/csgo/addons/counterstrikesharp/plugins/PugSharp
+	cp -rf $(currentDir)/PugSharp/bin/Debug/net8.0/publish/* $(currentDir)/cs2/game/csgo/addons/counterstrikesharp/plugins/PugSharp
 
 copy-pugsharp-sample-configs:
 	mkdir -p $(currentDir)/cs2/game/csgo/cfg
