@@ -9,7 +9,7 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-		<PackageReference Include="CounterStrikeSharp.API" Version="1.0.286" />
+		<PackageReference Include="CounterStrikeSharp.API" Version="1.0.296" />
 		<PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.11.1" />
 		<PackageReference Include="NSubstitute" Version="5.3.0" />
 		<PackageReference Include="xunit" Version="2.9.2" />
@@ -37,7 +37,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
-	  <PackageReference Update="Meziantou.Analyzer" Version="2.0.177">
+	  <PackageReference Update="Meziantou.Analyzer" Version="2.0.182">
 	    <PrivateAssets>all</PrivateAssets>
 	    <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
 	  </PackageReference>
