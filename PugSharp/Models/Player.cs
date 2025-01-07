@@ -4,6 +4,8 @@ using CounterStrikeSharp.API;
 using CounterStrikeSharp.API.Core;
 using CounterStrikeSharp.API.Modules.Menu;
 
+using CSSharpUtils.Extensions;
+
 using PugSharp.Match.Contract;
 
 namespace PugSharp.Models;
@@ -86,23 +88,28 @@ public class Player : IPlayer
         }
     }
 
-    public string? Clan
+    public string Clan
     {
         get
         {
             if (TryGetPlayerController(out var playerController))
             {
-                return playerController?.Clan;
+                return playerController?.ClanName ?? string.Empty;
             }
 
-            return null;
+            return string.Empty;
         }
 
         set
         {
-            if (TryGetPlayerController(out var playerController) && playerController?.InGameMoneyServices != null && value != null)
+            if (TryGetPlayerController(out var playerController)
+                && value != null
+                && !string.Equals(playerController!.Clan, value, StringComparison.Ordinal))
             {
-                playerController.Clan = value;
+                playerController.SetClantag(value);
+
+                // Fire Event to synchronize all clients
+                new EventNextlevelChanged(force: false).FireEvent(false);
             }
         }
     }
