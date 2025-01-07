@@ -34,26 +34,26 @@ Invoke-WebRequest "https://mms.alliedmods.net/mmsdrop/2.0/$latestMM" -OutFile "$
 Write-Output "Extract MetaMod Version $latestMM"
 Expand-Archive "$TARGET_DIR\latestMM.zip" -DestinationPath $TARGET_DIR -Force
 
-Write-Output "Fix GameInfo"
-if (Test-Path $GAMEINFO_FILE) {
-    $NEW_ENTRY = "			Game	csgo/addons/metamod"
-    $SEL = Select-String -Path $GAMEINFO_FILE -Pattern $NEW_ENTRY
-    if ($SEL -ne $null) {
-        Write-Output "The entry '$NEW_ENTRY' already exists in $GAMEINFO_FILE. No changes were made."
-    }
-    else {
-        (Get-Content $GAMEINFO_FILE) |
-        Foreach-Object {
-            $_ # send the current line to output
-            if ($_ -match "Game_LowViolence") {
-                #Add Lines after the selected pattern
-                $NEW_ENTRY
-            }
-        } | Set-Content $GAMEINFO_FILE
+# Write-Output "Fix GameInfo"
+# if (Test-Path $GAMEINFO_FILE) {
+#     $NEW_ENTRY = "			Game	csgo/addons/metamod"
+#     $SEL = Select-String -Path $GAMEINFO_FILE -Pattern $NEW_ENTRY
+#     if ($SEL -ne $null) {
+#         Write-Output "The entry '$NEW_ENTRY' already exists in $GAMEINFO_FILE. No changes were made."
+#     }
+#     else {
+#         (Get-Content $GAMEINFO_FILE) |
+#         Foreach-Object {
+#             $_ # send the current line to output
+#             if ($_ -match "Game_LowViolence") {
+#                 #Add Lines after the selected pattern
+#                 $NEW_ENTRY
+#             }
+#         } | Set-Content $GAMEINFO_FILE
 
-        Write-Output "The file $GAMEINFO_FILE has been modified successfully. '$NEW_ENTRY' has been added."
-    }
-}
+#         Write-Output "The file $GAMEINFO_FILE has been modified successfully. '$NEW_ENTRY' has been added."
+#     }
+# }
 
 Write-Output "Install CounterStrikeSharp"
 
