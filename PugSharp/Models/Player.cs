@@ -107,6 +107,9 @@ public class Player : IPlayer
                 && !string.Equals(playerController!.Clan, value, StringComparison.Ordinal))
             {
                 playerController.SetClantag(value);
+
+                // Fire Event to synchronize all clients
+                new EventNextlevelChanged(force: false).FireEvent(false);
             }
         }
     }

@@ -1155,6 +1155,7 @@ public class Match : IDisposable
             player.Clan = _TextHelper.GetText(nameof(Resources.PugSharp_Match_NotReadyTag));
             _CsServer.PrintToChatAll(_TextHelper.GetText(nameof(Resources.PugSharp_Match_Info_NotReady), player.PlayerName, readyPlayers, requiredPlayers));
         }
+
     }
 
     public Team GetPlayerTeam(ulong steamID)
