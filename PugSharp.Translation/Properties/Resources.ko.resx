@@ -1,6 +1,65 @@
 <?xml version="1.0" encoding="utf-8"?>
 <root>
-  <xsd:schema xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata" id="root">
+  <!-- 
+    Microsoft ResX Schema 
+    
+    Version 2.0
+    
+    The primary goals of this format is to allow a simple XML format 
+    that is mostly human readable. The generation and parsing of the 
+    various data types are done through the TypeConverter classes 
+    associated with the data types.
+    
+    Example:
+    
+    ... ado.net/XML headers & schema ...
+    <resheader name="resmimetype">text/microsoft-resx</resheader>
+    <resheader name="version">2.0</resheader>
+    <resheader name="reader">System.Resources.ResXResourceReader, System.Windows.Forms, ...</resheader>
+    <resheader name="writer">System.Resources.ResXResourceWriter, System.Windows.Forms, ...</resheader>
+    <data name="Name1"><value>this is my long string</value><comment>this is a comment</comment></data>
+    <data name="Color1" type="System.Drawing.Color, System.Drawing">Blue</data>
+    <data name="Bitmap1" mimetype="application/x-microsoft.net.object.binary.base64">
+        <value>[base64 mime encoded serialized .NET Framework object]</value>
+    </data>
+    <data name="Icon1" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
+        <value>[base64 mime encoded string representing a byte array form of the .NET Framework object]</value>
+        <comment>This is a comment</comment>
+    </data>
+                
+    There are any number of "resheader" rows that contain simple 
+    name/value pairs.
+    
+    Each data row contains a name, and value. The row also contains a 
+    type or mimetype. Type corresponds to a .NET class that support 
+    text/value conversion through the TypeConverter architecture. 
+    Classes that don't support this are serialized and stored with the 
+    mimetype set.
+    
+    The mimetype is used for serialized objects, and tells the 
+    ResXResourceReader how to depersist the object. This is currently not 
+    extensible. For a given mimetype the value must be set accordingly:
+    
+    Note - application/x-microsoft.net.object.binary.base64 is the format 
+    that the ResXResourceWriter will generate, however the reader can 
+    read any of the formats listed below.
+    
+    mimetype: application/x-microsoft.net.object.binary.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Binary.BinaryFormatter
+            : and then encoded with base64 encoding.
+    
+    mimetype: application/x-microsoft.net.object.soap.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Soap.SoapFormatter
+            : and then encoded with base64 encoding.
+
+    mimetype: application/x-microsoft.net.object.bytearray.base64
+    value   : The object must be serialized into a byte array 
+            : using a System.ComponentModel.TypeConverter
+            : and then encoded with base64 encoding.
+    -->
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
     <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
     <xsd:element name="root" msdata:IsDataSet="true">
       <xsd:complexType>
@@ -58,21 +117,14 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="PugSharp.Match.TeamReminder" xml:space="preserve">
-    <value>귀하는 현재 다음 팀에 속해 있습니다: **{0:teamName}**.</value>
-  </data>
-  <data name="PugSharp.Hello" xml:space="preserve">
-    <value>**{0:playerName}** 안녕하세요,
-매치에 오신걸 환영합니다 {1:matchId}</value>
+  <data name="PugSharp.Command.ChangedMaxOvertimeRounds" xml:space="preserve">
+    <value>최대연장전 라운드가 변경되었습니다. 변경전 {0:oldMaxRounds} 변경후 {1:maxOvertimeRounds}</value>
   </data>
   <data name="PugSharp.Command.ChangedMaxRounds" xml:space="preserve">
     <value>최대라운드 변경 {0:oldMaxRounds} 에서 {1:maxRounds}으로</value>
   </data>
-  <data name="PugSharp.Command.CreatingMatchMaxOvertimeRounds" xml:space="preserve">
-    <value>`!maxovertimerounds &lt;rounds&gt;` 로 최대 연장전 라운드를 정할 수 있습니다!</value>
-  </data>
-  <data name="PugSharp.Command.CreatingMatchMaxRounds" xml:space="preserve">
-    <value>`!maxrounds &lt;rounds&gt;`명령어로 최대 매치라운드를 설정합니다!</value>
+  <data name="PugSharp.Command.ChangedTeamMode" xml:space="preserve">
+    <value>팀모드가 변경되었습니다.{0:oldTeamMode} 에서 {1:newTeamMode}으로</value>
   </data>
   <data name="PugSharp.Command.ConfigLoaded" xml:space="preserve">
     <value>매치설정을 불러왔습니다!</value>
@@ -80,13 +132,24 @@
   <data name="PugSharp.Command.CreatingMatchAddMap" xml:space="preserve">
     <value>`!addmap &lt;mapname&gt;`으로 맵을 추가합니다!</value>
   </data>
-  <data name="PugSharp.Command.ChangedTeamMode" xml:space="preserve">
-    <value>팀모드가 변경되었습니다.{0:oldTeamMode} 에서 {1:newTeamMode}으로</value>
-  </data>
-  <data name="PugSharp.Command.ChangedMaxOvertimeRounds" xml:space="preserve">
-    <value>최대연장전 라운드가 변경되었습니다. 변경전 {0:oldMaxRounds} 변경후 {1:maxOvertimeRounds}</value>
-  </data>
   <data name="PugSharp.Command.CreatingMatchMatchInfo" xml:space="preserve">
     <value>`!matchinfo`명령어로 경기구성을 확인할 수 있습니다!</value>
+  </data>
+  <data name="PugSharp.Command.CreatingMatchMaxOvertimeRounds" xml:space="preserve">
+    <value>`!maxovertimerounds &lt;rounds&gt;` 로 최대 연장전 라운드를 정할 수 있습니다!</value>
+  </data>
+  <data name="PugSharp.Command.CreatingMatchMaxRounds" xml:space="preserve">
+    <value>`!maxrounds &lt;rounds&gt;`명령어로 최대 매치라운드를 설정합니다!</value>
+  </data>
+  <data name="PugSharp.Hello" xml:space="preserve">
+    <value>**{0:playerName}** 안녕하세요,
+매치에 오신걸 환영합니다 {1:matchId}</value>
+  </data>
+  <data name="PugSharp.Match.TeamReminder" xml:space="preserve">
+    <value>귀하는 현재 다음 팀에 속해 있습니다: **{0:teamName}**.</value>
+  </data>
+  <assembly alias="System.Windows.Forms" name="System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" />
+  <data name="PugSharp.Match.VotingTag" type="System.Resources.ResXNullRef, System.Windows.Forms">
+    <value />
   </data>
 </root>

@@ -336,4 +336,7 @@
   <data name="PugSharp.PoweredBy" xml:space="preserve">
     <value>powered by **PugSharp** (https://github.com/Lan2Play/PugSharp/)</value>
   </data>
+  <data name="PugSharp.Match.VotingTag" xml:space="preserve">
+    <value>[Voting] </value>
+  </data>
 </root>
