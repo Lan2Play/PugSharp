@@ -59,7 +59,7 @@
             : using a System.ComponentModel.TypeConverter
             : and then encoded with base64 encoding.
     -->
-  <xsd:schema xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata" id="root">
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
     <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
     <xsd:element name="root" msdata:IsDataSet="true">
       <xsd:complexType>
@@ -117,98 +117,14 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="PugSharp.Hello" xml:space="preserve">
-    <value>Hallo **{0:playerName}**, willkommen zu dem Match {1:matchId}</value>
-  </data>
-  <data name="PugSharp.Match.Error.AlreadyBannedMap" xml:space="preserve">
-    <value>Die hast die Kartennummer {0: mapNumber}: {1:mapName} bereits gebannt!</value>
-  </data>
-  <data name="PugSharp.Match.BannedMap" xml:space="preserve">
-    <value>Die Karte **{0:mapName}** wurde von {1:teamName} gebannt!</value>
-  </data>
-  <data name="PugSharp.Match.Info.Ready" xml:space="preserve">
-    <value>{0:playerName} ist bereit! {1:readyPlayers} von {2:requiredPlayers} sind bereit.</value>
-  </data>
-  <data name="PugSharp.Match.Error.NoTeamVoteExpected" xml:space="preserve">
-    <value>Im Moment ist keine Teamabstimmung aktiv!</value>
-  </data>
-  <data name="PugSharp.Match.Error.UnpauseNotPossible" xml:space="preserve">
-    <value>Im Moment kann die Pause nicht beendet werden!</value>
-  </data>
-  <data name="PugSharp.Match.Error.TeamNotAvailable" xml:space="preserve">
-    <value>Das Team mit dem Namen {0:teamName} ist nicht verfügbar!</value>
-  </data>
-  <data name="PugSharp.Match.Info.WaitingForAllPlayers" xml:space="preserve">
-    <value>Warte darauf dass alle Spieler bereit sind.</value>
-  </data>
-  <data name="PugSharp.Match.Info.IsLive" xml:space="preserve">
-    <value>Das Spiel ist jetzt **LIVE**</value>
-  </data>
-  <data name="PugSharp.Match.Error.AlreadyVotedForTeam" xml:space="preserve">
-    <value>Du hast bereits für das Team {0:teamNumber}: {1:teamName} gewählt!</value>
-  </data>
-  <data name="PugSharp.Match.Error.PauseNotPossible" xml:space="preserve">
-    <value>Im Moment kann keine Pause gestartet werden!</value>
-  </data>
-  <data name="PugSharp.Match.Error.NotPermittedToBanMap" xml:space="preserve">
-    <value>Dir ist es im Momment nicht erlaubt eine Karte zu bannen!</value>
-  </data>
-  <data name="PugSharp.Match.Info.NotReady" xml:space="preserve">
-    <value>{0:playerName} ist nicht bereit! {1:readyPlayers} von {2:requiredPlayers} sind bereit.</value>
-  </data>
-  <data name="PugSharp.Match.Info.StartMatch" xml:space="preserve">
-    <value>Start Spiel. **{0:team1Name}** als **{1:team1Side}**. **{2:team2Name}** als **{3:team2Side}**</value>
-  </data>
-  <data name="PugSharp.Match.Error.NoMapVoteExpected" xml:space="preserve">
-    <value>Im Moment ist keine Kartenabstimmung aktiv!</value>
-  </data>
-  <data name="PugSharp.Match.Error.NoReadyExpected" xml:space="preserve">
-    <value>Im Moment wird nicht auf den Bereitstatus gewartet!</value>
-  </data>
-  <data name="PugSharp.Match.Error.UnknownMapNumber" xml:space="preserve">
-    <value>Die Karte mit der Kartennummer **{0:mapNumber}** ist nicht verfügbar!</value>
-  </data>
-  <data name="PugSharp.Match.TeamReminder" xml:space="preserve">
-    <value>Sie sind derzeit im Team: **{0:teamName}**.</value>
-  </data>
-  <data name="PugSharp.Match.RemindReady" xml:space="preserve">
-    <value>Du bist !!nicht!! bereit! Schreibe `!ready` in den chat wenn du bereit bist.</value>
-  </data>
-  <data name="PugSharp.Match.Error.NotPermittedToVoteForTeam" xml:space="preserve">
-    <value>Dir ist es im Moment nicht erlaubt ein Team zu wählen!</value>
-  </data>
-  <data name="PugSharp.Match.VoteTeamMenuHeader" xml:space="preserve">
-    <value>Wähle die Startseite (`!stay` oder`!switch`)</value>
-  </data>
-  <data name="PugSharp.Match.VoteMapMenuHeader" xml:space="preserve">
-    <value>Stimme ab um eine Karte zu bannen: schreibe `!&lt;Kartennummer&gt;` in den Chat</value>
-  </data>
-  <data name="PugSharp.NotifyReady" xml:space="preserve">
-    <value>schreibe `!ready` in den Chat um als bereit markiert zu werden</value>
-  </data>
-  <data name="PugSharp.Match.WaitForOtherTeam" xml:space="preserve">
-    <value>Warte auf die Abstimmung des anderen Teams!</value>
-  </data>
-  <data name="PugSharp.PoweredBy" xml:space="preserve">
-    <value>powered by **PugSharp** (https://github.com/Lan2Play/PugSharp/)</value>
-  </data>
-  <data name="PugSharp.Match.VotedForTeam" xml:space="preserve">
-    <value>Du hast **{0:teamName}** gewählt</value>
-  </data>
-  <data name="PugSharp.Match.VotedToBanMap" xml:space="preserve">
-    <value>Du hast dafür gestimmt **{0:mapName}** zu bannen</value>
-  </data>
-  <data name="PugSharp.Match.SelectedTeam" xml:space="preserve">
-    <value>{0:teamName} hat {1:side} als Startseite gewählt!</value>
-  </data>
-  <data name="PugSharp.Command.Error.NumberOfRoundsRequired" xml:space="preserve">
-    <value>Anzahl an Runden wird benötigt!</value>
-  </data>
   <data name="PugSharp.Command.ChangedMaxOvertimeRounds" xml:space="preserve">
     <value>Maximale Anzahl an Nachspielrunden wurde von {0:oldMaxRounds} zu {1:maxOvertimeRounds} geändert</value>
   </data>
   <data name="PugSharp.Command.ChangedMaxRounds" xml:space="preserve">
     <value>Maximale Anzahl an Runden wurde von {0:oldMaxRounds} zu {1:maxRounds} geändert</value>
+  </data>
+  <data name="PugSharp.Command.ChangedTeamMode" xml:space="preserve">
+    <value>Der Teammodus wurde von {0:oldTeamMode} zu {1:newTeamMode} geändert</value>
   </data>
   <data name="PugSharp.Command.ConfigLoaded" xml:space="preserve">
     <value>Matchkonfiguration geladen!</value>
@@ -218,57 +134,6 @@
   </data>
   <data name="PugSharp.Command.CreatingMatchMatchInfo" xml:space="preserve">
     <value>`!matchinfo` um die aktuelle Spielkonfiguration anzuzeigen!</value>
-  </data>
-  <data name="PugSharp.Command.MapRemoved" xml:space="preserve">
-    <value>Karte**{0:mapName}** entfernt. Aktuelle Karten sind {1:maps}</value>
-  </data>
-  <data name="PugSharp.Command.Error.NoMatch" xml:space="preserve">
-    <value>Kein Spiel verfügbar.</value>
-  </data>
-  <data name="PugSharp.Command.Error.NoMatchRunning" xml:space="preserve">
-    <value>Momentan läuft kein Spiel</value>
-  </data>
-  <data name="PugSharp.Command.Error.NumberOfOvertimeRoundsLessThanZero" xml:space="preserve">
-    <value>Maximale Anzahl an Nachspielrunden muss größer als 0 sein!</value>
-  </data>
-  <data name="PugSharp.Command.Error.NumberOfOvertimeRoundsNotNumeric" xml:space="preserve">
-    <value>Maximale Anzahl an Nachspielrunden muss eine Nummer sein!</value>
-  </data>
-  <data name="PugSharp.Command.Error.NumberOfRoundsLessThanZero" xml:space="preserve">
-    <value>Maximale Anzahl an Runden muss größer als 0 sein!</value>
-  </data>
-  <data name="PugSharp.Command.Error.NumberOfRoundsNotNumeric" xml:space="preserve">
-    <value>Maximale Anzahl an Runden muss eine Nummer sein!</value>
-  </data>
-  <data name="PugSharp.Command.Error.OneMapRequired" xml:space="preserve">
-    <value>Das Spiel kann nicht gestartet werden! Es wird mindestens eine Karte benötigt!</value>
-  </data>
-  <data name="PugSharp.Command.Error.RconNotSupported" xml:space="preserve">
-    <value>Dieser Behfehl wird nicht über rcon unterstützt.</value>
-  </data>
-  <data name="PugSharp.Command.Error.TeammodePossibleValues" xml:space="preserve">
-    <value>Mögliche Werte für den Teammodus: {0:possibleValues}</value>
-  </data>
-  <data name="PugSharp.Command.Error.TeammodeRequired" xml:space="preserve">
-    <value>Teammodus wird benötigt!</value>
-  </data>
-  <data name="PugSharp.Command.Error.UrlRequired" xml:space="preserve">
-    <value>Url wird als Argument benötigt!</value>
-  </data>
-  <data name="PugSharp.Command.LoadingConfigFromFile" xml:space="preserve">
-    <value>Laden der Konfiguration {0:fileName}</value>
-  </data>
-  <data name="PugSharp.Command.LoadingConfigFromUrl" xml:space="preserve">
-    <value>Laden der Konfiguration von {0:url}</value>
-  </data>
-  <data name="PugSharp.Command.MapAdded" xml:space="preserve">
-    <value>Karte **{0:mapName}** hinzugefügt. Aktuelle Karten sind {1:maps}</value>
-  </data>
-  <data name="PugSharp.Command.MatchStopped" xml:space="preserve">
-    <value>Spiel gestoppt!</value>
-  </data>
-  <data name="PugSharp.Command.ChangedTeamMode" xml:space="preserve">
-    <value>Der Teammodus wurde von {0:oldTeamMode} zu {1:newTeamMode} geändert</value>
   </data>
   <data name="PugSharp.Command.CreatingMatchMaxOvertimeRounds" xml:space="preserve">
     <value>`!maxovertimerounds &lt;rounds&gt;` um die maximaler Anzahl an Nachspielrunden zu setzen!</value>
@@ -324,7 +189,146 @@
   <data name="PugSharp.Command.Error.MatchStateUnavailable" xml:space="preserve">
     <value>Momentan läuft kein Spiel. Status ist nicht verfügbar!</value>
   </data>
+  <data name="PugSharp.Command.Error.NoMatch" xml:space="preserve">
+    <value>Kein Spiel verfügbar.</value>
+  </data>
+  <data name="PugSharp.Command.Error.NoMatchRunning" xml:space="preserve">
+    <value>Momentan läuft kein Spiel</value>
+  </data>
+  <data name="PugSharp.Command.Error.NumberOfOvertimeRoundsLessThanZero" xml:space="preserve">
+    <value>Maximale Anzahl an Nachspielrunden muss größer als 0 sein!</value>
+  </data>
+  <data name="PugSharp.Command.Error.NumberOfOvertimeRoundsNotNumeric" xml:space="preserve">
+    <value>Maximale Anzahl an Nachspielrunden muss eine Nummer sein!</value>
+  </data>
+  <data name="PugSharp.Command.Error.NumberOfRoundsLessThanZero" xml:space="preserve">
+    <value>Maximale Anzahl an Runden muss größer als 0 sein!</value>
+  </data>
+  <data name="PugSharp.Command.Error.NumberOfRoundsNotNumeric" xml:space="preserve">
+    <value>Maximale Anzahl an Runden muss eine Nummer sein!</value>
+  </data>
+  <data name="PugSharp.Command.Error.NumberOfRoundsRequired" xml:space="preserve">
+    <value>Anzahl an Runden wird benötigt!</value>
+  </data>
+  <data name="PugSharp.Command.Error.OneMapRequired" xml:space="preserve">
+    <value>Das Spiel kann nicht gestartet werden! Es wird mindestens eine Karte benötigt!</value>
+  </data>
+  <data name="PugSharp.Command.Error.RconNotSupported" xml:space="preserve">
+    <value>Dieser Behfehl wird nicht über rcon unterstützt.</value>
+  </data>
   <data name="PugSharp.Command.Error.RoundBackupFileNotFound" xml:space="preserve">
     <value>Rundensicherung "{0:roundBackupFile}" wurde nicht gefunden!</value>
+  </data>
+  <data name="PugSharp.Command.Error.TeammodePossibleValues" xml:space="preserve">
+    <value>Mögliche Werte für den Teammodus: {0:possibleValues}</value>
+  </data>
+  <data name="PugSharp.Command.Error.TeammodeRequired" xml:space="preserve">
+    <value>Teammodus wird benötigt!</value>
+  </data>
+  <data name="PugSharp.Command.Error.UrlRequired" xml:space="preserve">
+    <value>Url wird als Argument benötigt!</value>
+  </data>
+  <data name="PugSharp.Command.LoadingConfigFromFile" xml:space="preserve">
+    <value>Laden der Konfiguration {0:fileName}</value>
+  </data>
+  <data name="PugSharp.Command.LoadingConfigFromUrl" xml:space="preserve">
+    <value>Laden der Konfiguration von {0:url}</value>
+  </data>
+  <data name="PugSharp.Command.MapAdded" xml:space="preserve">
+    <value>Karte **{0:mapName}** hinzugefügt. Aktuelle Karten sind {1:maps}</value>
+  </data>
+  <data name="PugSharp.Command.MapRemoved" xml:space="preserve">
+    <value>Karte**{0:mapName}** entfernt. Aktuelle Karten sind {1:maps}</value>
+  </data>
+  <data name="PugSharp.Command.MatchStopped" xml:space="preserve">
+    <value>Spiel gestoppt!</value>
+  </data>
+  <data name="PugSharp.Hello" xml:space="preserve">
+    <value>Hallo **{0:playerName}**, willkommen zu dem Match {1:matchId}</value>
+  </data>
+  <data name="PugSharp.Match.BannedMap" xml:space="preserve">
+    <value>Die Karte **{0:mapName}** wurde von {1:teamName} gebannt!</value>
+  </data>
+  <data name="PugSharp.Match.Error.AlreadyBannedMap" xml:space="preserve">
+    <value>Die hast die Kartennummer {0: mapNumber}: {1:mapName} bereits gebannt!</value>
+  </data>
+  <data name="PugSharp.Match.Error.AlreadyVotedForTeam" xml:space="preserve">
+    <value>Du hast bereits für das Team {0:teamNumber}: {1:teamName} gewählt!</value>
+  </data>
+  <data name="PugSharp.Match.Error.NoMapVoteExpected" xml:space="preserve">
+    <value>Im Moment ist keine Kartenabstimmung aktiv!</value>
+  </data>
+  <data name="PugSharp.Match.Error.NoReadyExpected" xml:space="preserve">
+    <value>Im Moment wird nicht auf den Bereitstatus gewartet!</value>
+  </data>
+  <data name="PugSharp.Match.Error.NoTeamVoteExpected" xml:space="preserve">
+    <value>Im Moment ist keine Teamabstimmung aktiv!</value>
+  </data>
+  <data name="PugSharp.Match.Error.NotPermittedToBanMap" xml:space="preserve">
+    <value>Dir ist es im Momment nicht erlaubt eine Karte zu bannen!</value>
+  </data>
+  <data name="PugSharp.Match.Error.NotPermittedToVoteForTeam" xml:space="preserve">
+    <value>Dir ist es im Moment nicht erlaubt ein Team zu wählen!</value>
+  </data>
+  <data name="PugSharp.Match.Error.PauseNotPossible" xml:space="preserve">
+    <value>Im Moment kann keine Pause gestartet werden!</value>
+  </data>
+  <data name="PugSharp.Match.Error.TeamNotAvailable" xml:space="preserve">
+    <value>Das Team mit dem Namen {0:teamName} ist nicht verfügbar!</value>
+  </data>
+  <data name="PugSharp.Match.Error.UnknownMapNumber" xml:space="preserve">
+    <value>Die Karte mit der Kartennummer **{0:mapNumber}** ist nicht verfügbar!</value>
+  </data>
+  <data name="PugSharp.Match.Error.UnpauseNotPossible" xml:space="preserve">
+    <value>Im Moment kann die Pause nicht beendet werden!</value>
+  </data>
+  <data name="PugSharp.Match.Info.IsLive" xml:space="preserve">
+    <value>Das Spiel ist jetzt **LIVE**</value>
+  </data>
+  <data name="PugSharp.Match.Info.NotReady" xml:space="preserve">
+    <value>{0:playerName} ist nicht bereit! {1:readyPlayers} von {2:requiredPlayers} sind bereit.</value>
+  </data>
+  <data name="PugSharp.Match.Info.Ready" xml:space="preserve">
+    <value>{0:playerName} ist bereit! {1:readyPlayers} von {2:requiredPlayers} sind bereit.</value>
+  </data>
+  <data name="PugSharp.Match.Info.StartMatch" xml:space="preserve">
+    <value>Start Spiel. **{0:team1Name}** als **{1:team1Side}**. **{2:team2Name}** als **{3:team2Side}**</value>
+  </data>
+  <data name="PugSharp.Match.Info.WaitingForAllPlayers" xml:space="preserve">
+    <value>Warte darauf dass alle Spieler bereit sind.</value>
+  </data>
+  <data name="PugSharp.Match.TeamReminder" xml:space="preserve">
+    <value>Sie sind derzeit im Team: **{0:teamName}**.</value>
+  </data>
+  <data name="PugSharp.Match.RemindReady" xml:space="preserve">
+    <value>Du bist !!nicht!! bereit! Schreibe `!ready` in den chat wenn du bereit bist.</value>
+  </data>
+  <data name="PugSharp.Match.SelectedTeam" xml:space="preserve">
+    <value>{0:teamName} hat {1:side} als Startseite gewählt!</value>
+  </data>
+  <data name="PugSharp.Match.VotedForTeam" xml:space="preserve">
+    <value>Du hast **{0:teamName}** gewählt</value>
+  </data>
+  <data name="PugSharp.Match.VotedToBanMap" xml:space="preserve">
+    <value>Du hast dafür gestimmt **{0:mapName}** zu bannen</value>
+  </data>
+  <data name="PugSharp.Match.VoteMapMenuHeader" xml:space="preserve">
+    <value>Stimme ab um eine Karte zu bannen: schreibe `!&lt;Kartennummer&gt;` in den Chat</value>
+  </data>
+  <data name="PugSharp.Match.VoteTeamMenuHeader" xml:space="preserve">
+    <value>Wähle die Startseite (`!stay` oder`!switch`)</value>
+  </data>
+  <data name="PugSharp.Match.WaitForOtherTeam" xml:space="preserve">
+    <value>Warte auf die Abstimmung des anderen Teams!</value>
+  </data>
+  <data name="PugSharp.NotifyReady" xml:space="preserve">
+    <value>schreibe `!ready` in den Chat um als bereit markiert zu werden</value>
+  </data>
+  <data name="PugSharp.PoweredBy" xml:space="preserve">
+    <value>powered by **PugSharp** (https://github.com/Lan2Play/PugSharp/)</value>
+  </data>
+  <assembly alias="System.Windows.Forms" name="System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" />
+  <data name="PugSharp.Match.VotingTag" type="System.Resources.ResXNullRef, System.Windows.Forms">
+    <value />
   </data>
 </root>

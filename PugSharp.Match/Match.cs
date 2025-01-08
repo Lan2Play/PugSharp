@@ -244,6 +244,10 @@ public class Match : IDisposable
     {
         _Logger.LogInformation("Stop ReadyReminder");
         _ReadyReminderTimer.Stop();
+        foreach(var player in AllMatchPlayers)
+        {
+            player.Player.Clan = string.Empty;
+        }
     }
 
     private void UnpauseMatch()
@@ -759,6 +763,9 @@ public class Match : IDisposable
 
         ShowMenuToTeam(_CurrentMatchTeamToVote!, _TextHelper.GetText(nameof(Resources.PugSharp_Match_VoteMapMenuHeader)), mapOptions);
 
+        DoForAll(_CurrentMatchTeamToVote!.Players.Select(x => x.Player), p => p.Clan = _TextHelper.GetText(nameof(Resources.PugSharp_Match_VotingTag)));
+        DoForAll(GetOtherTeam(_CurrentMatchTeamToVote).Players.Select(x => x.Player), p => p.Clan = string.Empty);
+
         GetOtherTeam(_CurrentMatchTeamToVote!).PrintToChat(_TextHelper.GetText(nameof(Resources.PugSharp_Match_WaitForOtherTeam)));
 
         _VoteTimer.Start();
@@ -809,6 +816,9 @@ public class Match : IDisposable
 
         ShowMenuToTeam(_CurrentMatchTeamToVote!, _TextHelper.GetText(nameof(Resources.PugSharp_Match_VoteTeamMenuHeader)), mapOptions);
         GetOtherTeam(_CurrentMatchTeamToVote!).PrintToChat(_TextHelper.GetText(nameof(Resources.PugSharp_Match_WaitForOtherTeam)));
+
+        DoForAll(_CurrentMatchTeamToVote!.Players.Select(x => x.Player), p => p.Clan = _TextHelper.GetText(nameof(Resources.PugSharp_Match_VotingTag)));
+        DoForAll(GetOtherTeam(_CurrentMatchTeamToVote).Players.Select(x => x.Player), p => p.Clan = string.Empty);
 
         _VoteTimer.Start();
     }
@@ -1035,7 +1045,6 @@ public class Match : IDisposable
             return false;
         }
 
-        player.Clan = _TextHelper.GetText(nameof(Resources.PugSharp_Match_NotReadyTag));
         if (MatchInfo.Config.TeamMode == Config.TeamMode.PlayerSelect)
         {
             // Quicker to just remove them and add them back, rather than check whether they are already in the match
@@ -1229,6 +1238,7 @@ public class Match : IDisposable
         mapToSelect.Votes.Add(player);
 
         player.PrintToChat(_TextHelper.GetText(nameof(Resources.PugSharp_Match_VotedToBanMap), mapToSelect.Name));
+        player.Clan = string.Empty;
 
         if (_MapsToSelect.Sum(x => x.Votes.Count) >= MatchInfo.Config.PlayersPerTeam)
         {
@@ -1280,6 +1290,7 @@ public class Match : IDisposable
 
         // Successful vote
         player.PrintToChat(_TextHelper.GetText(nameof(Resources.PugSharp_Match_VotedForTeam), teamToVote.Name));
+        player.Clan = string.Empty;
 
         if (_TeamVotes.Sum(x => x.Votes.Count) >= MatchInfo.Config.PlayersPerTeam)
         {

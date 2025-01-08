@@ -691,6 +691,15 @@ namespace PugSharp.Translation.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to [Voting] .
+        /// </summary>
+        public static string PugSharp_Match_VotingTag {
+            get {
+                return ResourceManager.GetString("PugSharp.Match.VotingTag", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Waiting for other Team to vote!.
         /// </summary>
         public static string PugSharp_Match_WaitForOtherTeam {

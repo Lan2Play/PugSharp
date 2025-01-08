@@ -1,6 +1,65 @@
 <?xml version="1.0" encoding="utf-8"?>
 <root>
-  <xsd:schema xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata" id="root">
+  <!-- 
+    Microsoft ResX Schema 
+    
+    Version 2.0
+    
+    The primary goals of this format is to allow a simple XML format 
+    that is mostly human readable. The generation and parsing of the 
+    various data types are done through the TypeConverter classes 
+    associated with the data types.
+    
+    Example:
+    
+    ... ado.net/XML headers & schema ...
+    <resheader name="resmimetype">text/microsoft-resx</resheader>
+    <resheader name="version">2.0</resheader>
+    <resheader name="reader">System.Resources.ResXResourceReader, System.Windows.Forms, ...</resheader>
+    <resheader name="writer">System.Resources.ResXResourceWriter, System.Windows.Forms, ...</resheader>
+    <data name="Name1"><value>this is my long string</value><comment>this is a comment</comment></data>
+    <data name="Color1" type="System.Drawing.Color, System.Drawing">Blue</data>
+    <data name="Bitmap1" mimetype="application/x-microsoft.net.object.binary.base64">
+        <value>[base64 mime encoded serialized .NET Framework object]</value>
+    </data>
+    <data name="Icon1" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
+        <value>[base64 mime encoded string representing a byte array form of the .NET Framework object]</value>
+        <comment>This is a comment</comment>
+    </data>
+                
+    There are any number of "resheader" rows that contain simple 
+    name/value pairs.
+    
+    Each data row contains a name, and value. The row also contains a 
+    type or mimetype. Type corresponds to a .NET class that support 
+    text/value conversion through the TypeConverter architecture. 
+    Classes that don't support this are serialized and stored with the 
+    mimetype set.
+    
+    The mimetype is used for serialized objects, and tells the 
+    ResXResourceReader how to depersist the object. This is currently not 
+    extensible. For a given mimetype the value must be set accordingly:
+    
+    Note - application/x-microsoft.net.object.binary.base64 is the format 
+    that the ResXResourceWriter will generate, however the reader can 
+    read any of the formats listed below.
+    
+    mimetype: application/x-microsoft.net.object.binary.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Binary.BinaryFormatter
+            : and then encoded with base64 encoding.
+    
+    mimetype: application/x-microsoft.net.object.soap.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Soap.SoapFormatter
+            : and then encoded with base64 encoding.
+
+    mimetype: application/x-microsoft.net.object.bytearray.base64
+    value   : The object must be serialized into a byte array 
+            : using a System.ComponentModel.TypeConverter
+            : and then encoded with base64 encoding.
+    -->
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
     <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
     <xsd:element name="root" msdata:IsDataSet="true">
       <xsd:complexType>
@@ -58,6 +117,9 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
+  <data name="PugSharp.Command.ChangedMaxOvertimeRounds" xml:space="preserve">
+    <value>Alterado o número máximo de rodadas extras de {0:oldMaxRounds} para {1:maxOvertimeRounds}</value>
+  </data>
   <data name="PugSharp.Command.ChangedMaxRounds" xml:space="preserve">
     <value>Alterado o número máximo de rodadas de {0:oldMaxRounds} para {1:maxRounds}</value>
   </data>
@@ -67,11 +129,17 @@
   <data name="PugSharp.Command.ConfigLoaded" xml:space="preserve">
     <value>Matchconfig carregado!</value>
   </data>
+  <data name="PugSharp.Command.CreatingMatchAddMap" xml:space="preserve">
+    <value>`!addmap &lt;nome do mapa&gt;` para adicionar um mapa!</value>
+  </data>
   <data name="PugSharp.Command.CreatingMatchMatchInfo" xml:space="preserve">
     <value>`!matchinfo` para mostrar a configuração atual da partida!</value>
   </data>
   <data name="PugSharp.Command.CreatingMatchMaxOvertimeRounds" xml:space="preserve">
     <value>`!maxovertimerounds &lt;rounds&gt;` para definir o máximo de rodadas de prorrogação!</value>
+  </data>
+  <data name="PugSharp.Command.CreatingMatchMaxRounds" xml:space="preserve">
+    <value>`!maxrounds &lt;rounds&gt;` para definir o máximo de rodadas de partida!</value>
   </data>
   <data name="PugSharp.Command.CreatingMatchPlayersPerTeam" xml:space="preserve">
     <value>`!playersperteam &lt;players&gt;` para definir jogadores por equipe!</value>
@@ -88,6 +156,9 @@
   <data name="PugSharp.Command.CreatingMatchTeamMode" xml:space="preserve">
     <value>`!teammode &lt;mode&gt;` para definir o modo de equipe!</value>
   </data>
+  <data name="PugSharp.Command.Error.ArgumentRoundIndexNotNumeric" xml:space="preserve">
+    <value>O argumento para o índice round deve ser numérico.</value>
+  </data>
   <data name="PugSharp.Command.Error.CsgoDirNotFound" xml:space="preserve">
     <value>Diretório CSGO não encontrado!</value>
   </data>
@@ -100,6 +171,9 @@
   <data name="PugSharp.Command.Error.MapNameRequired" xml:space="preserve">
     <value>O nome do mapa é obrigatório!</value>
   </data>
+  <data name="PugSharp.Command.Error.MapNotRemoved" xml:space="preserve">
+    <value>não foi possível remover **{0:mapName}**. Os mapas atuais são {1:maps}</value>
+  </data>
   <data name="PugSharp.Command.Error.MatchIdRequired" xml:space="preserve">
     <value>MatchId é necessário como Argumento!</value>
   </data>
@@ -108,6 +182,9 @@
   </data>
   <data name="PugSharp.Command.Error.MatchInfoFileNotFound" xml:space="preserve">
     <value>MatchInfoFile "{matchInfoFileName}" não encontrado!</value>
+  </data>
+  <data name="PugSharp.Command.Error.MatchRunning" xml:space="preserve">
+    <value>Atualmente a partida {0:match} está em execução. Para pará-lo, chame `{1:stopCommand}`!</value>
   </data>
   <data name="PugSharp.Command.Error.MatchStateUnavailable" xml:space="preserve">
     <value>Atualmente nenhuma partida está acontecendo. Matchstate não está disponível!</value>
@@ -120,6 +197,9 @@
   </data>
   <data name="PugSharp.Command.Error.NumberOfOvertimeRoundsLessThanZero" xml:space="preserve">
     <value>O máximo de rodadas de prorrogação deve ser maior que 0!</value>
+  </data>
+  <data name="PugSharp.Command.Error.NumberOfOvertimeRoundsNotNumeric" xml:space="preserve">
+    <value>O máximo de rodadas de prorrogação deve ser um número!</value>
   </data>
   <data name="PugSharp.Command.Error.NumberOfRoundsLessThanZero" xml:space="preserve">
     <value>O máximo de rodadas deve ser maior que 0!</value>
@@ -136,11 +216,11 @@
   <data name="PugSharp.Command.Error.RconNotSupported" xml:space="preserve">
     <value>Este comando não é suportado via rcon.</value>
   </data>
-  <data name="PugSharp.Command.ChangedMaxOvertimeRounds" xml:space="preserve">
-    <value>Alterado o número máximo de rodadas extras de {0:oldMaxRounds} para {1:maxOvertimeRounds}</value>
+  <data name="PugSharp.Command.Error.RoundBackupFileNotFound" xml:space="preserve">
+    <value>RoundBackupFile "{0:roundBackupFile}" não encontrado!</value>
   </data>
-  <data name="PugSharp.Command.CreatingMatchAddMap" xml:space="preserve">
-    <value>`!addmap &lt;nome do mapa&gt;` para adicionar um mapa!</value>
+  <data name="PugSharp.Command.Error.TeammodePossibleValues" xml:space="preserve">
+    <value>Possíveis valores para TeamMode: {0:possíveisValues}</value>
   </data>
   <data name="PugSharp.Command.Error.TeammodeRequired" xml:space="preserve">
     <value>O modo equipe é obrigatório!</value>
@@ -163,11 +243,17 @@
   <data name="PugSharp.Command.MatchStopped" xml:space="preserve">
     <value>Partida interrompida!</value>
   </data>
+  <data name="PugSharp.Hello" xml:space="preserve">
+    <value>Olá **{0:playerName}**, bem-vindo ao jogo {1:matchId}</value>
+  </data>
   <data name="PugSharp.Match.BannedMap" xml:space="preserve">
     <value>Mapa **{0:mapName}** foi banido por {1:teamName}!</value>
   </data>
   <data name="PugSharp.Match.Error.AlreadyBannedMap" xml:space="preserve">
     <value>Você já baniu mapnumber {0: mapNumber}: {1:mapName}!</value>
+  </data>
+  <data name="PugSharp.Match.Error.AlreadyVotedForTeam" xml:space="preserve">
+    <value>Você já votou na equipe {0:teamNumber}: {1:teamName}!</value>
   </data>
   <data name="PugSharp.Match.Error.NoMapVoteExpected" xml:space="preserve">
     <value>Atualmente nenhuma votação de mapa está ativa!</value>
@@ -180,6 +266,9 @@
   </data>
   <data name="PugSharp.Match.Error.NotPermittedToBanMap" xml:space="preserve">
     <value>Atualmente você não tem permissão para banir um mapa!</value>
+  </data>
+  <data name="PugSharp.Match.Error.NotPermittedToVoteForTeam" xml:space="preserve">
+    <value>No momento você não tem permissão para votar em uma equipe!</value>
   </data>
   <data name="PugSharp.Match.Error.PauseNotPossible" xml:space="preserve">
     <value>A pausa não é possível no momento!</value>
@@ -196,34 +285,8 @@
   <data name="PugSharp.Match.Info.IsLive" xml:space="preserve">
     <value>Partida está **LIVE**</value>
   </data>
-  <data name="PugSharp.Command.CreatingMatchMaxRounds" xml:space="preserve">
-    <value>`!maxrounds &lt;rounds&gt;` para definir o máximo de rodadas de partida!</value>
-  </data>
-  <data name="PugSharp.Hello" xml:space="preserve">
-    <value>Olá **{0:playerName}**, bem-vindo ao jogo {1:matchId}</value>
-  </data>
-  <data name="PugSharp.Match.Error.NotPermittedToVoteForTeam" xml:space="preserve">
-    <value>No momento você não tem permissão para votar em uma equipe!</value>
-  </data>
-  <data name="PugSharp.Command.Error.ArgumentRoundIndexNotNumeric" xml:space="preserve">
-    <value>O argumento para o índice round deve ser numérico.</value>
-  </data>
-  <data name="PugSharp.Command.Error.MapNotRemoved" xml:space="preserve">
-    <value>não foi possível remover **{0:mapName}**. Os mapas atuais são {1:maps}</value>
-  </data>
-  <data name="PugSharp.Command.Error.MatchRunning" xml:space="preserve">
-    <value>Atualmente a partida {0:match} está em execução. Para pará-lo, chame `{1:stopCommand}`!</value>
-  </data>
-  <data name="PugSharp.Command.Error.NumberOfOvertimeRoundsNotNumeric" xml:space="preserve">
-    <value>O máximo de rodadas de prorrogação deve ser um número!</value>
-  </data>
-  <data name="PugSharp.Command.Error.RoundBackupFileNotFound" xml:space="preserve">
-    <value>RoundBackupFile "{0:roundBackupFile}" não encontrado!</value>
-  </data>
-  <data name="PugSharp.Command.Error.TeammodePossibleValues" xml:space="preserve">
-    <value>Possíveis valores para TeamMode: {0:possíveisValues}</value>
-  </data>
-  <data name="PugSharp.Match.Error.AlreadyVotedForTeam" xml:space="preserve">
-    <value>Você já votou na equipe {0:teamNumber}: {1:teamName}!</value>
+  <assembly alias="System.Windows.Forms" name="System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" />
+  <data name="PugSharp.Match.VotingTag" type="System.Resources.ResXNullRef, System.Windows.Forms">
+    <value />
   </data>
 </root>

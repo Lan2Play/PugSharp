@@ -1,6 +1,65 @@
 <?xml version="1.0" encoding="utf-8"?>
 <root>
-  <xsd:schema xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata" id="root">
+  <!-- 
+    Microsoft ResX Schema 
+    
+    Version 2.0
+    
+    The primary goals of this format is to allow a simple XML format 
+    that is mostly human readable. The generation and parsing of the 
+    various data types are done through the TypeConverter classes 
+    associated with the data types.
+    
+    Example:
+    
+    ... ado.net/XML headers & schema ...
+    <resheader name="resmimetype">text/microsoft-resx</resheader>
+    <resheader name="version">2.0</resheader>
+    <resheader name="reader">System.Resources.ResXResourceReader, System.Windows.Forms, ...</resheader>
+    <resheader name="writer">System.Resources.ResXResourceWriter, System.Windows.Forms, ...</resheader>
+    <data name="Name1"><value>this is my long string</value><comment>this is a comment</comment></data>
+    <data name="Color1" type="System.Drawing.Color, System.Drawing">Blue</data>
+    <data name="Bitmap1" mimetype="application/x-microsoft.net.object.binary.base64">
+        <value>[base64 mime encoded serialized .NET Framework object]</value>
+    </data>
+    <data name="Icon1" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
+        <value>[base64 mime encoded string representing a byte array form of the .NET Framework object]</value>
+        <comment>This is a comment</comment>
+    </data>
+                
+    There are any number of "resheader" rows that contain simple 
+    name/value pairs.
+    
+    Each data row contains a name, and value. The row also contains a 
+    type or mimetype. Type corresponds to a .NET class that support 
+    text/value conversion through the TypeConverter architecture. 
+    Classes that don't support this are serialized and stored with the 
+    mimetype set.
+    
+    The mimetype is used for serialized objects, and tells the 
+    ResXResourceReader how to depersist the object. This is currently not 
+    extensible. For a given mimetype the value must be set accordingly:
+    
+    Note - application/x-microsoft.net.object.binary.base64 is the format 
+    that the ResXResourceWriter will generate, however the reader can 
+    read any of the formats listed below.
+    
+    mimetype: application/x-microsoft.net.object.binary.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Binary.BinaryFormatter
+            : and then encoded with base64 encoding.
+    
+    mimetype: application/x-microsoft.net.object.soap.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Soap.SoapFormatter
+            : and then encoded with base64 encoding.
+
+    mimetype: application/x-microsoft.net.object.bytearray.base64
+    value   : The object must be serialized into a byte array 
+            : using a System.ComponentModel.TypeConverter
+            : and then encoded with base64 encoding.
+    -->
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
     <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
     <xsd:element name="root" msdata:IsDataSet="true">
       <xsd:complexType>
@@ -58,6 +117,12 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
+  <data name="PugSharp.Command.ChangedMaxOvertimeRounds" xml:space="preserve">
+    <value>将最大加时赛回合数由 {0:oldMaxRounds} 修改至 {1:maxOvertimeRounds}</value>
+  </data>
+  <data name="PugSharp.Command.ChangedMaxRounds" xml:space="preserve">
+    <value>将最大回合数由 {0:oldMaxRounds} 修改至 {1:maxRounds}</value>
+  </data>
   <data name="PugSharp.Command.ChangedTeamMode" xml:space="preserve">
     <value>将队伍模式由 {0:oldTeamMode} 修改至 {1:newTeamMode}</value>
   </data>
@@ -69,6 +134,9 @@
   </data>
   <data name="PugSharp.Command.CreatingMatchMatchInfo" xml:space="preserve">
     <value>使用 `!matchinfo` 展示当前比赛配置!</value>
+  </data>
+  <data name="PugSharp.Command.CreatingMatchMaxOvertimeRounds" xml:space="preserve">
+    <value>使用 `!maxovertimerounds &lt;回合数&gt;` 设置最大加时赛回合数!</value>
   </data>
   <data name="PugSharp.Command.CreatingMatchMaxRounds" xml:space="preserve">
     <value>使用 `!maxrounds &lt;回合数&gt;` 设置最大回合数!</value>
@@ -88,6 +156,9 @@
   <data name="PugSharp.Command.CreatingMatchTeamMode" xml:space="preserve">
     <value>使用 `!teammode &lt;模式&gt;` 设置队伍模式!</value>
   </data>
+  <data name="PugSharp.Command.Error.ArgumentRoundIndexNotNumeric" xml:space="preserve">
+    <value>round index的参数必须为数字.</value>
+  </data>
   <data name="PugSharp.Command.Error.CsgoDirNotFound" xml:space="preserve">
     <value>没有找到Csgo游戏目录!</value>
   </data>
@@ -106,32 +177,20 @@
   <data name="PugSharp.Command.Error.MatchIdRequired" xml:space="preserve">
     <value>MatchId必须作为参数!</value>
   </data>
+  <data name="PugSharp.Command.Error.MatchInfoFileCouldNotBeLoaded" xml:space="preserve">
+    <value>无法加载 "{matchInfoFileName}" MatchInfo文件!</value>
+  </data>
   <data name="PugSharp.Command.Error.MatchInfoFileNotFound" xml:space="preserve">
     <value>找不到 "{matchInfoFileName}" MatchInfo文件!</value>
   </data>
   <data name="PugSharp.Command.Error.MatchRunning" xml:space="preserve">
     <value>当前正在进行比赛 {0:match} . 取消比赛请使用 `{1:stopCommand}`!</value>
   </data>
-  <data name="PugSharp.Command.ChangedMaxOvertimeRounds" xml:space="preserve">
-    <value>将最大加时赛回合数由 {0:oldMaxRounds} 修改至 {1:maxOvertimeRounds}</value>
-  </data>
-  <data name="PugSharp.Command.ChangedMaxRounds" xml:space="preserve">
-    <value>将最大回合数由 {0:oldMaxRounds} 修改至 {1:maxRounds}</value>
-  </data>
-  <data name="PugSharp.Command.CreatingMatchMaxOvertimeRounds" xml:space="preserve">
-    <value>使用 `!maxovertimerounds &lt;回合数&gt;` 设置最大加时赛回合数!</value>
-  </data>
-  <data name="PugSharp.Command.Error.ArgumentRoundIndexNotNumeric" xml:space="preserve">
-    <value>round index的参数必须为数字.</value>
-  </data>
-  <data name="PugSharp.Command.Error.MatchInfoFileCouldNotBeLoaded" xml:space="preserve">
-    <value>无法加载 "{matchInfoFileName}" MatchInfo文件!</value>
+  <data name="PugSharp.Command.Error.MatchStateUnavailable" xml:space="preserve">
+    <value>当前没有正在进行的比赛. 比赛信息不可用!</value>
   </data>
   <data name="PugSharp.Command.Error.NoMatch" xml:space="preserve">
     <value>没有可用的比赛.</value>
-  </data>
-  <data name="PugSharp.Command.Error.MatchStateUnavailable" xml:space="preserve">
-    <value>当前没有正在进行的比赛. 比赛信息不可用!</value>
   </data>
   <data name="PugSharp.Command.Error.NoMatchRunning" xml:space="preserve">
     <value>当前没有正在进行的比赛</value>
@@ -226,6 +285,9 @@
   <data name="PugSharp.Match.Info.IsLive" xml:space="preserve">
     <value>**比赛开始 GL&amp;&amp;HF**</value>
   </data>
+  <data name="PugSharp.Match.Info.NotReady" xml:space="preserve">
+    <value>{0:playerName} 取消准备! {1:readyPlayers} / {2:requiredPlayers} 已准备.</value>
+  </data>
   <data name="PugSharp.Match.Info.Ready" xml:space="preserve">
     <value>{0:playerName} 已准备! {1:readyPlayers} / {2:requiredPlayers} 已准备.</value>
   </data>
@@ -235,11 +297,17 @@
   <data name="PugSharp.Match.Info.WaitingForAllPlayers" xml:space="preserve">
     <value>正在等待所有玩家准备.</value>
   </data>
+  <data name="PugSharp.Match.TeamReminder" xml:space="preserve">
+    <value>你现在在队伍: **{0:teamName}**.</value>
+  </data>
   <data name="PugSharp.Match.RemindReady" xml:space="preserve">
     <value>你当前 !!没有准备!! ! 输入 `!ready` 准备.</value>
   </data>
   <data name="PugSharp.Match.SelectedTeam" xml:space="preserve">
     <value>{0:teamName} 选择了 {1:side} 作为初始边!</value>
+  </data>
+  <data name="PugSharp.Match.VotedForTeam" xml:space="preserve">
+    <value>你投票给了 **{0:teamName}**</value>
   </data>
   <data name="PugSharp.Match.VotedToBanMap" xml:space="preserve">
     <value>你投票禁用了 **{0:mapName}**</value>
@@ -250,25 +318,20 @@
   <data name="PugSharp.Match.VoteTeamMenuHeader" xml:space="preserve">
     <value>选择初始边 (`!stay` 或 `!switch`)</value>
   </data>
+  <data name="PugSharp.Match.VoteConfirmTeamHeader" xml:space="preserve">
+    <value>请选择正确的队伍:</value>
+  </data>
   <data name="PugSharp.Match.WaitForOtherTeam" xml:space="preserve">
     <value>等待对方投票!</value>
-  </data>
-  <data name="PugSharp.PoweredBy" xml:space="preserve">
-    <value>由 **PugSharp** (https://github.com/Lan2Play/PugSharp/) 强力驱动</value>
-  </data>
-  <data name="PugSharp.Match.VotedForTeam" xml:space="preserve">
-    <value>你投票给了 **{0:teamName}**</value>
   </data>
   <data name="PugSharp.NotifyReady" xml:space="preserve">
     <value>输入 `!ready` 以准备比赛</value>
   </data>
-  <data name="PugSharp.Match.Info.NotReady" xml:space="preserve">
-    <value>{0:playerName} 取消准备! {1:readyPlayers} / {2:requiredPlayers} 已准备.</value>
+  <data name="PugSharp.PoweredBy" xml:space="preserve">
+    <value>由 **PugSharp** (https://github.com/Lan2Play/PugSharp/) 强力驱动</value>
   </data>
-  <data name="PugSharp.Match.TeamReminder" xml:space="preserve">
-    <value>你现在在队伍: **{0:teamName}**.</value>
-  </data>
-  <data name="PugSharp.Match.VoteConfirmTeamHeader" xml:space="preserve">
-    <value>请选择正确的队伍:</value>
+  <assembly alias="System.Windows.Forms" name="System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" />
+  <data name="PugSharp.Match.VotingTag" type="System.Resources.ResXNullRef, System.Windows.Forms">
+    <value />
   </data>
 </root>
