@@ -7,7 +7,7 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-		<PackageReference Include="CounterStrikeSharp.API" Version="1.0.296">
+		<PackageReference Include="CounterStrikeSharp.API" Version="1.0.304">
 			<PrivateAssets>none</PrivateAssets>
 			<ExcludeAssets>runtime</ExcludeAssets>
 			<IncludeAssets>compile; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
@@ -15,7 +15,7 @@
 		<PackageReference Include="CSSharpUtils" Version="1.0.5" />
 		<PackageReference Include="Microsoft.Extensions.Http.Polly" Version="8.0.10" />
 		<PackageReference Include="OneOf" Version="3.0.271" />
-		<PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="8.0.1" />
+		<PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="9.0.3" />
 		<PackageReference Include="System.Text.Json" Version="8.0.5" />
 	</ItemGroup>
 
