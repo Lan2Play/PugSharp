@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 	<PropertyGroup>
 		<TargetFramework>net8.0</TargetFramework>
 		<ImplicitUsings>enable</ImplicitUsings>
@@ -7,14 +7,14 @@
 
 	<ItemGroup>
 		<PackageReference Include="Nito.AsyncEx" Version="5.1.2" />
-		<PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="8.0.1" />
+		<PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="9.0.3" />
 		<PackageReference Include="Microsoft.Extensions.Http.Polly" Version="8.0.10" />
 		<PackageReference Include="Microsoft.Extensions.Logging" Version="8.0.1" />
-		<PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="8.0.2" />
+		<PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="8.0.3" />
 	</ItemGroup>
 
 	<ItemGroup>
-	  <PackageReference Update="Meziantou.Analyzer" Version="2.0.182">
+	  <PackageReference Update="Meziantou.Analyzer" Version="2.0.190">
 	    <PrivateAssets>all</PrivateAssets>
 	    <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
 	  </PackageReference>
