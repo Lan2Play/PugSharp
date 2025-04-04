@@ -883,7 +883,7 @@ public class Match : IDisposable
     private bool AllPlayersAreReady()
     {
         var readyPlayers = AllMatchPlayers.Where(p => p.IsReady);
-        var requiredPlayers = MatchInfo.Config.PlayersPerTeam * 2;
+        var requiredPlayers = MatchInfo.Config.MinPlayersToReady * 2;
 
         return readyPlayers.Take(requiredPlayers + 1).Count() == requiredPlayers;
     }
