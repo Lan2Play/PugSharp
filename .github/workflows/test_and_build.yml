@@ -114,7 +114,7 @@ jobs:
         id: PUGSHARPNETVER
 
       - name: get counterstrikesharp version
-        run: echo "CSSHARPVER=$(dotnet list PugSharp/PugSharp.csproj package --format json | jq -r '.projects[].frameworks[].topLevelPackages[] | select(.id == "CounterStrikeSharp.API") | .resolvedVersion' | sed 's|1.0.|v|g')"  >> $GITHUB_ENV
+        run: echo "CSSHARPVER=$(dotnet list PugSharp/PugSharp.csproj package --format json | jq -r '.projects[].frameworks[].topLevelPackages[] | select(.id == "CounterStrikeSharp.API") | .resolvedVersion' | sed 's|1.0.|v1.0.|g')"  >> $GITHUB_ENV
       - name: set counterstrikesharp version in output
         run: echo "CSSHARPVER=$CSSHARPVER" >> "$GITHUB_OUTPUT"
         id: CSSHARPVER
