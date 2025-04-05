@@ -244,9 +244,10 @@ public class Match : IDisposable
     {
         _Logger.LogInformation("Stop ReadyReminder");
         _ReadyReminderTimer.Stop();
-        foreach(var player in AllMatchPlayers)
+        foreach (var player in AllMatchPlayers)
         {
             player.Player.Clan = string.Empty;
+            player.IsReady = true;
         }
     }
 
