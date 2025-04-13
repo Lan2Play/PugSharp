@@ -112,8 +112,9 @@ public class Match : IDisposable
 #pragma warning restore MA0051 // Method is too long
     {
         _MatchStateMachine.Configure(MatchState.None)
-            .PermitDynamicIf(MatchCommand.LoadMatch, () => HasRestoredMatch() ? MatchState.RestoreMatch : MatchState.WaitingForPlayersConnectedReady);
-
+            .PermitDynamicIf(MatchCommand.LoadMatch, () => HasRestoredMatch() ? MatchState.RestoreMatch : MatchState.WaitingForPlayersConnectedReady)
+            .OnEntryAsync(() => _CsServer.InitializeWorkshopMapLookupAsync());
+            
         _MatchStateMachine.Configure(MatchState.WaitingForPlayersConnectedReady)
             .PermitDynamicIf(MatchCommand.PlayerReady, () => HasRestoredMatch() ? MatchState.MatchRunning : MatchState.DefineTeams, AllPlayersAreReady)
             .OnEntry(StartWarmup)

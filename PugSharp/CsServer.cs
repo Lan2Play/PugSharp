@@ -19,15 +19,15 @@ public class CsServer : ICsServer
     private readonly ILogger<CsServer> _Logger;
     private readonly ICssDispatcher _Dispatcher;
 
-    private Dictionary<string, string>? _workshopMapLookup;
-    private readonly string _workshopMapConfigPath;
+    private Dictionary<string, string>? _WorkshopMapLookup;
+    private readonly string _WorkshopMapConfigPath;
 
     public CsServer(ILogger<CsServer> logger, ICssDispatcher dispatcher)
     {
         _Logger = logger;
         _Dispatcher = dispatcher;
 
-        _workshopMapConfigPath = Path.Combine(GameDirectory, "csgo", "PugSharp", "Config", "workshop_maps.json");
+        _WorkshopMapConfigPath = Path.Combine(GameDirectory, "csgo", "PugSharp", "Config", "workshop_maps.json");
     }
 
     public string GameDirectory => CounterStrikeSharp.API.Server.GameDirectory;
@@ -214,6 +214,36 @@ public class CsServer : ICsServer
         ExecuteCommand("mp_unpause_match");
     }
 
+    public async Task InitializeWorkshopMapLookupAsync()
+    {
+        if (_WorkshopMapLookup != null)
+            return; // Already loaded
+
+        try
+        {
+            if (File.Exists(_WorkshopMapConfigPath))
+            {
+                string json = await File.ReadAllTextAsync(_WorkshopMapConfigPath);
+                _WorkshopMapLookup = JsonSerializer.Deserialize<Dictionary<string, string>>(json, new JsonSerializerOptions
+                {
+                    PropertyNameCaseInsensitive = true
+                }) ?? new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+
+                _Logger.LogInformation("Loaded workshop map config from {Path}", _WorkshopMapConfigPath);
+            }
+            else
+            {
+                _Logger.LogWarning("Workshop map config not found at {Path}. Workshop maps will not be available.", _WorkshopMapConfigPath);
+                _WorkshopMapLookup = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+            }
+        }
+        catch (Exception ex)
+        {
+            _Logger.LogError(ex, "Failed to load workshop map config from {Path}", _WorkshopMapConfigPath);
+            _WorkshopMapLookup = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+        }
+    }
+
     public void SwitchMap(string selectedMap)
     {
         _Dispatcher.NextWorldUpdate(() =>
@@ -224,33 +254,9 @@ public class CsServer : ICsServer
                 return;
             }
 
-            // Lazy-load the workshop map config if not already loaded
-            if (_workshopMapLookup == null)
-            {
-                try
-                {
-                    if (File.Exists(_workshopMapConfigPath))
-                    {
-                        string json = File.ReadAllText(_workshopMapConfigPath);
-                        _workshopMapLookup = JsonSerializer.Deserialize<Dictionary<string, string>>(json);
-                        _Logger.LogInformation("Loaded workshop map config from {Path}", _workshopMapConfigPath);
-                    }
-                    else
-                    {
-                        _Logger.LogWarning("Workshop map config not found at {Path}. Workshop maps will not be available.", _workshopMapConfigPath);
-                        _workshopMapLookup = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
-                    }
-                }
-                catch (Exception ex)
-                {
-                    _Logger.LogError(ex, "Failed to load workshop map config from {Path}", _workshopMapConfigPath);
-                    _workshopMapLookup = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
-                }
-            }
-
             string command;
 
-            if (_workshopMapLookup != null && _workshopMapLookup.TryGetValue(selectedMap, out var workshopId))
+            if (_WorkshopMapLookup != null && _WorkshopMapLookup.TryGetValue(selectedMap, out var workshopId))
             {
                 _Logger.LogInformation("Translating map \"{SelectedMap}\" to Workshop ID: {WorkshopId}", selectedMap, workshopId);
                 command = $"host_workshop_map {workshopId}";
