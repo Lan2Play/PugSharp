@@ -217,8 +217,9 @@ public class CsServer : ICsServer
     public async Task InitializeWorkshopMapLookupAsync()
     {
         if (_WorkshopMapLookup != null)
+        {
             return; // Already loaded
-
+        }
         try
         {
             if (File.Exists(_WorkshopMapConfigPath))
