@@ -26,4 +26,5 @@ public interface ICsServer
     void SwitchMap(string selectedMap);
     void UnpauseMatch();
     void UpdateConvar<T>(string name, T value);
+    Task InitializeWorkshopMapLookupAsync();
 }
