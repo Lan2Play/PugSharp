@@ -21,6 +21,7 @@ public interface ICsServer
     void RestartGame();
     void RestoreBackup(string roundBackupFile);
     void SetupRoundBackup(string prefix);
+    void SetupKnifeRound();
     string StartDemoRecording(string demoDirectory, string demoFileName);
     void StopDemoRecording();
     void SwitchMap(string selectedMap);

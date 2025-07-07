@@ -56,5 +56,15 @@ public class MultiApiProvider : IApiProvider
         return Task.WhenAll(_ApiProviders.Select(a => a.FreeServerAsync(cancellationToken)));
     }
 
+    public Task SendKnifeRoundStartedAsync(KnifeRoundStartedParams knifeRoundStartedParams, CancellationToken cancellationToken)
+    {
+        return Task.WhenAll(_ApiProviders.Select(a => a.SendKnifeRoundStartedAsync(knifeRoundStartedParams, cancellationToken)));
+    }
+
+    public Task SendKnifeRoundWonAsync(KnifeRoundWonParams knifeRoundWonParams, CancellationToken cancellationToken)
+    {
+        return Task.WhenAll(_ApiProviders.Select(a => a.SendKnifeRoundWonAsync(knifeRoundWonParams, cancellationToken)));
+    }
+
     #endregion
 }

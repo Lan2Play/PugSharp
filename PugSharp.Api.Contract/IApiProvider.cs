@@ -10,4 +10,6 @@ public interface IApiProvider
     Task FinalizeMapAsync(MapResultParams finalizeMapParams, CancellationToken cancellationToken);
     Task FinalizeAsync(SeriesResultParams seriesResultParams, CancellationToken cancellationToken);
     Task FreeServerAsync(CancellationToken cancellationToken);
+    Task SendKnifeRoundStartedAsync(KnifeRoundStartedParams knifeRoundStartedParams, CancellationToken cancellationToken);
+    Task SendKnifeRoundWonAsync(KnifeRoundWonParams knifeRoundWonParams, CancellationToken cancellationToken);
 }
