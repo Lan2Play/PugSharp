@@ -37,9 +37,11 @@ public partial class G5ApiTests : ApiTestBase, IClassFixture<G5ApiFixture>
             new() {SteamId= "76561198025644200", Name = "3", Stats = new PlayerStats()},
             new() {SteamId= "76561198025644200", Name = "3", Stats = new PlayerStats()},
          });
+
+        // Assert
         Assert.True(await g5ApiClient.SendEventAsync(new MapResultEvent() { MapNumber = 1, MatchId = "1", Winner = new Winner(Side.T, 0), StatsTeam1 = statsTeam1, StatsTeam2 = statsTeam2 }, CancellationToken.None));
         Assert.True(await g5ApiClient.SendEventAsync(new SeriesResultEvent() { MatchId = "1", Winner = new Winner(Side.T, 0), Team1SeriesScore = 0, Team2SeriesScore = 1, TimeUntilRestore = 2 }, CancellationToken.None));
 
-        // Assert
+        
     }
 }

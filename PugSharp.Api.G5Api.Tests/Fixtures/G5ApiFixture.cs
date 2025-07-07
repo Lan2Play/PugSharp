@@ -80,11 +80,7 @@ public class G5ApiFixture : IAsyncLifetime
             // Wait until the API is launched, has performed migrations, and is ready to accept requests
             .WithWaitStrategy(Wait
                 .ForUnixContainer()
-                .UntilHttpRequestIsSucceeded(r => r
-                    .ForPath("/")
-                    .ForPort(_ApiPort)
-                    .ForStatusCode(HttpStatusCode.OK)
-                )
+                .UntilMessageIsLogged("online")
             )
             .WithOutputConsumer(
                 Consume.RedirectStdoutAndStderrToStream(_ApiContainerStdOut, _ApiContainerStdErr)
