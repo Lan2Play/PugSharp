@@ -89,6 +89,16 @@ public class JsonApiProvider : IApiProvider
         return Task.CompletedTask;
     }
 
+    public Task SendKnifeRoundStartedAsync(KnifeRoundStartedParams knifeRoundStartedParams, CancellationToken cancellationToken)
+    {
+        return SerializeAndSaveData($"Match_{knifeRoundStartedParams.MatchId}_kniferoundstarted.json", knifeRoundStartedParams, cancellationToken);
+    }
+
+    public Task SendKnifeRoundWonAsync(KnifeRoundWonParams knifeRoundWonParams, CancellationToken cancellationToken)
+    {
+        return SerializeAndSaveData($"Match_{knifeRoundWonParams.MatchId}_kniferoundwon.json", knifeRoundWonParams, cancellationToken);
+    }
+
 
     private void CreateStatsDirectoryIfNotExists()
     {
