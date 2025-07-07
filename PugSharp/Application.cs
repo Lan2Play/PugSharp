@@ -352,6 +352,11 @@ public class Application : IApplication
                 SetMatchVariable();
             });
         }
+        else if (_Match == null && _ServerConfig != null && !string.IsNullOrEmpty(_ServerConfig.AutoloadConfig))
+        {
+            _Logger.LogInformation("Map started, attempting to autoload config: {Config}", _ServerConfig.AutoloadConfig);
+            _ = Task.Run(() => TryAutoloadConfig());
+        }
     }
 
     // TODO Add Round Events to RoundService?
@@ -2022,6 +2027,74 @@ public class Application : IApplication
         _Match = matchFactory.CreateMatch(matchInfo, roundBackupFile);
         _Match.MatchFinalized += OnMatchFinalized;
         KickNonMatchPlayers();
+    }
+
+    private async Task TryAutoloadConfig()
+    {
+        if (_ServerConfig == null || string.IsNullOrEmpty(_ServerConfig.AutoloadConfig))
+        {
+            return;
+        }
+
+        if (_Match != null)
+        {
+            _Logger.LogInformation("Match is already running, skipping autoload");
+            return;
+        }
+
+        _Logger.LogInformation("Attempting to autoload config: {Config}", _ServerConfig.AutoloadConfig);
+
+        try
+        {
+            var config = _ServerConfig.AutoloadConfig;
+            var authToken = _ServerConfig.AutoloadConfigAuthToken;
+
+            // Check if it's a URL or file path
+            if (Uri.TryCreate(config, UriKind.Absolute, out var uri) && 
+                (uri.Scheme.Equals(Uri.UriSchemeHttp, StringComparison.Ordinal) || uri.Scheme.Equals(Uri.UriSchemeHttps, StringComparison.Ordinal)))
+            {
+                // Load from URL
+                var result = await _ConfigProvider.LoadMatchConfigFromUrlAsync(config, authToken).ConfigureAwait(false);
+                result.Switch(
+                    error =>
+                    {
+                        _Logger.LogError("Failed to autoload config from URL: {Error}", error.Value);
+                    },
+                    matchConfig =>
+                    {
+                        _Logger.LogInformation("Successfully autoloaded config from URL");
+                        
+                        // Use same token for APIstats if there's no token set in the matchconfig
+                        if (string.IsNullOrEmpty(matchConfig.EventulaApistatsToken))
+                        {
+                            matchConfig.EventulaApistatsToken = authToken;
+                        }
+
+                        StoreConfig(matchConfig);
+                        InitializeMatch(matchConfig);
+                    });
+            }
+            else
+            {
+                // Load from file
+                var result = await _ConfigProvider.LoadMatchConfigFromFileAsync(config).ConfigureAwait(false);
+                result.Switch(
+                    error =>
+                    {
+                        _Logger.LogError("Failed to autoload config from file: {Error}", error.Value);
+                    },
+                    matchConfig =>
+                    {
+                        _Logger.LogInformation("Successfully autoloaded config from file");
+                        StoreConfig(matchConfig);
+                        InitializeMatch(matchConfig);
+                    });
+            }
+        }
+        catch (Exception ex)
+        {
+            _Logger.LogError(ex, "Error during autoload config");
+        }
     }
 
     private void OnMatchFinalized(object? sender, MatchFinalizedEventArgs e)
