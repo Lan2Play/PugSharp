@@ -5,7 +5,7 @@ using Xunit.Abstractions;
 
 namespace PugSharp.Api.G5Api.Tests;
 
-public partial class G5ApiTests : ApiTestBase, IClassFixture<G5ApiFixture>
+public partial class G5ApiTests : ApiTestBase
 {
     public G5ApiTests(G5ApiFixture api, ITestOutputHelper testOutput) : base(api, testOutput)
     {
