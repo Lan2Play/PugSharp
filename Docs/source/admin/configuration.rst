@@ -59,6 +59,10 @@ Matchconfig Fields
 +--------------------------+-----------------+-------------------------------------------------------------------------------------------------------------------------------+
 | team_mode                | 0               | Change how teams are defined. 0: Default (Teams are fix defined) 1: Scramble (Teams are scrambled when all players are ready) |
 +--------------------------+-----------------+-------------------------------------------------------------------------------------------------------------------------------+
+| knife_round              | false           | Flag to determine if a knife round should be played to decide team sides. Winning team chooses to stay or switch.            |
++--------------------------+-----------------+-------------------------------------------------------------------------------------------------------------------------------+
+| skip_veto                | false           | Flag to skip the map and team voting phases and start the match directly with the configured settings.                       |
++--------------------------+-----------------+-------------------------------------------------------------------------------------------------------------------------------+
 
 Team Fields
 '''''''''''''''''''''

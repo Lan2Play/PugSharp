@@ -26,9 +26,9 @@ Player Commands
 +---------------+--------------+-----------------------------------------------------------------------------------+
 | ``!<number>`` |              | Select something in the current menu.                                             |
 +---------------+--------------+-----------------------------------------------------------------------------------+
-| ``!stay``     |              | Vote to stay at the current team.                                                 |
+| ``!stay``     |              | Vote to stay at the current team, or stay on current side after knife round.     |
 +---------------+--------------+-----------------------------------------------------------------------------------+
-| ``!switch``   |              | Vote to switch the current team.                                                  |
+| ``!switch``   |              | Vote to switch the current team, or switch sides after knife round.              |
 +---------------+--------------+-----------------------------------------------------------------------------------+
 
 

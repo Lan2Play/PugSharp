@@ -130,6 +130,87 @@ public class MatchTests
         PauseUnpauseMatch(csServer, match, player1);
     }
 
+    [Fact]
+    public void KnifeRoundTest()
+    {
+        var config = CreateKnifeRoundTestConfig();
+        
+        var serviceProvider = CreateTestProvider();
+
+        var matchPlayers = new List<IPlayer>();
+        var csServer = serviceProvider.GetRequiredService<ICsServer>();
+        csServer.LoadAllPlayers().Returns(matchPlayers);
+
+        var matchFactory = serviceProvider.GetRequiredService<MatchFactory>();
+        var match = matchFactory.CreateMatch(config);
+
+        Assert.Equal(MatchState.WaitingForPlayersConnectedReady, match.CurrentState);
+
+        IPlayer player1 = CreatePlayerSub(0, 0);
+        IPlayer player2 = CreatePlayerSub(1, 1);
+
+        ConnectPlayers(matchPlayers, match, player1, player2);
+        SetPlayersReady(match, player1, player2, MatchState.SwitchMap);
+        
+        // Switch to match map
+        Assert.True(match.TryFireState(MatchCommand.SwitchMap));
+        Assert.Equal(MatchState.WaitingForPlayersReady, match.CurrentState);
+        
+        // Set players ready again
+        match.TogglePlayerIsReady(player1);
+        match.TogglePlayerIsReady(player2);
+        Assert.Equal(MatchState.MatchStarting, match.CurrentState);
+        
+        // Start match should go to knife round
+        Assert.True(match.TryFireState(MatchCommand.StartMatch));
+        Assert.Equal(MatchState.KnifeRound, match.CurrentState);
+        
+        // Complete knife round
+        Assert.True(match.TryFireState(MatchCommand.CompleteKnifeRound));
+        Assert.Equal(MatchState.WaitingForKnifeRoundDecision, match.CurrentState);
+        
+        // Vote to stay
+        Assert.True(match.VoteStayAfterKnifeRound(player1));
+        Assert.Equal(MatchState.MatchRunning, match.CurrentState);
+    }
+
+    [Fact]
+    public void SkipVetoTest()
+    {
+        var config = CreateSkipVetoTestConfig();
+        
+        var serviceProvider = CreateTestProvider();
+
+        var matchPlayers = new List<IPlayer>();
+        var csServer = serviceProvider.GetRequiredService<ICsServer>();
+        csServer.LoadAllPlayers().Returns(matchPlayers);
+
+        var matchFactory = serviceProvider.GetRequiredService<MatchFactory>();
+        var match = matchFactory.CreateMatch(config);
+
+        Assert.Equal(MatchState.WaitingForPlayersConnectedReady, match.CurrentState);
+
+        IPlayer player1 = CreatePlayerSub(0, 0);
+        IPlayer player2 = CreatePlayerSub(1, 1);
+
+        // Add players
+        Assert.True(match.TryAddPlayer(player1));
+        Assert.True(match.TryAddPlayer(player2));
+        matchPlayers.Add(player1);
+        matchPlayers.Add(player2);
+        Assert.Equal(MatchState.WaitingForPlayersConnectedReady, match.CurrentState);
+        
+        // Set first player ready
+        match.TogglePlayerIsReady(player1);
+        Assert.Equal(MatchState.WaitingForPlayersConnectedReady, match.CurrentState);
+        
+        // Set second player ready - this should trigger state change
+        match.TogglePlayerIsReady(player2);
+        
+        // Should now be in DefineTeams, which should auto-progress to SwitchMap
+        Assert.Equal(MatchState.SwitchMap, match.CurrentState);
+    }
+
 
     private static void PauseUnpauseMatch(ICsServer csServer, Match match, IPlayer player1)
     {
@@ -240,6 +321,73 @@ public class MatchTests
         {
             matchConfig.Maplist.Add(map);
         }
+
+        return matchConfig;
+    }
+
+    private static MatchConfig CreateKnifeRoundTestConfig()
+    {
+        var matchConfig = new MatchConfig
+        {
+            MatchId = "1337",
+            PlayersPerTeam = 1,
+            MinPlayersToReady = 1,
+            NumMaps = 1,
+            KnifeRound = true,
+            SkipVeto = true,
+            Maplist = new List<string> { "de_dust2" },
+            Team1 = new Config.Team
+            {
+                Id = "1",
+                Name = "Team1",
+                Players = new Dictionary<ulong, string>()
+                {
+                    { 0,"Abc" },
+                },
+            },
+            Team2 = new Config.Team
+            {
+                Id = "2",
+                Name = "Team2",
+                Players = new Dictionary<ulong, string>()
+                {
+                    { 1,"Def" },
+                },
+            },
+        };
+
+        return matchConfig;
+    }
+
+    private static MatchConfig CreateSkipVetoTestConfig()
+    {
+        var matchConfig = new MatchConfig
+        {
+            MatchId = "1337",
+            PlayersPerTeam = 1,
+            MinPlayersToReady = 1,
+            NumMaps = 1,
+            SkipVeto = true,
+            Maplist = new List<string> { "de_dust2" },
+            Team1 = new Config.Team
+            {
+                Id = "1",
+                Name = "Team1",
+                Players = new Dictionary<ulong, string>()
+                {
+                    { 0,"Abc" },
+                },
+            },
+            Team2 = new Config.Team
+            {
+                Id = "2",
+                Name = "Team2",
+                Players = new Dictionary<ulong, string>()
+                {
+                    { 1,"Def" },
+                },
+            },
+        };
 
         return matchConfig;
     }
