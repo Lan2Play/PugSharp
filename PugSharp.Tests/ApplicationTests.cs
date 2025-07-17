@@ -45,4 +45,26 @@ public class ApplicationTests
 
         application.Initialize(hotReload: false);
     }
+
+    [Fact]
+    public void ServerConfigHasAutoloadProperties()
+    {
+        var serverConfig = new ServerConfig
+        {
+            AutoloadConfig = "https://example.com/config.json",
+            AutoloadConfigAuthToken = "test-token"
+        };
+
+        Assert.Equal("https://example.com/config.json", serverConfig.AutoloadConfig);
+        Assert.Equal("test-token", serverConfig.AutoloadConfigAuthToken);
+    }
+
+    [Fact]
+    public void ServerConfigDefaultsToEmptyAutoloadConfig()
+    {
+        var serverConfig = new ServerConfig();
+
+        Assert.Equal(string.Empty, serverConfig.AutoloadConfig);
+        Assert.Equal(string.Empty, serverConfig.AutoloadConfigAuthToken);
+    }
 }
