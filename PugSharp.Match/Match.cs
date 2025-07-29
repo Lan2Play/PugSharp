@@ -113,7 +113,7 @@ public class Match : IDisposable
     {
         _MatchStateMachine.Configure(MatchState.None)
             .PermitDynamicIf(MatchCommand.LoadMatch, () => HasRestoredMatch() ? MatchState.RestoreMatch : MatchState.WaitingForPlayersConnectedReady);
-
+            
         _MatchStateMachine.Configure(MatchState.WaitingForPlayersConnectedReady)
             .PermitDynamicIf(MatchCommand.PlayerReady, () => HasRestoredMatch() ? MatchState.MatchRunning : MatchState.DefineTeams, AllPlayersAreReady)
             .OnEntry(StartWarmup)
