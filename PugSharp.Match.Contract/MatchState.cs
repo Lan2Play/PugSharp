@@ -9,6 +9,8 @@ public enum MatchState
     SwitchMap,
     WaitingForPlayersReady,
     MatchStarting,
+    KnifeRound,
+    WaitingForKnifeRoundDecision,
     MatchRunning,
     MatchPaused,
     MapCompleted,

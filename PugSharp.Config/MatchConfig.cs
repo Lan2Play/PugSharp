@@ -52,6 +52,12 @@ public class MatchConfig
     [JsonPropertyName("team_mode")]
     public TeamMode TeamMode { get; set; }
 
+    [JsonPropertyName("knife_round")]
+    public bool KnifeRound { get; init; } = false;
+
+    [JsonPropertyName("skip_veto")]
+    public bool SkipVeto { get; init; } = false;
+
     [JsonPropertyName("cvars")]
     public IDictionary<string, string> CVars { get; init; } = new Dictionary<string, string>(StringComparer.Ordinal);
 

@@ -339,4 +339,28 @@
   <data name="PugSharp.Match.VotingTag" xml:space="preserve">
     <value>[Voting] </value>
   </data>
+  <data name="PugSharp_Match_Info_KnifeRoundStarting" xml:space="preserve">
+    <value>Knife round starting...</value>
+  </data>
+  <data name="PugSharp_Match_Info_KnifeRoundStarted" xml:space="preserve">
+    <value>Knife round started! Fight for the side selection!</value>
+  </data>
+  <data name="PugSharp_Match_Info_KnifeRoundWaitingForDecision" xml:space="preserve">
+    <value>Knife round ended! Winning team, please choose to !stay or !switch sides.</value>
+  </data>
+  <data name="PugSharp_Match_KnifeRoundDecisionMenuHeader" xml:space="preserve">
+    <value>Choose your side:</value>
+  </data>
+  <data name="PugSharp_Match_Error_NoKnifeRoundDecisionExpected" xml:space="preserve">
+    <value>No knife round decision is expected at this time.</value>
+  </data>
+  <data name="PugSharp_Match_Error_NotPermittedToVoteAfterKnifeRound" xml:space="preserve">
+    <value>You are not permitted to vote after the knife round. Only the winning team can vote.</value>
+  </data>
+  <data name="PugSharp_Match_VotedToStay" xml:space="preserve">
+    <value>You voted to stay on the current side.</value>
+  </data>
+  <data name="PugSharp_Match_VotedToSwitch" xml:space="preserve">
+    <value>You voted to switch sides.</value>
+  </data>
 </root>
