@@ -9,11 +9,16 @@ Rating| |Security Rating| |Vulnerabilities| |Code Smells| |Bugs| |PugSharp Trans
 `Pugsharp <https://github.com/Lan2Play/PugSharp>`_ is a PUG System Plugin for CS2 based on the awesome  `CounterStrikeSharp by roflmuffin <https://github.com/roflmuffin/CounterStrikeSharp>`_. 
 
 Its intended purpose is to be used with our fork of `eventula <https://github.com/Lan2Play/eventula-manager>`_, but ofc can be used in a different environment or with different software as well.
+If you want to use it with a different software instead of standalone or with eventula, currently these are your options:
+
+- `CS2 PugSharp Manager <https://github.com/DuelistRag3/cs2-pugsharp-manager>`_ by DuelistRag3, which is a web based Tournament System that interfaces with PugSharp
+- `G5V <https://github.com/PhlexPlexico/G5V>`_ in combination with `G5API <https://github.com/phlexplexico/G5API>`_ by PhlexPlexico, which should work since we have implemented api compatibility with Get5 
+
 If you implement software to interface with PugSharp let us know please!
 
 
 .. warning::
-   This Plugin is in a very early state of development and some things are not fully working right now! Please report any issues you find either on Discord or in our issues tab on `Github <https://github.com/Lan2Play/PugSharp/issues>`_ 
+   This Plugin is in development and maybe some things are not fully working right now! Please report any issues you find either on Discord or in our issues tab on `Github <https://github.com/Lan2Play/PugSharp/issues>`_ 
 
 .. image:: https://discordapp.com/api/guilds/748086853449810013/widget.png?style=banner3
    :target: https://discord.gg/zF5C9WPWFq
