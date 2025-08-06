@@ -356,31 +356,31 @@ jobs:
       CSSHARPlink: ${{needs.get_versions.outputs.CSSHARPlink}}
       CSSHARPlinkWRuntime: ${{needs.get_versions.outputs.CSSHARPlinkWRuntime}}
     steps:
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v5
         with:
           name: latest_build_windows
           path: build/windows
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v5
         with:
           name: latest_build_windows_with_cssharp
           path: build/windows
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v5
         with:
           name: latest_build_windows_with_cssharp_and_runtime
           path: build/windows
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v5
         with:
           name: latest_build_linux
           path: build/linux
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v5
         with:
           name: latest_build_linux_with_cssharp
           path: build/linux
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v5
         with:
           name: latest_build_linux_with_cssharp_and_runtime
           path: build/linux
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v5
         with:
           name: latest_build_meta
           path: build/meta
