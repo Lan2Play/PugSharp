@@ -397,6 +397,19 @@ public class Application : IApplication
             return HookResult.Continue;
         }
 
+        if (_Match.CurrentState == MatchState.KnifeRound)
+        {
+            _Logger.LogInformation("Knife round ended");
+            
+            // Use a timer to fire the CompleteKnifeRound command after a brief delay
+            _Plugin.AddTimer(2.0f, () =>
+            {
+                _Match?.TryFireState(MatchCommand.CompleteKnifeRound);
+            });
+            
+            return HookResult.Continue;
+        }
+
         if (_Match.CurrentState == MatchState.MatchRunning)
         {
             _RoundStopwatch.Stop();
@@ -1823,8 +1836,16 @@ public class Application : IApplication
                 return;
             }
 
-            var voteSite = p.TeamNum == (int)Match.Contract.Team.Terrorist ? "CT" : "T";
-            _Match.VoteTeam(new Player(p.SteamID), voteSite);
+            // Check if this is a knife round decision
+            if (_Match.CurrentState == MatchState.WaitingForKnifeRoundDecision)
+            {
+                _Match.VoteSwitchAfterKnifeRound(new Player(p.SteamID));
+            }
+            else
+            {
+                var voteSite = p.TeamNum == (int)Match.Contract.Team.Terrorist ? "CT" : "T";
+                _Match.VoteTeam(new Player(p.SteamID), voteSite);
+            }
         },
         command,
         player);
@@ -1848,8 +1869,16 @@ public class Application : IApplication
                 return;
             }
 
-            var voteSite = p.TeamNum == (int)Match.Contract.Team.Terrorist ? "T" : "CT";
-            _Match.VoteTeam(new Player(p.SteamID), voteSite);
+            // Check if this is a knife round decision
+            if (_Match.CurrentState == MatchState.WaitingForKnifeRoundDecision)
+            {
+                _Match.VoteStayAfterKnifeRound(new Player(p.SteamID));
+            }
+            else
+            {
+                var voteSite = p.TeamNum == (int)Match.Contract.Team.Terrorist ? "T" : "CT";
+                _Match.VoteTeam(new Player(p.SteamID), voteSite);
+            }
         },
         command,
         player);

@@ -122,7 +122,7 @@ public class Match : IDisposable
             .OnExit(StopReadyReminder);
 
         _MatchStateMachine.Configure(MatchState.DefineTeams)
-            .Permit(MatchCommand.TeamsDefined, MatchState.MapVote)
+            .PermitDynamicIf(MatchCommand.TeamsDefined, () => MatchInfo.Config.SkipVeto ? MatchState.SwitchMap : MatchState.MapVote)
             .OnEntry(ContinueIfDefault)
             .OnEntry(ContinueIfPlayerSelect)
             .OnEntry(ScrambleTeams);
@@ -150,8 +150,18 @@ public class Match : IDisposable
             .OnExit(StopReadyReminder);
 
         _MatchStateMachine.Configure(MatchState.MatchStarting)
-            .Permit(MatchCommand.StartMatch, MatchState.MatchRunning)
+            .PermitDynamicIf(MatchCommand.StartMatch, () => MatchInfo.Config.KnifeRound ? MatchState.KnifeRound : MatchState.MatchRunning)
             .OnEntry(StartMatch);
+
+        _MatchStateMachine.Configure(MatchState.KnifeRound)
+            .Permit(MatchCommand.CompleteKnifeRound, MatchState.WaitingForKnifeRoundDecision)
+            .OnEntry(StartKnifeRound);
+
+        _MatchStateMachine.Configure(MatchState.WaitingForKnifeRoundDecision)
+            .Permit(MatchCommand.StayAfterKnifeRound, MatchState.MatchRunning)
+            .Permit(MatchCommand.SwitchAfterKnifeRound, MatchState.MatchRunning)
+            .OnEntry(WaitForKnifeRoundDecision)
+            .OnExit(CompleteKnifeRoundDecision);
 
         _MatchStateMachine.Configure(MatchState.MatchRunning)
             .Permit(MatchCommand.DisconnectPlayer, MatchState.MatchPaused)
@@ -298,11 +308,99 @@ public class Match : IDisposable
         string demoDirectory = Path.Combine(_CsServer.GameDirectory, "csgo", "PugSharp", "Demo");
         MatchInfo.DemoFile = _CsServer.StartDemoRecording(demoDirectory, demoFileName);
 
+        if (MatchInfo.Config.KnifeRound)
+        {
+            _CsServer.PrintToChatAll("Knife round starting...");
+        }
+        else
+        {
+            _CsServer.PrintToChatAll(_TextHelper.GetText(nameof(Resources.PugSharp_Match_Info_StartMatch), MatchInfo.MatchTeam1.TeamConfig.Name, MatchInfo.MatchTeam1.CurrentTeamSide, MatchInfo.MatchTeam2.TeamConfig.Name, MatchInfo.MatchTeam2.CurrentTeamSide));
+            _ = _ApiProvider.GoingLiveAsync(new GoingLiveParams(MatchInfo.Config.MatchId, MatchInfo.CurrentMap.MapName, MatchInfo.CurrentMap.MapNumber), CancellationToken.None);
+        }
+
+        TryFireState(MatchCommand.StartMatch);
+    }
+
+    private void StartKnifeRound()
+    {
+        if (MatchInfo == null)
+        {
+            _Logger.LogError("Can not start knife round without a matchInfo!");
+            return;
+        }
+
+        // Load knife round config
+        _CsServer.LoadAndExecuteConfig("knife.cfg");
+
+        // Give all players knives only
+        _CsServer.SetupKnifeRound();
+
+        _CsServer.PrintToChatAll("Knife round started! Fight for the side selection!");
+
+        _ = _ApiProvider.SendKnifeRoundStartedAsync(new KnifeRoundStartedParams(MatchInfo.Config.MatchId, MatchInfo.CurrentMap.MapNumber), CancellationToken.None);
+    }
+
+    private void WaitForKnifeRoundDecision()
+    {
+        if (MatchInfo == null)
+        {
+            _Logger.LogError("Can not wait for knife round decision without a matchInfo!");
+            return;
+        }
+
+        _CsServer.PrintToChatAll("Knife round ended! Winning team, please choose to !stay or !switch sides.");
+        
+        // Show menu to winning team
+        var winningTeam = GetKnifeRoundWinningTeam();
+        if (winningTeam != null)
+        {
+            var knifeRoundOptions = new List<MenuOption>()
+            {
+                new("stay", (opt, player) => VoteStayAfterKnifeRound(player)),
+                new("switch", (opt, player) => VoteSwitchAfterKnifeRound(player)),
+            };
+
+            ShowMenuToTeam(winningTeam, "Choose your side:", knifeRoundOptions);
+        }
+    }
+
+    private void CompleteKnifeRoundDecision()
+    {
+        if (MatchInfo == null)
+        {
+            _Logger.LogError("Can not complete knife round decision without a matchInfo!");
+            return;
+        }
+
+        // Load live config for the actual match
+        _CsServer.LoadAndExecuteConfig("live.cfg");
+
+        // Restart Game to reset everything
+        _CsServer.RestartGame();
+
         _CsServer.PrintToChatAll(_TextHelper.GetText(nameof(Resources.PugSharp_Match_Info_StartMatch), MatchInfo.MatchTeam1.TeamConfig.Name, MatchInfo.MatchTeam1.CurrentTeamSide, MatchInfo.MatchTeam2.TeamConfig.Name, MatchInfo.MatchTeam2.CurrentTeamSide));
 
         _ = _ApiProvider.GoingLiveAsync(new GoingLiveParams(MatchInfo.Config.MatchId, MatchInfo.CurrentMap.MapName, MatchInfo.CurrentMap.MapNumber), CancellationToken.None);
+    }
 
-        TryFireState(MatchCommand.StartMatch);
+    private MatchTeam? GetKnifeRoundWinningTeam()
+    {
+        // Logic to determine which team won the knife round
+        // This would typically be determined by which team has more players alive
+        // or other knife round winning conditions
+        var (ctScore, tScore) = _CsServer.LoadTeamsScore();
+        
+        if (ctScore > tScore)
+        {
+            return MatchInfo.MatchTeam1.CurrentTeamSide == Team.CounterTerrorist ? MatchInfo.MatchTeam1 : MatchInfo.MatchTeam2;
+        }
+        else if (tScore > ctScore)
+        {
+            return MatchInfo.MatchTeam1.CurrentTeamSide == Team.Terrorist ? MatchInfo.MatchTeam1 : MatchInfo.MatchTeam2;
+        }
+        
+        // If tied, default to team 1 (could be randomized)
+        return MatchInfo.MatchTeam1;
     }
 
     private void SendMapResults()
@@ -931,7 +1029,7 @@ public class Match : IDisposable
         return !MapIsSelected();
     }
 
-    private bool TryFireState(MatchCommand command)
+    public bool TryFireState(MatchCommand command)
     {
         if (_MatchStateMachine.CanFire(command))
         {
@@ -1299,6 +1397,78 @@ public class Match : IDisposable
         }
 
         return true;
+    }
+
+    public bool VoteStayAfterKnifeRound(IPlayer player)
+    {
+        // Not in correct state
+        if (CurrentState != MatchState.WaitingForKnifeRoundDecision)
+        {
+            player.PrintToChat("No knife round decision is expected at this time.");
+            return false;
+        }
+
+        var winningTeam = GetKnifeRoundWinningTeam();
+        if (winningTeam == null)
+        {
+            return false;
+        }
+
+        // Player not permitted to vote - only winning team can vote
+        if (!winningTeam.Players.Select(x => x.Player.UserId).Contains(player.UserId))
+        {
+            player.PrintToChat("You are not permitted to vote after the knife round. Only the winning team can vote.");
+            return false;
+        }
+
+        player.PrintToChat("You voted to stay on the current side.");
+        
+        _ = _ApiProvider.SendKnifeRoundWonAsync(new KnifeRoundWonParams(MatchInfo.Config.MatchId, MatchInfo.CurrentMap.MapNumber, (int)winningTeam.CurrentTeamSide, false), CancellationToken.None);
+        
+        TryFireState(MatchCommand.StayAfterKnifeRound);
+        
+        return true;
+    }
+
+    public bool VoteSwitchAfterKnifeRound(IPlayer player)
+    {
+        // Not in correct state
+        if (CurrentState != MatchState.WaitingForKnifeRoundDecision)
+        {
+            player.PrintToChat("No knife round decision is expected at this time.");
+            return false;
+        }
+
+        var winningTeam = GetKnifeRoundWinningTeam();
+        if (winningTeam == null)
+        {
+            return false;
+        }
+
+        // Player not permitted to vote - only winning team can vote
+        if (!winningTeam.Players.Select(x => x.Player.UserId).Contains(player.UserId))
+        {
+            player.PrintToChat("You are not permitted to vote after the knife round. Only the winning team can vote.");
+            return false;
+        }
+
+        player.PrintToChat("You voted to switch sides.");
+        
+        // Switch the teams
+        SwitchTeamSides();
+        
+        _ = _ApiProvider.SendKnifeRoundWonAsync(new KnifeRoundWonParams(MatchInfo.Config.MatchId, MatchInfo.CurrentMap.MapNumber, (int)winningTeam.CurrentTeamSide, true), CancellationToken.None);
+        
+        TryFireState(MatchCommand.SwitchAfterKnifeRound);
+        
+        return true;
+    }
+
+    private void SwitchTeamSides()
+    {
+        var team1OriginalSide = MatchInfo.MatchTeam1.CurrentTeamSide;
+        MatchInfo.MatchTeam1.CurrentTeamSide = MatchInfo.MatchTeam2.CurrentTeamSide;
+        MatchInfo.MatchTeam2.CurrentTeamSide = team1OriginalSide;
     }
 
     public void Pause(IPlayer player)

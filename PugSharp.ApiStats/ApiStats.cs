@@ -152,6 +152,18 @@ public class ApiStats : BaseApi, IApiProvider
         await HandleResponseAsync(response, cancellationToken).ConfigureAwait(false);
     }
 
+    public Task SendKnifeRoundStartedAsync(KnifeRoundStartedParams knifeRoundStartedParams, CancellationToken cancellationToken)
+    {
+        // Knife round started events are not required for ApiStats
+        return Task.CompletedTask;
+    }
+
+    public Task SendKnifeRoundWonAsync(KnifeRoundWonParams knifeRoundWonParams, CancellationToken cancellationToken)
+    {
+        // Knife round won events are not required for ApiStats
+        return Task.CompletedTask;
+    }
+
     #endregion
 
     private async Task UpdatePlayerStatsInternalAsync(int mapNumber, ITeamInfo teamInfo1, ITeamInfo teamInfo2, IMap currentMap, CancellationToken cancellationToken)

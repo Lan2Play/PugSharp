@@ -155,6 +155,31 @@ public class CsServer : ICsServer
         ExecuteCommand($"mp_backup_round_file {prefix}");
     }
 
+    public void SetupKnifeRound()
+    {
+        _Logger.LogInformation("Setting up knife round");
+        ExecuteCommand("mp_give_player_c4 0");
+        ExecuteCommand("mp_weapons_allow_typecount -1");
+        ExecuteCommand("mp_ct_default_primary \"\"");
+        ExecuteCommand("mp_ct_default_secondary \"\"");
+        ExecuteCommand("mp_t_default_primary \"\"");
+        ExecuteCommand("mp_t_default_secondary \"\"");
+        ExecuteCommand("mp_equipment_reset_rounds 1");
+        ExecuteCommand("mp_solid_teammates 1");
+        ExecuteCommand("sv_infinite_ammo 0");
+        ExecuteCommand("ammo_grenade_limit_default 0");
+        ExecuteCommand("ammo_grenade_limit_flashbang 0");
+        ExecuteCommand("ammo_grenade_limit_total 0");
+        ExecuteCommand("mp_weapons_allow_zeus 0");
+        ExecuteCommand("mp_buy_anywhere 0");
+        ExecuteCommand("mp_buytime 0");
+        ExecuteCommand("mp_freezetime 3");
+        ExecuteCommand("mp_roundtime 1.92");
+        ExecuteCommand("mp_roundtime_defuse 1.92");
+        ExecuteCommand("mp_maxrounds 1");
+        ExecuteCommand("mp_restartgame 1");
+    }
+
     public string StartDemoRecording(string demoDirectory, string demoFileName)
     {
         try

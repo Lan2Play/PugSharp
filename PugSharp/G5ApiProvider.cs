@@ -183,5 +183,28 @@ public partial class G5ApiProvider : IApiProvider
         return Task.CompletedTask;
     }
 
+    public Task SendKnifeRoundStartedAsync(KnifeRoundStartedParams knifeRoundStartedParams, CancellationToken cancellationToken)
+    {
+        var knifeRoundStartedEvent = new KnifeRoundStartedEvent
+        {
+            MatchId = knifeRoundStartedParams.MatchId,
+            MapNumber = knifeRoundStartedParams.MapNumber
+        };
+        return _G5Stats.SendEventAsync(knifeRoundStartedEvent, cancellationToken);
+    }
+
+    public Task SendKnifeRoundWonAsync(KnifeRoundWonParams knifeRoundWonParams, CancellationToken cancellationToken)
+    {
+        var knifeRoundWonEvent = new KnifeRoundWonEvent
+        {
+            MatchId = knifeRoundWonParams.MatchId,
+            MapNumber = knifeRoundWonParams.MapNumber,
+            TeamNumber = 1, // Assuming team 1 won; this would need to be calculated based on the winning side
+            Side = knifeRoundWonParams.WinningSide,
+            Swapped = knifeRoundWonParams.Swapped
+        };
+        return _G5Stats.SendEventAsync(knifeRoundWonEvent, cancellationToken);
+    }
+
     #endregion
 }
