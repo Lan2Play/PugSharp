@@ -29,26 +29,26 @@ jobs:
         env : { CONTENT : "${{ toJson(github) }}" }
         run : "echo $CONTENT"
       - name: Set up JDK 11
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@v5
         with:
           distribution: 'temurin'
           java-version: '17'
       - name: Setup .NET
-        uses: actions/setup-dotnet@v4
+        uses: actions/setup-dotnet@v5
         with:
           dotnet-version: 8.0
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
         with:
           fetch-depth: 0
       - name: Cache SonarCloud packages
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: ./sonar/cache
           key: ${{ runner.os }}-sonar
           restore-keys: ${{ runner.os }}-sonar
       - name: Cache SonarCloud scanner
         id: cache-sonar-scanner
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: ./sonar/scanner
           key: ${{ runner.os }}-sonar-scanner
@@ -95,7 +95,7 @@ jobs:
       CSSHARPlinkWRuntimeWindows: ${{ steps.CSSHARPlinkWRuntimeWindows.outputs.CSSHARPlinkWRuntimeWindows }}
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           submodules: recursive
       - name: install deps
@@ -153,7 +153,7 @@ jobs:
         run: sed -i "s|%%METAMODVERSION%%|2.0 - 1256|g" ./release.json;
       - name: upload artifact
         if: github.event_name != 'pull_request'
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: latest_build_meta
           path: |
@@ -175,7 +175,7 @@ jobs:
       CSSHARPlinkWRuntime: ${{needs.get_versions.outputs.CSSHARPlinkWRuntime}}
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           submodules: recursive
       - name: set Pugsharp version
@@ -230,7 +230,7 @@ jobs:
           retention-days: 10
       - name: upload artifact
         if: github.event_name != 'pull_request'
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: latest_build_linux_with_cssharp
           path: |
@@ -238,7 +238,7 @@ jobs:
           retention-days: 10
       - name: upload artifact
         if: github.event_name != 'pull_request'
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: latest_build_linux_with_cssharp_and_runtime
           path: |
@@ -259,7 +259,7 @@ jobs:
       CSSHARPlinkWRuntime: ${{needs.get_versions.outputs.CSSHARPlinkWRuntimeWindows}}
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           submodules: recursive
       - name: set Pugsharp version
@@ -336,7 +336,7 @@ jobs:
           retention-days: 10
       - name: upload artifact
         if: github.event_name != 'pull_request'
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: latest_build_windows_with_cssharp_and_runtime
           path: |
@@ -356,31 +356,31 @@ jobs:
       CSSHARPlink: ${{needs.get_versions.outputs.CSSHARPlink}}
       CSSHARPlinkWRuntime: ${{needs.get_versions.outputs.CSSHARPlinkWRuntime}}
     steps:
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v7
         with:
           name: latest_build_windows
           path: build/windows
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v7
         with:
           name: latest_build_windows_with_cssharp
           path: build/windows
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v7
         with:
           name: latest_build_windows_with_cssharp_and_runtime
           path: build/windows
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v7
         with:
           name: latest_build_linux
           path: build/linux
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v7
         with:
           name: latest_build_linux_with_cssharp
           path: build/linux
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v7
         with:
           name: latest_build_linux_with_cssharp_and_runtime
           path: build/linux
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v7
         with:
           name: latest_build_meta
           path: build/meta
