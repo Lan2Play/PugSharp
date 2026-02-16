@@ -1,7 +1,6 @@
 ﻿using PugSharp.Api.G5Api.Tests.Fixtures;
 
 using Xunit;
-using Xunit.Abstractions;
 
 namespace PugSharp.Api.G5Api.Tests;
 

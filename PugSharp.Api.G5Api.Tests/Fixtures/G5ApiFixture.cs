@@ -42,7 +42,7 @@ public class G5ApiFixture : IAsyncLifetime
             //.WithDriver(DotNet.Testcontainers.Configurations.NetworkDriver.Host)
             .Build();
 
-        _DatabaseContainer = new MariaDbBuilder()
+        _DatabaseContainer = new MariaDbBuilder(image: "mariadb:10.10")
             .WithNetwork(_Network)
             .WithNetworkAliases(_DatabaseHost)
             .WithDatabase("get5")
@@ -51,8 +51,7 @@ public class G5ApiFixture : IAsyncLifetime
             )
             .Build();
 
-        _ApiContainer = new ContainerBuilder()
-            .WithImage("ghcr.io/phlexplexico/g5api:latest")
+        _ApiContainer = new ContainerBuilder(image: "ghcr.io/phlexplexico/g5api:latest")
             .WithImagePullPolicy(PullPolicy.Missing)
             .WithNetwork(_Network)
             .WithNetworkAliases(_ApiHost)
@@ -93,7 +92,7 @@ public class G5ApiFixture : IAsyncLifetime
             .Build();
     }
 
-    public async Task InitializeAsync()
+    public async ValueTask InitializeAsync()
     {
         try
         {
@@ -157,7 +156,7 @@ public class G5ApiFixture : IAsyncLifetime
              """;
     }
 
-    public async Task DisposeAsync()
+    public async ValueTask DisposeAsync()
     {
         await _ApiContainer.DisposeAsync().ConfigureAwait(false);
         await _DatabaseContainer.DisposeAsync().ConfigureAwait(false);

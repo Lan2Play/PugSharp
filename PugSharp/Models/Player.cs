@@ -94,7 +94,7 @@ public class Player : IPlayer
         {
             if (TryGetPlayerController(out var playerController))
             {
-                return playerController?.ClanName ?? string.Empty;
+                return playerController?.Clan ?? string.Empty;
             }
 
             return string.Empty;

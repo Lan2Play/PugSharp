@@ -1,11 +1,12 @@
-﻿using System.Text.Json.Serialization;
+﻿using System.Globalization;
+using System.Text.Json.Serialization;
 
 namespace PugSharp.Config;
 
 public class Team
 {
     [JsonPropertyName("id")]
-    public string Id { get; set; } = Ulid.NewUlid().ToString();
+    public string Id { get; set; } = Guid.NewGuid().ToString();
 
     [JsonPropertyName("name")]
     public string Name { get; set; } = string.Empty;
