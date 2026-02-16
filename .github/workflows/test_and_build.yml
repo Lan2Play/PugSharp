@@ -222,7 +222,7 @@ jobs:
         working-directory: ./packagebuild
       - name: upload artifact
         if: github.event_name != 'pull_request'
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: latest_build_linux
           path: |
@@ -320,7 +320,7 @@ jobs:
         working-directory: ./packagebuild
       - name: upload artifact
         if: github.event_name != 'pull_request'
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: latest_build_windows
           path: |
@@ -328,7 +328,7 @@ jobs:
           retention-days: 10
       - name: upload artifact
         if: github.event_name != 'pull_request'
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: latest_build_windows_with_cssharp
           path: |
