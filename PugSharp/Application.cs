@@ -85,6 +85,8 @@ public class Application : IApplication
     {
         var serverConfigResult = _ConfigProvider.LoadServerConfig();
 
+        _CsServer.InitializeWorkshopMapLookupAsync()
+
         serverConfigResult.Switch(
             error => { }, // Do nothing - Error already logged
             serverConfig =>
